@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Neo Mirai case study | Impeccable</title><meta name="description" content="See how Impeccable turned a generated mockup and brand toolkit into a responsive website for the fictional Neo Mirai conference."><meta name="theme-color" content="#f9f9f9"><link rel="canonical" href="https://impeccable.style/cases/neo-mirai"><meta property="og:type" content="website"><meta property="og:url" content="https://impeccable.style/cases/neo-mirai"><meta property="og:title" content="The missing design vocabulary for agents."><meta property="og:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta property="og:image" content="https://impeccable.style/og-image-v6.png"><meta property="og:image:width" content="1733"><meta property="og:image:height" content="907"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The missing design vocabulary for agents."><meta name="twitter:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta name="twitter:image" content="https://impeccable.style/og-image-v6.png"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Alumni+Sans:wght@200..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script>// Exceptions we cannot act on, dropped in posthog.astro's before_send. This
+// file is inlined into the page as a classic script (no imports, no exports
+// beyond the one function), so keep it self-contained.
+//
+// Keep unknown rejections, SDK failures and first-party stacks observable.
+// Drop only opaque cross-origin errors, foreign-only stacks, the SDK's own
+// request timeout, and identifiable extension or injected wallet failures.
+function isUnactionableException(properties) {
+  var list = (properties && properties.$exception_list) || [];
+  if (!list.length) return false;
+  var framesOf = function (e) { return (e.stacktrace && e.stacktrace.frames) || []; };
+  var page = function (url) { return String(url || '').split(/[?#]/)[0]; };
+  var currentPage = page(properties.$current_url);
+  var isPage = function (f) { return /^https?:/.test(f.filename || '') && currentPage && page(f.filename) === currentPage; };
+  var foreign = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && own.every(function (f) { return !/^https?:/.test(f.filename || ''); });
+  });
+  var opaque = list.every(function (e) { return e.value === 'Script error.' && framesOf(e).length === 0; });
+  var sdkTimeout = list.every(function (e) {
+    var own = framesOf(e);
+    return /^PostHog request timed out after \d+ms$/.test(e.value || '') && own.length > 0 &&
+      own.every(function (f) { return /^https?:\/\/[^/]+\/relay\/static\//.test(f.filename || ''); });
+  });
+  // PostHog orders frames outermost first. Only discard an extension throw
+  // when the rest of the stack contains page URLs or foreign frames; a
+  // first-party bundle anywhere in the chain keeps the exception actionable.
+  var inExtension = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && /^(webkit-masked-url|chrome-extension|moz-extension|safari-web-extension):/.test(own[own.length - 1].filename || '') &&
+      own.every(function (f) { return !/^https?:/.test(f.filename || '') || isPage(f); });
+  });
+  // This exact Brave iOS wallet injection runs against the page itself.
+  // Other ethereum messages and exceptions from site bundles remain visible.
+  var wallet = list.every(function (e) {
+    var own = framesOf(e);
+    return e.value === "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')" &&
+      own.length > 0 && own.every(isPage);
+  });
+  // Firefox throws this bare form when page code reads an object owned by a
+  // more privileged compartment, which on a web page means an extension. It
+  // arrives through event.target in our click handlers and the SDK's, so this
+  // is the one rule that drops a stack with site frames. Cross-origin access
+  // ends in "on cross-origin object" and stays visible.
+  var privileged = list.every(function (e) {
+    return /^Permission denied to access property "[^"]*"$/.test(e.value || '');
+  });
+  return foreign || opaque || sdkTimeout || inExtension || wallet || privileged;
+}
+</script><script>(function(){const apiKey = "phc_qCpX2jadsFcLpk7T87rjhowCAMGohC3cnNZwn9Y8h9dp";
+const apiHost = "/relay";
+
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+
+    // Label every event, the first pageview included, by where it ran, so
+    // insights can leave out local dev and PR previews.
+    var host = location.hostname;
+    var environment = host === 'impeccable.style' || host.endsWith('.impeccable.style') ? 'production'
+      : host === 'localhost' || host === '127.0.0.1' ? 'development'
+      : 'preview';
+
+    window.posthog.init(apiKey, {
+      api_host: apiHost,
+      ui_host: 'https://us.posthog.com',
+      defaults: '2026-01-30',
+      // Replay is off, and the privacy policy says nothing about recording.
+      // Keep it off here so a dashboard toggle cannot change that.
+      disable_session_recording: true,
+      // Cloudflare Web Analytics already reports Core Web Vitals, and
+      // $pageleave doubles pageview volume for a scroll-depth signal we do not
+      // use. Together they were about 28% of all events.
+      capture_performance: { web_vitals: false },
+      capture_pageleave: false,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
+      before_send(event) {
+        if (!event) return event;
+        if (event.event === '$exception' && isUnactionableException(event.properties)) return null;
+        event.properties = { ...event.properties, environment };
+        return event;
+      },
+    });
+  })();</script><link rel="stylesheet" href="/_astro/sub-pages.CTJhASV9.css"><link rel="stylesheet" href="/_astro/kinpaku-tokens.Czfxn__5.css"><link rel="stylesheet" href="/_astro/Base.C85DQK9e.css"></head><body class="sub-page neon-case-page kinpaku-chrome"><a href="#main" class="skip-link">Skip to content</a><header class="site-header" data-site-header data-nav-open="false"><a href="/" class="site-header-brand" aria-label="Impeccable home"><span class="site-header-brand-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2.5 L13.5 2.5 L5.5 21.5 L5 21.5 Q2.5 21.5 2.5 19 L2.5 5 Q2.5 2.5 5 2.5 Z"></path><path d="M16.5 2.5 L19 2.5 Q21.5 2.5 21.5 5 L21.5 19 Q21.5 21.5 19 21.5 L8.5 21.5 Z"></path></svg></span><span class="site-header-brand-name">Impeccable</span></a><button type="button" class="site-header-menu" aria-label="Open navigation" aria-expanded="false" aria-controls="site-header-nav-panel" data-site-header-menu><span class="site-header-menu-line" aria-hidden="true"></span><span class="site-header-menu-line" aria-hidden="true"></span></button><div class="site-header-right" id="site-header-nav-panel"><nav class="site-header-nav" aria-label="Primary"><a href="/" data-nav="home">Home</a><a href="/designing" data-nav="designing">Designing</a><a href="/gallery" data-nav="gallery">Gallery</a><a href="/docs" data-nav="docs">Docs</a><a href="/slop" data-nav="slop">Slop</a><a href="/live-mode" data-nav="live">Live</a></nav><a href="https://github.com/pbakaus/impeccable" class="site-header-github" target="_blank" rel="noopener" aria-label="Impeccable on GitHub, 95k stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg><span class="site-header-github-label">95k</span><svg class="site-header-github-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.76 6.36L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.24-.91L12 2z"></path></svg></a></div></header><script>
+  (function () {
+    var header = document.querySelector('[data-site-header]');
+    var btn = document.querySelector('[data-site-header-menu]');
+    var panel = document.getElementById('site-header-nav-panel');
+    if (!header || !btn || !panel) return;
+    var mobile = window.matchMedia('(max-width: 760px)');
+
+    function setOpen(open, restoreFocus) {
+      open = mobile.matches && open;
+      header.setAttribute('data-nav-open', String(open));
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      if (restoreFocus) btn.focus();
+      panel.inert = mobile.matches && !open;
+    }
+
+    setOpen(false);
+    btn.addEventListener('click', function () {
+      var open = header.getAttribute('data-nav-open') === 'true';
+      setOpen(!open);
+    });
+
+    panel.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        setOpen(false, mobile.matches);
+      });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && header.getAttribute('data-nav-open') === 'true') {
+        event.preventDefault();
+        setOpen(false, true);
+      }
+    });
+
+    document.addEventListener('pointerdown', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.target)) {
+        setOpen(false, panel.contains(document.activeElement));
+      }
+    });
+
+    header.addEventListener('focusout', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.relatedTarget)) {
+        setOpen(false);
+      }
+    });
+
+    mobile.addEventListener('change', function () {
+      setOpen(false, mobile.matches && panel.contains(document.activeElement));
+    });
+  })();
+</script><main id="main"><div class="neon-case"><section class="neon-case-hero"><div class="neon-case-hero-copy"><a class="neon-case-back" href="/designing#start">Designing with Impeccable</a><span class="neon-case-eyebrow ks-tag">Case study</span><h1>Neo Mirai: from mockup to working site.</h1><p>Neo Mirai began with two generated images: a page mockup and a brand toolkit for a fictional conference. Impeccable turned those references into a responsive website, then refined it through browser checks and adjustments.</p><div class="neon-case-actions"><a class="ks-button ks-button-primary" href="/neo-mirai/index.html">Explore the site<span class="ks-button-arrow" aria-hidden="true"><svg viewBox="0 0 16 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M0 4h14M10 0l4 4-4 4"></path></svg></span></a><a class="ks-button ks-button-secondary" href="/docs/new-work">Try this workflow</a></div></div><a class="neon-case-hero-shot" href="/neo-mirai/index.html" aria-label="Explore the Neo Mirai site"><img src="/assets/cases/neo-mirai/live-fold.webp" alt="The Neo Mirai site opens with a warm, futuristic Tokyo skyline and oversized conference title above a dark agenda section." width="1440" height="1100"></a></section><section class="neon-case-strip" aria-label="From generated references to working website"><figure><span class="ks-tag">01 &middot; Page mockup</span><a href="/assets/openai_image_2_hifi.jpg"><img src="/assets/openai_image_2_hifi.jpg" alt="Generated Neo Mirai page mockup, from the opening skyline to the ticket section." loading="lazy" width="864" height="1821"></a><figcaption>A page mockup makes the layout and visual direction visible before implementation.</figcaption></figure><figure><span class="ks-tag">02 &middot; Brand toolkit</span><a href="/assets/openai_image_2_brand.jpg"><img src="/assets/openai_image_2_brand.jpg" alt="Generated Neo Mirai brand toolkit with colors, type specimens, symbols, and sample applications." loading="lazy" width="1536" height="1024"></a><figcaption>A brand toolkit brings the colors, typography, and imagery together in one reference.</figcaption></figure><figure><span class="ks-tag">03 &middot; Working site</span><a href="/neo-mirai/index.html" aria-label="Explore the Neo Mirai site"><img src="/assets/cases/neo-mirai/live-page.png" alt="Full-page screenshot of the implemented Neo Mirai website." loading="lazy" width="1440" height="3013"></a><figcaption>The working page adds responsive layout, navigation, and interactive controls.</figcaption></figure></section><p class="neon-case-image-credit">The page mockup and brand toolkit were generated with OpenAI GPT Image 2.</p><section class="neon-case-body"><div class="neon-case-column"><span class="neon-case-section-label">What changed</span><h2>The design became a page people can use.</h2></div><div class="neon-case-notes"><article><h3>Keep the composition</h3><p>The site carries over the mockup’s large opening artwork, dark agenda section, orange manifesto band, installation grid, and ticket section.</p></article><article><h3>Prepare the images</h3><p>The city scene, speaker portraits, pine overlay, and supporting illustrations were regenerated or separated into assets the page could use.</p></article><article><h3>Refine it in the browser</h3><p>Browser checks after each pass caught overlaps, awkward image crops, navigation states, and speaker carousel issues. Further adjustments made the layout work on small and large screens.</p></article></div></section><section class="neon-case-details" aria-label="Compare the mockup and working page"><figure><a href="/assets/openai_image_2_hifi.jpg"><img src="/assets/openai_image_2_hifi.jpg" alt="The full Neo Mirai page mockup, showing its colors, imagery, and section layout." loading="lazy" width="864" height="1821"></a><figcaption><span>Page mockup</span> The reference establishes the order and proportions of the sections, from the opening artwork to tickets.</figcaption></figure><figure><a href="/neo-mirai/index.html" aria-label="Explore the Neo Mirai site"><img src="/assets/cases/neo-mirai/live-page.png" alt="Full-page screenshot of the implemented Neo Mirai website." loading="lazy" width="1440" height="3013"></a><figcaption><span>Working site</span> The composition carries through to a page with links, carousel controls, hover states, and a layout that adapts to the screen.</figcaption></figure></section><section class="neon-case-command"><div><span class="neon-case-section-label">Try it yourself</span><h2>Describe the site you want.</h2><p>Start with what you want to make. Impeccable helps you choose a direction, builds it, and checks the result. You can begin with a visual mockup or go straight to code.</p></div><div><pre><code>/impeccable design a retro-futurist AI design conference website</code></pre></div></section></div></main><footer class="site-footer"><div class="footer-row"><a class="footer-logo" href="/">Impeccable</a><nav class="footer-links" aria-label="Footer"><a href="/gallery">Gallery</a><a href="/changelog">Changelog</a><a href="/faq">FAQ</a><a href="/privacy">Privacy</a><a href="https://app.vanta.com/renaissance-geek.ai/trust/jhldu1ow0u17opmmk3s7zk">Trust Center</a><a href="https://github.com/pbakaus/impeccable">GitHub</a></nav><div class="footer-credit"><span>Created by <a href="https://x.com/pbakaus" target="_blank" rel="noopener">Paul Bakaus</a></span><a href="https://x.com/pbakaus" class="footer-social-link" aria-label="Follow on X" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a><a href="https://linkedin.com/in/paulbakaus" class="footer-social-link" aria-label="Connect on LinkedIn" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></a></div></div></footer><script type="module" src="/_astro/Base.astro_astro_type_script_index_0_lang.BD-jcN2D.js"></script><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2375b0fdc85c43a68f4b0e89cc6ae43c"}'></script><!-- Cloudflare Pages Analytics --></body></html>

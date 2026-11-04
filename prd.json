@@ -1,0 +1,292 @@
+{
+  "project": "Impeccable-Equivalent CLI",
+  "tasks": [
+    {
+      "id": "task-01",
+      "title": "Capture impeccable.style source pages",
+      "description": "Download the homepage and every linked docs/command/changelog page from https://impeccable.style/ into docs/research/raw/ as HTML (or rendered text if the site is JS-driven). Record each URL and fetch date in docs/research/raw/SOURCES.md. Read-only research; no implementation code.",
+      "verification": "test -s docs/research/raw/SOURCES.md && test \"$(ls docs/research/raw | wc -l)\" -ge 2",
+      "status": "completed"
+    },
+    {
+      "id": "task-02",
+      "title": "Document the command surface",
+      "description": "From the captured pages, write docs/research/commands.md describing what each of polish, typeset, distill, critique, audit, live, generate and document does: purpose, inputs, flags, outputs, whether it mutates files. Note any additional commands found on the site.",
+      "verification": "for c in polish typeset distill critique audit live generate document; do grep -qi \"^## .*$c\" docs/research/commands.md || { echo \"missing $c\"; exit 1; }; done",
+      "status": "pending"
+    },
+    {
+      "id": "task-03",
+      "title": "Document the slop catalog",
+      "description": "Write docs/research/slop-catalog.md listing the generic AI-design anti-patterns the site describes or implies (typography, color, layout, copy, motion, accessibility), each with a short description, a detection idea, and a severity guess.",
+      "verification": "test \"$(grep -c '^### ' docs/research/slop-catalog.md)\" -ge 15",
+      "status": "pending"
+    },
+    {
+      "id": "task-04",
+      "title": "Document context files and changelog footprint",
+      "description": "Write docs/research/context-files.md describing how PRODUCT.md and DESIGN.md are used (sections, who writes them, how commands consume them) and what changelog/footprint a run leaves in a project.",
+      "verification": "grep -q 'PRODUCT.md' docs/research/context-files.md && grep -q 'DESIGN.md' docs/research/context-files.md && grep -qi 'changelog' docs/research/context-files.md",
+      "status": "pending"
+    },
+    {
+      "id": "task-05",
+      "title": "Write the command interface schema",
+      "description": "Create docs/spec/cli-schema.json: a machine-readable spec of the CLI (name, version, global flags, exit codes, and per-command args, flags, output shape, mutates:boolean) covering the eight required commands plus an init command.",
+      "verification": "python3 -c \"import json;d=json.load(open('docs/spec/cli-schema.json'));n={c['name'] for c in d['commands']};assert {'polish','typeset','distill','critique','audit','live','generate','document','init'}<=n\"",
+      "status": "pending"
+    },
+    {
+      "id": "task-06",
+      "title": "Write the originality ground rules",
+      "description": "Create docs/spec/originality.md: the tool gets its own name, own rule IDs, own wording and own code; only the command names and the general concept are shared. List what must not be copied (branding, prose, rule text, code, assets). Choose and record the final CLI name and npm bin name.",
+      "verification": "grep -qi 'bin name' docs/spec/originality.md && grep -qi 'must not' docs/spec/originality.md",
+      "status": "pending"
+    },
+    {
+      "id": "task-07",
+      "title": "Initialize the Node package",
+      "description": "Create package.json (ESM, engines node>=20, bin entry pointing at bin/<name>.js, scripts: test using node --test, check using node --check over all source files) with zero runtime dependencies if practical. Add .gitignore and an empty src/ and tests/ layout.",
+      "verification": "python3 -c \"import json;p=json.load(open('package.json'));assert p['type']=='module' and 'bin' in p and 'test' in p['scripts']\"",
+      "status": "pending"
+    },
+    {
+      "id": "task-08",
+      "title": "Create the CLI entry point",
+      "description": "Implement bin/<name>.js: argument parsing, --help, --version, and a clear error for unknown input. No subcommand logic yet.",
+      "verification": "node bin/*.js --version && node bin/*.js --help | grep -qi usage",
+      "status": "pending"
+    },
+    {
+      "id": "task-09",
+      "title": "Build the command registry with stubs",
+      "description": "Create src/commands/index.js that registers polish, typeset, distill, critique, audit, live, generate, document and init as stub handlers driven by docs/spec/cli-schema.json. Each stub prints its own help via '<cmd> --help'. Unknown commands exit 2.",
+      "verification": "node --test tests/cli/registry.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-10",
+      "title": "Add shared flags, reporter and exit codes",
+      "description": "Implement src/lib/reporter.js and global flags --json, --cwd, --quiet, --no-color, --write/--dry-run semantics, and the exit-code table from the schema (0 ok, 1 findings over threshold, 2 usage error, 3 internal error).",
+      "verification": "node --test tests/lib/reporter.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-11",
+      "title": "Implement the project context loader",
+      "description": "Implement src/lib/context.js: find project root, read PRODUCT.md and DESIGN.md (optional YAML-ish front matter plus headed sections), read optional config file, and return a normalized context object with a 'missing' list.",
+      "verification": "node --test tests/lib/context.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-12",
+      "title": "Implement the changelog footprint module",
+      "description": "Implement src/lib/changelog.js: append-only entries under an 'Unreleased' heading in the project's CHANGELOG.md (create if absent), each entry recording command, date and files touched. Idempotent when nothing changed; never rewrites older entries.",
+      "verification": "node --test tests/lib/changelog.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-13",
+      "title": "Build the source file scanner",
+      "description": "Implement src/detector/scan.js: walk a project honoring .gitignore and a default ignore list, load html/css/scss/jsx/tsx/vue/svelte/md files, and expose lines plus file type to rules.",
+      "verification": "node --test tests/detector/scan.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-14",
+      "title": "Define the rule interface and finding schema",
+      "description": "Implement src/detector/rule.js and registry: a rule has id, category, severity, appliesTo and check(file, ctx) returning findings {ruleId, severity, file, line, message, hint}. Support inline suppression comments and per-rule severity overrides from config.",
+      "verification": "node --test tests/detector/rule.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-15",
+      "title": "Add typography slop rules",
+      "description": "Implement rules in src/detector/rules/typography.js: single overused default font stack, too many distinct font sizes with no scale, missing or extreme line-height, body text under a readable size, excessive font weights.",
+      "verification": "node --test tests/detector/rules-typography.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-16",
+      "title": "Add color slop rules",
+      "description": "Implement rules in src/detector/rules/color.js including a WCAG contrast calculator: low-contrast text, stock purple-to-blue gradients, pure #000/#fff, gray text on colored backgrounds, too many unrelated hues.",
+      "verification": "node --test tests/detector/rules-color.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-17",
+      "title": "Add layout and component slop rules",
+      "description": "Implement rules in src/detector/rules/layout.js: nested cards, grids of identical cards, uniform oversized border-radius, stacked heavy shadows, glassmorphism everywhere, emoji used as icons, everything centered.",
+      "verification": "node --test tests/detector/rules-layout.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-18",
+      "title": "Add copy slop rules",
+      "description": "Implement rules in src/detector/rules/copy.js: lorem ipsum, stock marketing phrases, placeholder names and testimonials, exclamation-heavy headings, vague button labels like 'Learn more' repeated.",
+      "verification": "node --test tests/detector/rules-copy.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-19",
+      "title": "Add motion and accessibility rules",
+      "description": "Implement rules in src/detector/rules/motion-a11y.js: bounce/float animations on everything, missing prefers-reduced-motion, outline:none without replacement, images without alt, click handlers on non-interactive elements, missing lang attribute.",
+      "verification": "node --test tests/detector/rules-motion-a11y.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-20",
+      "title": "Implement scoring and the detect pipeline",
+      "description": "Implement src/detector/index.js: run all rules over a scan, aggregate findings, compute a 0-100 slop score with per-category breakdown, sort deterministically, and expose a text and JSON report.",
+      "verification": "node --test tests/detector/pipeline.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-21",
+      "title": "Create detector fixtures and accuracy test",
+      "description": "Add tests/fixtures/slop/ (files that should trigger each rule) and tests/fixtures/clean/ (well-designed files). Add a test asserting every rule fires on slop and the clean set yields zero errors.",
+      "verification": "node --test tests/detector/accuracy.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-22",
+      "title": "Implement the audit command",
+      "description": "Implement src/commands/audit.js: run the detector plus consistency checks (token usage, spacing scale), print a grouped report, support --json and --fail-under <score>, exit 1 when the threshold is missed. Read-only.",
+      "verification": "node --test tests/commands/audit.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-23",
+      "title": "Implement the critique command",
+      "description": "Implement src/commands/critique.js: deterministic design critique of a target file or directory judged against PRODUCT.md audience and DESIGN.md principles; output hierarchy, clarity, consistency and fit sections with concrete suggestions. Read-only.",
+      "verification": "node --test tests/commands/critique.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-24",
+      "title": "Implement the typeset command",
+      "description": "Implement src/commands/typeset.js: infer the current type scale, propose a modular scale and font pairing from DESIGN.md tokens, and rewrite font-size/line-height declarations. Dry-run by default, --write applies, writes changelog entry.",
+      "verification": "node --test tests/commands/typeset.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-25",
+      "title": "Implement the polish command",
+      "description": "Implement src/commands/polish.js: normalize spacing, radius and shadow values to the DESIGN.md token scale, fix near-duplicate values, and show a unified diff. Dry-run by default, --write applies, writes changelog entry.",
+      "verification": "node --test tests/commands/polish.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-26",
+      "title": "Implement the distill command",
+      "description": "Implement src/commands/distill.js: identify removable decoration and redundancy (unused CSS, duplicate wrappers, decorative extras, repeated copy) and propose a reduction. Report by default, --write applies safe removals, writes changelog entry.",
+      "verification": "node --test tests/commands/distill.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-27",
+      "title": "Implement the generate command",
+      "description": "Implement src/commands/generate.js with templates in src/templates/: scaffold a named component or page (e.g. hero, pricing, form) using DESIGN.md tokens and PRODUCT.md voice, refusing to overwrite existing files without --force. Writes changelog entry.",
+      "verification": "node --test tests/commands/generate.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-28",
+      "title": "Implement the document command",
+      "description": "Implement src/commands/document.js: extract design tokens and components from the codebase and create or update DESIGN.md between managed markers, preserving hand-written sections. Writes changelog entry.",
+      "verification": "node --test tests/commands/document.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-29",
+      "title": "Implement the live server",
+      "description": "Implement src/commands/live.js server half: start a local HTTP server on a configurable port that serves the latest detector report as HTML and JSON, with a Server-Sent Events stream. Clean shutdown on SIGINT.",
+      "verification": "node --test tests/commands/live-server.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-30",
+      "title": "Add live file watching",
+      "description": "Add the watcher half of live: debounce file changes, rerun the detector on changed files only, and push updated findings over SSE so the open report page refreshes without reload.",
+      "verification": "node --test tests/commands/live-watch.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-31",
+      "title": "Create the PRODUCT.md template and validator",
+      "description": "Add src/templates/PRODUCT.md and src/lib/validate-product.js: required sections (users, problem, goals, tone/voice, non-goals), with a validator reporting missing or placeholder-only sections.",
+      "verification": "node --test tests/lib/validate-product.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-32",
+      "title": "Create the DESIGN.md template and validator",
+      "description": "Add src/templates/DESIGN.md and src/lib/validate-design.js: required sections (principles, color, typography, spacing, radius, motion, components) with machine-readable token blocks the commands can read, and a validator for them.",
+      "verification": "node --test tests/lib/validate-design.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-33",
+      "title": "Implement the init command",
+      "description": "Implement src/commands/init.js: infer product details from package.json, README and existing CSS to prefill PRODUCT.md and DESIGN.md, ask nothing when --yes is passed, and never overwrite existing files without --force.",
+      "verification": "node --test tests/commands/init.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-34",
+      "title": "Wire context files into all commands",
+      "description": "Make every command load PRODUCT.md and DESIGN.md via the context loader, print a helpful 'run init' message when they are missing, and use their tokens and tone. Add a test per command for the missing-context and present-context paths.",
+      "verification": "node --test tests/commands/context-wiring.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-35",
+      "title": "Wire changelog footprint into mutating commands",
+      "description": "Ensure typeset, polish, distill, generate, document and init write exactly one changelog entry per applied run and none on dry-run or no-op. Add a test covering each.",
+      "verification": "node --test tests/commands/changelog-wiring.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-36",
+      "title": "Create the sample app fixture",
+      "description": "Add tests/fixtures/sample-app/: a small realistic static site (HTML, CSS, a JSX component) with deliberate slop plus a package.json, copied to a temp dir by tests so the original stays untouched.",
+      "verification": "test -f tests/fixtures/sample-app/package.json && test -f tests/fixtures/sample-app/index.html",
+      "status": "pending"
+    },
+    {
+      "id": "task-37",
+      "title": "End-to-end test of all commands on the sample app",
+      "description": "Write tests/e2e/full-run.test.js: init, audit, critique, typeset, polish, distill, generate, document, and live (start then stop) against a temp copy of the sample app; assert exit codes, outputs, and that the slop score improves after the mutating commands.",
+      "verification": "node --test tests/e2e/full-run.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-38",
+      "title": "Test dry-run safety and idempotence",
+      "description": "Write tests/e2e/safety.test.js: no mutating command changes any file without --write, and a second --write run produces no diff and no new changelog entry.",
+      "verification": "node --test tests/e2e/safety.test.js",
+      "status": "pending"
+    },
+    {
+      "id": "task-39",
+      "title": "Run the CLI on a real project",
+      "description": "Link the CLI (npm link) and run init, audit, critique and document (dry-run for mutating ones) against a real existing project folder on this machine chosen with the user. Save the outputs under docs/validation/ and record problems found as new tasks.",
+      "verification": "test -s docs/validation/real-project-audit.txt",
+      "status": "pending"
+    },
+    {
+      "id": "task-40",
+      "title": "Write the README and usage docs",
+      "description": "Write README.md covering install, the eight commands with examples, the slop detector rule list (generated from the registry), PRODUCT.md/DESIGN.md format, changelog behavior, and an originality note.",
+      "verification": "for c in polish typeset distill critique audit live generate document; do grep -q \"$c\" README.md || exit 1; done",
+      "status": "pending"
+    },
+    {
+      "id": "task-41",
+      "title": "Final release check",
+      "description": "Run the whole suite, syntax-check all sources, confirm every command responds to --help, and confirm the package contents with npm pack --dry-run.",
+      "verification": "npm test && npm run check && npm pack --dry-run",
+      "status": "pending"
+    }
+  ]
+}

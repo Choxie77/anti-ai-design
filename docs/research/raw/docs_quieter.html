@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>quieter | Impeccable</title><meta name="description" content="Reduce visual noise while keeping the design’s personality."><meta name="theme-color" content="#f9f9f9"><link rel="canonical" href="https://impeccable.style/docs/quieter"><meta property="og:type" content="website"><meta property="og:url" content="https://impeccable.style/docs/quieter"><meta property="og:title" content="The missing design vocabulary for agents."><meta property="og:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta property="og:image" content="https://impeccable.style/og-image-v6.png"><meta property="og:image:width" content="1733"><meta property="og:image:height" content="907"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The missing design vocabulary for agents."><meta name="twitter:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta name="twitter:image" content="https://impeccable.style/og-image-v6.png"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Alumni+Sans:wght@200..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script>// Exceptions we cannot act on, dropped in posthog.astro's before_send. This
+// file is inlined into the page as a classic script (no imports, no exports
+// beyond the one function), so keep it self-contained.
+//
+// Keep unknown rejections, SDK failures and first-party stacks observable.
+// Drop only opaque cross-origin errors, foreign-only stacks, the SDK's own
+// request timeout, and identifiable extension or injected wallet failures.
+function isUnactionableException(properties) {
+  var list = (properties && properties.$exception_list) || [];
+  if (!list.length) return false;
+  var framesOf = function (e) { return (e.stacktrace && e.stacktrace.frames) || []; };
+  var page = function (url) { return String(url || '').split(/[?#]/)[0]; };
+  var currentPage = page(properties.$current_url);
+  var isPage = function (f) { return /^https?:/.test(f.filename || '') && currentPage && page(f.filename) === currentPage; };
+  var foreign = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && own.every(function (f) { return !/^https?:/.test(f.filename || ''); });
+  });
+  var opaque = list.every(function (e) { return e.value === 'Script error.' && framesOf(e).length === 0; });
+  var sdkTimeout = list.every(function (e) {
+    var own = framesOf(e);
+    return /^PostHog request timed out after \d+ms$/.test(e.value || '') && own.length > 0 &&
+      own.every(function (f) { return /^https?:\/\/[^/]+\/relay\/static\//.test(f.filename || ''); });
+  });
+  // PostHog orders frames outermost first. Only discard an extension throw
+  // when the rest of the stack contains page URLs or foreign frames; a
+  // first-party bundle anywhere in the chain keeps the exception actionable.
+  var inExtension = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && /^(webkit-masked-url|chrome-extension|moz-extension|safari-web-extension):/.test(own[own.length - 1].filename || '') &&
+      own.every(function (f) { return !/^https?:/.test(f.filename || '') || isPage(f); });
+  });
+  // This exact Brave iOS wallet injection runs against the page itself.
+  // Other ethereum messages and exceptions from site bundles remain visible.
+  var wallet = list.every(function (e) {
+    var own = framesOf(e);
+    return e.value === "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')" &&
+      own.length > 0 && own.every(isPage);
+  });
+  // Firefox throws this bare form when page code reads an object owned by a
+  // more privileged compartment, which on a web page means an extension. It
+  // arrives through event.target in our click handlers and the SDK's, so this
+  // is the one rule that drops a stack with site frames. Cross-origin access
+  // ends in "on cross-origin object" and stays visible.
+  var privileged = list.every(function (e) {
+    return /^Permission denied to access property "[^"]*"$/.test(e.value || '');
+  });
+  return foreign || opaque || sdkTimeout || inExtension || wallet || privileged;
+}
+</script><script>(function(){const apiKey = "phc_qCpX2jadsFcLpk7T87rjhowCAMGohC3cnNZwn9Y8h9dp";
+const apiHost = "/relay";
+
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+
+    // Label every event, the first pageview included, by where it ran, so
+    // insights can leave out local dev and PR previews.
+    var host = location.hostname;
+    var environment = host === 'impeccable.style' || host.endsWith('.impeccable.style') ? 'production'
+      : host === 'localhost' || host === '127.0.0.1' ? 'development'
+      : 'preview';
+
+    window.posthog.init(apiKey, {
+      api_host: apiHost,
+      ui_host: 'https://us.posthog.com',
+      defaults: '2026-01-30',
+      // Replay is off, and the privacy policy says nothing about recording.
+      // Keep it off here so a dashboard toggle cannot change that.
+      disable_session_recording: true,
+      // Cloudflare Web Analytics already reports Core Web Vitals, and
+      // $pageleave doubles pageview volume for a scroll-depth signal we do not
+      // use. Together they were about 28% of all events.
+      capture_performance: { web_vitals: false },
+      capture_pageleave: false,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
+      before_send(event) {
+        if (!event) return event;
+        if (event.event === '$exception' && isUnactionableException(event.properties)) return null;
+        event.properties = { ...event.properties, environment };
+        return event;
+      },
+    });
+  })();</script><link rel="stylesheet" href="/_astro/DocsCommandSyntax.C5rjZV-W.css"><link rel="stylesheet" href="/_astro/kinpaku-tokens.Czfxn__5.css"><link rel="stylesheet" href="/_astro/sub-pages.CTJhASV9.css"><link rel="stylesheet" href="/_astro/Base.C85DQK9e.css"><link rel="stylesheet" href="/_astro/docs-kinpaku.u_zHQAQM.css"><link rel="stylesheet" href="/_astro/docs-system-examples.CfqeJq5h.css"><link rel="stylesheet" href="/_astro/_..T9PZ0Um_.css"><link rel="stylesheet" href="/_astro/docs-reading.BT9XhWTg.css"></head><body class="sub-page skills-layout-page docs-kinpaku kinpaku-chrome"><a href="#main" class="skip-link">Skip to content</a><header class="site-header" data-site-header data-nav-open="false"><a href="/" class="site-header-brand" aria-label="Impeccable home"><span class="site-header-brand-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2.5 L13.5 2.5 L5.5 21.5 L5 21.5 Q2.5 21.5 2.5 19 L2.5 5 Q2.5 2.5 5 2.5 Z"></path><path d="M16.5 2.5 L19 2.5 Q21.5 2.5 21.5 5 L21.5 19 Q21.5 21.5 19 21.5 L8.5 21.5 Z"></path></svg></span><span class="site-header-brand-name">Impeccable</span></a><button type="button" class="site-header-menu" aria-label="Open navigation" aria-expanded="false" aria-controls="site-header-nav-panel" data-site-header-menu><span class="site-header-menu-line" aria-hidden="true"></span><span class="site-header-menu-line" aria-hidden="true"></span></button><div class="site-header-right" id="site-header-nav-panel"><nav class="site-header-nav" aria-label="Primary"><a href="/" data-nav="home">Home</a><a href="/designing" data-nav="designing">Designing</a><a href="/gallery" data-nav="gallery">Gallery</a><a href="/docs" data-nav="docs" aria-current="page">Docs</a><a href="/slop" data-nav="slop">Slop</a><a href="/live-mode" data-nav="live">Live</a></nav><a href="https://github.com/pbakaus/impeccable" class="site-header-github" target="_blank" rel="noopener" aria-label="Impeccable on GitHub, 95k stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg><span class="site-header-github-label">95k</span><svg class="site-header-github-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.76 6.36L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.24-.91L12 2z"></path></svg></a></div></header><script>
+  (function () {
+    var header = document.querySelector('[data-site-header]');
+    var btn = document.querySelector('[data-site-header-menu]');
+    var panel = document.getElementById('site-header-nav-panel');
+    if (!header || !btn || !panel) return;
+    var mobile = window.matchMedia('(max-width: 760px)');
+
+    function setOpen(open, restoreFocus) {
+      open = mobile.matches && open;
+      header.setAttribute('data-nav-open', String(open));
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      if (restoreFocus) btn.focus();
+      panel.inert = mobile.matches && !open;
+    }
+
+    setOpen(false);
+    btn.addEventListener('click', function () {
+      var open = header.getAttribute('data-nav-open') === 'true';
+      setOpen(!open);
+    });
+
+    panel.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        setOpen(false, mobile.matches);
+      });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && header.getAttribute('data-nav-open') === 'true') {
+        event.preventDefault();
+        setOpen(false, true);
+      }
+    });
+
+    document.addEventListener('pointerdown', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.target)) {
+        setOpen(false, panel.contains(document.activeElement));
+      }
+    });
+
+    header.addEventListener('focusout', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.relatedTarget)) {
+        setOpen(false);
+      }
+    });
+
+    mobile.addEventListener('change', function () {
+      setOpen(false, mobile.matches && panel.contains(document.activeElement));
+    });
+  })();
+</script><main id="main"><div class="skills-layout"><aside class="skills-sidebar" aria-label="Docs navigation"><button class="skills-sidebar-toggle" type="button" aria-expanded="false" aria-controls="skills-sidebar-inner"><span class="skills-sidebar-toggle-label">Browse docs</span><svg class="skills-sidebar-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><div class="skills-sidebar-inner" id="skills-sidebar-inner"><nav aria-label="Guides"><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Start here</h2><ul class="skills-sidebar-list"><li><a href="/tutorials/getting-started"><span>Install &amp; first steps</span></a></li><li><a href="/docs/image-generation"><span>Enable image generation</span></a></li></ul></div><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Design workflows</h2><ul class="skills-sidebar-list"><li><a href="/docs/new-work"><span>Build something new</span></a></li><li><a href="/docs/improve-design"><span>Improve an existing design</span></a></li><li><a href="/tutorials/critique-with-overlay"><span>Review with a visual overlay</span></a></li><li><a href="/docs/design-system"><span>Work with a design system</span></a></li><li><a href="/tutorials/iterate-live"><span>Iterate in the browser</span></a></li></ul></div><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Checks &amp; troubleshooting</h2><ul class="skills-sidebar-list"><li><a href="/docs/hooks"><span>Automatic design checks</span></a></li><li><a href="/docs/detector"><span>Run a detector scan</span></a></li><li><a href="/docs/doctor"><span>Fix setup problems</span></a></li></ul></div><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Reference</h2><ul class="skills-sidebar-list"><li><a href="/docs/context"><span>Context files</span></a></li><li><a href="/docs/config"><span>Configuration &amp; ignores</span></a></li></ul></div></nav><details class="docs-command-reference" open><summary>Command reference</summary><a class="docs-all-commands" href="/docs#command-reference">All commands</a><nav class="docs-palette" aria-labelledby="docs-commands-label"><h2 class="skills-sidebar-label" id="docs-commands-label">Commands</h2><div class="skills-sidebar-group"><span class="skills-sidebar-category">Create</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/impeccable"><span class="docs-palette-name">impeccable</span></a></li><li><a class="docs-palette-row" href="/docs/shape"><span class="docs-palette-name">shape</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Evaluate</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/audit"><span class="docs-palette-name">audit</span></a></li><li><a class="docs-palette-row" href="/docs/critique"><span class="docs-palette-name">critique</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Refine</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/animate"><span class="docs-palette-name">animate</span></a></li><li><a class="docs-palette-row" href="/docs/bolder"><span class="docs-palette-name">bolder</span></a></li><li><a class="docs-palette-row" href="/docs/colorize"><span class="docs-palette-name">colorize</span></a></li><li><a class="docs-palette-row" href="/docs/delight"><span class="docs-palette-name">delight</span></a></li><li><a class="docs-palette-row" href="/docs/layout"><span class="docs-palette-name">layout</span></a></li><li><a class="docs-palette-row" href="/docs/overdrive"><span class="docs-palette-name">overdrive</span></a></li><li><a class="docs-palette-row" href="/docs/quieter" aria-current="page"><span class="docs-palette-name">quieter</span></a></li><li><a class="docs-palette-row" href="/docs/typeset"><span class="docs-palette-name">typeset</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Simplify</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/adapt"><span class="docs-palette-name">adapt</span></a></li><li><a class="docs-palette-row" href="/docs/clarify"><span class="docs-palette-name">clarify</span></a></li><li><a class="docs-palette-row" href="/docs/distill"><span class="docs-palette-name">distill</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Harden</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/harden"><span class="docs-palette-name">harden</span></a></li><li><a class="docs-palette-row" href="/docs/onboard"><span class="docs-palette-name">onboard</span></a></li><li><a class="docs-palette-row" href="/docs/optimize"><span class="docs-palette-name">optimize</span></a></li><li><a class="docs-palette-row" href="/docs/polish"><span class="docs-palette-name">polish</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">System</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/document"><span class="docs-palette-name">document</span></a></li><li><a class="docs-palette-row" href="/docs/extract"><span class="docs-palette-name">extract</span></a></li><li><a class="docs-palette-row" href="/docs/generate"><span class="docs-palette-name">generate</span></a></li><li><a class="docs-palette-row" href="/docs/init"><span class="docs-palette-name">init</span></a></li><li><a class="docs-palette-row" href="/docs/live"><span class="docs-palette-name">live</span></a></li></ul></div></nav></details></div></aside><script>
+  // The rail scrolls on its own, and every docs page is a full load, so
+  // without this it starts at the top on each one: scroll down, click a
+  // link, and the link you clicked is gone. The position is kept for the
+  // session and restored here, before first paint, since this script runs
+  // as soon as the rail has parsed. If the current page's link still is not
+  // in view (arrived from elsewhere with a stale position), it is brought
+  // into the rail's view without moving the page.
+  (() => {
+    const rail = document.querySelector('.skills-sidebar');
+    if (!rail) return;
+    const KEY = 'impeccable:docs-rail-scroll';
+    try {
+      const saved = sessionStorage.getItem(KEY);
+      if (saved !== null) rail.scrollTop = Number(saved) || 0;
+    } catch {}
+    const current = rail.querySelector('[aria-current="page"]');
+    if (current && rail.scrollHeight > rail.clientHeight) {
+      const r = current.getBoundingClientRect();
+      const s = rail.getBoundingClientRect();
+      if (r.top < s.top || r.bottom > s.bottom) rail.scrollTop += r.top - s.top - s.height / 2;
+    }
+    let queued = false;
+    rail.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        try { sessionStorage.setItem(KEY, String(rail.scrollTop)); } catch {}
+      });
+    }, { passive: true });
+  })();
+
+</script><div class="skills-main"><div class="skills-detail"><div class="docs-hero docs-hero--with-demo"><header class="sub-page-header"><h1 class="sub-page-title" data-perform="quieter">quieter</h1><p class="sub-page-lede">Reduce visual noise while keeping the design’s personality.</p></header><div class="docs-command-demo" data-command="quieter"></div></div><details class="docs-contents"><summary>On this page <span>3 sections</span></summary><nav aria-label="On this page"><ol><li><a href="#try-it">Try it</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#check-the-result">Check the result</a></li></ol></nav></details><script type="module" src="/_astro/DocsContents.astro_astro_type_script_index_0_lang.D-o4rU-p.js"></script><div class="skills-detail-body docs-body prose"><noscript><p class="docs-syntax-fallback">Most agents use <code>/impeccable</code>. In Codex, use <code>$impeccable</code>.</p></noscript><p>Use <code>quieter</code> when too many colors, heavy elements, or effects compete for attention. Impeccable reduces that intensity so the important content is easier to see and the page is more comfortable to use.</p>
+<h2 id="try-it">Try it</h2>
+<pre class="astro-code impeccable-paper" style="background-color:#EEEEEE;color:#1B1B1B; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/impeccable quieter the pricing cards. Keep the brand color and make the plan choices easier to compare.</span></span></code></pre>
+<p>Say what feels excessive and what gives the design its character. The goal may be a calmer reading page or a less distracting tool; it doesn’t have to be a minimal design.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>Impeccable identifies what creates the visual pressure, then adjusts it:</p>
+<ul>
+<li><strong>Color:</strong> reduce competing accents and overly intense surfaces while preserving meaningful color.</li>
+<li><strong>Weight and scale:</strong> let supporting text and controls recede so the main content can lead.</li>
+<li><strong>Decoration:</strong> remove or soften borders, shadows, and effects that add little to the experience.</li>
+<li><strong>Motion:</strong> reduce distracting movement while keeping useful feedback and transitions.</li>
+</ul>
+<figure class="command-example"><div class="command-example-pair"><div><strong class="command-example-label">Every detail competes</strong><div class="command-example-screen quiet-plan quiet-plan--before"><span class="command-example-title">Team plan</span><div class="quiet-features"><span>Shared projects</span><span>Team permissions</span><span>Activity history</span></div><span class="quiet-action">Choose Team</span></div></div><div><strong class="command-example-label">The action leads</strong><div class="command-example-screen quiet-plan quiet-plan--after"><span class="command-example-title">Team plan</span><div class="quiet-features"><span>Shared projects</span><span>Team permissions</span><span>Activity history</span></div><span class="quiet-action">Choose Team</span></div></div></div><figcaption>Illustrated refinement: features become plain text while the action keeps its color. The content and brand hue remain.</figcaption></figure>
+<p><strong>Clear contrast and useful emphasis stay.</strong> Quieter should not make everything small, pale, or identical. The page still needs readable text, recognizable controls, and a point of view.</p>
+<h2 id="check-the-result">Check the result</h2>
+<p>Spend time reading or completing the main task. Is the page calmer without becoming harder to navigate? Check focus, hover, and error states, especially where color or effects changed.</p>
+<p>If the problem is too much content, use <a href="/docs/distill">distill</a>. If one important section needs more presence, use <a href="/docs/bolder">bolder</a>. A page can need both kinds of adjustment in different places.</p>
+</div><footer class="skills-relationships"><h2 class="skills-relationships-title">Related commands</h2><div class="skills-relationships-list"><a href="/docs/bolder" class="skills-relationship-chip" data-relation="pairs"><span class="skills-relationship-label">pairs with</span><span class="skills-relationship-name">bolder</span></a></div></footer></div></div></div><script>
+    document.addEventListener('click', (e) => {
+      const toggle = e.target.closest('.skills-sidebar-toggle');
+      if (!toggle) return;
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+    });
+  </script><script type="module" src="/_astro/Doc.astro_astro_type_script_index_0_lang.CtelqPQc.js"></script><script type="module" src="/_astro/Doc.astro_astro_type_script_index_1_lang.C27OA2jo.js"></script><script type="module" src="/_astro/Doc.astro_astro_type_script_index_2_lang.DdcAfEke.js"></script></main><footer class="site-footer"><div class="footer-row"><a class="footer-logo" href="/">Impeccable</a><nav class="footer-links" aria-label="Footer"><a href="/gallery">Gallery</a><a href="/changelog">Changelog</a><a href="/faq">FAQ</a><a href="/privacy">Privacy</a><a href="https://app.vanta.com/renaissance-geek.ai/trust/jhldu1ow0u17opmmk3s7zk">Trust Center</a><a href="https://github.com/pbakaus/impeccable">GitHub</a></nav><div class="footer-credit"><span>Created by <a href="https://x.com/pbakaus" target="_blank" rel="noopener">Paul Bakaus</a></span><a href="https://x.com/pbakaus" class="footer-social-link" aria-label="Follow on X" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a><a href="https://linkedin.com/in/paulbakaus" class="footer-social-link" aria-label="Connect on LinkedIn" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></a></div></div></footer><script type="module" src="/_astro/Base.astro_astro_type_script_index_0_lang.BD-jcN2D.js"></script><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2375b0fdc85c43a68f4b0e89cc6ae43c"}'></script><!-- Cloudflare Pages Analytics --></body></html>

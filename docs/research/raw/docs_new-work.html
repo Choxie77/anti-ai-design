@@ -1,0 +1,342 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Build something new | Impeccable</title><meta name="description" content="Create a page, extend an existing design, or plan a redesign with Impeccable. Choose a direction, steer the result, and decide how to build it."><meta name="theme-color" content="#f9f9f9"><link rel="canonical" href="https://impeccable.style/docs/new-work"><meta property="og:type" content="website"><meta property="og:url" content="https://impeccable.style/docs/new-work"><meta property="og:title" content="The missing design vocabulary for agents."><meta property="og:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta property="og:image" content="https://impeccable.style/og-image-v6.png"><meta property="og:image:width" content="1733"><meta property="og:image:height" content="907"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The missing design vocabulary for agents."><meta name="twitter:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta name="twitter:image" content="https://impeccable.style/og-image-v6.png"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Alumni+Sans:wght@200..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script>// Exceptions we cannot act on, dropped in posthog.astro's before_send. This
+// file is inlined into the page as a classic script (no imports, no exports
+// beyond the one function), so keep it self-contained.
+//
+// Keep unknown rejections, SDK failures and first-party stacks observable.
+// Drop only opaque cross-origin errors, foreign-only stacks, the SDK's own
+// request timeout, and identifiable extension or injected wallet failures.
+function isUnactionableException(properties) {
+  var list = (properties && properties.$exception_list) || [];
+  if (!list.length) return false;
+  var framesOf = function (e) { return (e.stacktrace && e.stacktrace.frames) || []; };
+  var page = function (url) { return String(url || '').split(/[?#]/)[0]; };
+  var currentPage = page(properties.$current_url);
+  var isPage = function (f) { return /^https?:/.test(f.filename || '') && currentPage && page(f.filename) === currentPage; };
+  var foreign = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && own.every(function (f) { return !/^https?:/.test(f.filename || ''); });
+  });
+  var opaque = list.every(function (e) { return e.value === 'Script error.' && framesOf(e).length === 0; });
+  var sdkTimeout = list.every(function (e) {
+    var own = framesOf(e);
+    return /^PostHog request timed out after \d+ms$/.test(e.value || '') && own.length > 0 &&
+      own.every(function (f) { return /^https?:\/\/[^/]+\/relay\/static\//.test(f.filename || ''); });
+  });
+  // PostHog orders frames outermost first. Only discard an extension throw
+  // when the rest of the stack contains page URLs or foreign frames; a
+  // first-party bundle anywhere in the chain keeps the exception actionable.
+  var inExtension = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && /^(webkit-masked-url|chrome-extension|moz-extension|safari-web-extension):/.test(own[own.length - 1].filename || '') &&
+      own.every(function (f) { return !/^https?:/.test(f.filename || '') || isPage(f); });
+  });
+  // This exact Brave iOS wallet injection runs against the page itself.
+  // Other ethereum messages and exceptions from site bundles remain visible.
+  var wallet = list.every(function (e) {
+    var own = framesOf(e);
+    return e.value === "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')" &&
+      own.length > 0 && own.every(isPage);
+  });
+  // Firefox throws this bare form when page code reads an object owned by a
+  // more privileged compartment, which on a web page means an extension. It
+  // arrives through event.target in our click handlers and the SDK's, so this
+  // is the one rule that drops a stack with site frames. Cross-origin access
+  // ends in "on cross-origin object" and stays visible.
+  var privileged = list.every(function (e) {
+    return /^Permission denied to access property "[^"]*"$/.test(e.value || '');
+  });
+  return foreign || opaque || sdkTimeout || inExtension || wallet || privileged;
+}
+</script><script>(function(){const apiKey = "phc_qCpX2jadsFcLpk7T87rjhowCAMGohC3cnNZwn9Y8h9dp";
+const apiHost = "/relay";
+
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+
+    // Label every event, the first pageview included, by where it ran, so
+    // insights can leave out local dev and PR previews.
+    var host = location.hostname;
+    var environment = host === 'impeccable.style' || host.endsWith('.impeccable.style') ? 'production'
+      : host === 'localhost' || host === '127.0.0.1' ? 'development'
+      : 'preview';
+
+    window.posthog.init(apiKey, {
+      api_host: apiHost,
+      ui_host: 'https://us.posthog.com',
+      defaults: '2026-01-30',
+      // Replay is off, and the privacy policy says nothing about recording.
+      // Keep it off here so a dashboard toggle cannot change that.
+      disable_session_recording: true,
+      // Cloudflare Web Analytics already reports Core Web Vitals, and
+      // $pageleave doubles pageview volume for a scroll-depth signal we do not
+      // use. Together they were about 28% of all events.
+      capture_performance: { web_vitals: false },
+      capture_pageleave: false,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
+      before_send(event) {
+        if (!event) return event;
+        if (event.event === '$exception' && isUnactionableException(event.properties)) return null;
+        event.properties = { ...event.properties, environment };
+        return event;
+      },
+    });
+  })();</script><link rel="stylesheet" href="/_astro/DocsCommandSyntax.C5rjZV-W.css"><link rel="stylesheet" href="/_astro/kinpaku-tokens.Czfxn__5.css"><link rel="stylesheet" href="/_astro/sub-pages.CTJhASV9.css"><link rel="stylesheet" href="/_astro/Base.C85DQK9e.css"><link rel="stylesheet" href="/_astro/docs-kinpaku.u_zHQAQM.css"><link rel="stylesheet" href="/_astro/docs-system-examples.CfqeJq5h.css"><link rel="stylesheet" href="/_astro/_..T9PZ0Um_.css"><link rel="stylesheet" href="/_astro/docs-reading.BT9XhWTg.css"></head><body class="sub-page skills-layout-page docs-kinpaku kinpaku-chrome"><a href="#main" class="skip-link">Skip to content</a><header class="site-header" data-site-header data-nav-open="false"><a href="/" class="site-header-brand" aria-label="Impeccable home"><span class="site-header-brand-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2.5 L13.5 2.5 L5.5 21.5 L5 21.5 Q2.5 21.5 2.5 19 L2.5 5 Q2.5 2.5 5 2.5 Z"></path><path d="M16.5 2.5 L19 2.5 Q21.5 2.5 21.5 5 L21.5 19 Q21.5 21.5 19 21.5 L8.5 21.5 Z"></path></svg></span><span class="site-header-brand-name">Impeccable</span></a><button type="button" class="site-header-menu" aria-label="Open navigation" aria-expanded="false" aria-controls="site-header-nav-panel" data-site-header-menu><span class="site-header-menu-line" aria-hidden="true"></span><span class="site-header-menu-line" aria-hidden="true"></span></button><div class="site-header-right" id="site-header-nav-panel"><nav class="site-header-nav" aria-label="Primary"><a href="/" data-nav="home">Home</a><a href="/designing" data-nav="designing">Designing</a><a href="/gallery" data-nav="gallery">Gallery</a><a href="/docs" data-nav="docs" aria-current="page">Docs</a><a href="/slop" data-nav="slop">Slop</a><a href="/live-mode" data-nav="live">Live</a></nav><a href="https://github.com/pbakaus/impeccable" class="site-header-github" target="_blank" rel="noopener" aria-label="Impeccable on GitHub, 95k stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg><span class="site-header-github-label">95k</span><svg class="site-header-github-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.76 6.36L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.24-.91L12 2z"></path></svg></a></div></header><script>
+  (function () {
+    var header = document.querySelector('[data-site-header]');
+    var btn = document.querySelector('[data-site-header-menu]');
+    var panel = document.getElementById('site-header-nav-panel');
+    if (!header || !btn || !panel) return;
+    var mobile = window.matchMedia('(max-width: 760px)');
+
+    function setOpen(open, restoreFocus) {
+      open = mobile.matches && open;
+      header.setAttribute('data-nav-open', String(open));
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      if (restoreFocus) btn.focus();
+      panel.inert = mobile.matches && !open;
+    }
+
+    setOpen(false);
+    btn.addEventListener('click', function () {
+      var open = header.getAttribute('data-nav-open') === 'true';
+      setOpen(!open);
+    });
+
+    panel.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        setOpen(false, mobile.matches);
+      });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && header.getAttribute('data-nav-open') === 'true') {
+        event.preventDefault();
+        setOpen(false, true);
+      }
+    });
+
+    document.addEventListener('pointerdown', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.target)) {
+        setOpen(false, panel.contains(document.activeElement));
+      }
+    });
+
+    header.addEventListener('focusout', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.relatedTarget)) {
+        setOpen(false);
+      }
+    });
+
+    mobile.addEventListener('change', function () {
+      setOpen(false, mobile.matches && panel.contains(document.activeElement));
+    });
+  })();
+</script><main id="main"><div class="skills-layout"><aside class="skills-sidebar" aria-label="Docs navigation"><button class="skills-sidebar-toggle" type="button" aria-expanded="false" aria-controls="skills-sidebar-inner"><span class="skills-sidebar-toggle-label">Browse docs</span><svg class="skills-sidebar-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><div class="skills-sidebar-inner" id="skills-sidebar-inner"><nav aria-label="Guides"><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Start here</h2><ul class="skills-sidebar-list"><li><a href="/tutorials/getting-started"><span>Install &amp; first steps</span></a></li><li><a href="/docs/image-generation"><span>Enable image generation</span></a></li></ul></div><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Design workflows</h2><ul class="skills-sidebar-list"><li><a href="/docs/new-work" aria-current="page"><span>Build something new</span></a></li><li><a href="/docs/improve-design"><span>Improve an existing design</span></a></li><li><a href="/tutorials/critique-with-overlay"><span>Review with a visual overlay</span></a></li><li><a href="/docs/design-system"><span>Work with a design system</span></a></li><li><a href="/tutorials/iterate-live"><span>Iterate in the browser</span></a></li></ul></div><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Checks &amp; troubleshooting</h2><ul class="skills-sidebar-list"><li><a href="/docs/hooks"><span>Automatic design checks</span></a></li><li><a href="/docs/detector"><span>Run a detector scan</span></a></li><li><a href="/docs/doctor"><span>Fix setup problems</span></a></li></ul></div><div class="skills-sidebar-group"><h2 class="skills-sidebar-category">Reference</h2><ul class="skills-sidebar-list"><li><a href="/docs/context"><span>Context files</span></a></li><li><a href="/docs/config"><span>Configuration &amp; ignores</span></a></li></ul></div></nav><details class="docs-command-reference"><summary>Command reference</summary><a class="docs-all-commands" href="/docs#command-reference">All commands</a><nav class="docs-palette" aria-labelledby="docs-commands-label"><h2 class="skills-sidebar-label" id="docs-commands-label">Commands</h2><div class="skills-sidebar-group"><span class="skills-sidebar-category">Create</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/impeccable"><span class="docs-palette-name">impeccable</span></a></li><li><a class="docs-palette-row" href="/docs/shape"><span class="docs-palette-name">shape</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Evaluate</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/audit"><span class="docs-palette-name">audit</span></a></li><li><a class="docs-palette-row" href="/docs/critique"><span class="docs-palette-name">critique</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Refine</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/animate"><span class="docs-palette-name">animate</span></a></li><li><a class="docs-palette-row" href="/docs/bolder"><span class="docs-palette-name">bolder</span></a></li><li><a class="docs-palette-row" href="/docs/colorize"><span class="docs-palette-name">colorize</span></a></li><li><a class="docs-palette-row" href="/docs/delight"><span class="docs-palette-name">delight</span></a></li><li><a class="docs-palette-row" href="/docs/layout"><span class="docs-palette-name">layout</span></a></li><li><a class="docs-palette-row" href="/docs/overdrive"><span class="docs-palette-name">overdrive</span></a></li><li><a class="docs-palette-row" href="/docs/quieter"><span class="docs-palette-name">quieter</span></a></li><li><a class="docs-palette-row" href="/docs/typeset"><span class="docs-palette-name">typeset</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Simplify</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/adapt"><span class="docs-palette-name">adapt</span></a></li><li><a class="docs-palette-row" href="/docs/clarify"><span class="docs-palette-name">clarify</span></a></li><li><a class="docs-palette-row" href="/docs/distill"><span class="docs-palette-name">distill</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">Harden</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/harden"><span class="docs-palette-name">harden</span></a></li><li><a class="docs-palette-row" href="/docs/onboard"><span class="docs-palette-name">onboard</span></a></li><li><a class="docs-palette-row" href="/docs/optimize"><span class="docs-palette-name">optimize</span></a></li><li><a class="docs-palette-row" href="/docs/polish"><span class="docs-palette-name">polish</span></a></li></ul></div><div class="skills-sidebar-group"><span class="skills-sidebar-category">System</span><ul class="skills-sidebar-list"><li><a class="docs-palette-row" href="/docs/document"><span class="docs-palette-name">document</span></a></li><li><a class="docs-palette-row" href="/docs/extract"><span class="docs-palette-name">extract</span></a></li><li><a class="docs-palette-row" href="/docs/generate"><span class="docs-palette-name">generate</span></a></li><li><a class="docs-palette-row" href="/docs/init"><span class="docs-palette-name">init</span></a></li><li><a class="docs-palette-row" href="/docs/live"><span class="docs-palette-name">live</span></a></li></ul></div></nav></details></div></aside><script>
+  // The rail scrolls on its own, and every docs page is a full load, so
+  // without this it starts at the top on each one: scroll down, click a
+  // link, and the link you clicked is gone. The position is kept for the
+  // session and restored here, before first paint, since this script runs
+  // as soon as the rail has parsed. If the current page's link still is not
+  // in view (arrived from elsewhere with a stale position), it is brought
+  // into the rail's view without moving the page.
+  (() => {
+    const rail = document.querySelector('.skills-sidebar');
+    if (!rail) return;
+    const KEY = 'impeccable:docs-rail-scroll';
+    try {
+      const saved = sessionStorage.getItem(KEY);
+      if (saved !== null) rail.scrollTop = Number(saved) || 0;
+    } catch {}
+    const current = rail.querySelector('[aria-current="page"]');
+    if (current && rail.scrollHeight > rail.clientHeight) {
+      const r = current.getBoundingClientRect();
+      const s = rail.getBoundingClientRect();
+      if (r.top < s.top || r.bottom > s.bottom) rail.scrollTop += r.top - s.top - s.height / 2;
+    }
+    let queued = false;
+    rail.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        try { sessionStorage.setItem(KEY, String(rail.scrollTop)); } catch {}
+      });
+    }, { passive: true });
+  })();
+
+</script><div class="skills-main"><div class="skills-detail docs-guide"><header class="sub-page-header"><h1 class="sub-page-title">Build something new</h1><p class="sub-page-lede">Make something new, with a direction you can shape.</p></header><details class="docs-contents"><summary>On this page <span>5 sections</span></summary><nav aria-label="On this page"><ol><li><a href="#review-a-mockup-or-go-straight-to-code">Review a mockup or go straight to code</a></li><li><a href="#set-how-much-can-change">Set how much can change</a></li><li><a href="#choose-a-direction-you-want-to-pursue">Choose a direction you want to pursue</a></li><li><a href="#after-the-build">After the build</a></li><li><a href="#more-about-the-process">More about the process</a></li></ol></nav></details><script type="module" src="/_astro/DocsContents.astro_astro_type_script_index_0_lang.D-o4rU-p.js"></script><div class="skills-detail-body docs-body prose"><noscript><p class="docs-syntax-fallback">Most agents use <code>/impeccable</code>. In Codex, use <code>$impeccable</code>.</p></noscript><p>Describe the page you want to make. Impeccable helps you choose a direction, builds it, and reviews the result. No special command or visual concept required.</p>
+<aside class="docs-callout" aria-label="Image generation setup">
+<div>
+<strong class="docs-callout-title">Want to push the visual direction further?</strong>
+<p>Image generation opens up bolder compositions. Expect a few rounds to carry that ambition into code; the first build will lose some of the mockup’s detail.</p>
+</div>
+<a class="ks-button ks-button-primary" href="/docs/image-generation">Enable image generation →</a>
+</aside>
+<pre class="astro-code impeccable-paper" style="background-color:#EEEEEE;color:#1B1B1B; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/impeccable design a pricing page for our enterprise customers</span></span></code></pre>
+<ol class="docs-steps">
+<li><strong>Describe the job</strong><p>Say who it serves, what it should do, and what must stay.</p></li>
+<li><strong>Choose a direction</strong><p>Compare options and steer the design. Small additions can follow your existing style.</p></li>
+<li><strong>Build and review</strong><p>Try the interface and refine it. Impeccable records the decisions for future work.</p></li>
+</ol>
+<p>Only need a plan? Start with <a href="/docs/shape">shape</a>.</p>
+<h2 id="review-a-mockup-or-go-straight-to-code">Review a mockup or go straight to code</h2>
+<p>You can choose how a new design becomes a working interface. A <strong>comp</strong> is a visual composition: a detailed mockup of the page.</p>
+<table class="docs-workflow-comparison">
+<thead><tr><th scope="col">Mockup first<br />(comp-led)</th><th scope="col">Build directly<br />(code-led)</th></tr></thead>
+<tbody>
+<tr><td><strong>The opportunity</strong><br />Bolder compositions and more creative visual directions than the coding model would naturally build.</td><td><strong>The opportunity</strong><br />A more coherent first implementation, built within the coding model’s natural visual range.</td></tr>
+<tr><td><strong>You review</strong><br />Generated mockups, then the working interface against your chosen image.</td><td><strong>You review</strong><br />A proposed concept, then its implementation in the working interface.</td></tr>
+<tr><td><strong>The tradeoff</strong><br />Image-to-code translation loses detail. Expect several rounds of prompting and review to get closer to the mockup.</td><td><strong>The tradeoff</strong><br />The result tends to look better out of the box, but the execution is usually less ambitious than a comp-led direction.</td></tr>
+<tr><td><strong>You need</strong><br />Image generation, extra time and usage, and willingness to iterate.</td><td><strong>You need</strong><br />No image generation. Review and refinement still matter.</td></tr>
+</tbody>
+</table>
+<p><strong>Comp-led is not a one-shot workflow.</strong> An image model can propose a composition the coding model cannot reproduce faithfully on its first pass. Typography, spacing, imagery, and proportions will drift in translation. Impeccable gives the build a visual target and helps check fidelity, but you should expect to prompt a few rounds until you are satisfied. Use a capable coding model for that work.</p>
+<p>Choose <strong>mockup first</strong> for a higher visual ceiling you are willing to work toward. Choose <strong>build directly</strong> for a stronger first implementation within the model’s natural range. Without image generation, Impeccable uses the code-led path.</p>
+<p>Use the workflow switch in the design picker for a session-specific choice:</p>
+<div class="new-work-paths">
+  <figure>
+    <img src="/images/docs/new-work/03-comp-first-crop.png" width="370" height="84" alt="Workflow switch with Comp first selected: mockup first, or comp-led." loading="lazy" />
+    <figcaption><strong>Mockup first (comp-led).</strong> Compare compositions, approve one, then build and review against it.</figcaption>
+  </figure>
+  <figure>
+    <img src="/images/docs/new-work/04-code-first-crop.png" width="370" height="84" alt="Workflow switch with Code first selected: build directly, or code-led." loading="lazy" />
+    <figcaption><strong>Build directly (code-led).</strong> Develop the agreed design in code and review it in the working interface.</figcaption>
+  </figure>
+</div>
+<details class="docs-prose-details" id="how-your-workflow-preference-is-saved">
+<summary>Defaults and saving your workflow preference</summary>
+<p>With image generation available and no saved preference, Impeccable defaults to <strong>mockup first</strong>. Without image generation, it builds directly in code and does not show the switch.</p>
+<p>The picker’s switch applies to the current session. To change the project’s default, ask in plain language:</p>
+<pre class="astro-code impeccable-paper" style="background-color:#EEEEEE;color:#1B1B1B; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/impeccable use code-led as this project's default for new design work</span></span>
+<span class="line"><span>/impeccable use comp-led as this project's default for new design work</span></span></code></pre>
+<p>The setting is <code>buildPath</code> in <code>.impeccable/config.json</code>: <code>comp</code> or <code>code</code>. A value in <code>.impeccable/config.local.json</code> overrides the shared setting for that developer. See <a href="/docs/config#choose-a-build-workflow">Configuration &amp; ignores</a> for the file format.</p>
+<p>On a project without a saved preference, changing the switch can prompt a one-time question about keeping the new choice. Init can also establish the preference during setup.</p>
+<p>These paths apply to new design work and redesigns. A focused polish pass keeps the current design. Either path can use generated images as finished assets; code-led skips the mockup approval stage.</p>
+</details>
+<h2 id="set-how-much-can-change">Set how much can change</h2>
+<p>Tell Impeccable what it can change. A new section should fit the surrounding page; a new page should fit the product. For a redesign, name what to keep.</p>
+<blockquote>
+<p>Redesign this within our current system. Keep the product names and signup flow.</p>
+</blockquote>
+<details class="docs-prose-details">
+<summary>Starting fresh, extending a system, or working with incomplete docs</summary>
+<ul>
+<li><strong>Add a section or component:</strong> it inherits the surrounding design.</li>
+<li><strong>Create a page in an existing product:</strong> the visual system stays consistent; the layout can change for the task.</li>
+<li><strong>Start fresh or redesign:</strong> the visual direction is open. Product facts, functionality, and constraints still apply.</li>
+</ul>
+<p>Impeccable reads the actual interface, tokens, components, and assets alongside <code>DESIGN.md</code>. Missing documentation does not erase an established design. It can <a href="/docs/design-system">record that system</a> before extending it.</p>
+<p>If the boundary is unclear, Impeccable should ask. “Replace the current look” gives different permission from “Redesign within our current system.”</p>
+</details>
+<h2 id="choose-a-direction-you-want-to-pursue">Choose a direction you want to pursue</h2>
+<p>Compare the options in the picker, then choose one or tell Impeccable what to change. Here, the same release catalog takes three different forms:</p>
+<figure class="new-work-picker">
+  <a href="/images/docs/new-work/01-directions.png"><img src="/images/docs/new-work/01-directions.png" width="1280" height="900" alt="The real Impeccable picker compares Relay as a blue teletext index, a printed program guide, and a pictogram-led release schedule. Each card shows a preview, design choices, risks, and a Build this button." loading="lazy" /></a>
+  <figcaption><strong>Compare designs for the same product.</strong> Open a preview to inspect it, or flip a card for the reasoning. These example directions for the fictional Relay catalog are shown in the actual picker. <a href="/images/docs/new-work/01-directions.png">View full-size screenshot</a>.</figcaption>
+</figure>
+<ul>
+<li><strong>Choose one:</strong> select <strong>Build this</strong> on the direction you want.</li>
+<li><strong>Ask for another set:</strong> re-roll, or use <strong>Safer hand</strong> and <strong>Bolder hand</strong> to change the range.</li>
+<li><strong>Steer the next round:</strong> use the text field to say what to change or keep.</li>
+<li><strong>Keep it familiar:</strong> the category-standard option offers a conventional approach.</li>
+</ul>
+<p>You can reject the whole set. After two consecutive new sets, Impeccable asks what quality is missing so the next attempt has a clearer basis. If the browser decision page cannot run, the choice moves into the conversation.</p>
+<details class="docs-prose-details" id="when-the-visual-system-is-already-established">
+<summary>Example: a new page within an established visual system</summary>
+<p>For a new page inside an existing product, the choice is about structure. These three layouts explore Relay’s integrations page while keeping its visual identity:</p>
+<figure class="new-work-picker">
+  <a href="/images/docs/new-work/02-structures.png"><img src="/images/docs/new-work/02-structures.png" width="1280" height="850" alt="The real structure picker shows three layouts for Relay’s integrations page: a category rail with ledger rows, a searchable board of sockets, and a pipeline map with a detail panel." loading="lazy" /></a>
+  <figcaption><strong>Choose how the page works.</strong> A ledger, a board, and a pipeline map organize the same task differently. This code-first example uses layout schematics. <a href="/images/docs/new-work/02-structures.png">View full-size screenshot</a>.</figcaption>
+</figure>
+</details>
+<details class="docs-prose-details" id="bring-a-strong-idea-if-you-have-one">
+<summary>Already have a visual idea? Bring it in your prompt</summary>
+<p>Your references and constraints guide the design:</p>
+<pre class="astro-code impeccable-paper" style="background-color:#EEEEEE;color:#1B1B1B; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/impeccable design a landing page for our vinyl shop with a 1970s hi-fi catalog look. Use Futura and lead with the records.</span></span></code></pre>
+<p>Impeccable develops the choices your brief leaves open. A chosen aesthetic is a starting point for a complete design, including navigation, controls, and interaction.</p>
+</details>
+<details class="docs-prose-details">
+<summary>See a mockup carried into a working page</summary>
+<div>
+<figure class="new-work-reference">
+  <div class="new-work-reference-pair">
+    <div><strong>Visual target</strong><a href="/assets/openai_image_2_hifi.jpg"><img src="/assets/openai_image_2_hifi.jpg" alt="Neo Mirai conference mockup: a city illustration above a large title, followed by the program and ticket sections." loading="lazy" /></a></div>
+    <div><strong>Working interface</strong><a href="/assets/cases/neo-mirai/live-page.png"><img src="/assets/cases/neo-mirai/live-page.png" alt="The implemented Neo Mirai conference page, carrying the mockup’s palette, city imagery, large typography, and page composition into code." loading="lazy" /></a></div>
+  </div>
+  <figcaption>The fictional Neo Mirai conference illustrates a mockup carried into a working site. <a href="/cases/neo-mirai">See the case study</a> or <a href="/neo-mirai/index.html">visit the working site</a>. Open either image above to inspect it in full.</figcaption>
+</figure>
+<p>Compare the lettering, artwork, and section proportions: the overall direction carries through, but the translation changes details. Closing the gaps takes review and iteration. The implementation also needs readable text, working controls, accessible behavior, and responsive layouts.</p>
+</div>
+</details>
+<h2 id="after-the-build">After the build</h2>
+<p>Try the main task, check a narrow screen, and tell Impeccable what to keep or adjust. The chosen direction guides the review; the finished interface still needs to work for real users.</p>
+<details class="docs-prose-details" id="what-carries-into-the-next-session">
+<summary>What carries into the next session</summary>
+<ul>
+<li><strong>The visual system:</strong> when the work establishes or replaces a design, <code>DESIGN.md</code> records the result after implementation and review. An ordinary addition follows the existing system.</li>
+<li><strong>The page’s decisions:</strong> a surface brief under <code>.impeccable/surfaces/</code> records the page’s purpose, chosen direction, constraints, and unresolved questions. Future work can read why the design took this form.</li>
+<li><strong>The visual references:</strong> generated mockups stay under <code>.impeccable/mocks/</code>, with their generation details and recorded approval where applicable.</li>
+</ul>
+<p>The design plan belongs in the development record. It is not placed in the page’s HTML comments, hidden content, or other output sent to visitors.</p>
+</details>
+<details class="docs-prose-details" id="why-the-options-go-beyond-the-obvious">
+<summary>Why the options go beyond the obvious</summary>
+<p>Creative prompts can still produce familiar answers. In Impeccable’s published July 2026 experiments, 30 of 35 answers under different creative framings returned the same concept. <a href="/research">Read the research</a> for the experiment and its limits.</p>
+<p>Impeccable introduces variation into the selection process. It develops directions from your product and audience, uses a seeded selection to avoid always choosing the model’s first preference, and considers alternatives from a curated catalog when the visual identity is open.</p>
+<p>Those references have to become a design for your product: its content, tasks, controls, and constraints. A catalog image shows inspiration and a level of finish, rather than a ready-made page to copy.</p>
+</details>
+<h2 id="more-about-the-process">More about the process</h2>
+<details class="docs-prose-details">
+<summary>How a proposed direction is evaluated</summary>
+<div>
+<p>A direction has to fit the product before it reaches you:</p>
+<ul>
+<li><strong>Truth:</strong> the claims and relationships it shows must be real. Illustrative data must be identified as such.</li>
+<li><strong>Purpose:</strong> its structure must help someone understand the product or complete the task.</li>
+<li><strong>Consequence:</strong> its distinctive move must improve the experience, beyond adding a decorative theme.</li>
+<li><strong>Feasibility:</strong> it must work on the intended devices with the available assets, tools, and performance budget.</li>
+<li><strong>Fit:</strong> its tradeoffs must respect your brief.</li>
+</ul>
+<p>For a new page inside an established system, the alternatives explore structure within that system. For a new or replacement identity, they can explore a different visual language.</p>
+</div>
+</details>
+<details class="docs-prose-details">
+<summary>The written direction and the seed</summary>
+<div>
+<p>The surface brief holds a short direction contract: the central idea, visual language, visitor’s path, first-screen composition, chosen form and seed, and what must be checked before the work is complete.</p>
+<p>The finishing review uses those commitments to assess the result. For mockup-led work, it also compares the implementation with the approved image.</p>
+<p>Keep the seed if you want to replay the selection, including its re-roll rounds. Replaying a selection does not guarantee identical generated images or code.</p>
+</div>
+</details>
+<details class="docs-prose-details">
+<summary>Delegated choices and unattended work</summary>
+<div>
+<p>When you are reviewing the choices, Impeccable asks you to select a direction and approve the mockup where that workflow applies. You can also delegate a choice.</p>
+<p>In an unattended run, it proceeds with the assigned direction and states its assumptions. If the decision page closes without an answer, it tries the conversation once before treating the run as unattended.</p>
+<p>You can request fresh options for any reason. The agent’s own re-rolls require a concrete problem with the product’s facts or task; its personal preference is not enough.</p>
+</div>
+</details>
+<details class="docs-prose-details">
+<summary>Coming from the craft command?</summary>
+<div>
+<p><code>/impeccable craft</code> is a deprecated alias for ordinary new-work requests. You can describe the work directly to <code>/impeccable</code>.</p>
+</div>
+</details>
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="/designing">Designing with Impeccable</a> shows the wider workflow, from a first idea to maintaining the system.</li>
+<li><a href="/docs/shape">Shape</a> helps you agree on the plan before building.</li>
+<li><a href="/docs/context">Context files</a> explains the records this process reads and writes.</li>
+</ul>
+</div></div></div></div><script>
+    document.addEventListener('click', (e) => {
+      const toggle = e.target.closest('.skills-sidebar-toggle');
+      if (!toggle) return;
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+    });
+  </script><script type="module" src="/_astro/Doc.astro_astro_type_script_index_0_lang.CtelqPQc.js"></script><script type="module" src="/_astro/Doc.astro_astro_type_script_index_1_lang.C27OA2jo.js"></script><script type="module" src="/_astro/Doc.astro_astro_type_script_index_2_lang.DdcAfEke.js"></script></main><footer class="site-footer"><div class="footer-row"><a class="footer-logo" href="/">Impeccable</a><nav class="footer-links" aria-label="Footer"><a href="/gallery">Gallery</a><a href="/changelog">Changelog</a><a href="/faq">FAQ</a><a href="/privacy">Privacy</a><a href="https://app.vanta.com/renaissance-geek.ai/trust/jhldu1ow0u17opmmk3s7zk">Trust Center</a><a href="https://github.com/pbakaus/impeccable">GitHub</a></nav><div class="footer-credit"><span>Created by <a href="https://x.com/pbakaus" target="_blank" rel="noopener">Paul Bakaus</a></span><a href="https://x.com/pbakaus" class="footer-social-link" aria-label="Follow on X" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a><a href="https://linkedin.com/in/paulbakaus" class="footer-social-link" aria-label="Connect on LinkedIn" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></a></div></div></footer><script type="module" src="/_astro/Base.astro_astro_type_script_index_0_lang.BD-jcN2D.js"></script><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2375b0fdc85c43a68f4b0e89cc6ae43c"}'></script><!-- Cloudflare Pages Analytics --></body></html>
