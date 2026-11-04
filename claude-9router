@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Launch Claude Code against the local 9router gateway.
+# Settings apply to this run only; normal `claude` sessions are unaffected.
+# Override the model per run:  ROUTER_MODEL="gemini/gemini-3.1-pro-preview" ./claude-9router
+set -euo pipefail
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set -a
+# shellcheck disable=SC1091
+source "$DIR/.env"
+set +a
+
+MODEL="${ROUTER_MODEL:-$ANTHROPIC_MODEL}"
+
+export ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN
+export ANTHROPIC_MODEL="$MODEL"
+export ANTHROPIC_SMALL_FAST_MODEL="$MODEL"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="$MODEL"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="$MODEL"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="$MODEL"
+unset ANTHROPIC_API_KEY
+
+exec claude "$@"

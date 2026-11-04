@@ -1,0 +1,8 @@
+[task-01] COMPLETED - Capture impeccable.style source pages
+Fetched the homepage plus 43 linked pages (all 200 OK) into docs/research/raw/: the 8 required command docs
+(polish, typeset, distill, critique, audit, live, generate, document) and 24 other /docs/* pages (init, doctor,
+config, context, detector, hooks, ...), /slop, /changelog, /live-mode, /designing, /faq, /research, /gallery,
+/tutorials/getting-started, /cases/neo-mirai. URL-to-file map and fetch date in docs/research/raw/SOURCES.md.
+Notes for later tasks: site is server-rendered Astro HTML (readable with grep); the site also lists extra commands
+(adapt, animate, bolder, clarify, colorize, delight, harden, ...) and an open-source repo (pbakaus/impeccable).
+Verified: test -s SOURCES.md && file count >= 2 -> OK (44 files).

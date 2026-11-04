@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Live Mode | Impeccable</title><meta name="description" content="Pick an element, compare changes in your page, and keep a chosen result in source. Use Steer for a direction that applies across the page."><meta name="theme-color" content="#f9f9f9"><link rel="canonical" href="https://impeccable.style/live-mode"><meta property="og:type" content="website"><meta property="og:url" content="https://impeccable.style/live-mode"><meta property="og:title" content="The missing design vocabulary for agents."><meta property="og:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta property="og:image" content="https://impeccable.style/og-image-v6.png"><meta property="og:image:width" content="1733"><meta property="og:image:height" content="907"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The missing design vocabulary for agents."><meta name="twitter:description" content="Turn AI slop into interfaces you’re proud to ship. Impeccable gives your agent the design expertise to build from scratch, improve what you have, and stay true to your design system."><meta name="twitter:image" content="https://impeccable.style/og-image-v6.png"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Alumni+Sans:wght@200..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script>// Exceptions we cannot act on, dropped in posthog.astro's before_send. This
+// file is inlined into the page as a classic script (no imports, no exports
+// beyond the one function), so keep it self-contained.
+//
+// Keep unknown rejections, SDK failures and first-party stacks observable.
+// Drop only opaque cross-origin errors, foreign-only stacks, the SDK's own
+// request timeout, and identifiable extension or injected wallet failures.
+function isUnactionableException(properties) {
+  var list = (properties && properties.$exception_list) || [];
+  if (!list.length) return false;
+  var framesOf = function (e) { return (e.stacktrace && e.stacktrace.frames) || []; };
+  var page = function (url) { return String(url || '').split(/[?#]/)[0]; };
+  var currentPage = page(properties.$current_url);
+  var isPage = function (f) { return /^https?:/.test(f.filename || '') && currentPage && page(f.filename) === currentPage; };
+  var foreign = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && own.every(function (f) { return !/^https?:/.test(f.filename || ''); });
+  });
+  var opaque = list.every(function (e) { return e.value === 'Script error.' && framesOf(e).length === 0; });
+  var sdkTimeout = list.every(function (e) {
+    var own = framesOf(e);
+    return /^PostHog request timed out after \d+ms$/.test(e.value || '') && own.length > 0 &&
+      own.every(function (f) { return /^https?:\/\/[^/]+\/relay\/static\//.test(f.filename || ''); });
+  });
+  // PostHog orders frames outermost first. Only discard an extension throw
+  // when the rest of the stack contains page URLs or foreign frames; a
+  // first-party bundle anywhere in the chain keeps the exception actionable.
+  var inExtension = list.every(function (e) {
+    var own = framesOf(e);
+    return own.length > 0 && /^(webkit-masked-url|chrome-extension|moz-extension|safari-web-extension):/.test(own[own.length - 1].filename || '') &&
+      own.every(function (f) { return !/^https?:/.test(f.filename || '') || isPage(f); });
+  });
+  // This exact Brave iOS wallet injection runs against the page itself.
+  // Other ethereum messages and exceptions from site bundles remain visible.
+  var wallet = list.every(function (e) {
+    var own = framesOf(e);
+    return e.value === "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')" &&
+      own.length > 0 && own.every(isPage);
+  });
+  // Firefox throws this bare form when page code reads an object owned by a
+  // more privileged compartment, which on a web page means an extension. It
+  // arrives through event.target in our click handlers and the SDK's, so this
+  // is the one rule that drops a stack with site frames. Cross-origin access
+  // ends in "on cross-origin object" and stays visible.
+  var privileged = list.every(function (e) {
+    return /^Permission denied to access property "[^"]*"$/.test(e.value || '');
+  });
+  return foreign || opaque || sdkTimeout || inExtension || wallet || privileged;
+}
+</script><script>(function(){const apiKey = "phc_qCpX2jadsFcLpk7T87rjhowCAMGohC3cnNZwn9Y8h9dp";
+const apiHost = "/relay";
+
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+
+    // Label every event, the first pageview included, by where it ran, so
+    // insights can leave out local dev and PR previews.
+    var host = location.hostname;
+    var environment = host === 'impeccable.style' || host.endsWith('.impeccable.style') ? 'production'
+      : host === 'localhost' || host === '127.0.0.1' ? 'development'
+      : 'preview';
+
+    window.posthog.init(apiKey, {
+      api_host: apiHost,
+      ui_host: 'https://us.posthog.com',
+      defaults: '2026-01-30',
+      // Replay is off, and the privacy policy says nothing about recording.
+      // Keep it off here so a dashboard toggle cannot change that.
+      disable_session_recording: true,
+      // Cloudflare Web Analytics already reports Core Web Vitals, and
+      // $pageleave doubles pageview volume for a scroll-depth signal we do not
+      // use. Together they were about 28% of all events.
+      capture_performance: { web_vitals: false },
+      capture_pageleave: false,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
+      before_send(event) {
+        if (!event) return event;
+        if (event.event === '$exception' && isUnactionableException(event.properties)) return null;
+        event.properties = { ...event.properties, environment };
+        return event;
+      },
+    });
+  })();</script><link rel="stylesheet" href="/_astro/DocsCommandSyntax.C5rjZV-W.css"><link rel="stylesheet" href="/_astro/LiveDemoGbar.DmSJUYlA.css"><link rel="stylesheet" href="/_astro/kinpaku-tokens.Czfxn__5.css"><link rel="stylesheet" href="/_astro/sub-pages.CTJhASV9.css"><link rel="stylesheet" href="/_astro/Base.C85DQK9e.css"><link rel="stylesheet" href="/_astro/index.MTO3z1km.css"></head><body class="sub-page live-mode-page-body live-mode-kinpaku kinpaku-chrome"><a href="#main" class="skip-link">Skip to content</a><header class="site-header" data-site-header data-nav-open="false"><a href="/" class="site-header-brand" aria-label="Impeccable home"><span class="site-header-brand-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2.5 L13.5 2.5 L5.5 21.5 L5 21.5 Q2.5 21.5 2.5 19 L2.5 5 Q2.5 2.5 5 2.5 Z"></path><path d="M16.5 2.5 L19 2.5 Q21.5 2.5 21.5 5 L21.5 19 Q21.5 21.5 19 21.5 L8.5 21.5 Z"></path></svg></span><span class="site-header-brand-name">Impeccable</span></a><button type="button" class="site-header-menu" aria-label="Open navigation" aria-expanded="false" aria-controls="site-header-nav-panel" data-site-header-menu><span class="site-header-menu-line" aria-hidden="true"></span><span class="site-header-menu-line" aria-hidden="true"></span></button><div class="site-header-right" id="site-header-nav-panel"><nav class="site-header-nav" aria-label="Primary"><a href="/" data-nav="home">Home</a><a href="/designing" data-nav="designing">Designing</a><a href="/gallery" data-nav="gallery">Gallery</a><a href="/docs" data-nav="docs">Docs</a><a href="/slop" data-nav="slop">Slop</a><a href="/live-mode" data-nav="live" aria-current="page">Live</a></nav><a href="https://github.com/pbakaus/impeccable" class="site-header-github" target="_blank" rel="noopener" aria-label="Impeccable on GitHub, 95k stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg><span class="site-header-github-label">95k</span><svg class="site-header-github-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.76 6.36L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.24-.91L12 2z"></path></svg></a></div></header><script>
+  (function () {
+    var header = document.querySelector('[data-site-header]');
+    var btn = document.querySelector('[data-site-header-menu]');
+    var panel = document.getElementById('site-header-nav-panel');
+    if (!header || !btn || !panel) return;
+    var mobile = window.matchMedia('(max-width: 760px)');
+
+    function setOpen(open, restoreFocus) {
+      open = mobile.matches && open;
+      header.setAttribute('data-nav-open', String(open));
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      if (restoreFocus) btn.focus();
+      panel.inert = mobile.matches && !open;
+    }
+
+    setOpen(false);
+    btn.addEventListener('click', function () {
+      var open = header.getAttribute('data-nav-open') === 'true';
+      setOpen(!open);
+    });
+
+    panel.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        setOpen(false, mobile.matches);
+      });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && header.getAttribute('data-nav-open') === 'true') {
+        event.preventDefault();
+        setOpen(false, true);
+      }
+    });
+
+    document.addEventListener('pointerdown', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.target)) {
+        setOpen(false, panel.contains(document.activeElement));
+      }
+    });
+
+    header.addEventListener('focusout', function (event) {
+      if (header.getAttribute('data-nav-open') === 'true' && !header.contains(event.relatedTarget)) {
+        setOpen(false);
+      }
+    });
+
+    mobile.addEventListener('change', function () {
+      setOpen(false, mobile.matches && panel.contains(document.activeElement));
+    });
+  })();
+</script><main id="main"><div class="live-mode-page"><header class="live-mode-page-header"><h1 class="live-mode-page-title">Live Mode <span class="live-mode-page-title-badge ks-tag">Beta</span></h1><p class="live-mode-page-lede">Pick part of your website and compare three variations in place. Or give the agent a direction for the whole page with Steer. The changes you keep become part of your source code.</p><div class="live-mode-command docs-kinpaku"><div class="prose"><p>Run this in your agent chat:</p><noscript><p class="docs-syntax-fallback">Most agents use <code>/impeccable</code>. In Codex, use <code>$impeccable</code>.</p></noscript><pre><code>/impeccable live</code></pre></div></div><p class="live-mode-page-alpha-note"><strong>Beta:</strong> ready to try, with rough edges on uncommon project setups. If something fails, tell us what happened.</p></header><section class="live-mode-demo-wrap" aria-label="Live Mode interactive demo"><div class="live-demo" id="live-demo" aria-label="Live Mode interactive demo loop"><div class="live-demo-frame-col"><div class="live-demo-frame"><div class="live-demo-chrome"><span class="live-demo-dot"></span><span class="live-demo-dot"></span><span class="live-demo-dot"></span><span class="live-demo-url">localhost:3000</span></div><div class="live-demo-stage"><div class="live-demo-skeleton" aria-hidden="true"><div class="live-demo-skel-nav"><span class="live-demo-skel-logo"></span><span class="live-demo-skel-link"></span><span class="live-demo-skel-link"></span><span class="live-demo-skel-link"></span><span class="live-demo-skel-cta"></span></div><div class="live-demo-skel-heading"></div><div class="live-demo-skel-line"></div><div class="live-demo-skel-line live-demo-skel-line--short"></div></div><div class="live-demo-target" data-demo-target aria-hidden="true" inert data-impeccable-ignore="*"><div class="live-demo-variant is-active" data-variant="original"><div class="live-demo-card live-demo-card--plain"><span class="live-demo-card-kicker">Newsletter</span><p class="live-demo-card-h">Subscribe for updates</p><p>Monthly-ish design notes.</p><button type="button">Subscribe</button></div></div><div class="live-demo-variant" data-variant="1"><div class="live-demo-card live-demo-card--v1"><span class="live-demo-card-kicker">No. 04</span><p class="live-demo-card-h">Letters, <em>occasionally</em>.</p><p>A postcard from the editor, about once a month. No tracking pixels, no "just checking in."</p><button type="button">Send me one</button></div></div><div class="live-demo-variant" data-variant="2"><div class="live-demo-card live-demo-card--v2"><div class="live-demo-card-stamp">&#x261E;</div><span class="live-demo-card-kicker">Dispatch</span><p class="live-demo-card-h">Design&nbsp;notes, <br>every&nbsp;other<br>Thursday.</p><button type="button">Join the list &rarr;</button></div></div><div class="live-demo-variant" data-variant="3"><div class="live-demo-card live-demo-card--v3"><div class="live-demo-card-sticker"><span>&star;</span><span>&star;</span><span>&star;</span></div><span class="live-demo-card-kicker">Field Notes</span><p class="live-demo-card-h">A monthly letter, for people who still read email for pleasure.</p><button type="button">Receive the letter <span aria-hidden="true">&#x273A;</span></button></div></div></div><div class="live-demo-outline" data-demo-outline aria-hidden="true"></div><div class="live-demo-annotations" data-demo-annotations aria-hidden="true"><svg class="live-demo-stroke" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"><path d="M 10,40 Q 60,10 110,38 T 210,32 T 290,20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" pathLength="1"></path></svg><div class="live-demo-comment">more playful</div></div><div class="live-demo-ctx" data-demo-ctx data-phase="hidden" aria-hidden="true" inert><div class="live-demo-ctx-row live-demo-ctx-row--configure"><div class="live-demo-ctx-command"><span class="live-demo-ctx-input" data-demo-input><button type="button" class="live-demo-ctx-selection">h1</button><span data-demo-input-text></span><span class="live-demo-ctx-caret"></span></span></div><div class="live-demo-ctx-trailing"><div class="live-demo-ctx-modifiers"><button type="button" class="live-demo-ctx-action" data-demo-ctx-pill><span data-demo-cmd-name>adapt</span><span class="live-demo-ctx-action-caret" aria-hidden="true">&#x25BE;</span></button><button type="button" class="live-demo-ctx-count">&times;3</button></div><div class="live-demo-ctx-actions"><button type="button" class="live-demo-ctx-voice" aria-label="Voice input"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg></button><button type="button" class="live-demo-ctx-go" data-demo-go aria-label="Generate variants"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div><div class="live-demo-ctx-palette" data-demo-palette data-demo-pick="delight" aria-hidden="true" inert><div class="live-demo-ctx-palette-grid"><button type="button" class="live-demo-ctx-palette-chip" data-cmd="impeccable"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M4 20l4-1L18 9l-3-3L5 16z"/><path d="M14 7l3 3"/></svg></span><span class="live-demo-ctx-palette-name">Freeform</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="bolder"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><rect x="6" y="12" width="4" height="7" rx="0.5"/><rect x="14" y="5" width="4" height="14" rx="0.5"/></svg></span><span class="live-demo-ctx-palette-name">Bolder</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="quieter"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><rect x="6" y="5" width="4" height="14" rx="0.5"/><rect x="14" y="12" width="4" height="7" rx="0.5"/></svg></span><span class="live-demo-ctx-palette-name">Quieter</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="distill"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M4 5h16l-6 8v7l-4-2v-5z"/></svg></span><span class="live-demo-ctx-palette-name">Distill</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="polish"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M15 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M7 13l0.6 1.8 1.8 0.6-1.8 0.6-0.6 1.8-0.6-1.8-1.8-0.6 1.8-0.6z"/></svg></span><span class="live-demo-ctx-palette-name">Polish</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="typeset"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M5 6h14" stroke-width="2.6"/><path d="M5 12h9" stroke-width="1.9"/><path d="M5 18h5" stroke-width="1.3"/></svg></span><span class="live-demo-ctx-palette-name">Typeset</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="colorize"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="10" r="5"/><circle cx="12" cy="15" r="5"/></svg></span><span class="live-demo-ctx-palette-name">Colorize</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="layout"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><rect x="3" y="4" width="8" height="16" rx="0.5"/><rect x="13" y="4" width="8" height="7" rx="0.5"/><rect x="13" y="13" width="8" height="7" rx="0.5"/></svg></span><span class="live-demo-ctx-palette-name">Layout</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="adapt"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><rect x="2.5" y="5" width="12" height="11" rx="1"/><line x1="2.5" y1="19" x2="14.5" y2="19"/><rect x="16.5" y="8" width="5" height="11" rx="1"/></svg></span><span class="live-demo-ctx-palette-name">Adapt</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="animate"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M3 18c4-4 6-10 10-10"/><path d="M13 8c3 0 5 5 8 10"/><circle cx="13" cy="8" r="1.6" fill="currentColor" stroke="none"/></svg></span><span class="live-demo-ctx-palette-name">Animate</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="delight"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="live-demo-ctx-palette-name">Delight</span></button><button type="button" class="live-demo-ctx-palette-chip" data-cmd="overdrive"><span class="live-demo-ctx-palette-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M13 3L5 13h5l-1 8 9-12h-6z"/></svg></span><span class="live-demo-ctx-palette-name">Overdrive</span></button></div></div><div class="live-demo-ctx-row live-demo-ctx-row--generating"><span class="live-demo-ctx-spinner" aria-hidden="true"></span><span>Generating variants&hellip;</span></div><div class="live-demo-ctx-row live-demo-ctx-row--cycling"><button type="button" class="live-demo-ctx-nav" aria-label="Previous variant">&lsaquo;</button><span class="live-demo-ctx-counter" data-demo-counter>1 / 3</span><button type="button" class="live-demo-ctx-nav" aria-label="Next variant">&rsaquo;</button><span class="live-demo-ctx-divider"></span><button type="button" class="live-demo-ctx-discard" aria-label="Discard">&times;</button><button type="button" class="live-demo-ctx-accept" data-demo-accept>Accept</button></div><div class="live-demo-ctx-row live-demo-ctx-row--accepted"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Variant 3 written to source</span></div></div><div class="live-demo-cursor" data-demo-cursor aria-hidden="true"><svg width="18" height="22" viewBox="0 0 18 22" fill="none"><path d="M1 1 L1 17 L5 13 L8 20 L11 19 L7.5 12 L13 12 Z" fill="#111" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"></path></svg></div></div><div class="live-demo-gbar" data-demo-gbar data-astro-cid-j6ck2wjq><span class="live-demo-gbar-brand" role="img" aria-label="Impeccable live mode" data-astro-cid-j6ck2wjq><svg class="live-demo-gbar-brand-mark" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-astro-cid-j6ck2wjq><path d="M5 2.5 L13.5 2.5 L5.5 21.5 L5 21.5 Q2.5 21.5 2.5 19 L2.5 5 Q2.5 2.5 5 2.5 Z" data-astro-cid-j6ck2wjq></path><path d="M16.5 2.5 L19 2.5 Q21.5 2.5 21.5 5 L21.5 19 Q21.5 21.5 19 21.5 L8.5 21.5 Z" data-astro-cid-j6ck2wjq></path></svg></span><div class="live-demo-gbar-inner" data-astro-cid-j6ck2wjq><button type="button" class="live-demo-gbar-btn is-active" data-demo-gbar-pick aria-label="Pick element" aria-hidden="true" inert data-astro-cid-j6ck2wjq><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-astro-cid-j6ck2wjq><circle cx="12" cy="12" r="10" data-astro-cid-j6ck2wjq></circle><line x1="22" y1="12" x2="18" y2="12" data-astro-cid-j6ck2wjq></line><line x1="6" y1="12" x2="2" y2="12" data-astro-cid-j6ck2wjq></line><line x1="12" y1="6" x2="12" y2="2" data-astro-cid-j6ck2wjq></line><line x1="12" y1="22" x2="12" y2="18" data-astro-cid-j6ck2wjq></line></svg><span class="live-demo-gbar-btn-label" data-astro-cid-j6ck2wjq>Pick</span></button><button type="button" class="live-demo-gbar-btn" aria-label="Insert new element" aria-hidden="true" inert data-astro-cid-j6ck2wjq><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-astro-cid-j6ck2wjq><path d="M12 5v14" data-astro-cid-j6ck2wjq></path><path d="M5 12h14" data-astro-cid-j6ck2wjq></path></svg><span class="live-demo-gbar-btn-label" data-astro-cid-j6ck2wjq>Insert</span></button><button type="button" class="live-demo-gbar-btn" aria-label="Detect anti-patterns" aria-hidden="true" inert data-astro-cid-j6ck2wjq><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-astro-cid-j6ck2wjq><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" data-astro-cid-j6ck2wjq></path><circle cx="12" cy="12" r="3" data-astro-cid-j6ck2wjq></circle></svg><span class="live-demo-gbar-btn-label" data-astro-cid-j6ck2wjq>Detect</span></button><button type="button" class="live-demo-gbar-btn" aria-label="Toggle DESIGN.md panel" aria-hidden="true" inert data-astro-cid-j6ck2wjq><span class="live-demo-gbar-dmd" aria-hidden="true" data-astro-cid-j6ck2wjq><span data-astro-cid-j6ck2wjq></span><span data-astro-cid-j6ck2wjq></span><span data-astro-cid-j6ck2wjq></span><span data-astro-cid-j6ck2wjq></span></span><span class="live-demo-gbar-btn-label live-demo-gbar-btn-label--mono" data-astro-cid-j6ck2wjq>DESIGN.md</span></button><div class="live-demo-gbar-chat" data-demo-gbar-chat data-expanded="false" title="Steer the page" data-astro-cid-j6ck2wjq><span class="live-demo-gbar-chat-icon" aria-hidden="true" data-astro-cid-j6ck2wjq><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j6ck2wjq><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-astro-cid-j6ck2wjq></path></svg></span><button type="button" class="live-demo-gbar-chat-hint" aria-label="Try steering the page" aria-expanded="false" data-astro-cid-j6ck2wjq>Steer</button><input class="live-demo-gbar-chat-input" type="text" placeholder="Steer the page…" aria-label="Steer the page" tabindex="-1" hidden data-astro-cid-j6ck2wjq><button type="button" class="live-demo-gbar-chat-voice" aria-label="Voice input" title="Voice input requires browser speech recognition." disabled data-astro-cid-j6ck2wjq><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j6ck2wjq><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" data-astro-cid-j6ck2wjq></path><path d="M19 10v2a7 7 0 0 1-14 0v-2" data-astro-cid-j6ck2wjq></path><line x1="12" y1="19" x2="12" y2="23" data-astro-cid-j6ck2wjq></line><line x1="8" y1="23" x2="16" y2="23" data-astro-cid-j6ck2wjq></line></svg></button></div><button type="button" class="live-demo-gbar-x" aria-label="Exit live mode" aria-hidden="true" inert data-astro-cid-j6ck2wjq><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" data-astro-cid-j6ck2wjq><line x1="3" y1="3" x2="11" y2="11" data-astro-cid-j6ck2wjq></line><line x1="11" y1="3" x2="3" y2="11" data-astro-cid-j6ck2wjq></line></svg></button></div></div></div></div></div><p class="live-mode-demo-caption">Watch the picking and comparison flow. A still view is shown when reduced motion is preferred.</p></section><section class="live-mode-stages" aria-label="What happens in a live mode session"><h2 class="live-mode-stages-title">Pick, compare, keep</h2><div class="live-mode-stages-grid"><article class="live-mode-stage"><span class="live-mode-stage-num">01 &middot; Pick</span><h3 class="live-mode-stage-name">Point at what you want to change</h3><p class="live-mode-stage-desc">Select an element and describe the outcome. Add a comment or draw a mark when it is easier to show than explain.</p><div class="live-mode-stage-viz"><div class="docs-viz-picker-row" style="min-height:72px;padding:10px"><div class="docs-viz-picker-target" style="font-size:12px;padding:6px 12px">Newsletter card<span class="docs-viz-picker-pin" style="width:18px;height:18px;font-size:9px">1</span></div></div></div></article><article class="live-mode-stage"><span class="live-mode-stage-num">02 &middot; Generate</span><h3 class="live-mode-stage-name">Explore three alternatives</h3><p class="live-mode-stage-desc">Compare different layouts, hierarchies, or levels of emphasis within your project’s identity. Tune a variation when adjustment controls are available.</p><div class="live-mode-stage-viz live-mode-stage-viz--rail"><div class="viz-rail"><div class="viz-rail-cell"><span>No.04</span><span class="viz-rail-mark"></span></div><div class="viz-rail-cell is-active"><span>Dispatch</span><span class="viz-rail-mark"></span></div><div class="viz-rail-cell"><span>Field</span><span class="viz-rail-mark"></span></div></div></div></article><article class="live-mode-stage"><span class="live-mode-stage-num">03 &middot; Accept</span><h3 class="live-mode-stage-name">Keep the result in source</h3><p class="live-mode-stage-desc">Accept the version you want. Impeccable integrates it into your project and removes temporary preview code. Discard the set to restore the original selection.</p><div class="live-mode-stage-viz"><span class="docs-viz-accept-pill">Variant 2 written to source</span></div></article></div></section><section class="live-mode-steer" aria-labelledby="live-mode-steer-title"><h2 id="live-mode-steer-title" class="live-mode-stages-title">A direction for the whole page</h2><p>Use Steer to type or speak a request without selecting an element first. “Make the delivery information easier to find” can guide changes across the page. The agent works on the request directly.</p></section><section class="live-mode-pathways" aria-label="Where to go next"><h2 class="live-mode-pathways-title">Get started</h2><div class="live-mode-pathways-grid"><a class="live-mode-pathway" href="/tutorials/iterate-live"><span class="live-mode-pathway-kind">Tutorial</span><h3 class="live-mode-pathway-title">Follow the tutorial</h3><p class="live-mode-pathway-desc">Start a session, pick an element, compare variations, and review the accepted result. Real screenshots show each stage.</p><span class="live-mode-pathway-cta">Open the tutorial &rarr;</span></a><a class="live-mode-pathway" href="/docs/live"><span class="live-mode-pathway-kind">Reference</span><h3 class="live-mode-pathway-title">Explore what Live Mode can do</h3><p class="live-mode-pathway-desc">Learn about steering, tuning, text edits, supported projects, and what happens when you accept a variation.</p><span class="live-mode-pathway-cta">Read the command guide &rarr;</span></a><a class="live-mode-pathway" href="/#downloads"><span class="live-mode-pathway-kind">Install</span><h3 class="live-mode-pathway-title">Install Impeccable</h3><p class="live-mode-pathway-desc">Set up Impeccable in your coding tool, then start Live Mode from the agent chat.</p><span class="live-mode-pathway-cta">See the install steps &rarr;</span></a></div></section><section class="live-mode-frameworks" aria-label="Supported frameworks"><span class="live-mode-frameworks-label">Works with your web project</span><ul class="live-mode-frameworks-list framework-list--matrix"><li><small>bundler</small><strong>Vite</strong></li><li><small>apps</small><strong>Next.js</strong></li><li><small>apps</small><strong>SvelteKit</strong></li><li><small>pages</small><strong>Astro</strong></li><li><small>apps</small><strong>Nuxt</strong></li><li><small>runtime</small><strong>Bun</strong></li><li><small>static</small><strong>Static HTML</strong></li></ul><p class="live-mode-web-note">Live Mode works on web pages. It does not attach to native iOS or Android interfaces.</p></section></div><script type="module" src="/_astro/index.astro_astro_type_script_index_0_lang.BeTb0S7R.js"></script><script>
+  document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('.skills-sidebar-toggle');
+    if (!toggle) return;
+    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!expanded));
+  });
+
+  (function initSplitCompare() {
+    const wrappers = document.querySelectorAll('.split-comparison');
+    if (wrappers.length === 0) return;
+    const hasHover = matchMedia('(hover: hover)').matches;
+    const DEFAULT_POSITION = 50;
+
+    for (const wrapper of wrappers) {
+      const container = wrapper.querySelector('.split-container');
+      const splitAfter = wrapper.querySelector('.split-after');
+      const splitDivider = wrapper.querySelector('.split-divider');
+      if (!container || !splitAfter || !splitDivider) continue;
+
+      const tanAngle = Math.tan(10 * Math.PI / 180);
+      let skewOffset = 8;
+      const recalcSkew = () => {
+        const r = container.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          skewOffset = 50 * r.height * tanAngle / r.width;
+        }
+      };
+      recalcSkew();
+      window.addEventListener('resize', recalcSkew, { passive: true });
+
+      let targetX = DEFAULT_POSITION;
+      let currentX = DEFAULT_POSITION;
+      let rafId = null;
+
+      const paint = (pct) => {
+        const x = Math.max(-skewOffset, Math.min(100 + skewOffset, pct));
+        splitAfter.style.clipPath =
+          `polygon(${x + skewOffset}% 0%, 100% 0%, 100% 100%, ${x - skewOffset}% 100%)`;
+        splitDivider.style.left = `${x}%`;
+      };
+
+      const step = () => {
+        currentX += (targetX - currentX) * 0.2;
+        if (Math.abs(targetX - currentX) < 0.1) {
+          currentX = targetX;
+          rafId = null;
+        } else {
+          rafId = requestAnimationFrame(step);
+        }
+        paint(currentX);
+      };
+
+      const setTarget = (pct) => {
+        targetX = pct;
+        if (rafId === null) rafId = requestAnimationFrame(step);
+      };
+
+      paint(DEFAULT_POSITION);
+
+      const pctFromClientX = (clientX) => {
+        const rect = container.getBoundingClientRect();
+        return ((clientX - rect.left) / rect.width) * 100;
+      };
+
+      let hovering = false;
+      let dragging = false;
+
+      wrapper.addEventListener('pointerenter', (e) => {
+        if (hasHover && e.pointerType === 'mouse') hovering = true;
+      });
+
+      wrapper.addEventListener('pointerdown', (e) => {
+        dragging = true;
+        wrapper.setPointerCapture(e.pointerId);
+        setTarget(pctFromClientX(e.clientX));
+      });
+
+      wrapper.addEventListener('pointermove', (e) => {
+        if (dragging || hovering) setTarget(pctFromClientX(e.clientX));
+      });
+
+      const endDrag = (e) => {
+        if (dragging) {
+          dragging = false;
+          try { wrapper.releasePointerCapture(e.pointerId); } catch {}
+        }
+      };
+
+      wrapper.addEventListener('pointerup', endDrag);
+      wrapper.addEventListener('pointercancel', endDrag);
+
+      wrapper.addEventListener('pointerleave', (e) => {
+        endDrag(e);
+        if (hovering) {
+          hovering = false;
+          setTarget(DEFAULT_POSITION);
+        }
+      });
+    }
+  })();
+</script></main><footer class="site-footer"><div class="footer-row"><a class="footer-logo" href="/">Impeccable</a><nav class="footer-links" aria-label="Footer"><a href="/gallery">Gallery</a><a href="/changelog">Changelog</a><a href="/faq">FAQ</a><a href="/privacy">Privacy</a><a href="https://app.vanta.com/renaissance-geek.ai/trust/jhldu1ow0u17opmmk3s7zk">Trust Center</a><a href="https://github.com/pbakaus/impeccable">GitHub</a></nav><div class="footer-credit"><span>Created by <a href="https://x.com/pbakaus" target="_blank" rel="noopener">Paul Bakaus</a></span><a href="https://x.com/pbakaus" class="footer-social-link" aria-label="Follow on X" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a><a href="https://linkedin.com/in/paulbakaus" class="footer-social-link" aria-label="Connect on LinkedIn" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></a></div></div></footer><script type="module" src="/_astro/Base.astro_astro_type_script_index_0_lang.BD-jcN2D.js"></script><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2375b0fdc85c43a68f4b0e89cc6ae43c"}'></script><!-- Cloudflare Pages Analytics --></body></html>
