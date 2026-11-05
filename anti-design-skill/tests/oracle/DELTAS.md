@@ -7371,3 +7371,41 @@ Modified by Anti-AI Design contributors. `live-wrap-text-picks-later-file`, `liv
 `live-insert-text-picks-later-file`: the engine now adds `"styleClose":"</style>"` to the scope-rule output.
 Checked by script: removing that one field from the new golden reproduces the old golden exactly. This field
 is already present in the other `live-wrap-*` goldens, so these five were stale before the fork.
+
+## Re-recorded 2026-11-05 (third pass): rename to anti-ai-design
+
+Modified by Anti-AI Design contributors. All goldens were first rewritten by `tools/rebrand/rebrand2.sh`
+(the brand strings in them follow the rename). The 27 cases below still differed after that, were reviewed
+one by one against the replay diff, and re-recorded from the rebuilt engine. They are listed with `*` on
+purpose: `run.mjs` reads `- ` lines as accepted deltas, and these are plain re-recordings, not exceptions.
+
+Rename reasons (each is a consequence of the longer name or the new placeholder URL):
+
+* `surface-brief-path-url`: the case's URL is now `https://github.com/Choxie77/anti-ai-design/docs/audit/?x=1#top`
+  (the placeholder domain became the GitHub URL), so the surface slug is
+  `github-com-choxie77-anti-ai-design-docs-audit`.
+* `embed-png-prompt-file`, `embed-jpeg`: the embedded metadata text names the product; the file is 3 bytes
+  (PNG) and 6 bytes (JPEG, two occurrences) longer. Only the `<binary N bytes>` size changed.
+* `seed-direction-local-reroll`, `seed-direction-local-reroll-bolder`, `seed-direction-local-reroll-safer`,
+  `seed-mode-rules-persuade`, `seed-mode-rules-experience`, `seed-mode-rules-operate`, `seed-mode-rules-read`,
+  `seed-mode-rules-missing-file`, `seed-mode-rules-missing-section`, `seed-direction-local-unscoped`,
+  `seed-direction-env-key`, `seed-surface-local-default-scope`, `seed-surface-local-grain-flow`,
+  `seed-surface-local-compositions`, `seed-surface-local-card-base`, `seed-degraded-surface`,
+  `seed-degraded-safer`, `seed-degraded-bolder`, `seed-presentation-build-path-code`,
+  `seed-presentation-build-path-local`: the salted `SEED REFERENCE: seed:<hash>` line is the only change
+  (checked by script: with the 16-hex hash masked, old and new lines are identical).
+* `live-complete-source-in-node-modules`: `__journalBytes` in the session snapshot went from 736 to 739
+  (the journal names the folder `.anti-ai-design`, 3 bytes longer).
+
+Not a rename reason, logged for honesty:
+
+* `detect-unknown-flag`, `detect-config-cross-project`: these two scan a fixture inside the repository, so
+  they read the repository's own `DESIGN.md`. The branding rewrite of `DESIGN.md` (commit `310e9bd6`)
+  added a type ramp, so the scan now also reports `design-system-font-size` (line 8) ahead of the two
+  `design-system-color` findings. They fail the same way on `main` before this rename (checked with `main`'s
+  own engine binary in a scratch checkout), so they were already stale; re-recorded here so the corpus is
+  green. A hermetic fixture workspace would stop these cases depending on the repository's `DESIGN.md`.
+
+Requested change, not a rename: `--fix` and `--write` are now in `detect --help` (task-51 extra), so
+
+* `detect-help` is re-recorded; the only change is the two new options and two new example lines.
