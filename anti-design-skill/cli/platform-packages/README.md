@@ -1,6 +1,6 @@
 # Platform packages
 
-Templates for the `@anti-design/cli-<os>-<arch>` packages the `anti-design` npm
+Templates for the `@anti-ai-design/cli-<os>-<arch>` packages the `anti-design` npm
 shim (`cli/bin/cli.js`) declares as `optionalDependencies`. npm installs only
 the one matching the host (`os` / `cpu` fields), and the shim resolves
 `<package>/bin/anti-design[.exe]` from it before falling back to the user cache
@@ -9,7 +9,7 @@ or a download.
 They are **published from the engine release**, not built here: `bun run
 release:platform-packages` (`scripts/publish-platform-packages.mjs`) copies each template, sets `version` to the engine version, drops the
 built binary at `bin/anti-design[.exe]` (executable), and publishes it under
-`@anti-design`. The version pinned in this repo's `package.json`
+`@anti-ai-design` (claim the scope on npm first; the script never creates it). The version pinned in this repo's `package.json`
 `optionalDependencies` must equal `ENGINE_VERSION`.
 
 Targets: `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`, `windows-x64`.

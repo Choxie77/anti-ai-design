@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * Publish the five @anti-design/cli-<os>-<arch> npm platform packages for the
- * pinned ENGINE_VERSION from the engine-v<ENGINE_VERSION> GitHub release.
+ * Publish the five @anti-ai-design/cli-<os>-<arch> npm platform packages for the
+ * pinned ENGINE_VERSION from the engine-v<ENGINE_VERSION> GitHub release of
+ * Choxie77/anti-ai-design. The scope must already be claimed on npm; this script
+ * never creates it and `--dry-run` never publishes.
  *
  * Step 3 of the engine cutover, as one command:
  *
@@ -13,12 +15,14 @@
  * (the sidecar is required here: nothing unverified is ever published),
  * stages a package from cli/platform-packages/<target>/package.json with the
  * version stamped, the binary at bin/anti-design[.exe] (executable) and the
- * repo LICENSE, then runs `npm publish --access public` from the staging dir.
+ * repo LICENSE, then runs `npm publish --access public` from the staging dir
+ * (`npm publish --dry-run` with --dry-run).
  * Targets already published at this version are skipped, so a re-run after a
  * partial failure picks up where it stopped.
  *
  * Preconditions checked up front: package.json optionalDependencies pin the
- * same version as ENGINE_VERSION, and `npm whoami` succeeds (log in first).
+ * same version as ENGINE_VERSION, and `npm whoami` succeeds (log in first;
+ * skipped with --dry-run).
  *
  * Environment:
  *   ANTI_DESIGN_DOWNLOAD_BASE  release channel root (default: this repo's GitHub Releases)
@@ -33,6 +37,8 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import {
   ENGINE_TARGETS,
+  NPM_SCOPE,
+  platformPackageName,
   assetUrl,
   binaryName,
   readEngineVersion,
@@ -42,7 +48,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const NPM_REGISTRY = (process.env.NPM_REGISTRY || 'https://registry.npmjs.org').replace(/\/$/, '');
 
 export function packageName(target) {
-  return `@anti-design/cli-${target}`;
+  return platformPackageName(target);
 }
 
 /**
@@ -121,7 +127,16 @@ export async function isPublished(target, version, registry = NPM_REGISTRY) {
 
 function checkPins(version) {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8'));
-  const pins = pkg.optionalDependencies || {};
+  const deps = pkg.optionalDependencies || {};
+  // package.json keeps naming the legacy scope until the rename pass flips it
+  // together with cli/bin/cli.js, so match the pin by `/cli-<target>` and warn
+  // about the scope instead of failing on it.
+  const pinName = (t) => Object.keys(deps).find((n) => n.endsWith(`/cli-${t}`));
+  const pins = Object.fromEntries(ENGINE_TARGETS.map((t) => [packageName(t), deps[pinName(t)]]));
+  const offScope = ENGINE_TARGETS.filter((t) => pinName(t) && pinName(t) !== packageName(t));
+  if (offScope.length) {
+    console.warn(`⚠ package.json optionalDependencies still use another npm scope than ${NPM_SCOPE} (${offScope.map(pinName).join(', ')}); the rename pass must move them with cli/bin/cli.js.`);
+  }
   const bad = ENGINE_TARGETS.filter((t) => pins[packageName(t)] !== version);
   if (bad.length) {
     const listed = bad.map((t) => `${packageName(t)}@${pins[packageName(t)] || 'missing'}`).join(', ');
@@ -175,7 +190,7 @@ export async function main(argv = process.argv.slice(2)) {
   if (!fs.existsSync(licensePath)) throw new Error(`LICENSE is missing at ${licensePath}; the platform packages ship it`);
   const license = fs.readFileSync(licensePath);
   const user = opts.dryRun ? '(dry run)' : npmWhoami();
-  console.log(`→ Publishing @anti-design/cli-* platform packages for engine ${version} as ${user}`);
+  console.log(`→ Publishing ${NPM_SCOPE}/cli-* platform packages for engine ${version} as ${user}`);
 
   const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-platform-packages-'));
   const results = [];
