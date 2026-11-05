@@ -8,5 +8,5 @@ Paste ONE file per new session. The dashboard (python3 tools/dashboard/serve.py 
    - A5-release.md
    - B-contract-safefix.md  (tasks 47 + 48; the long-running session finished 46 and is idle)
 3. DONE so far: branding, release and safefix are merged into main.
-4. NOW: R-rename.md alone (all other sessions idle).
+4. R-rename.md (running). IN PARALLEL: S-studio.md (web UI, only touches studio/).
 5. Then Z-integrator.md (it also reconciles local main with the GitHub history, see its notes).
