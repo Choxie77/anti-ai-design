@@ -1,5 +1,5 @@
 {
-  "$comment": "Wish list for Anti-AI Design written before we chose to fork. It is NOT the contract: the fork's real contract is anti-design-skill/docs/CLI-CONTRACT.md. Task-47 diffs the two.",
+  "$comment": "WISH LIST, NOT THE CONTRACT. Written before we chose to fork, and it does not describe the shipped CLI. The real contract is anti-design-skill/docs/CLI-CONTRACT.md; the verified comparison is docs/ours/contract-diff.md. Of the commands below only `detect` and `live` exist as binary verbs (and `live` means something else); audit, critique, polish, typeset, distill, generate, document and init are skill commands run by an agent, not CLI verbs. Flags `--write` (dry-run default) and the run log are the parts we want, implemented as `detect --fix [--write]`; see docs/ours/safe-fix.md.",
   "name": "anti-ai-design",
   "displayName": "Anti-AI Design",
   "version": "0.1.0",
