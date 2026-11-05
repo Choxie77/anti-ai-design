@@ -7,6 +7,6 @@ Paste ONE file per new session. The dashboard (python3 tools/dashboard/serve.py 
    - A4-branding.md
    - A5-release.md
    - B-contract-safefix.md  (tasks 47 + 48; the long-running session finished 46 and is idle)
-3. Tell the assistant here when the long-running session is idle -> it does the repo clean-up (remove .env/.pnpm from git, scrub history, add the Choxie77 remote, create `integration`).
-4. Then R-rename.md alone (nothing else running).
-5. Then Z-integrator.md.
+3. DONE so far: branding, release and safefix are merged into main.
+4. NOW: R-rename.md alone (all other sessions idle).
+5. Then Z-integrator.md (it also reconciles local main with the GitHub history, see its notes).
