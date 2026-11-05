@@ -1,0 +1,117 @@
+name: release
+# Product release, triggered by pushing a tag `v<X.Y.Z>` where X.Y.Z is the
+# skill version in anti-design-skill/.claude-plugin/plugin.json.
+#
+# It refuses unless the engine release for the pinned ENGINE_VERSION is already
+# published (release-engine.yml) and the committed engine-checksums.txt matches
+# it, builds universal.zip from the tagged tree, signs it with the Ed25519
+# bundle-signing key held in the ANTI_DESIGN_SIGNING_KEY secret, and publishes
+# universal.zip + universal.zip.sig.json together.
+#
+# The installer (crates/skills) looks for the bundle at the release tag
+# `skill-v<X.Y.Z>`, so the GitHub Release is created under that name, pointing
+# at the same commit as the `v` tag. Drop that indirection when the engine's
+# release URL is renamed (see docs/ours/status/release.md).
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+defaults:
+  run:
+    working-directory: anti-design-skill
+jobs:
+  verify-and-build:
+    name: verify and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: anti-design-skill/.bun-version
+      - name: Check the tag matches the skill version
+        run: |
+          set -e
+          version=$(node -p "require('./.claude-plugin/plugin.json').version")
+          [ "$GITHUB_REF_NAME" = "v$version" ] || { echo "tag $GITHUB_REF_NAME != v$version (.claude-plugin/plugin.json)"; exit 1; }
+          echo "SKILL_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Check the engine release is published and the manifest matches it
+        # --no-npm: publishing the npm platform packages is a separate, manual
+        # step; the bundle itself downloads the engine from GitHub Releases.
+        run: node scripts/check-engine-release.mjs --no-npm
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Core suite
+        run: node scripts/run-tests.mjs core
+      - name: Build universal.zip
+        run: bun run build:release
+      - name: Refuse generated output that drifts from the tagged tree
+        working-directory: .
+        run: |
+          status=$(git status --porcelain)
+          if [ -n "$status" ]; then echo "build produced uncommitted changes:"; echo "$status"; exit 1; fi
+      - name: Check the bundle exists
+        run: test -s dist/universal.zip && ls -l dist/universal.zip
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: universal-zip
+          path: anti-design-skill/dist/universal.zip
+          if-no-files-found: error
+  sign-and-publish:
+    name: sign and publish
+    needs: verify-and-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: universal-zip
+          path: anti-design-skill/dist
+      - name: Sign universal.zip
+        env:
+          # The PKCS#8 PEM from ~/aad-secrets/bundle-signing-private.pem,
+          # stored as a repository (or `release` environment) secret.
+          ANTI_DESIGN_SIGNING_KEY: ${{ secrets.ANTI_DESIGN_SIGNING_KEY }}
+        run: |
+          set -e
+          [ -n "$ANTI_DESIGN_SIGNING_KEY" ] || { echo "::error title=Signing key missing::Add the ANTI_DESIGN_SIGNING_KEY Actions secret (see docs/BUNDLE-SIGNING.md)."; exit 1; }
+          version="${GITHUB_REF_NAME#v}"
+          node scripts/sign-bundle.mjs "$version" dist/universal.zip
+      - name: Verify the signature against the committed public key
+        run: |
+          node --input-type=module -e "
+            import { readFileSync } from 'node:fs';
+            import { createHash, createPublicKey, verify } from 'node:crypto';
+            import { signaturePayload, readTrustedKeys } from './scripts/sign-bundle.mjs';
+            const zip = readFileSync('dist/universal.zip');
+            const env = JSON.parse(readFileSync('dist/universal.zip.sig.json', 'utf8'));
+            const hex = readTrustedKeys()[env.keyId];
+            if (!hex) throw new Error('signature names an untrusted key');
+            const spki = Buffer.concat([Buffer.from('302a300506032b6570032100', 'hex'), Buffer.from(hex, 'hex')]);
+            const ok = env.size === zip.length
+              && env.sha256 === createHash('sha256').update(zip).digest('hex')
+              && env.version === process.env.GITHUB_REF_NAME.slice(1)
+              && verify(null, signaturePayload(env), createPublicKey({ key: spki, format: 'der', type: 'spki' }), Buffer.from(env.signature, 'hex'));
+            if (!ok) throw new Error('signature verification failed');
+            console.log('signature ok, key', env.keyId);
+          "
+      - name: Publish the GitHub Release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "skill-v$version" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Anti-AI Design $version" --generate-notes \
+            anti-design-skill/dist/universal.zip anti-design-skill/dist/universal.zip.sig.json

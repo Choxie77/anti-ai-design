@@ -245,28 +245,55 @@ this feature, replacing the `detectText` call it makes into the npm
 
 ## Releases
 
-Remote skill ZIPs require a pinned-key signature before extraction. See
-[bundle signing](BUNDLE-SIGNING.md) for the 1Password setup and the required
-signature-first rollout order.
+The release channel is **GitHub Releases of `Choxie77/anti-ai-design`**. Every
+workflow named below lives in the repository's root `.github/workflows/`
+(GitHub does not run workflows from `anti-design-skill/.github/`). Remote skill
+ZIPs require a pinned-key signature before extraction; see
+[bundle signing](BUNDLE-SIGNING.md) for the key and the secret to store.
 
 Two release kinds touch the runtime, in this order:
 
-1. **Engine** (`engine-v<ENGINE_VERSION>`): `bun run release:engine` verifies
-   the version, the npm platform-package pins and a clean tree, then tags and
-   pushes; `.github/workflows/release-engine.yml` builds the five targets and
-   publishes the binaries with `.sha256` sidecars. The launcher, the npm shim
-   and `anti-design install` download from
-   `github.com/OWNER/anti-design/releases/download/engine-v<X>/` and verify
-   each binary against `skill/scripts/engine-checksums.txt`, never the
-   sidecar. After the release, `node scripts/check-engine-release.mjs --record`
-   rewrites that file; commit it with the `ENGINE_VERSION` bump.
-2. **npm platform packages**, then the **skill** and **CLI** releases, which
-   `scripts/check-engine-release.mjs` gates on the engine release.
+1. **Engine** (`engine-v<ENGINE_VERSION>`). The flow:
+   1. Bump `ENGINE_VERSION` and the five `optionalDependencies` pins in
+      `package.json` together. Use a version that has never been released
+      under this name: the digests currently in
+      `skill/scripts/engine-checksums.txt` belong to binaries built before the
+      fork, so the same version would verify against the wrong bytes.
+   2. Merge to `main` with the tests green, then `bun run release:engine`
+      (`scripts/release.mjs engine`). It verifies the version, the pins and a
+      clean pushed tree, then tags `engine-v<X>` and pushes the tag. Use
+      `-- --dry-run` to see the plan without tagging.
+   3. `.github/workflows/release-engine.yml` builds darwin arm64/x64, linux
+      x64/arm64 (musl) and windows x64, smokes the native ones with
+      `engine-probe`, and publishes the release `engine-v<X>` with each
+      `anti-design-<os>-<arch>[.exe]`, its `.sha256`, and
+      `engine-checksums.txt` generated from those exact files
+      (`check-engine-release.mjs --from-dir`). A manual run builds and smokes
+      without publishing. The Windows binary is not Authenticode-signed.
+   4. Copy `engine-checksums.txt` from the release into
+      `skill/scripts/engine-checksums.txt` (or run `bun run release:checksums`,
+      which downloads the five binaries and hashes them) and commit it. The launcher, the npm shim and
+      `anti-design install` download from
+      `github.com/Choxie77/anti-ai-design/releases/download/engine-v<X>/` and
+      verify each binary against that file, never the `.sha256` sidecar.
+      `scripts/fetch-engine.mjs` defines the repository, download base and npm
+      scope in one place (`RELEASE_REPO`, `DEFAULT_DOWNLOAD_BASE`,
+      `NPM_SCOPE`).
+2. **npm platform packages** (`@anti-ai-design/cli-<os>-<arch>`):
+   `bun run release:platform-packages` (never run unattended; `-- --dry-run`
+   stages and `npm publish --dry-run`s without publishing). Then the **skill**
+   release: push the tag `v<skill version>`; `.github/workflows/release.yml`
+   verifies the engine release and manifest
+   (`check-engine-release.mjs --no-npm`), builds, signs and publishes
+   `universal.zip` + `universal.zip.sig.json` as the release `skill-v<version>`.
+   `scripts/check-engine-release.mjs` (without `--no-npm`) is the strict gate
+   that `release.mjs skill|cli` applies.
 
 The extension ships its own vendored WASM core and never execs the engine
 binary, so `bun run release:ext` is exempt from that gate. It does need
 `bun run build:extension` (and therefore a Rust toolchain and `wasm-pack`)
 before the zip is attached.
 
-CI runs the workspace build and tests (`rust`, `rust-windows`) and replays the
-oracle against a release build from the checkout under test.
+`.github/workflows/test.yml` runs the core suite, `cargo build` / `cargo test`
+on Linux and Windows, and the oracle replay against a release build from the
+checkout under test, on every pull request and push to `main`.
