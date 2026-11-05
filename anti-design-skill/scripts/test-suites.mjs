@@ -115,7 +115,7 @@ export const SUITES = {
       {
         runner: 'node',
         timeoutMs: 900000,
-        files: ['tests/oracle.test.mjs', 'tests/aad-rules.test.mjs'],
+        files: ['tests/oracle.test.mjs', 'tests/aad-rules.test.mjs', 'tests/aad-safe-fix.test.mjs'],
       },
     ],
   },
