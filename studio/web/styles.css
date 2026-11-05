@@ -64,15 +64,17 @@ body {
   width: 100%;
   max-width: 78rem;
   margin-inline: auto;
-  padding-inline: var(--gutter);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
 
 main {
   flex: 1;
-  padding-block: 2.5rem 4rem;
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
 }
 
-main:focus {
+main:focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -125,7 +127,8 @@ a {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem 2rem;
-  padding-block: 1.25rem 0.75rem;
+  padding-top: 1.25rem;
+  padding-bottom: 0.75rem;
 }
 
 .brand {
@@ -152,7 +155,8 @@ a {
 
 .nav-link {
   display: inline-block;
-  padding-block: 0.4rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
   text-decoration: none;
   font-size: 1.0625rem;
   border-bottom: 2px solid transparent;
@@ -176,7 +180,8 @@ a {
 /* Footer */
 .colophon {
   border-top: 1px solid var(--rule);
-  padding-block: 1rem 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
 }
 
 .colophon .meta {
@@ -192,6 +197,7 @@ h3 {
   line-height: 1.2;
   margin: 0;
   letter-spacing: -0.005em;
+  text-wrap: balance;
 }
 
 h1 {
@@ -199,20 +205,21 @@ h1 {
   margin-bottom: 0.75rem;
 }
 
-h1:focus {
+h1:focus:not(:focus-visible) {
   outline: none;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 1.625rem;
 }
 
 h3 {
-  font-size: 1.1875rem;
+  font-size: 1.375rem;
 }
 
 p {
   margin: 0 0 0.9rem;
+  text-wrap: pretty;
 }
 
 .lede {
@@ -270,6 +277,12 @@ code {
   font: inherit;
   font-size: 1rem;
   min-height: 2.75rem;
+}
+
+/* Browsers dim placeholders below AA; keep them at the soft ink colour. */
+.field::placeholder {
+  color: var(--ink-soft);
+  opacity: 1;
 }
 
 textarea.field {
@@ -425,7 +438,8 @@ legend {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.5rem 2.5rem;
-  padding-block: 1.75rem;
+  padding-top: 1.75rem;
+  padding-bottom: 1.75rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -502,7 +516,7 @@ legend {
 }
 
 .notice-title {
-  font-size: 1.3125rem;
+  font-size: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
@@ -535,7 +549,8 @@ pre.plain {
   gap: 1.5rem 3rem;
   border-top: 3px double var(--ink);
   border-bottom: 1px solid var(--ink);
-  padding-block: 1.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
   margin-bottom: 2rem;
 }
 
@@ -560,6 +575,7 @@ pre.plain {
 }
 
 .tally-title {
+  font-weight: 700;
   font-size: 0.875rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -570,7 +586,8 @@ pre.plain {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.15rem 1rem;
-  padding-block: 0.45rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -588,7 +605,8 @@ pre.plain {
 }
 
 .tally-row2 {
-  padding-block: 0.4rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -635,12 +653,12 @@ pre.plain {
 }
 
 .group-title {
-  font-size: 1.375rem;
+  font-size: 1.625rem;
   overflow-wrap: anywhere;
 }
 
 .group-title.mono {
-  font-size: 1.125rem;
+  font-size: 1.3125rem;
 }
 
 .entries {
@@ -650,7 +668,8 @@ pre.plain {
 }
 
 .finding {
-  padding-block: 1.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--rule);
   max-width: 56rem;
 }
@@ -740,7 +759,9 @@ a.tag:hover {
 
 /* Code around a finding */
 .code {
+  position: relative; /* contains the visually hidden text inside the scroll box */
   margin-top: 0.75rem;
+  padding: 0.5rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--paper-lit);
@@ -753,6 +774,7 @@ a.tag:hover {
 .cl {
   display: flex;
   min-width: max-content;
+  padding: 0.1875rem 0;
 }
 
 .ln {
@@ -784,7 +806,8 @@ a.tag:hover {
 .guarantee {
   border-top: 3px double var(--ink);
   border-bottom: 1px solid var(--ink);
-  padding-block: 0.9rem;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
   font-size: 1.1875rem;
   max-width: 46rem;
 }
@@ -794,6 +817,7 @@ a.tag:hover {
 }
 
 .diff-wrap {
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
@@ -821,7 +845,8 @@ a.tag:hover {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-align: left;
-  padding-block: 0.35rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -845,7 +870,8 @@ a.tag:hover {
   background: var(--paper-deep);
   color: var(--ink-soft);
   font-size: 0.8125rem;
-  padding-block: 0.15rem;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
 }
 
 .d-del,
@@ -866,7 +892,7 @@ tr.d-del .ds {
 }
 
 .d-empty {
-  background: repeating-linear-gradient(135deg, transparent 0 6px, var(--rule) 6px 7px);
+  background: var(--paper-deep);
 }
 
 .diff-split .dt {
@@ -877,13 +903,14 @@ tr.d-del .ds {
 .confirm {
   border-top: 3px double var(--red);
   border-bottom: 1px solid var(--red);
-  padding-block: 1.25rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
   max-width: 46rem;
 }
 
 .section-title {
   margin-bottom: 0.5rem;
-  font-size: 1.375rem;
+  font-size: 1.5rem;
 }
 
 .verdict {
@@ -935,6 +962,35 @@ tr.d-del .ds {
   .ledger {
     grid-template-columns: 1.1fr 1fr 1fr;
     align-items: start;
+  }
+}
+
+@media (max-width: 40rem) {
+  .log thead {
+    position: absolute;
+    clip: rect(0 0 0 0);
+  }
+
+  .log tr {
+    display: block;
+    padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .log td {
+    display: block;
+    border: 0;
+    padding: 0.1rem 0;
+  }
+
+  .log td::before {
+    content: attr(data-label) ": ";
+    font-family: var(--serif);
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
   }
 }
 

@@ -28,7 +28,7 @@ function countRows(title, counts, total, order) {
   return h(
     'section',
     { class: 'tally', 'aria-label': title },
-    h('h2', { class: 'tally-title', text: title }),
+    h('p', { class: 'tally-title', 'aria-hidden': 'true', text: title }),
     h(
       'ul',
       { class: 'rule-list' },

@@ -93,7 +93,8 @@ export function renderScan(main, ctx) {
       data = await engine.browse(form.path);
     } catch (err) {
       if (!alive || req !== browseReq) return;
-      clear(browseList).append(h('p', { class: 'meta', text: err.status === 404 ? 'No such folder under the root.' : err.message }));
+      const msg = err.code === 'not_a_folder' ? 'This is a single file. It will be scanned on its own.' : err.status === 404 ? 'No such file or folder under the root.' : err.message;
+      clear(browseList).append(h('p', { class: 'meta', text: msg }));
       return;
     }
     if (!alive || req !== browseReq) return;
