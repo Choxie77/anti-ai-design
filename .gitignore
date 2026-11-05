@@ -1,3 +1,10 @@
 rea/
 .DS_Store
 node_modules/
+
+# secrets and caches (never publish)
+.env
+.pnpm/
+.claude/settings.local.json
+target/
+rea/
