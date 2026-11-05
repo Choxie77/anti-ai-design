@@ -61,6 +61,9 @@ fn run(args: &[String], io: &mut Io) -> i32 {
             io.out(&format!("anti-design-engine {VERSION}\n"));
             0
         }
+        // Modified by Anti-Design contributors, 2026-11-05: `--fix` / `--write` route to the
+        // safe-fix tier; every other `detect` call is untouched.
+        "detect" if anti_design::safe_fix::wants_fix(rest) => anti_design::safe_fix::run(rest, io, &engines()),
         "detect" => anti_design_detect::run_detect(rest, io, &engines()),
         "ignores" | "ignore" => anti_design_detect::run_ignores(rest, io),
         "skills" => anti_design_skills::run(rest, io),
@@ -112,6 +115,9 @@ fn run(args: &[String], io: &mut Io) -> i32 {
         // `npx anti-design src/` shorthand: a path-shaped, flag, URL, or existing
         // first arg is a detect target (cli.js looksLikeDetectTarget).
         v if anti_design_detect::looks_like_detect_target(v, &io.cwd.to_string_lossy()) => {
+            if anti_design::safe_fix::wants_fix(args) {
+                return anti_design::safe_fix::run(args, io, &engines());
+            }
             anti_design_detect::run_detect(args, io, &engines())
         }
         "init" => {
