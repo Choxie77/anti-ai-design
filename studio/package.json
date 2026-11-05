@@ -1,0 +1,13 @@
+{
+  "name": "@anti-ai-design/studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Anti-AI Design Studio: a local web UI for the detector.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/"
+  }
+}
