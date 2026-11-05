@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 230" role="img" aria-labelledby="t d">
+  <title id="t">How Anti-AI Design checks agent output</title>
+  <desc id="d">Three boxes joined by arrows. The agent edits a UI file. The detector scans it with fixed rules. Findings go back to the agent, which fixes them before it reports the work as done.</desc>
+  <rect width="760" height="230" fill="#f4f1ea"/>
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="13" fill="#1c1b19">
+    <g fill="none" stroke="#1c1b19" stroke-width="2">
+      <rect x="24" y="62" width="200" height="104"/>
+      <rect x="280" y="62" width="200" height="104"/>
+      <rect x="536" y="62" width="200" height="104"/>
+    </g>
+    <g font-family="Georgia, 'Times New Roman', serif" font-size="20" font-weight="700">
+      <text x="44" y="96">1. Agent edits</text>
+      <text x="300" y="96">2. Detector scans</text>
+      <text x="556" y="96">3. Agent fixes</text>
+    </g>
+    <text x="44" y="124">a UI file: HTML,</text>
+    <text x="44" y="142">CSS, JSX, Vue...</text>
+    <text x="300" y="124">fixed rules, no LLM,</text>
+    <text x="300" y="142">no API key</text>
+    <text x="556" y="124">findings come back</text>
+    <text x="556" y="142">before "done"</text>
+    <g stroke="#b3361c" stroke-width="2.5" fill="none">
+      <path d="M228 114 H276"/><path d="M268 107 L276 114 L268 121"/>
+      <path d="M484 114 H532"/><path d="M524 107 L532 114 L524 121"/>
+    </g>
+    <text x="24" y="206" fill="#5a574f">Exit code 2 means findings, 1 means a target could not be scanned, 0 means clean.</text>
+  </g>
+</svg>
