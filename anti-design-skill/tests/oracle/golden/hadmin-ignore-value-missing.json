@@ -1,6 +1,6 @@
 {
   "stdout": "",
-  "stderr": "Error: Pass a rule id and value, e.g. /anti-design hooks ignore-value overused-font Inter\n",
+  "stderr": "Error: Pass a rule id and value, e.g. /anti-ai-design hooks ignore-value overused-font Inter\n",
   "exit": 1,
   "signal": null,
   "files": {}

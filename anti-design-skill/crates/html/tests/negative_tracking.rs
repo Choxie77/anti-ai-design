@@ -1,11 +1,11 @@
 //! Integration tests for `extreme-negative-tracking` over the repo fixture:
 //! the size-scaled threshold and the CJK exemption.
 
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::{Path, PathBuf};
 
 fn repo_root() -> PathBuf {
-    std::env::var("ANTI_DESIGN_PUBLIC_REPO")
+    std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO")
         .map(PathBuf::from)
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."))
 }

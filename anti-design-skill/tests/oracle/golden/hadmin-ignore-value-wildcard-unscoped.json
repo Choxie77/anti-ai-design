@@ -1,6 +1,6 @@
 {
   "stdout": "",
-  "stderr": "Error: Wildcard value ignores must be scoped with --file <glob>, e.g. /anti-design hooks ignore-value design-system-font-size \"*\" --file \"src/widget.js\". To suppress the rule project-wide use /anti-design hooks ignore-rule design-system-font-size.\n",
+  "stderr": "Error: Wildcard value ignores must be scoped with --file <glob>, e.g. /anti-ai-design hooks ignore-value design-system-font-size \"*\" --file \"src/widget.js\". To suppress the rule project-wide use /anti-ai-design hooks ignore-rule design-system-font-size.\n",
   "exit": 1,
   "signal": null,
   "files": {}

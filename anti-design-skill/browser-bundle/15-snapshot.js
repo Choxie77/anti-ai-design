@@ -7,7 +7,7 @@
 // consumer and the field contract). Nothing in here decides anything about
 // a design: no thresholds, no rule names, no snippet strings.
 //
-// Exposed as `__antiDesignSnapshot`:
+// Exposed as `__antiAiDesignSnapshot`:
 //   capture(options)        -> { json, elements, stats } | { error }
 //   answer(needs, elements) -> facts for the core (`hitTests` -> `hits`)
 //   idOf(el, elements)      -> the element's snapshot id (0 when absent)
@@ -281,8 +281,8 @@ function __snapStyleRuleAppliesToLiveMatches(rule, matches) {
   const style = rule?.style;
   if (!style || !matches?.length || typeof getComputedStyle !== 'function') return false;
   const sequence = ++__snapContainerProbeSequence;
-  const property = `--anti-design-container-probe-${sequence}-${Math.random().toString(36).slice(2)}`;
-  const value = `anti-design-container-active-${sequence}`;
+  const property = `--anti-ai-design-container-probe-${sequence}-${Math.random().toString(36).slice(2)}`;
+  const value = `anti-ai-design-container-active-${sequence}`;
   const previousValue = style.getPropertyValue(property);
   const previousPriority = style.getPropertyPriority(property);
   try { style.setProperty(property, value, 'important'); }
@@ -746,7 +746,7 @@ function __createDrawableIO() {
   };
 }
 
-const __antiDesignSnapshot = {
+const __antiAiDesignSnapshot = {
   STYLE_PROPS: __SNAP_STYLE_PROPS,
   PSEUDO_PROPS: __SNAP_PSEUDO_PROPS,
   STATE_PSEUDOS: __SNAP_STATE_PSEUDOS,
@@ -754,7 +754,7 @@ const __antiDesignSnapshot = {
   // Serialize the page. `options.maxElements` / `options.maxBytes` are the
   // guards (defaults 30k elements / 48 MB); `options.exclude(el)` skips a
   // subtree (the extension passes its own overlay nodes, exactly the nodes
-  // the rules skip through their `.anti-design-*` selectors anyway).
+  // the rules skip through their `.anti-ai-design-*` selectors anyway).
   capture(options = {}) {
     const t0 = performance.now();
     const maxElements = options.maxElements || __SNAP_DEFAULT_MAX_ELEMENTS;
@@ -931,7 +931,7 @@ const __antiDesignSnapshot = {
 
     // 3. Document-level facts.
     const docClone = root.cloneNode(true);
-    for (const node of docClone.querySelectorAll('[id^="anti-design-live-"]')) node.remove();
+    for (const node of docClone.querySelectorAll('[id^="anti-ai-design-live-"]')) node.remove();
     const body = document.body;
     let bodyInnerText = null;
     if (body) {

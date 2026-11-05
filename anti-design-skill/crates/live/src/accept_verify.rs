@@ -20,27 +20,27 @@ static VAR_P_RE: Lazy<Regex> =
 fn forbidden() -> Vec<(Marker, &'static str)> {
     vec![
         (
-            Marker::Text("anti-design-variants-start"),
+            Marker::Text("anti-ai-design-variants-start"),
             "variant wrapper comment left in source",
         ),
         (
-            Marker::Text("anti-design-variants-end"),
+            Marker::Text("anti-ai-design-variants-end"),
             "variant wrapper comment left in source",
         ),
         (
-            Marker::Text("anti-design-carbonize-start"),
+            Marker::Text("anti-ai-design-carbonize-start"),
             "carbonize block not rewritten into permanent form",
         ),
         (
-            Marker::Text("anti-design-carbonize-end"),
+            Marker::Text("anti-ai-design-carbonize-end"),
             "carbonize block not rewritten into permanent form",
         ),
         (
-            Marker::Text("anti-design-param-values"),
+            Marker::Text("anti-ai-design-param-values"),
             "param-values comment not baked and removed",
         ),
         (
-            Marker::Text("data-anti-design-"),
+            Marker::Text("data-anti-ai-design-"),
             "live-mode plumbing attribute left on markup",
         ),
         (
@@ -52,7 +52,7 @@ fn forbidden() -> Vec<(Marker, &'static str)> {
             "preview parameter variable not baked to a literal",
         ),
         (
-            Marker::Text("--anti-design-variant-ready"),
+            Marker::Text("--anti-ai-design-variant-ready"),
             "preview readiness sentinel left in CSS",
         ),
     ]
@@ -69,7 +69,7 @@ pub fn verify_accepted_source(text: &str) -> (bool, Vec<Value>) {
                 Marker::Re(re, label) => (re.is_match(line), *label),
             };
             if hit {
-                let trimmed = anti_design_context::util::js_trim(line);
+                let trimmed = anti_ai_design_context::util::js_trim(line);
                 let excerpt: String = trimmed.chars().take(120).collect();
                 findings.push(
                     json!({ "marker": label, "line": i + 1, "excerpt": excerpt, "why": why }),

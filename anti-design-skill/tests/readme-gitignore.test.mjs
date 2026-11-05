@@ -20,17 +20,17 @@ describe('README gitignore block', () => {
     const match = readme.match(/```gitignore\n([\s\S]*?)```/);
     assert.ok(match, 'README.md should contain a fenced gitignore block');
     const block = match[1];
-    assert.match(block, /# anti-design-ignore-start/);
+    assert.match(block, /# anti-ai-design-ignore-start/);
 
-    tmp = mkdtempSync(join(tmpdir(), 'anti-design-readme-gitignore-'));
+    tmp = mkdtempSync(join(tmpdir(), 'anti-ai-design-readme-gitignore-'));
     writeFileSync(join(tmp, '.gitignore'), block);
     execFileSync('git', ['init'], { cwd: tmp });
 
     for (const rel of [
-      '.anti-design/review/desktop.png',
-      '.anti-design/questions/fb63f8a6.log',
-      'apps/web/.anti-design/review/desktop.png',
-      'apps/web/.anti-design/questions/fb63f8a6.log',
+      '.anti-ai-design/review/desktop.png',
+      '.anti-ai-design/questions/fb63f8a6.log',
+      'apps/web/.anti-ai-design/review/desktop.png',
+      'apps/web/.anti-ai-design/questions/fb63f8a6.log',
     ]) {
       const ignored = execFileSync('git', ['check-ignore', rel], {
         cwd: tmp,
@@ -40,10 +40,10 @@ describe('README gitignore block', () => {
     }
 
     for (const rel of [
-      '.anti-design/config.json',
-      '.anti-design/critique/report.md',
-      'apps/web/.anti-design/config.json',
-      'apps/web/.anti-design/critique/report.md',
+      '.anti-ai-design/config.json',
+      '.anti-ai-design/critique/report.md',
+      'apps/web/.anti-ai-design/config.json',
+      'apps/web/.anti-ai-design/critique/report.md',
     ]) {
       const result = spawnSync('git', ['check-ignore', rel], { cwd: tmp });
       assert.notEqual(result.status, 0, `${rel} should not be ignored`);

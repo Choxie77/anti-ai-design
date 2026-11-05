@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
  * Fetch the pinned engine binary (root ENGINE_VERSION) for one or every
- * platform into skill/scripts/bin/<os>-<arch>/anti-design[.exe], the sibling
- * layout the launcher (skill/scripts/anti-design) looks in first.
+ * platform into skill/scripts/bin/<os>-<arch>/anti-ai-design[.exe], the sibling
+ * layout the launcher (skill/scripts/anti-ai-design) looks in first.
  *
  *   node scripts/fetch-engine.mjs                # current platform
  *   node scripts/fetch-engine.mjs --all          # every release target
  *   node scripts/fetch-engine.mjs --target linux-x64 [--target ...]
- *   node scripts/fetch-engine.mjs --dest <dir>   # <dir>/<os>-<arch>/anti-design[.exe]
+ *   node scripts/fetch-engine.mjs --dest <dir>   # <dir>/<os>-<arch>/anti-ai-design[.exe]
  *   node scripts/fetch-engine.mjs --lenient      # a target that cannot be fetched warns instead of failing
  *
  * Environment (same names the launcher honors):
- *   ANTI_DESIGN_DOWNLOAD_BASE  release channel root (default: GitHub Releases of Choxie77/anti-ai-design)
- *   ANTI_DESIGN_BIN            copy this local binary for the current platform instead of downloading
+ *   ANTI_AI_DESIGN_DOWNLOAD_BASE  release channel root (default: GitHub Releases of Choxie77/anti-ai-design)
+ *   ANTI_AI_DESIGN_BIN            copy this local binary for the current platform instead of downloading
  *
- * The URL scheme is the launcher's: <base>/engine-v<version>/anti-design-<os>-<arch>[.exe].
+ * The URL scheme is the launcher's: <base>/engine-v<version>/anti-ai-design-<os>-<arch>[.exe].
  * Every download is verified against the line for its version and asset in
  * skill/scripts/engine-checksums.txt; no line means no download.
  */
@@ -26,20 +26,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-// The one place the release scripts learn where Anti-AI Design is published.
-// The code still ships under its working name `anti-design` (asset names,
-// launcher, npm shim), so the rename pass can find every spelling here.
+// The one place the release scripts learn where Anti-AI Design is published
+// (repository, download base, npm scope of the platform packages).
 export const RELEASE_REPO = 'Choxie77/anti-ai-design';
 export const REPO_URL = `https://github.com/${RELEASE_REPO}`;
 export const DEFAULT_DOWNLOAD_BASE = `${REPO_URL}/releases/download`;
 /** npm scope of the five @<scope>/cli-<os>-<arch> platform packages. */
 export const NPM_SCOPE = '@anti-ai-design';
-/**
- * The scope the engine's npm shim (cli/bin/cli.js) and package.json still use
- * until the rename pass flips them with tests/cli-shim.test.mjs. Existence
- * probes accept it as a stand-in; delete this and its uses with that change.
- */
-export const LEGACY_NPM_SCOPE = '@anti-design';
 export const platformPackageName = (target, scope = NPM_SCOPE) => `${scope}/cli-${target}`;
 export const ENGINE_TARGETS = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'windows-x64'];
 
@@ -54,14 +47,14 @@ export function currentTarget() {
 }
 
 export function binaryName(target) {
-  return target.startsWith('windows-') ? 'anti-design.exe' : 'anti-design';
+  return target.startsWith('windows-') ? 'anti-ai-design.exe' : 'anti-ai-design';
 }
 
 export function assetName(target) {
-  return `anti-design-${target}${target.startsWith('windows-') ? '.exe' : ''}`;
+  return `anti-ai-design-${target}${target.startsWith('windows-') ? '.exe' : ''}`;
 }
 
-export function assetUrl(version, target, base = process.env.ANTI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE) {
+export function assetUrl(version, target, base = process.env.ANTI_AI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE) {
   return `${base.replace(/\/$/, '')}/engine-v${version}/${assetName(target)}`;
 }
 
@@ -116,9 +109,9 @@ function install(buffer, target, dest) {
  * unavailable or its checksum does not match.
  */
 export async function fetchEngine(target, { version = readEngineVersion(), dest, base, root } = {}) {
-  const local = process.env.ANTI_DESIGN_BIN;
+  const local = process.env.ANTI_AI_DESIGN_BIN;
   if (local && target === currentTarget()) {
-    if (!fs.existsSync(local)) throw new Error(`ANTI_DESIGN_BIN points at a missing file: ${local}`);
+    if (!fs.existsSync(local)) throw new Error(`ANTI_AI_DESIGN_BIN points at a missing file: ${local}`);
     return install(fs.readFileSync(local), target, dest);
   }
   const checksum = expectedChecksum(version, target, root);

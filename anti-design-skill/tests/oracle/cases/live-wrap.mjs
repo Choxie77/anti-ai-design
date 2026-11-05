@@ -114,10 +114,10 @@ export default [
   W('live-wrap-astro-deferred', 'live-astro', ['--id', 'ab12cd34', '--element-id', 'features', '--defer-source-write'], { snap: ['src/**'] }),
   W('live-wrap-vue', 'live-nuxt', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1'], { snap: ['pages/**'] }),
   W('live-wrap-tanstack-tsx', 'live-tanstack', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1'], { snap: ['src/**'] }),
-  W('live-wrap-monorepo-child-from-root', 'live-monorepo', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1', '--target', 'website'], { snap: ['website/src/**', 'website/.anti-design/**'] }),
+  W('live-wrap-monorepo-child-from-root', 'live-monorepo', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1', '--target', 'website'], { snap: ['website/src/**', 'website/.anti-ai-design/**'] }),
   // --- Svelte: no compiler -> source-preview fallback; with compiler -> component preview ---
   W('live-wrap-svelte-no-compiler', 'live-sveltekit', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1'], { snap: ['src/**'] }),
-  W('live-wrap-svelte-env-disabled', 'live-sveltekit', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1'], { snap: ['src/**'], env: { ANTI_DESIGN_LIVE_SVELTE_COMPONENT: '0' }, setup: linkSvelte }),
+  W('live-wrap-svelte-env-disabled', 'live-sveltekit', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1'], { snap: ['src/**'], env: { ANTI_AI_DESIGN_LIVE_SVELTE_COMPONENT: '0' }, setup: linkSvelte }),
   W('live-wrap-svelte-component', 'live-sveltekit', ['--id', 'ab12cd34', '--classes', 'hero-title', '--tag', 'h1'], { snap: ['src/**'], setup: linkSvelte }),
   W('live-wrap-svelte-component-each', 'live-sveltekit', ['--id', 'ab12cd34', '--classes', 'expense-list', '--tag', 'ul'], { snap: ['src/**'], setup: linkSvelte }),
   W('live-wrap-svelte-component-refused-script', 'live-sveltekit', ['--id', 'ab12cd34', '--classes', 'page', '--tag', 'main'], {
@@ -164,5 +164,5 @@ export default [
   I('live-insert-astro-after', 'live-astro', ['--id', 'ab12cd34', '--position', 'after', '--element-id', 'features'], { snap: ['src/**'] }),
   I('live-insert-vue-after', 'live-nuxt', ['--id', 'ab12cd34', '--position', 'after', '--classes', 'hero-hook', '--tag', 'p'], { snap: ['pages/**'] }),
   I('live-insert-svelte-component', 'live-sveltekit', ['--id', 'ab12cd34', '--position', 'after', '--element-id', 'features'], { snap: ['src/**'] }),
-  I('live-insert-svelte-env-disabled', 'live-sveltekit', ['--id', 'ab12cd34', '--position', 'after', '--element-id', 'features'], { snap: ['src/**'], env: { ANTI_DESIGN_LIVE_SVELTE_COMPONENT: 'false' } }),
+  I('live-insert-svelte-env-disabled', 'live-sveltekit', ['--id', 'ab12cd34', '--position', 'after', '--element-id', 'features'], { snap: ['src/**'], env: { ANTI_AI_DESIGN_LIVE_SVELTE_COMPONENT: 'false' } }),
 ];

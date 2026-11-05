@@ -2,8 +2,8 @@
 /**
  * Release-order guard (triage decision D4).
  *
- * The launcher (skill/scripts/anti-design), the npm shim (cli/bin/cli.js), and
- * `anti-design install` all dead-end unless the engine release for the pinned
+ * The launcher (skill/scripts/anti-ai-design), the npm shim (cli/bin/cli.js), and
+ * `anti-ai-design install` all dead-end unless the engine release for the pinned
  * ENGINE_VERSION exists FIRST: the five platform binaries in the engine-v<version> GitHub Release
  * of Choxie77/anti-ai-design AND the five @anti-ai-design/cli-<os>-<arch> npm platform packages.
  * Nothing else mechanically stops a maintainer from tagging the skill release (or
@@ -11,7 +11,7 @@
  * are published, which breaks every install path.
  *
  * This script verifies, for the pinned engine version, that:
- *   1. each of the five release binaries anti-design-<os>-<arch>[.exe] is fetchable
+ *   1. each of the five release binaries anti-ai-design-<os>-<arch>[.exe] is fetchable
  *   2. each binary's .sha256 sidecar is fetchable
  *   3. skill/scripts/engine-checksums.txt records the digest each sidecar publishes
  *   4. each npm platform package @anti-ai-design/cli-<os>-<arch>@<version> is published
@@ -33,7 +33,7 @@
  *   node scripts/check-engine-release.mjs --from-dir <dir>   # write engine-checksums.txt from local release assets (no network, no check)
  *
  * Environment:
- *   ANTI_DESIGN_DOWNLOAD_BASE  release root (default: GitHub Releases of Choxie77/anti-ai-design)
+ *   ANTI_AI_DESIGN_DOWNLOAD_BASE  release root (default: GitHub Releases of Choxie77/anti-ai-design)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -42,7 +42,6 @@ import {
   ENGINE_TARGETS,
   DEFAULT_DOWNLOAD_BASE,
   NPM_SCOPE,
-  LEGACY_NPM_SCOPE,
   platformPackageName,
   readEngineVersion,
   assetName,
@@ -82,18 +81,14 @@ function npmPackageUrl(target, version, registry, scope = NPM_SCOPE) {
   return `${registry}/${platformPackageName(target, scope).replace('/', '%2f')}/${version}`;
 }
 
-// The package counts as published under our scope, or (until the rename pass
-// moves the npm shim over) under the scope the shim still names.
+// The package counts as published when the registry serves it under our scope.
 async function npmVersionExists(target, version, registry) {
-  for (const scope of [NPM_SCOPE, LEGACY_NPM_SCOPE]) {
-    try {
-      const res = await fetch(npmPackageUrl(target, version, registry, scope), { redirect: 'follow' });
-      if (res.ok) return true;
-    } catch {
-      // try the next scope
-    }
+  try {
+    const res = await fetch(npmPackageUrl(target, version, registry), { redirect: 'follow' });
+    return res.ok;
+  } catch {
+    return false;
   }
-  return false;
 }
 
 /**
@@ -102,7 +97,7 @@ async function npmVersionExists(target, version, registry) {
  */
 export async function checkEngineRelease({
   version = readEngineVersion(),
-  base = process.env.ANTI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE,
+  base = process.env.ANTI_AI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE,
   root,
   registry = NPM_REGISTRY,
   npm = true,
@@ -122,8 +117,8 @@ export async function checkEngineRelease({
       ]);
       const recorded = expectedChecksum(version, target, root);
 
-      if (!binOk) missing.push({ kind: 'binary', target, what: `anti-design-${target} binary`, url: binUrl });
-      if (!published) missing.push({ kind: 'checksum', target, what: `anti-design-${target} .sha256`, url: shaUrl });
+      if (!binOk) missing.push({ kind: 'binary', target, what: `anti-ai-design-${target} binary`, url: binUrl });
+      if (!published) missing.push({ kind: 'checksum', target, what: `anti-ai-design-${target} .sha256`, url: shaUrl });
       else if (recorded !== published) {
         missing.push({
           kind: 'manifest',
@@ -145,7 +140,7 @@ export async function checkEngineRelease({
 
 const MANIFEST_HEADER = [
   '# Engine binary digests for the pinned ENGINE_VERSION: <engine-version> <asset> <sha256>.',
-  '# The launchers, the npm shim, `anti-design install` and scripts/fetch-engine.mjs verify',
+  '# The launchers, the npm shim, `anti-ai-design install` and scripts/fetch-engine.mjs verify',
   '# every engine download against this file. Written by',
   '# `node scripts/check-engine-release.mjs --record` (or --from-dir, which the',
   '# build-engine workflow runs on the assets it publishes) after each engine release.',
@@ -163,7 +158,7 @@ export function renderManifest(rows) {
  */
 export async function recordEngineChecksums({
   version = readEngineVersion(),
-  base = process.env.ANTI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE,
+  base = process.env.ANTI_AI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE,
   root,
 } = {}) {
   const rows = await Promise.all(ENGINE_TARGETS.map(async (target) => {
@@ -175,7 +170,7 @@ export async function recordEngineChecksums({
 
 /**
  * Hash the five release assets already on disk in `dir` (the layout
- * release-engine publishes: <dir>/anti-design-<os>-<arch>[.exe]) and write the
+ * release-engine publishes: <dir>/anti-ai-design-<os>-<arch>[.exe]) and write the
  * manifest to `out` (default: skill/scripts/engine-checksums.txt). Throws when
  * any asset is missing, so a partial build never yields a partial manifest.
  */

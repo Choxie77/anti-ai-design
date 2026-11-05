@@ -1,27 +1,27 @@
 {
   "steps": [
     {
-      "stdout": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/website/.anti-design/live/config.json\",\"targetPath\":\"website\",\"projectRoot\":\"<WS>/website\",\"repoRoot\":\"<WS>\"}\n",
+      "stdout": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/website/.anti-ai-design/live/config.json\",\"targetPath\":\"website\",\"projectRoot\":\"<WS>/website\",\"repoRoot\":\"<WS>\"}\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     },
     {
-      "stdout": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/admin/.anti-design/live/config.json\",\"targetPath\":\"admin\",\"projectRoot\":\"<WS>/admin\",\"repoRoot\":\"<WS>\"}\n",
+      "stdout": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/admin/.anti-ai-design/live/config.json\",\"targetPath\":\"admin\",\"projectRoot\":\"<WS>/admin\",\"repoRoot\":\"<WS>\"}\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     },
     {
-      "stdout": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/website/.anti-design/live/config.json\",\"targetPath\":\"website\",\"projectRoot\":\"<WS>/website\",\"repoRoot\":\"<WS>\"}\n",
+      "stdout": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/website/.anti-ai-design/live/config.json\",\"targetPath\":\"website\",\"projectRoot\":\"<WS>/website\",\"repoRoot\":\"<WS>\"}\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     }
   ],
   "files": {
-    ".anti-design/live/app-root.json": "{\"version\":2,\"appRoots\":[{\"appRoot\":\"<WS>/website\",\"bootedAt\":\"<ISO>\"},{\"appRoot\":\"<WS>/admin\",\"bootedAt\":\"<ISO>\"}]}",
-    "admin/.anti-design/live/roots.json": "{\n  \"version\": 1,\n  \"appRoot\": \"<WS>/admin\",\n  \"repoRoot\": \"<WS>\",\n  \"contextRoot\": \"<WS>\",\n  \"sessionRoot\": \"<WS>/admin/.anti-design/live\",\n  \"productPath\": \"<WS>/PRODUCT.md\",\n  \"designPath\": \"<WS>/DESIGN.md\",\n  \"resolvedFrom\": \"target:admin\"\n}",
-    "website/.anti-design/live/roots.json": "{\n  \"version\": 1,\n  \"appRoot\": \"<WS>/website\",\n  \"repoRoot\": \"<WS>\",\n  \"contextRoot\": \"<WS>\",\n  \"sessionRoot\": \"<WS>/website/.anti-design/live\",\n  \"productPath\": \"<WS>/PRODUCT.md\",\n  \"designPath\": \"<WS>/DESIGN.md\",\n  \"resolvedFrom\": \"target:website\"\n}"
+    ".anti-ai-design/live/app-root.json": "{\"version\":2,\"appRoots\":[{\"appRoot\":\"<WS>/website\",\"bootedAt\":\"<ISO>\"},{\"appRoot\":\"<WS>/admin\",\"bootedAt\":\"<ISO>\"}]}",
+    "admin/.anti-ai-design/live/roots.json": "{\n  \"version\": 1,\n  \"appRoot\": \"<WS>/admin\",\n  \"repoRoot\": \"<WS>\",\n  \"contextRoot\": \"<WS>\",\n  \"sessionRoot\": \"<WS>/admin/.anti-ai-design/live\",\n  \"productPath\": \"<WS>/PRODUCT.md\",\n  \"designPath\": \"<WS>/DESIGN.md\",\n  \"resolvedFrom\": \"target:admin\"\n}",
+    "website/.anti-ai-design/live/roots.json": "{\n  \"version\": 1,\n  \"appRoot\": \"<WS>/website\",\n  \"repoRoot\": \"<WS>\",\n  \"contextRoot\": \"<WS>\",\n  \"sessionRoot\": \"<WS>/website/.anti-ai-design/live\",\n  \"productPath\": \"<WS>/PRODUCT.md\",\n  \"designPath\": \"<WS>/DESIGN.md\",\n  \"resolvedFrom\": \"target:website\"\n}"
   }
 }

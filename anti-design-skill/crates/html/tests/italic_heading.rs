@@ -1,4 +1,4 @@
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::Path;
 
 fn count(body: &str) -> usize {

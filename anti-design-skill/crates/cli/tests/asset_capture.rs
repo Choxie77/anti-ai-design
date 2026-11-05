@@ -1,6 +1,6 @@
-use anti_design::asset_capture::CdpAssetRenderer;
-use anti_design_comp::{png_io, raster};
-use anti_design_comp_verbs::asset_capture::{AssetCaptureRequest, AssetRenderer, CaptureBox};
+use anti_ai_design::asset_capture::CdpAssetRenderer;
+use anti_ai_design_comp::{png_io, raster};
+use anti_ai_design_comp_verbs::asset_capture::{AssetCaptureRequest, AssetRenderer, CaptureBox};
 use std::{
     io::{Read, Write},
     net::TcpListener,
@@ -10,7 +10,7 @@ use std::{
 #[test]
 fn native_capture_distinguishes_paint_from_file_presence() {
     let env = std::env::vars().collect();
-    if anti_design_browser::discovery::find_browser(&env).is_err() {
+    if anti_ai_design_browser::discovery::find_browser(&env).is_err() {
         eprintln!("skip: no browser installed");
         return;
     }
@@ -99,7 +99,7 @@ fn native_capture_distinguishes_paint_from_file_presence() {
                             "<script>const real=Element.prototype.getBoundingClientRect;Element.prototype.getBoundingClientRect=function(){const r=real.call(this);return this.id==='art'?new DOMRect(r.x+100,r.y,r.width,r.height):r;};</script>"
                         }
                         "state-probe" => {
-                            "<style>body[data-inspector] #art{display:none}</style><script>setInterval(()=>{if(Object.getOwnPropertyNames(window).some(k=>k.startsWith('__anti_design_capture_')))document.body.dataset.inspector='found';},0);</script>"
+                            "<style>body[data-inspector] #art{display:none}</style><script>setInterval(()=>{if(Object.getOwnPropertyNames(window).some(k=>k.startsWith('__anti_ai_design_capture_')))document.body.dataset.inspector='found';},0);</script>"
                         }
                         "lazy" => {
                             "<img loading=lazy src=/lazy.png style='position:absolute;top:10000px;width:80px;height:80px'>"
@@ -194,7 +194,7 @@ fn native_capture_distinguishes_paint_from_file_presence() {
                 },
             })
             .unwrap();
-        if let Ok(root) = std::env::var("ANTI_DESIGN_CAPTURE_TEST_OUTPUT") {
+        if let Ok(root) = std::env::var("ANTI_AI_DESIGN_CAPTURE_TEST_OUTPUT") {
             let out = std::path::Path::new(&root).join(mode);
             std::fs::create_dir_all(&out).unwrap();
             std::fs::write(

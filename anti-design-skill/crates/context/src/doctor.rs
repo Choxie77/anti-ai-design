@@ -1,4 +1,4 @@
-//! JS: doctor.mjs -> `anti-design doctor`
+//! JS: doctor.mjs -> `anti-ai-design doctor`
 
 use crate::artifact_schema::{read_product_schema_version, stamp_product_schema, PRODUCT_SCHEMA_VERSION};
 use crate::context::*;
@@ -7,7 +7,7 @@ use crate::staleness::*;
 use crate::staleness_deep::*;
 use crate::target_args::{parse_target_options, TargetOptions};
 use crate::util::{exists, json_pretty, opt_string, Env};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{Map, Value};
 
 struct Flags {
@@ -33,11 +33,11 @@ fn parse_args(argv: &[String]) -> Result<(Flags, TargetOptions), String> {
 
 fn usage() -> String {
     [
-        "Usage: anti-design doctor [--json] [--fix] [--target <path>]",
+        "Usage: anti-ai-design doctor [--json] [--fix] [--target <path>]",
         "",
-        "Report drift between this project's Anti-Design artifacts and what the",
+        "Report drift between this project's Anti-AI Design artifacts and what the",
         "installed version reads: PRODUCT.md, DESIGN.md and its sidecar,",
-        ".anti-design/config.json, surface briefs, and the design hook.",
+        ".anti-ai-design/config.json, surface briefs, and the design hook.",
         "",
         "  --json           Emit findings as JSON.",
         "  --fix            Apply the mechanical migrations (severity \"auto\") only.",
@@ -60,7 +60,7 @@ fn read_project_root_patterns(repo_root: &str) -> Vec<String> {
     if repo_root.is_empty() {
         return vec![];
     }
-    read_anti_design_project_roots(repo_root)
+    read_anti_ai_design_project_roots(repo_root)
 }
 
 fn collect(cwd: &str, target: &TargetOptions, env: &Env, provider_id: &str) -> Report {
@@ -169,7 +169,7 @@ fn apply_fixes(report: &Report) -> Fixes {
                         skipped.push((entry.id.clone(), format!("could not write {}", rel(&abs, &report.project_root))));
                     }
                 }
-                None => skipped.push((entry.id.clone(), "the gate entry is not in the launcher form; run `anti-design hooks on`".to_string())),
+                None => skipped.push((entry.id.clone(), "the gate entry is not in the launcher form; run `anti-ai-design hooks on`".to_string())),
             }
             continue;
         }
@@ -194,7 +194,7 @@ fn apply_fixes(report: &Report) -> Fixes {
 fn render_text(report: &Report, fixes: Option<&Fixes>, cwd: &str, command: &str, self_cmd: &str) -> String {
     let mut lines: Vec<String> = Vec::new();
     let pr = rel(&report.project_root, cwd);
-    lines.push(format!("Anti-Design doctor: {}", if pr.is_empty() { "." } else { &pr }));
+    lines.push(format!("Anti-AI Design doctor: {}", if pr.is_empty() { "." } else { &pr }));
     if report.ctx.is_monorepo {
         let rr = rel(&report.ctx.repo_root, cwd);
         lines.push(format!("Monorepo, repo root {}.", if rr.is_empty() { "." } else { &rr }));
@@ -260,13 +260,13 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
     let env = io.env.clone();
     let provider = crate::provider::detect(&env, &cwd);
     // The printed fix command spells the launcher when the launcher exported
-    // ANTI_DESIGN_SELF, and the plain `anti-design` verb otherwise.
+    // ANTI_AI_DESIGN_SELF, and the plain `anti-ai-design` verb otherwise.
     let self_cmd = env
-        .get("ANTI_DESIGN_SELF")
+        .get("ANTI_AI_DESIGN_SELF")
         .map(|v| v.trim().to_string())
         .filter(|v| !v.is_empty())
-        .map(|v| anti_design_common::launcher::spell_self(&v))
-        .unwrap_or_else(|| "anti-design".to_string());
+        .map(|v| anti_ai_design_common::launcher::spell_self(&v))
+        .unwrap_or_else(|| "anti-ai-design".to_string());
     let (flags, target) = match parse_args(args) {
         Ok(v) => v,
         Err(msg) => {

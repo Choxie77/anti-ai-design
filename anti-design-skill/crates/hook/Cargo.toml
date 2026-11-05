@@ -1,16 +1,16 @@
 [package]
-name = "anti-design-hook"
+name = "anti-ai-design-hook"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [dependencies]
-anti-design-common = { workspace = true }
-anti-design-comp-verbs = { workspace = true }
-anti-design-core = { workspace = true }
-anti-design-detect = { workspace = true }
-anti-design-context = { workspace = true }
+anti-ai-design-common = { workspace = true }
+anti-ai-design-comp-verbs = { workspace = true }
+anti-ai-design-core = { workspace = true }
+anti-ai-design-detect = { workspace = true }
+anti-ai-design-context = { workspace = true }
 serde_json = { workspace = true }
 regex = { workspace = true }
 once_cell = { workspace = true }
@@ -18,3 +18,6 @@ sha2 = "0.10"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
+
+[dev-dependencies]
+anti-ai-design-aad-rules = { path = "../aad-rules" }

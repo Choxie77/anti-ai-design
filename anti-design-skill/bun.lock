@@ -19,11 +19,11 @@
         "zod": "^4.3.6",
       },
       "optionalDependencies": {
-        "@anti-design/cli-darwin-arm64": "0.1.18",
-        "@anti-design/cli-darwin-x64": "0.1.18",
-        "@anti-design/cli-linux-arm64": "0.1.18",
-        "@anti-design/cli-linux-x64": "0.1.18",
-        "@anti-design/cli-windows-x64": "0.1.18",
+        "@anti-ai-design/cli-darwin-arm64": "0.1.18",
+        "@anti-ai-design/cli-darwin-x64": "0.1.18",
+        "@anti-ai-design/cli-linux-arm64": "0.1.18",
+        "@anti-ai-design/cli-linux-x64": "0.1.18",
+        "@anti-ai-design/cli-windows-x64": "0.1.18",
       },
     },
   },
@@ -72,15 +72,15 @@
 
     "@hono/node-server": ["@hono/node-server@1.19.14", "", { "peerDependencies": { "hono": "^4" } }, "sha512-GwtvgtXxnWsucXvbQXkRgqksiH2Qed37H9xHZocE5sA3N8O8O8/8FA3uclQXxXVzc9XBZuEOMK7+r02FmSpHtw=="],
 
-    "@anti-design/cli-darwin-arm64": ["@anti-design/cli-darwin-arm64@0.1.18", "", { "os": "darwin", "cpu": "arm64", "bin": { "anti-design-darwin-arm64": "bin/anti-design" } }, "sha512-Uhs8Vu8lNnwanaPnAY1TeIqQP0h+qPApAAyZozG5JZOgF++U6tFPpA0X1hsXwbwS1ldiZ8zCbkeWp1TgHhQoDw=="],
+    "@anti-ai-design/cli-darwin-arm64": ["@anti-ai-design/cli-darwin-arm64@0.1.18", "", { "os": "darwin", "cpu": "arm64", "bin": { "anti-ai-design-darwin-arm64": "bin/anti-ai-design" } }, "sha512-Uhs8Vu8lNnwanaPnAY1TeIqQP0h+qPApAAyZozG5JZOgF++U6tFPpA0X1hsXwbwS1ldiZ8zCbkeWp1TgHhQoDw=="],
 
-    "@anti-design/cli-darwin-x64": ["@anti-design/cli-darwin-x64@0.1.18", "", { "os": "darwin", "cpu": "x64", "bin": { "anti-design-darwin-x64": "bin/anti-design" } }, "sha512-oEdi45ONAkBsWdAAv5V/vzUJJ+aw4qDZlvjWFaVy1QIsSY0tgGK7VUz4aXzCYctdojBL9naEkmA7geNnRHWnAQ=="],
+    "@anti-ai-design/cli-darwin-x64": ["@anti-ai-design/cli-darwin-x64@0.1.18", "", { "os": "darwin", "cpu": "x64", "bin": { "anti-ai-design-darwin-x64": "bin/anti-ai-design" } }, "sha512-oEdi45ONAkBsWdAAv5V/vzUJJ+aw4qDZlvjWFaVy1QIsSY0tgGK7VUz4aXzCYctdojBL9naEkmA7geNnRHWnAQ=="],
 
-    "@anti-design/cli-linux-arm64": ["@anti-design/cli-linux-arm64@0.1.18", "", { "os": "linux", "cpu": "arm64", "bin": { "anti-design-linux-arm64": "bin/anti-design" } }, "sha512-LHqLzy8YWy8U+xOJm5hGgAZrr5YRoZ0ic3eixSx32XT3OYhkwf6ubJgIFT6L2M/qg/dXaucskGVBG4KV9RQGRw=="],
+    "@anti-ai-design/cli-linux-arm64": ["@anti-ai-design/cli-linux-arm64@0.1.18", "", { "os": "linux", "cpu": "arm64", "bin": { "anti-ai-design-linux-arm64": "bin/anti-ai-design" } }, "sha512-LHqLzy8YWy8U+xOJm5hGgAZrr5YRoZ0ic3eixSx32XT3OYhkwf6ubJgIFT6L2M/qg/dXaucskGVBG4KV9RQGRw=="],
 
-    "@anti-design/cli-linux-x64": ["@anti-design/cli-linux-x64@0.1.18", "", { "os": "linux", "cpu": "x64", "bin": { "anti-design-linux-x64": "bin/anti-design" } }, "sha512-cksllv5f/VryElehX8CcKCIOSpTHCKX9iLRxCre4A8cqtjmNsDKc8jtVO87hvfmCKISXKzHXfZGEIpJyGEiiBA=="],
+    "@anti-ai-design/cli-linux-x64": ["@anti-ai-design/cli-linux-x64@0.1.18", "", { "os": "linux", "cpu": "x64", "bin": { "anti-ai-design-linux-x64": "bin/anti-ai-design" } }, "sha512-cksllv5f/VryElehX8CcKCIOSpTHCKX9iLRxCre4A8cqtjmNsDKc8jtVO87hvfmCKISXKzHXfZGEIpJyGEiiBA=="],
 
-    "@anti-design/cli-windows-x64": ["@anti-design/cli-windows-x64@0.1.18", "", { "os": "win32", "cpu": "x64", "bin": { "anti-design-windows-x64": "bin/anti-design.exe" } }, "sha512-gQa/hDCMeJPdanY8/F6dm+HX8CRUWw0qZemcmS7RnZoI1NFgPi8iYZ+PSA5m+KG/vf/fmkQrVEUJaZRIeHu9Pg=="],
+    "@anti-ai-design/cli-windows-x64": ["@anti-ai-design/cli-windows-x64@0.1.18", "", { "os": "win32", "cpu": "x64", "bin": { "anti-ai-design-windows-x64": "bin/anti-ai-design.exe" } }, "sha512-gQa/hDCMeJPdanY8/F6dm+HX8CRUWw0qZemcmS7RnZoI1NFgPi8iYZ+PSA5m+KG/vf/fmkQrVEUJaZRIeHu9Pg=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 

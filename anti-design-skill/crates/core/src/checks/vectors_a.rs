@@ -10,14 +10,14 @@ use crate::color::Rgba;
 
 use crate::js_ext_a::utf16_index;
 use crate::vectors::{decode, encode, Js};
-use anti_design_foundation::vectors::checks_a::{field, opt_str, str_or_empty, to_number, truthy};
+use anti_ai_design_foundation::vectors::checks_a::{field, opt_str, str_or_empty, to_number, truthy};
 
 use serde_json::Value;
 
 /// (module, fn) pairs this group replays; the test treats vectors for other
 /// functions as SKIP, not FAIL, so groups can land independently. The open
 /// helpers of this group are dispatched by
-/// `anti_design_foundation::vectors::checks_a`.
+/// `anti_ai_design_foundation::vectors::checks_a`.
 pub const KNOWN: &[(&str, &[&str])] = &[(
     "rules.checks",
     &[

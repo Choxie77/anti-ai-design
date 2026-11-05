@@ -1,5 +1,5 @@
 [package]
-name = "anti-design-context"
+name = "anti-ai-design-context"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
@@ -7,14 +7,14 @@ publish.workspace = true
 
 [features]
 default = []
-# Use anti_design_core::registry::ANTIPATTERNS for doctor's known rule ids
+# Use anti_ai_design_core::registry::ANTIPATTERNS for doctor's known rule ids
 # instead of the embedded snapshot in src/rule_ids.rs.
 core-registry = []
 
 [dependencies]
-anti-design-common = { workspace = true, features = ["seed"] }
-anti-design-comp = { workspace = true }
-anti-design-core = { workspace = true }
+anti-ai-design-common = { workspace = true, features = ["seed"] }
+anti-ai-design-comp = { workspace = true }
+anti-ai-design-core = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 regex = { workspace = true }
@@ -28,5 +28,5 @@ unicode-normalization = "0.1.25"
 
 [dev-dependencies]
 # Stand-in upstream APIs in unit tests only; the runtime servers use
-# anti_design_common::http.
+# anti_ai_design_common::http.
 tiny_http = "0.12"

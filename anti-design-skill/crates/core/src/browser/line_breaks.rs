@@ -262,7 +262,7 @@ fn push_rendered_text(dom: &dyn Dom, el: ElId, out: &mut String) {
 }
 
 /// Whether `el`'s lines run past a box that clips them: a `-webkit-line-clamp`
-/// box (vercel.com's `p.line-clamp-2`, anti-design.example's release summaries)
+/// box (vercel.com's `p.line-clamp-2`, Anti-AI Design's release summaries)
 /// or one whose `overflow` clips on y, on `el` or within
 /// [`CLIP_SEARCH_DEPTH`] ancestors. Chromium lays out the lines a clamp
 /// hides below the box, and `Dom::text_line_rects` still returns them, so

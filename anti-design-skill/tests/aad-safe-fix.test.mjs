@@ -1,10 +1,10 @@
 /**
- * The safe-fix tier (`anti-design detect --fix [--write]`) through the engine binary:
+ * The safe-fix tier (`anti-ai-design detect --fix [--write]`) through the engine binary:
  * a dry run prints a diff and changes nothing, --write applies and logs one line, and a
  * second run is a no-op. The same cases run as Rust tests in crates/cli/tests/safe_fix.rs;
  * this keeps them reachable from the Node suites too.
  *
- * Skips cleanly when no binary is available (ANTI_DESIGN_BIN or target/release).
+ * Skips cleanly when no binary is available (ANTI_AI_DESIGN_BIN or target/release).
  * Run with: node --test tests/aad-safe-fix.test.mjs
  */
 import { describe, it } from 'node:test';
@@ -28,12 +28,12 @@ function project() {
 }
 
 function run(dir, args) {
-  const env = { ...process.env, HOME: dir, NO_COLOR: '1', ANTI_DESIGN_NO_UPDATE_CHECK: '1' };
-  delete env.ANTI_DESIGN_BUILTIN_ONLY;
+  const env = { ...process.env, HOME: dir, NO_COLOR: '1', ANTI_AI_DESIGN_NO_UPDATE_CHECK: '1' };
+  delete env.ANTI_AI_DESIGN_BUILTIN_ONLY;
   return spawnSync(BIN, args, { encoding: 'utf8', env, cwd: dir });
 }
 
-const log = (dir) => path.join(dir, '.anti-design', 'changelog.md');
+const log = (dir) => path.join(dir, '.anti-ai-design', 'changelog.md');
 const entries = (dir) => (fs.existsSync(log(dir)) ? fs.readFileSync(log(dir), 'utf8').split('\n').filter((l) => l.startsWith('- ')) : []);
 
 describe('safe-fix tier', { skip: BIN ? false : ENGINE_MISSING_MESSAGE }, () => {
@@ -45,7 +45,7 @@ describe('safe-fix tier', { skip: BIN ? false : ENGINE_MISSING_MESSAGE }, () => 
     assert.match(res.stdout, /^--- a\/a\.css\n\+\+\+ b\/a\.css\n@@ /);
     assert.match(res.stdout, /\+  color: #6366f1;/);
     assert.equal(fs.readFileSync(path.join(dir, 'a.css'), 'utf8'), before);
-    assert.equal(fs.existsSync(path.join(dir, '.anti-design')), false);
+    assert.equal(fs.existsSync(path.join(dir, '.anti-ai-design')), false);
   });
 
   it('--write applies, logs once, and a second run does nothing', () => {

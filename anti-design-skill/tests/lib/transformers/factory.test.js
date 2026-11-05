@@ -158,19 +158,19 @@ describe('createTransformer factory', () => {
     };
     const transform = createTransformer(config);
     const skills = [{
-      name: 'anti-design',
+      name: 'anti-ai-design',
       description: 'Test',
       body: 'Body',
       scripts: [{
         name: 'example.mjs',
         content: [
-          "export const ANTI_DESIGN_COMMAND_PREFIX = '/'; // @anti-design-provider-command-prefix",
-          "export const ANTI_DESIGN_PROVIDER_ID = 'source'; // @anti-design-provider-id",
-          'const command = `${ANTI_DESIGN_COMMAND_PREFIX}anti-design polish`;',
-          'const hint = "Run /anti-design audit";',
-          'const hook = ".github/hooks/anti-design.json";',
-          'const runtime = "/src/lib/anti-design/__runtime.js";',
-          'const regex = /anti-design\\b/gi;',
+          "export const ANTI_AI_DESIGN_COMMAND_PREFIX = '/'; // @anti-ai-design-provider-command-prefix",
+          "export const ANTI_AI_DESIGN_PROVIDER_ID = 'source'; // @anti-ai-design-provider-id",
+          'const command = `${ANTI_AI_DESIGN_COMMAND_PREFIX}anti-ai-design polish`;',
+          'const hint = "Run /anti-ai-design audit";',
+          'const hook = ".github/hooks/anti-ai-design.json";',
+          'const runtime = "/src/lib/anti-ai-design/__runtime.js";',
+          'const regex = /anti-ai-design\\b/gi;',
         ].join('\n'),
       }],
     }];
@@ -178,16 +178,16 @@ describe('createTransformer factory', () => {
     transform(skills, TEST_DIR);
 
     const script = fs.readFileSync(
-      path.join(TEST_DIR, 'codex/.test/skills/anti-design/scripts/example.mjs'),
+      path.join(TEST_DIR, 'codex/.test/skills/anti-ai-design/scripts/example.mjs'),
       'utf-8',
     );
-    expect(script).toContain('ANTI_DESIGN_COMMAND_PREFIX = "$"');
-    expect(script).toContain('ANTI_DESIGN_PROVIDER_ID = "codex"');
-    expect(script).toContain('`${ANTI_DESIGN_COMMAND_PREFIX}anti-design polish`');
-    expect(script).toContain('"Run /anti-design audit"');
-    expect(script).toContain('".github/hooks/anti-design.json"');
-    expect(script).toContain('"/src/lib/anti-design/__runtime.js"');
-    expect(script).toContain('/anti-design\\b/gi');
+    expect(script).toContain('ANTI_AI_DESIGN_COMMAND_PREFIX = "$"');
+    expect(script).toContain('ANTI_AI_DESIGN_PROVIDER_ID = "codex"');
+    expect(script).toContain('`${ANTI_AI_DESIGN_COMMAND_PREFIX}anti-ai-design polish`');
+    expect(script).toContain('"Run /anti-ai-design audit"');
+    expect(script).toContain('".github/hooks/anti-ai-design.json"');
+    expect(script).toContain('"/src/lib/anti-ai-design/__runtime.js"');
+    expect(script).toContain('/anti-ai-design\\b/gi');
   });
 
   test('should clean existing directory before writing', () => {

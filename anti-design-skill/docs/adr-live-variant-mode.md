@@ -6,7 +6,7 @@
 
 ## Context
 
-Anti-Design is a design skill for AI coding agents. It teaches AI harnesses (Claude Code, Cursor, Gemini CLI, Codex, etc.) how to produce better frontend design. The skill has 23 commands (bolder, quieter, polish, typeset, etc.) that the agent runs on source code.
+Anti-AI Design is a design skill for AI coding agents. It teaches AI harnesses (Claude Code, Cursor, Gemini CLI, Codex, etc.) how to produce better frontend design. The skill has 23 commands (bolder, quieter, polish, typeset, etc.) that the agent runs on source code.
 
 The missing piece: there was no way to visually iterate on a live page. The user could ask the agent to "make this bolder," but they had to read the code diff, reload the page, and decide if they liked it. If not, they'd ask again, wait, reload, repeat. Slow and disconnected.
 
@@ -14,7 +14,7 @@ The missing piece: there was no way to visually iterate on a live page. The user
 
 ## Decision
 
-Build a self-contained live variant mode that ships as part of the anti-design skill (no separate npm install required). The system bridges three parties: the **browser** (where the user picks elements and cycles variants), the **server** (a localhost HTTP server that relays messages), and the **agent** (the AI that generates variants by modifying source files).
+Build a self-contained live variant mode that ships as part of the anti-ai-design skill (no separate npm install required). The system bridges three parties: the **browser** (where the user picks elements and cycles variants), the **server** (a localhost HTTP server that relays messages), and the **agent** (the AI that generates variants by modifying source files).
 
 ### Key architectural decisions
 
@@ -34,13 +34,13 @@ All live mode code lives in `skill/scripts/`:
 - `live-wrap.mjs` — CLI helper that finds elements in source and creates variant wrappers
 - `live-browser.js` — Browser script (element picker, action panel, variant cycler, global bar)
 
-When a user installs the skill via `npx skills add OWNER/anti-design`, they get the live mode without any additional setup. The agent runs the scripts via `node {{scripts_path}}/live-server.mjs`.
+When a user installs the skill via `npx skills add Choxie77/anti-ai-design`, they get the live mode without any additional setup. The agent runs the scripts via `node {{scripts_path}}/live-server.mjs`.
 
 **4. HTTP long-poll for the agent, not WebSocket or stdin.**
 The agent communicates with the server via HTTP long-poll (`GET /poll` blocks until a browser event arrives). This works across all AI harnesses because every harness can run a shell command and read its stdout. No harness-specific integration needed.
 
 **5. `display: contents` variant wrapper.**
-Variants are wrapped in a container with `display: contents`, which makes the wrapper invisible to CSS layout. The selected element's relationship with its parent (flex child, grid child, etc.) is preserved. The wrapper carries `data-anti-design-variants` and `data-anti-design-variant-count` attributes that the browser script uses to detect and cycle variants.
+Variants are wrapped in a container with `display: contents`, which makes the wrapper invisible to CSS layout. The selected element's relationship with its parent (flex child, grid child, etc.) is preserved. The wrapper carries `data-anti-ai-design-variants` and `data-anti-ai-design-variant-count` attributes that the browser script uses to detect and cycle variants.
 
 **6. No-HMR fallback.**
 For dev servers that don't support HMR (like Bun's static HTML import), the browser fetches the raw source file directly from the live server's `/source` endpoint and injects the variants into the DOM. This works universally, at the cost of losing framework state on that injection.
@@ -58,7 +58,7 @@ For dev servers that don't support HMR (like Bun's static HTML import), the brow
  │  │   variant count, go button; morphs to generating/cycling)    │
  │  ├── Global bar (bottom pill: Detect toggle, Pick toggle, Exit) │
  │  ├── Variant cycler (MutationObserver watches for new           │
- │  │   [data-anti-design-variant] children in DOM)                 │
+ │  │   [data-anti-ai-design-variant] children in DOM)                 │
  │  ├── SSE connection (EventSource → /events for server push)     │
  │  ├── fetch POST (→ /events for browser-to-server messages)      │
  │  └── localStorage (session state survives reloads)              │
@@ -82,7 +82,7 @@ For dev servers that don't support HMR (like Bun's static HTML import), the brow
  │  └── GET  /stop        — graceful shutdown                      │
  │                                                                 │
  │  State: session token, SSE client set, event queue, poll queue  │
- │  Server file: .anti-design/live/server.json (project root)        │
+ │  Server file: .anti-ai-design/live/server.json (project root)        │
  │                                                                 │
  └────────────┬──────────────────────────────────┬─────────────────┘
               │ GET /poll (long-poll)             │ POST /poll (reply)
@@ -123,11 +123,11 @@ Server enqueues event
 Agent GET /poll returns: {type:"generate", id:"abc", action:"bolder", count:3, element:{...}}
   ↓
 Agent runs: node live-wrap.mjs --id abc --count 3 --classes "hero-left"
-  → Finds element in source, wraps with data-anti-design-variants container
+  → Finds element in source, wraps with data-anti-ai-design-variants container
   → Original stays visible (no flash of empty content)
   ↓
 Agent writes all 3 variants in a single Edit tool call
-  → Each variant is a <div data-anti-design-variant="N"> with full HTML replacement
+  → Each variant is a <div data-anti-ai-design-variant="N"> with full HTML replacement
   → First variant visible, others display:none
   ↓
 Agent POST /poll: {id:"abc", type:"done", file:"public/index.html"}
@@ -173,25 +173,25 @@ Agent POST /poll: {id:"abc", type:"done"}
 In the source file (HTML example):
 
 ```html
-<!-- anti-design-variants-start abc12345 -->
-<div data-anti-design-variants="abc12345" data-anti-design-variant-count="3" style="display: contents">
-  <div data-anti-design-variant="original">
+<!-- anti-ai-design-variants-start abc12345 -->
+<div data-anti-ai-design-variants="abc12345" data-anti-ai-design-variant-count="3" style="display: contents">
+  <div data-anti-ai-design-variant="original">
     <!-- original element (visible until first variant arrives) -->
   </div>
-  <div data-anti-design-variant="1">
+  <div data-anti-ai-design-variant="1">
     <!-- variant 1 (visible) -->
   </div>
-  <div data-anti-design-variant="2" style="display: none">
+  <div data-anti-ai-design-variant="2" style="display: none">
     <!-- variant 2 -->
   </div>
-  <div data-anti-design-variant="3" style="display: none">
+  <div data-anti-ai-design-variant="3" style="display: none">
     <!-- variant 3 -->
   </div>
 </div>
-<!-- anti-design-variants-end abc12345 -->
+<!-- anti-ai-design-variants-end abc12345 -->
 ```
 
-Comment markers enable deterministic cleanup. `display: contents` on the wrapper preserves flex/grid layout. The `data-anti-design-variant-count` attribute tells the browser how many to expect.
+Comment markers enable deterministic cleanup. `display: contents` on the wrapper preserves flex/grid layout. The `data-anti-ai-design-variant-count` attribute tells the browser how many to expect.
 
 ## Browser UI
 
@@ -199,7 +199,7 @@ Comment markers enable deterministic cleanup. `display: contents` on the wrapper
 
 Compact floating pill at bottom center. Light, translucent, matching the brand aesthetic.
 
-- **Anti-Design** brand mark (magenta)
+- **Anti-AI Design** brand mark (magenta)
 - **Detect** toggle (eye icon): loads anti-pattern scanner in extension mode, shows overlay count badge
 - **Pick** toggle (crosshair icon): enables/disables element picker (default: on)
 - **Exit** button (x): sends exit event, tears down all UI
@@ -228,8 +228,8 @@ This survives page reloads, browser close/reopen, HMR, and accidental refreshes.
 
 - **Session token**: `crypto.randomUUID()`, checked on all mutating endpoints and SSE connections.
 - **Localhost only**: server binds to `127.0.0.1`, not `0.0.0.0`.
-- **Token in server file**: `.anti-design/live/server.json` in project root. Only the user's processes can read it.
-- **Token injected into `/live.js`**: the server prepends `window.__ANTI_DESIGN_TOKEN__` at serve time.
+- **Token in server file**: `.anti-ai-design/live/server.json` in project root. Only the user's processes can read it.
+- **Token injected into `/live.js`**: the server prepends `window.__ANTI_AI_DESIGN_TOKEN__` at serve time.
 - **Path traversal guard**: `/source` endpoint validates the requested path is within `process.cwd()`.
 - **No eval/innerHTML**: all browser UI built with `createElement` and `textContent`.
 

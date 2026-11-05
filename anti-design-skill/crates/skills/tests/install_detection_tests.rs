@@ -5,15 +5,15 @@
 
 use std::collections::HashMap;
 
-use anti_design_skills::providers::{Scope, Sys};
-use anti_design_common::jsp;
+use anti_ai_design_skills::providers::{Scope, Sys};
+use anti_ai_design_common::jsp;
 
 fn temp_root(name: &str) -> String {
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_nanos())
         .unwrap_or(0);
-    let dir = std::env::temp_dir().join(format!("anti-design-{name}-{}-{nanos}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("anti-ai-design-{name}-{}-{nanos}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("temp root");
     let real = dir.canonicalize().unwrap().to_string_lossy().into_owned();
     real.strip_prefix(r"\\?\").map(str::to_string).unwrap_or(real)
@@ -111,7 +111,7 @@ fn opencode_config_dir_only_setup_is_detected() {
     assert_eq!(found, vec![opencode_dir]);
 }
 
-fn agents_project_detections(sys: &Sys, root: &str) -> Vec<anti_design_skills::providers::Detection> {
+fn agents_project_detections(sys: &Sys, root: &str) -> Vec<anti_ai_design_skills::providers::Detection> {
     sys.collect_install_detections(root)
         .into_iter()
         .filter(|d| d.provider == ".agents" && d.scope == Scope::Project)
@@ -137,9 +137,9 @@ fn replit_file_claims_the_agents_dir_detection() {
     let home = temp_root("replit-agents-home");
     let project = temp_root("replit-agents-project");
     std::fs::write(jsp::join(&[&project, ".replit"]), "").unwrap();
-    let skill_dir = jsp::join(&[&project, ".agents", "skills", "anti-design"]);
+    let skill_dir = jsp::join(&[&project, ".agents", "skills", "anti-ai-design"]);
     std::fs::create_dir_all(&skill_dir).unwrap();
-    std::fs::write(jsp::join(&[&skill_dir, "SKILL.md"]), "---\nname: anti-design\n---\n").unwrap();
+    std::fs::write(jsp::join(&[&skill_dir, "SKILL.md"]), "---\nname: anti-ai-design\n---\n").unwrap();
     let found = agents_project_detections(&sys_with(&home, &[]), &project);
 
     assert_eq!(found.len(), 1);
@@ -177,6 +177,6 @@ fn replit_project_with_codex_user_hint_keeps_both_and_preselects_replit() {
         .map(|d| (d.scope, d.label()))
         .collect();
     assert_eq!(agents, vec![(Scope::Project, "Replit Agent"), (Scope::User, "Codex CLI")]);
-    let defaults = anti_design_skills::providers::default_detections(&detections);
+    let defaults = anti_ai_design_skills::providers::default_detections(&detections);
     assert_eq!(defaults.iter().map(|d| d.harness).collect::<Vec<_>>(), vec!["replit"]);
 }

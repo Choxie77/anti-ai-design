@@ -1,4 +1,4 @@
-//! `anti-design detect --cdp`: scan a page of a Chromium-based app that is
+//! `anti-ai-design detect --cdp`: scan a page of a Chromium-based app that is
 //! already running (Electron, NW.js, CEF, WebView2) through its DevTools
 //! endpoint, with the URL scan's passes and output.
 //!
@@ -29,8 +29,8 @@ use std::io::{Read, Write};
 use std::net::ToSocketAddrs;
 use std::time::Duration;
 
-use anti_design_detect::cdp_endpoint::{is_loopback_host, CdpEndpoint};
-use anti_design_detect::engines::{EngineError, ScanOptions, UrlScan};
+use anti_ai_design_detect::cdp_endpoint::{is_loopback_host, CdpEndpoint};
+use anti_ai_design_detect::engines::{EngineError, ScanOptions, UrlScan};
 use serde_json::Value;
 
 use crate::cdp::{connect_tcp, Browser, Page, Viewport};
@@ -251,14 +251,14 @@ pub fn browser_ws_url(endpoint: &CdpEndpoint) -> Result<String, String> {
 /// - `requestAnimationFrame` fires on the next frame or after 100ms,
 ///   whichever comes first, so a frame wait never hangs on a window that
 ///   paints no frames.
-/// - Once [`RESTORE_JS`] sets `__antiDesignAttachCancelled`, neither calls
+/// - Once [`RESTORE_JS`] sets `__antiAiDesignAttachCancelled`, neither calls
 ///   anything back, so an async pass still running page-side stops at its
 ///   next wait instead of scrolling the restored page.
 ///
 /// The page's own globals are untouched: these are the isolated world's.
 pub const PREPARE_JS: &str = r#"(() => {
   const g = globalThis;
-  if (!g.__antiDesignAttachShim) {
+  if (!g.__antiAiDesignAttachShim) {
     const nativeSetTimeout = g.setTimeout.bind(g);
     const nativeClearTimeout = g.clearTimeout.bind(g);
     const nativeRaf = g.requestAnimationFrame.bind(g);
@@ -287,7 +287,7 @@ pub const PREPARE_JS: &str = r#"(() => {
     g.setTimeout = (cb, ms, ...args) => {
       const id = ++next;
       const wait = Math.max(0, Number(ms) || 0);
-      const run = () => { if (!g.__antiDesignAttachCancelled && typeof cb === 'function') cb(...args); };
+      const run = () => { if (!g.__antiAiDesignAttachCancelled && typeof cb === 'function') cb(...args); };
       if (document.visibilityState === 'hidden') {
         live.set(id, null);
         spin(id, wait, run);
@@ -303,12 +303,12 @@ pub const PREPARE_JS: &str = r#"(() => {
     };
     g.requestAnimationFrame = (cb) => {
       let done = false;
-      const fire = () => { if (!done) { done = true; if (!g.__antiDesignAttachCancelled) cb(performance.now()); } };
+      const fire = () => { if (!done) { done = true; if (!g.__antiAiDesignAttachCancelled) cb(performance.now()); } };
       nativeRaf(fire);
       g.setTimeout(fire, 100);
       return 0;
     };
-    g.__antiDesignAttachShim = true;
+    g.__antiAiDesignAttachShim = true;
   }
   const scrolled = [];
   const walk = (root) => {
@@ -318,12 +318,12 @@ pub const PREPARE_JS: &str = r#"(() => {
     }
   };
   walk(document);
-  g.__antiDesignAttachCancelled = false;
-  g.__antiDesignAttach = {
+  g.__antiAiDesignAttachCancelled = false;
+  g.__antiAiDesignAttach = {
     x: window.scrollX,
     y: window.scrollY,
     scrolled,
-    hideStyle: !!document.getElementById('anti-design-visual-contrast-hide-style'),
+    hideStyle: !!document.getElementById('anti-ai-design-visual-contrast-hide-style'),
   };
   return { hidden: document.visibilityState === 'hidden', scrollers: scrolled.length };
 })()"#;
@@ -331,14 +331,14 @@ pub const PREPARE_JS: &str = r#"(() => {
 /// Put back what [`PREPARE_JS`] recorded: first cancel the scan's waits,
 /// then every scroller at its old position (a scroller the scan moved off 0
 /// back to 0), the window last, the videos the pixel pass paused
-/// (`__antiDesignPausedMedia`) playing again unless they have ended, and the
+/// (`__antiAiDesignPausedMedia`) playing again unless they have ended, and the
 /// pixel pass's style element and marker attributes gone. Then the scan's
 /// own globals go, so the isolated world holds no references to the page's
 /// elements.
 pub const RESTORE_JS: &str = r#"(() => {
   const g = globalThis;
-  g.__antiDesignAttachCancelled = true;
-  const saved = g.__antiDesignAttach;
+  g.__antiAiDesignAttachCancelled = true;
+  const saved = g.__antiAiDesignAttach;
   const out = { restored: false };
   if (saved) {
     const was = new Map(saved.scrolled.map(([el, top, left]) => [el, [top, left]]));
@@ -357,29 +357,29 @@ pub const RESTORE_JS: &str = r#"(() => {
     };
     walk(document);
     window.scrollTo({ left: saved.x, top: saved.y, behavior: 'instant' });
-    for (const m of g.__antiDesignPausedMedia || []) {
+    for (const m of g.__antiAiDesignPausedMedia || []) {
       if (!m.paused || m.ended || !m.isConnected) continue;
       try { const p = m.play(); if (p && typeof p.catch === 'function') p.catch(() => {}); } catch (e) {}
     }
     if (!saved.hideStyle) {
-      const style = document.getElementById('anti-design-visual-contrast-hide-style');
+      const style = document.getElementById('anti-ai-design-visual-contrast-hide-style');
       if (style) style.remove();
     }
     out.restored = true;
     out.scroll = [window.scrollX, window.scrollY];
     out.wanted = [saved.x, saved.y];
   }
-  for (const el of document.querySelectorAll('[data-anti-design-visual-contrast-target], [data-anti-design-bgclip-text]')) {
-    el.removeAttribute('data-anti-design-visual-contrast-target');
-    el.removeAttribute('data-anti-design-bgclip-text');
+  for (const el of document.querySelectorAll('[data-anti-ai-design-visual-contrast-target], [data-anti-ai-design-bgclip-text]')) {
+    el.removeAttribute('data-anti-ai-design-visual-contrast-target');
+    el.removeAttribute('data-anti-ai-design-bgclip-text');
   }
-  for (const key of ['__antiDesignSnapshot', '__impCap', '__impIO', '__antiDesignContrastRestore', '__antiDesignVisualScrollSaved', '__antiDesignPausedMedia', '__antiDesignAttach']) {
+  for (const key of ['__antiAiDesignSnapshot', '__impCap', '__impIO', '__antiAiDesignContrastRestore', '__antiAiDesignVisualScrollSaved', '__antiAiDesignPausedMedia', '__antiAiDesignAttach']) {
     try { delete g[key]; } catch (e) {}
   }
   return out;
 })()"#;
 
-/// `anti-design detect --cdp`: attach, scan the chosen page as it stands, put
+/// `anti-ai-design detect --cdp`: attach, scan the chosen page as it stands, put
 /// it back, detach.
 pub fn detect_cdp(
     endpoint: &CdpEndpoint,

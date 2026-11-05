@@ -29,13 +29,13 @@ use crate::page::{
 };
 use crate::profile::{self, Meta, ProfileSink};
 use crate::quality::{check_element_quality, check_page_quality_from_doc, pf0};
-use anti_design_core::checks::css_scan::{side_stripe_index, CssHostIndex};
-use anti_design_core::checks::html_patterns::{check_html_patterns, HtmlPatternCorpora};
-use anti_design_core::checks::row_stripe::scan_css_text_for_row_stripe;
-use anti_design_core::checks::rules::{is_rounded_away_from_side, RuleHit, SafeTagTextSeen};
-use anti_design_core::findings::{try_finding, Finding};
-use anti_design_core::inline_ignores::apply_inline_ignores;
-use anti_design_core::page::is_full_page;
+use anti_ai_design_core::checks::css_scan::{side_stripe_index, CssHostIndex};
+use anti_ai_design_core::checks::html_patterns::{check_html_patterns, HtmlPatternCorpora};
+use anti_ai_design_core::checks::row_stripe::scan_css_text_for_row_stripe;
+use anti_ai_design_core::checks::rules::{is_rounded_away_from_side, RuleHit, SafeTagTextSeen};
+use anti_ai_design_core::findings::{try_finding, Finding};
+use anti_ai_design_core::inline_ignores::apply_inline_ignores;
+use anti_ai_design_core::page::is_full_page;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::path::Path;
@@ -60,14 +60,14 @@ pub trait DesignSystemHook {
 /// engine: em-dash overuse, marketing buzzwords, aphoristic cadence.
 pub type TextContentAnalyzers<'a> = &'a dyn Fn(&str, &str) -> Vec<Finding>;
 
-/// The static engine's half of a rule pack (`anti_design_core::rule_pack`):
+/// The static engine's half of a rule pack (`anti_ai_design_core::rule_pack`):
 /// rules written against the parsed page. The [`StaticDocument`] model is
 /// this crate's, so this hook cannot live on the engine-wide `RulePack`
 /// trait; a pack implements both and hands the same value to both fields of
 /// [`DetectHtmlOptions`].
 ///
 /// Findings come back as full [`Finding`] values, built with
-/// `anti_design_core::findings::finding_for(row, file_path, snippet, line)` so
+/// `anti_ai_design_core::findings::finding_for(row, file_path, snippet, line)` so
 /// they carry the pack's own registry metadata.
 pub trait StaticRulePack: Send + Sync + std::fmt::Debug {
     /// Runs once per HTML file, after every built-in pass and before inline
@@ -79,7 +79,7 @@ pub trait StaticRulePack: Send + Sync + std::fmt::Debug {
 #[derive(Default, Clone, Copy)]
 pub struct DetectHtmlOptions<'a> {
     /// JS `options.inlineIgnores === false` disables the whole-file
-    /// `anti-design-disable` waivers; anything else applies them.
+    /// `anti-ai-design-disable` waivers; anything else applies them.
     pub inline_ignores_disabled: bool,
     /// JS `options.designSystem` (present only when a DESIGN.md loaded).
     pub design_system: Option<&'a dyn DesignSystemHook>,
@@ -101,7 +101,7 @@ pub struct DetectHtmlOptions<'a> {
     /// raw HTML source (which is how a text-only pack still covers `.html`
     /// files, the way the built-in text-content analyzers do). A pack that
     /// implements both therefore never reports twice for the same file.
-    pub rule_pack: Option<&'static dyn anti_design_core::rule_pack::RulePack>,
+    pub rule_pack: Option<&'static dyn anti_ai_design_core::rule_pack::RulePack>,
 }
 
 /// Errors of the static engine.
@@ -273,8 +273,8 @@ pub fn detect_html_source(
                 // size and back) neither moves nor overshoots.
                 if h.id == "bounce-easing"
                     && h.snippet.strip_prefix("animation: ").is_some_and(|names| {
-                        anti_design_core::checks::css_scan::bounce_names_only_pulse(names, |name| {
-                            anti_design_core::checks::css_scan::css_keyframes_only_pulse(&css_text, name)
+                        anti_ai_design_core::checks::css_scan::bounce_names_only_pulse(names, |name| {
+                            anti_ai_design_core::checks::css_scan::css_keyframes_only_pulse(&css_text, name)
                         })
                     })
                 {
@@ -285,7 +285,7 @@ pub fn detect_html_source(
                     // bar) overrides the registry's.
                     if let Some(sev) = h.severity.filter(|s| !s.is_empty()) {
                         f.severity = sev;
-                        anti_design_core::findings::derive_advisory_flag(&mut f);
+                        anti_ai_design_core::findings::derive_advisory_flag(&mut f);
                     }
                     if f.antipattern == "low-contrast" {
                         pair_findings.push((findings.len(), crate::adapters::element_handle(el)));
@@ -330,7 +330,7 @@ pub fn detect_html_source(
                 if h.id == "flat-type-hierarchy" {
                     if let Some(sev) = flat_type_severity {
                         f.severity = sev.to_string();
-                        anti_design_core::findings::derive_advisory_flag(&mut f);
+                        anti_ai_design_core::findings::derive_advisory_flag(&mut f);
                     }
                 }
                 findings.push(f);
@@ -343,7 +343,7 @@ pub fn detect_html_source(
                     // mockup) overrides the registry's.
                     if let Some(sev) = h.severity.filter(|s| !s.is_empty()) {
                         f.severity = sev;
-                        anti_design_core::findings::derive_advisory_flag(&mut f);
+                        anti_ai_design_core::findings::derive_advisory_flag(&mut f);
                     }
                     findings.push(f);
                 }
@@ -386,7 +386,7 @@ pub fn detect_html_source(
         let pattern_hits = profile::findings(
             profile,
             Meta::new("page", "html-patterns", fp),
-            |f: &anti_design_core::checks::css_scan::PatternFinding| f.id.as_str(),
+            |f: &anti_ai_design_core::checks::css_scan::PatternFinding| f.id.as_str(),
             || {
                 check_html_patterns(html, Some(&corpora))
                     .into_iter()
@@ -401,7 +401,7 @@ pub fn detect_html_source(
             let mut hosts = Vec::new();
             if let Some(selector) = f.selector.as_deref() {
                 let stripped = PSEUDO_STRIP_RE.replace_all(selector, "");
-                let stripped = anti_design_core::js::trim(&stripped);
+                let stripped = anti_ai_design_core::js::trim(&stripped);
                 let matches = match doc.compile(stripped) {
                     Ok(_) => Some(doc.query_selector_all(stripped)),
                     Err(_) => None,
@@ -440,7 +440,7 @@ pub fn detect_html_source(
                 if let Some(sev) = f.severity.as_ref() {
                     item.severity = sev.clone();
                 }
-                anti_design_core::findings::derive_advisory_flag(&mut item);
+                anti_ai_design_core::findings::derive_advisory_flag(&mut item);
                 findings.push(item);
             }
         }
@@ -450,7 +450,7 @@ pub fn detect_html_source(
         let row_hits = profile::findings(
             profile,
             Meta::new("page", "row-stripe", fp),
-            |f: &anti_design_core::checks::css_scan::PatternFinding| f.id.as_str(),
+            |f: &anti_ai_design_core::checks::css_scan::PatternFinding| f.id.as_str(),
             || scan_css_text_for_row_stripe(&corpora.style_text, None),
         );
         for f in row_hits {
@@ -462,7 +462,7 @@ pub fn detect_html_source(
             let query = if doc.compile(selector).is_ok() {
                 selector
             } else {
-                anti_design_core::js::trim(&stripped)
+                anti_ai_design_core::js::trim(&stripped)
             };
             if doc.compile(query).is_err() {
                 continue;
@@ -528,7 +528,7 @@ pub fn detect_html_source(
         );
         findings.extend(pack_findings);
     } else if let Some(pack) = options.rule_pack {
-        let ext = anti_design_detect::detect_text::ext_from_file_path(fp);
+        let ext = anti_ai_design_detect::detect_text::ext_from_file_path(fp);
         let pack_findings = profile::findings(
             profile,
             Meta::new("source", "rule-pack", fp),
@@ -597,7 +597,7 @@ fn count_colour_pairs(
     for (i, total) in groups {
         if total > 1 {
             let f = &mut findings[i];
-            f.snippet = anti_design_core::checks::rules::with_more_count(&f.snippet, total - 1);
+            f.snippet = anti_ai_design_core::checks::rules::with_more_count(&f.snippet, total - 1);
         }
     }
     if !drop.is_empty() {

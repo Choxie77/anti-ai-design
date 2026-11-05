@@ -1,32 +1,32 @@
 /**
- * Anti-Design DevTools Extension - DevTools Page
+ * Anti-AI Design DevTools Extension - DevTools Page
  *
- * Creates the Anti-Design panel and triggers an auto-scan when DevTools opens.
+ * Creates the Anti-AI Design panel and triggers an auto-scan when DevTools opens.
  * This page lives for the entire DevTools session -- its port disconnect
  * is the canonical signal that DevTools has closed.
  */
 
 chrome.devtools.panels.create(
-  'Anti-Design',
+  'Anti-AI Design',
   '/icons/icon-32.png',
   '/devtools/panel.html'
 );
 
 // Sidebar pane in the Elements panel: shows findings for the currently selected element
-chrome.devtools.panels.elements.createSidebarPane('Anti-Design', (sidebar) => {
+chrome.devtools.panels.elements.createSidebarPane('Anti-AI Design', (sidebar) => {
   sidebar.setPage('/devtools/sidebar.html');
   sidebar.setHeight('200px');
 });
 
 // Lifecycle port to the service worker. Auto-reconnects if the SW gets terminated
 // (which can happen in MV3 after ~30s of inactivity, especially when the browser is unfocused).
-const portName = `anti-design-devtools-${chrome.devtools.inspectedWindow.tabId}`;
+const portName = `anti-ai-design-devtools-${chrome.devtools.inspectedWindow.tabId}`;
 let lifecyclePort = null;
 let firstConnect = true;
 function connectLifecycle() {
   lifecyclePort = chrome.runtime.connect({ name: portName });
   // On the very first connection, decide whether to auto-scan based on the user's setting.
-  // Default ('panel'): wait until the user opens the Anti-Design panel or sidebar.
+  // Default ('panel'): wait until the user opens the Anti-AI Design panel or sidebar.
   // Opt-in ('devtools'): scan immediately when DevTools opens.
   if (firstConnect) {
     firstConnect = false;

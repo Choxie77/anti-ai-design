@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \".codex/skills/anti-design/scripts/anti-design\" ] || \".codex/skills/anti-design/scripts/anti-design\" hook",
-            "commandWindows": "cmd /c if exist \".codex\\skills\\anti-design\\scripts\\anti-design.cmd\" \".codex\\skills\\anti-design\\scripts\\anti-design.cmd\" hook",
+            "command": "[ ! -f \".codex/skills/anti-ai-design/scripts/anti-ai-design\" ] || \".codex/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "commandWindows": "cmd /c if exist \".codex\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd\" \".codex\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd\" hook",
             "timeout": 5,
             "statusMessage": "Checking UI changes"
           }
@@ -19,8 +19,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \".codex/skills/anti-design/scripts/anti-design\" ] || \".codex/skills/anti-design/scripts/anti-design\" hook",
-            "commandWindows": "cmd /c if exist \".codex\\skills\\anti-design\\scripts\\anti-design.cmd\" \".codex\\skills\\anti-design\\scripts\\anti-design.cmd\" hook",
+            "command": "[ ! -f \".codex/skills/anti-ai-design/scripts/anti-ai-design\" ] || \".codex/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "commandWindows": "cmd /c if exist \".codex\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd\" \".codex\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd\" hook",
             "timeout": 30,
             "statusMessage": "Design deep pass"
           }

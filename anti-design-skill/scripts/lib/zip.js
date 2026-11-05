@@ -25,7 +25,7 @@ export async function createProviderZip(providerDir, distDir, providerName) {
     throw new Error(`Cannot create ${zipFileName}: provider directory not found: ${providerDir}`);
   }
 
-  // Fail loud, never soft. This artifact ships to `npx anti-design skills
+  // Fail loud, never soft. This artifact ships to `npx anti-ai-design skills
   // install` via the bundle endpoint; a build that can't produce a real zip
   // must exit non-zero rather than deploy an empty one. (archiver v8's ESM
   // break previously failed here silently and shipped a 0-byte universal.zip.)

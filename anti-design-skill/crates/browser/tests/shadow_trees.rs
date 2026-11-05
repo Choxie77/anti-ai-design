@@ -13,11 +13,11 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::time::Duration;
 
-use anti_design_browser::{
+use anti_ai_design_browser::{
     cdp::Browser, detect_url_evidence, discovery, fullpage, snapshot_engine, BrowserEngine,
     EvidenceRequest,
 };
-use anti_design_detect::engines::ScanOptions;
+use anti_ai_design_detect::engines::ScanOptions;
 use base64::Engine as _;
 use serde_json::Value;
 
@@ -81,7 +81,7 @@ fn shadow_trees_never_push_a_page_past_the_element_budget() {
     snapshot_engine::ensure_snapshot_js(&mut page).unwrap();
     let out = page
         .evaluate_value(
-            "(() => { const c = window.__antiDesignSnapshot.capture({ maxElements: 100 }); if (c.error) return { error: c.error }; const s = JSON.parse(c.json); return { count: s.els.length, tags: s.els.map(e => e.t) }; })()",
+            "(() => { const c = window.__antiAiDesignSnapshot.capture({ maxElements: 100 }); if (c.error) return { error: c.error }; const s = JSON.parse(c.json); return { count: s.els.length, tags: s.els.map(e => e.t) }; })()",
         )
         .unwrap();
     assert!(out.get("error").is_none(), "{out}");
@@ -95,7 +95,7 @@ fn shadow_trees_never_push_a_page_past_the_element_budget() {
     // shadow root is recorded on its element.
     let out = page
         .evaluate_value(
-            "(() => { const c = window.__antiDesignSnapshot.capture({}); if (c.error) return { error: c.error }; const s = JSON.parse(c.json); return { anim: s.anim === true, fading: s.els.filter(e => e.t === 'DIV' && Array.isArray(e.an)).map(e => e.an) }; })()",
+            "(() => { const c = window.__antiAiDesignSnapshot.capture({}); if (c.error) return { error: c.error }; const s = JSON.parse(c.json); return { anim: s.anim === true, fading: s.els.filter(e => e.t === 'DIV' && Array.isArray(e.an)).map(e => e.an) }; })()",
         )
         .unwrap();
     assert!(out.get("error").is_none(), "{out}");
@@ -132,7 +132,7 @@ fn pseudo_class_states_inside_shadow_trees_are_recorded() {
     snapshot_engine::ensure_snapshot_js(&mut page).unwrap();
     let out = page
         .evaluate_value(
-            "(() => { const c = window.__antiDesignSnapshot.capture({}); if (c.error) return { error: c.error }; const s = JSON.parse(c.json); return s.els.filter(e => e.t === 'BUTTON' || e.t === 'INPUT').map(e => [e.t, e.st || []]); })()",
+            "(() => { const c = window.__antiAiDesignSnapshot.capture({}); if (c.error) return { error: c.error }; const s = JSON.parse(c.json); return s.els.filter(e => e.t === 'BUTTON' || e.t === 'INPUT').map(e => [e.t, e.st || []]); })()",
         )
         .unwrap();
     assert!(out.get("error").is_none(), "{out}");
@@ -169,7 +169,7 @@ fn the_page_probe_lists_open_shadow_children() {
     page.goto(&format!("http://127.0.0.1:{port}/"), "load", Duration::from_secs(15))
         .unwrap();
     let script = format!(
-        "(() => {{ {PROBE_JS}\n const kids = id => __antiDesignDom.shadow_children(__intern(document.getElementById(id))).map(h => __el(h).tagName); return {{ deck: kids('deck'), plain: kids('plain') }}; }})()"
+        "(() => {{ {PROBE_JS}\n const kids = id => __antiAiDesignDom.shadow_children(__intern(document.getElementById(id))).map(h => __el(h).tagName); return {{ deck: kids('deck'), plain: kids('plain') }}; }})()"
     );
     let out = page.evaluate_value(&script).unwrap();
     assert_eq!(out["deck"], serde_json::json!(["STYLE", "DIV"]), "{out}");

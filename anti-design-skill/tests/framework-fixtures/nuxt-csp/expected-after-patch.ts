@@ -2,9 +2,9 @@
 // After the append-string CSP patch is applied, nuxt.config.ts should look
 // like this.
 
-// Dev-only allowance so anti-design live mode can load. Empty string in any
+// Dev-only allowance so anti-ai-design live mode can load. Empty string in any
 // non-development environment.
-const __antiDesignLiveDev =
+const __antiAiDesignLiveDev =
   process.env.NODE_ENV === 'development' ? ' http://localhost:8400' : '';
 
 export default defineNuxtConfig({
@@ -15,10 +15,10 @@ export default defineNuxtConfig({
       headers: {
         'Content-Security-Policy':
           "default-src 'self'; " +
-          `script-src 'self' 'unsafe-inline' 'unsafe-eval'${__antiDesignLiveDev}; ` +
+          `script-src 'self' 'unsafe-inline' 'unsafe-eval'${__antiAiDesignLiveDev}; ` +
           "style-src 'self' 'unsafe-inline'; " +
           "img-src 'self' data: blob:; " +
-          `connect-src 'self'${__antiDesignLiveDev}; ` +
+          `connect-src 'self'${__antiAiDesignLiveDev}; ` +
           "frame-ancestors 'self';",
         'X-Frame-Options': 'SAMEORIGIN',
       },

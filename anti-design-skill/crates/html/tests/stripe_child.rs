@@ -1,4 +1,4 @@
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::Path;
 
 fn raw_side_tab_snippets(html: &str) -> Vec<String> {

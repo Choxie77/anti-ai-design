@@ -1,5 +1,5 @@
 /**
- * Anti-Design DevTools Extension - Panel
+ * Anti-AI Design DevTools Extension - Panel
  *
  * Displays findings, provides controls for scanning and overlay toggling,
  * and allows clicking findings to inspect elements.
@@ -18,7 +18,7 @@ const tabId = chrome.devtools.inspectedWindow.tabId;
 let port = null;
 function getPort() {
   if (port) return port;
-  port = chrome.runtime.connect({ name: `anti-design-panel-${tabId}` });
+  port = chrome.runtime.connect({ name: `anti-ai-design-panel-${tabId}` });
   port.onMessage.addListener(handlePortMessage);
   port.onDisconnect.addListener(() => { port = null; });
   return port;
@@ -109,7 +109,7 @@ function initSpotlightBlurToggle(currentValue) {
   });
 }
 
-const { CATEGORY_LABELS, presentationCategory, fixSkillFor } = AntiDesignReport;
+const { CATEGORY_LABELS, presentationCategory, fixSkillFor } = AntiAiDesignReport;
 
 function renderSettings() {
   settingsList.innerHTML = '';
@@ -235,11 +235,11 @@ function getInspectedUrl() {
 }
 
 async function formatFindingsForCopy(findings) {
-  return AntiDesignReport.formatFindingsForCopy(findings, await getInspectedUrl());
+  return AntiAiDesignReport.formatFindingsForCopy(findings, await getInspectedUrl());
 }
 
 async function formatSingleFindingForCopy(item, finding) {
-  return AntiDesignReport.formatSingleFindingForCopy(item, finding, await getInspectedUrl());
+  return AntiAiDesignReport.formatSingleFindingForCopy(item, finding, await getInspectedUrl());
 }
 
 async function copyToClipboard(text, btn) {

@@ -5,12 +5,12 @@
 //! Pixel-level parity is proven by CRC32 of decoded/produced RGBA (and the f32
 //! diff-map) buffers; scores and fingerprints are compared value-for-value.
 
-use anti_design_comp::font_fingerprint as ff;
-use anti_design_comp::font_index as fi;
-use anti_design_comp::hero;
-use anti_design_comp::metrics as m;
-use anti_design_comp::raster::{self as r, rgb, Image};
-use anti_design_comp::{crc32, crc32_f32, png_io};
+use anti_ai_design_comp::font_fingerprint as ff;
+use anti_ai_design_comp::font_index as fi;
+use anti_ai_design_comp::hero;
+use anti_ai_design_comp::metrics as m;
+use anti_ai_design_comp::raster::{self as r, rgb, Image};
+use anti_ai_design_comp::{crc32, crc32_f32, png_io};
 use serde_json::Value;
 use std::path::PathBuf;
 
@@ -280,7 +280,7 @@ fn font_index_parity() {
     }
 
     // Full index (candidate ranking) — needs the catalog JSON from the public repo.
-    let pubrepo = std::env::var("ANTI_DESIGN_PUBLIC_REPO")
+    let pubrepo = std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../.."));
     let idx_path = pubrepo.join("skill/scripts/data/font-index.json");

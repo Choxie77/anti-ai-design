@@ -1,4 +1,4 @@
-<!-- anti-design:product-schema 2 -->
+<!-- anti-ai-design:product-schema 2 -->
 # Product
 
 ## What it is

@@ -1,6 +1,6 @@
 # Skill bundle signatures
 
-`anti-design install`, `update`, and `check` authenticate a remote skill ZIP
+`anti-ai-design install`, `update`, and `check` authenticate a remote skill ZIP
 before extracting it. `universal.zip.sig.json` is an Ed25519 signature over
 the ZIP's SHA-256 digest, byte length, release version, artifact name, and key
 ID. The engine trusts only `scripts/bundle-signing-keys.json`, compiled into
@@ -30,11 +30,11 @@ Treat that file as the only copy until it is stored in two places you control
 into chat, an issue, a log, or a command line. Anyone holding it can sign
 bundles the shipped engine will trust.
 
-Store it as a GitHub Actions secret named `ANTI_DESIGN_SIGNING_KEY`
+Store it as a GitHub Actions secret named `ANTI_AI_DESIGN_SIGNING_KEY`
 (Settings, Secrets and variables, Actions). From the key's directory:
 
 ```sh
-gh secret set ANTI_DESIGN_SIGNING_KEY --repo Choxie77/anti-ai-design < ~/aad-secrets/bundle-signing-private.pem
+gh secret set ANTI_AI_DESIGN_SIGNING_KEY --repo Choxie77/anti-ai-design < ~/aad-secrets/bundle-signing-private.pem
 ```
 
 `gh secret set` reads the value from stdin, so it never appears in the shell
@@ -47,24 +47,24 @@ environment with required reviewers, put the secret there, and add
 
 Normally you do not sign by hand: pushing the tag `v<version>` runs
 `.github/workflows/release.yml`, which builds `dist/universal.zip` from the
-tagged commit, signs it with `ANTI_DESIGN_SIGNING_KEY`, checks the signature
+tagged commit, signs it with `ANTI_AI_DESIGN_SIGNING_KEY`, checks the signature
 against the committed public key, and publishes `universal.zip` and
 `universal.zip.sig.json` together as the release `skill-v<version>`.
 
 `scripts/sign-bundle.mjs` reads the private key from the first of these that
 is set:
 
-1. `ANTI_DESIGN_SIGNING_KEY_FILE`: path to a PKCS#8 PEM. The file must not be
+1. `ANTI_AI_DESIGN_SIGNING_KEY_FILE`: path to a PKCS#8 PEM. The file must not be
    group or world accessible.
-2. `ANTI_DESIGN_SIGNING_KEY`: the PEM itself (what the workflow passes in).
-3. 1Password: `ANTI_DESIGN_SIGNING_KEY_REF` (`op://vault/item/field`), with
-   `OP_ACCOUNT` or the local git settings `anti-design.signingAccount` /
-   `anti-design.signingKeyRef`.
+2. `ANTI_AI_DESIGN_SIGNING_KEY`: the PEM itself (what the workflow passes in).
+3. 1Password: `ANTI_AI_DESIGN_SIGNING_KEY_REF` (`op://vault/item/field`), with
+   `OP_ACCOUNT` or the local git settings `anti-ai-design.signingAccount` /
+   `anti-ai-design.signingKeyRef`.
 
 Local signing of a build you made yourself:
 
 ```sh
-export ANTI_DESIGN_SIGNING_KEY_FILE="$HOME/aad-secrets/bundle-signing-private.pem"
+export ANTI_AI_DESIGN_SIGNING_KEY_FILE="$HOME/aad-secrets/bundle-signing-private.pem"
 node scripts/sign-bundle.mjs 4.8.0 dist/universal.zip
 ```
 
@@ -81,9 +81,9 @@ the upload plan; it does not prove that signing credentials work.
 Check a sidecar against the Rust verifier and compiled public key:
 
 ```sh
-ANTI_DESIGN_VERIFY_BUNDLE=/path/to/universal.zip \
-ANTI_DESIGN_VERIFY_BUNDLE_VERSION=4.8.0 \
-cargo test -p anti-design-skills verifies_reviewed_release_with_production_keyring -- --ignored
+ANTI_AI_DESIGN_VERIFY_BUNDLE=/path/to/universal.zip \
+ANTI_AI_DESIGN_VERIFY_BUNDLE_VERSION=4.8.0 \
+cargo test -p anti-ai-design-skills verifies_reviewed_release_with_production_keyring -- --ignored
 ```
 
 Never regenerate an old ZIP and sign those different bytes as the old
@@ -121,7 +121,7 @@ state are separate work. Signatures do not establish that authored skill
 content is safe. Separately downloaded engine binaries are covered only
 through the `scripts/engine-checksums.txt` digests the signed bundle carries.
 
-`ANTI_DESIGN_BUNDLE_PATH` and `anti-design link` are explicit local-development
+`ANTI_AI_DESIGN_BUNDLE_PATH` and `anti-ai-design link` are explicit local-development
 trust paths. They continue to accept unsigned local files/directories. Do not
 use those overrides to get around a failed remote verification. There is no
 unsigned-network fallback or skip-signature flag.
@@ -135,7 +135,7 @@ fields are rejected. The signature payload is UTF-8 with LF line endings
 and a final LF:
 
 ```text
-anti-design-skill-bundle-v1
+anti-ai-design-skill-bundle-v1
 <keyId>
 skill-v<version>
 universal.zip

@@ -11,17 +11,17 @@ import type { NextConfig } from "next";
 const posthogHost =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
 
-// Dev-only allowance so anti-design live mode can load. Guarded by NODE_ENV;
+// Dev-only allowance so anti-ai-design live mode can load. Guarded by NODE_ENV;
 // empty array in any non-development environment.
-const __antiDesignLiveDev =
+const __antiAiDesignLiveDev =
   process.env.NODE_ENV === "development" ? ["http://localhost:8400"] : [];
 
 const baseConfig = createBaseNextConfig({
   appName: "web",
   enableMapbox: true,
   additionalImgSrc: ["https:", "https://*.googleusercontent.com"],
-  additionalScriptSrc: [posthogHost, ...__antiDesignLiveDev],
-  additionalConnectSrc: [posthogHost, ...__antiDesignLiveDev],
+  additionalScriptSrc: [posthogHost, ...__antiAiDesignLiveDev],
+  additionalConnectSrc: [posthogHost, ...__antiAiDesignLiveDev],
 });
 
 const nextConfig: NextConfig = {

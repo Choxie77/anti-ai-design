@@ -4,9 +4,9 @@
 
 /** @type {import('next').NextConfig} */
 
-// Dev-only allowance so anti-design live mode can load. Empty string in any
+// Dev-only allowance so anti-ai-design live mode can load. Empty string in any
 // non-development environment.
-const __antiDesignLiveDev =
+const __antiAiDesignLiveDev =
   process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 
 module.exports = {
@@ -19,10 +19,10 @@ module.exports = {
             key: "Content-Security-Policy",
             value:
               "default-src 'self'; " +
-              `script-src 'self' 'unsafe-inline' 'unsafe-eval'${__antiDesignLiveDev}; ` +
+              `script-src 'self' 'unsafe-inline' 'unsafe-eval'${__antiAiDesignLiveDev}; ` +
               "style-src 'self' 'unsafe-inline'; " +
               "img-src 'self' data: blob:; " +
-              `connect-src 'self'${__antiDesignLiveDev}; ` +
+              `connect-src 'self'${__antiAiDesignLiveDev}; ` +
               "frame-ancestors 'self';",
           },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },

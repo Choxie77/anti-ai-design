@@ -1,5 +1,5 @@
 /**
- * Anti-Design DevTools Extension - Popup
+ * Anti-AI Design DevTools Extension - Popup
  *
  * Scan, copy the current page's findings, and toggle overlays.
  */
@@ -135,7 +135,7 @@ btnCopyAll.addEventListener('click', async () => {
       showCopyStatus('Page changed. Scan this page before copying.');
       return;
     }
-    await navigator.clipboard.writeText(AntiDesignReport.formatFindingsForCopy(scan.findings, scan.url));
+    await navigator.clipboard.writeText(AntiAiDesignReport.formatFindingsForCopy(scan.findings, scan.url));
     if (scan === currentScan) showCopyStatus('Copied findings. Paste them into your agent.');
   } catch {
     if (scan === currentScan) showCopyStatus('Couldn\u2019t copy findings. Try again.', true);

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // A/B of the two probes inside one bundle: inject dist/detect-antipatterns-
-// browser.js and diff `antiDesignDetect()` (rules over the live-DOM probe)
-// against `antiDesignDetectFromSnapshot()` (the same rules over a page
+// browser.js and diff `antiAiDesignDetect()` (rules over the live-DOM probe)
+// against `antiAiDesignDetectFromSnapshot()` (the same rules over a page
 // snapshot, hit tests answered on demand) on the same page in the same
 // Chrome. Verification tooling only (needs this repo's puppeteer).
 //
 //   node crates/wasm/tools/snapshot-diff.mjs [--public <other checkout>]
-//        [--only fixture.html,...] [--url https://anti-design.example] [--verbose]
+//        [--only fixture.html,...] [--url https://github.com/Choxie77/anti-ai-design] [--verbose]
 //
 // Exit 0 when every page is identical, 1 otherwise. Prints per-page timing,
 // snapshot size, rounds, and any computed-style property the capture missed.
@@ -23,7 +23,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const engineRoot = path.resolve(here, '../../..');
 // The fixtures and puppeteer live in this repo; --public points at another
 // checkout (an older one, for A/B against the pre-Rust engine).
-const publicRepo = path.resolve(flag('--public') || process.env.ANTI_DESIGN_PUBLIC_REPO || engineRoot);
+const publicRepo = path.resolve(flag('--public') || process.env.ANTI_AI_DESIGN_PUBLIC_REPO || engineRoot);
 const require = createRequire(path.join(publicRepo, 'package.json'));
 const puppeteer = require('puppeteer');
 
@@ -60,16 +60,16 @@ for (const url of targets) {
   let live, snap;
   try {
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
-    await page.evaluate(() => { window.__ANTI_DESIGN_CONFIG__ = { autoScan: false }; });
+    await page.evaluate(() => { window.__ANTI_AI_DESIGN_CONFIG__ = { autoScan: false }; });
     await page.evaluate(BUNDLE);
     live = await page.evaluate(() => {
       const t0 = performance.now();
-      const findings = window.antiDesignDetect({ decorate: false, serialize: true });
+      const findings = window.antiAiDesignDetect({ decorate: false, serialize: true });
       return { findings, ms: performance.now() - t0 };
     });
     snap = await page.evaluate(() => {
       const t0 = performance.now();
-      const r = window.antiDesignDetectFromSnapshot();
+      const r = window.antiAiDesignDetectFromSnapshot();
       return { ...r, ms: performance.now() - t0 };
     });
   } catch (e) {

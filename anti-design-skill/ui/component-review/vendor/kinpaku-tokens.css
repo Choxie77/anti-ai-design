@@ -1,7 +1,7 @@
-/* VENDORED from anti-design-site/site/styles/kinpaku-tokens.css (the source of truth).
+/* VENDORED from anti-ai-design-site/site/styles/kinpaku-tokens.css (the source of truth).
    Do not edit here: change the site, then run node scripts/sync-kinpaku-kit.mjs. */
 /*
- * anti-design.example tokens (page-global, single source of truth)
+ * github.com/Choxie77/anti-ai-design tokens (page-global, single source of truth)
  *
  * One theme. The page is neutral paper, the type is ink, and the brand gold
  * appears as a mark, a line, or an indicator on a dark control surface. It
@@ -189,7 +189,7 @@
 	--ks-type-eyebrow-size:  0.6875rem;
 	--ks-type-eyebrow-track: 0.14em;
 
-	/* Wordmark: ANTI_DESIGN in the header. */
+	/* Wordmark: ANTI_AI_DESIGN in the header. */
 	--ks-type-wordmark-size:  1.25rem;
 	--ks-type-wordmark-track: 0.18em;
 

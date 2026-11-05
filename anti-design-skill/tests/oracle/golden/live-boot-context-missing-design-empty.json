@@ -4,6 +4,6 @@
   "exit": 0,
   "signal": null,
   "files": {
-    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
+    ".anti-ai-design/live/config.json": "{\n  \"files\": [\"index.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
   }
 }

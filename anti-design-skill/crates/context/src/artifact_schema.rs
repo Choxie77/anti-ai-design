@@ -12,10 +12,10 @@ pub const PRODUCT_DEPRECATED_SECTIONS: [(&str, &str); 1] = [(
 )];
 
 static PRODUCT_STAMP_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?im)^[ \t]*<!--[ \t]*anti-design:product-schema[ \t]+(\d+)[ \t]*-->[ \t]*$").unwrap());
+    Lazy::new(|| Regex::new(r"(?im)^[ \t]*<!--[ \t]*anti-ai-design:product-schema[ \t]+(\d+)[ \t]*-->[ \t]*$").unwrap());
 
 pub fn product_stamp_line(version: i64) -> String {
-    format!("<!-- anti-design:product-schema {} -->", version)
+    format!("<!-- anti-ai-design:product-schema {} -->", version)
 }
 
 /// JS: readProductSchemaVersion

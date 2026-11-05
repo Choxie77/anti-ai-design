@@ -7,10 +7,6 @@ Anti-AI Design is a modified fork of [Impeccable](https://github.com/pbakaus/imp
 The npm package is a small launcher. It runs the engine binary for your platform, installed next to it as an optional dependency (`@anti-ai-design/cli-<os>-<arch>`), and falls back to a per-user cache or a one-time download when that package is missing.
 
 > **Status: pre-release.** The package and the engine downloads are not published yet. Build the engine from source until they are; steps are in the [main README](https://github.com/Choxie77/anti-ai-design/blob/main/anti-design-skill/README.md#build-from-source-works-today).
->
-> **Names.** The command is `anti-ai-design`. A local build is still named `anti-design` while the rename is pending; subcommands and flags are the same.
-
-<!-- RENAME-PASS: env vars (`ANTI_DESIGN_BIN`, `ANTI_DESIGN_BROWSER`), the `~/.anti-design/bin/` cache path and the `anti-design-disable` comment still use the old name in the code. Update with the rename, then drop the Names note above. -->
 
 ## Quick start
 
@@ -87,7 +83,7 @@ anti-ai-design detect [options] [file-or-dir-or-url...]
   --viewport <WxH>      Browser viewport for URL scans (default 1280x800)
   --no-config           Ignore project config, detector ignores, inline comments and DESIGN.md
   --no-inline-ignores   Do not honor in-file disable comments
-  --no-design-system    Do not load local DESIGN.md or .anti-design/design.json
+  --no-design-system    Do not load local DESIGN.md or .anti-ai-design/design.json
   --no-advisory         Hide advisory findings
   --no-consent-hiding   URL scans: leave consent-manager banners on the page
   --no-overlay-hiding   URL scans: leave product tours and preloaders on the page
@@ -101,10 +97,10 @@ This block mirrors `detect --help` of the engine in this repository; run it your
 ## Requirements
 
 - Node.js 18.19 or newer to run `npx anti-ai-design`. The engine is a self-contained binary and needs no runtime; the installed skill calls it directly.
-- For URL scans, an installed Chrome, Chromium or Edge. Set `ANTI_DESIGN_BROWSER` to point at a specific one.
+- For URL scans, an installed Chrome, Chromium or Edge. Set `ANTI_AI_DESIGN_BROWSER` to point at a specific one.
 - Behind a TLS-inspecting proxy, downloads trust your operating system's certificate store as well as the bundled Mozilla roots. Set `SSL_CERT_FILE` or `SSL_CERT_DIR` to use a specific CA bundle instead.
 
-Binary lookup order: `ANTI_DESIGN_BIN`, the platform package, `~/.anti-design/bin/<version>/`, then a download of the pinned version into that cache. Set `ANTI_DESIGN_BIN` to a local build to skip all of that.
+Binary lookup order: `ANTI_AI_DESIGN_BIN`, the platform package, `~/.anti-ai-design/bin/<version>/`, then a download of the pinned version into that cache. Set `ANTI_AI_DESIGN_BIN` to a local build to skip all of that.
 
 ## Part of Anti-AI Design
 

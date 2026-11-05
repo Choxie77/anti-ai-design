@@ -1,6 +1,6 @@
 {
   "stdout": "",
-  "stderr": "Error: overused-font is value-specific by default. Use /anti-design hooks ignore-value overused-font <font> for a confirmed font, or /anti-design hooks ignore-rule overused-font --all-values only when the user asked to ignore overused fonts generally.\n",
+  "stderr": "Error: overused-font is value-specific by default. Use /anti-ai-design hooks ignore-value overused-font <font> for a confirmed font, or /anti-ai-design hooks ignore-rule overused-font --all-values only when the user asked to ignore overused fonts generally.\n",
   "exit": 1,
   "signal": null,
   "files": {}

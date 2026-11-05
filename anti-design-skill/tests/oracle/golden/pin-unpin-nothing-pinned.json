@@ -4,9 +4,9 @@
   "exit": 0,
   "signal": null,
   "files": {
-    ".agents/skills/anti-design/SKILL.md": "---\nname: anti-design\ndescription: fixture\n---\n",
+    ".agents/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\ndescription: fixture\n---\n",
     ".claude/skills/audit/SKILL.md": "---\nname: audit\ndescription: a user-authored audit skill\n---\nNot pinned.\n",
-    ".claude/skills/anti-design/SKILL.md": "---\nname: anti-design\ndescription: fixture\n---\n",
-    ".cursor/skills/anti-design/SKILL.md": "---\nname: anti-design\ndescription: fixture\n---\n"
+    ".claude/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\ndescription: fixture\n---\n",
+    ".cursor/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\ndescription: fixture\n---\n"
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Anti-Pattern Browser Detector for Anti-Design
+ * Anti-Pattern Browser Detector for Anti-AI Design
  * Copyright (c) 2026 Paul Bakaus
  *
  * GENERATED -- do not edit. Source: crates/core/src/browser (rules, WASM) +
@@ -7,7 +7,7 @@
  * Rebuild: cargo xtask bundle
  *
  * Usage: <script src="detect-antipatterns-browser.js"></script>
- * Re-scan: window.antiDesignScan()
+ * Re-scan: window.antiAiDesignScan()
  */
 (function () {
 if (typeof window === 'undefined') return;

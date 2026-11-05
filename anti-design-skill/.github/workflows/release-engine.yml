@@ -1,8 +1,8 @@
 name: release-engine
 # Builds the engine binary for every supported target and publishes them, with
 # sha256 sidecars, as the GitHub Release `engine-v<X>` on this repo. That
-# release is what the launcher (skill/scripts/anti-design), the npm shim
-# (cli/bin/cli.js), `anti-design install`, and `bun run fetch:engine` download.
+# release is what the launcher (skill/scripts/anti-ai-design), the npm shim
+# (cli/bin/cli.js), `anti-ai-design install`, and `bun run fetch:engine` download.
 #
 # Trigger: `bun run release:engine` (scripts/release.mjs) verifies
 # ENGINE_VERSION, the npm platform-package pins, and a clean tree, then
@@ -48,16 +48,16 @@ jobs:
         run: cargo install cross --locked
       - name: Build
         shell: bash
-        run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release -p anti-design --target ${{ matrix.target }}
+        run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release -p anti-ai-design --target ${{ matrix.target }}
       - name: Smoke the binary
         if: ${{ !matrix.cross }}
         shell: bash
-        run: target/${{ matrix.target }}/release/anti-design${{ runner.os == 'Windows' && '.exe' || '' }} engine-probe
+        run: target/${{ matrix.target }}/release/anti-ai-design${{ runner.os == 'Windows' && '.exe' || '' }} engine-probe
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           # Keep unsigned Windows output outside the publish job's pattern.
-          name: ${{ matrix.short == 'windows-x64' && 'unsigned-windows-x64' || format('anti-design-{0}', matrix.short) }}
-          path: target/${{ matrix.target }}/release/anti-design${{ runner.os == 'Windows' && '.exe' || '' }}
+          name: ${{ matrix.short == 'windows-x64' && 'unsigned-windows-x64' || format('anti-ai-design-{0}', matrix.short) }}
+          path: target/${{ matrix.target }}/release/anti-ai-design${{ runner.os == 'Windows' && '.exe' || '' }}
           if-no-files-found: error
   sign-windows:
     needs: build
@@ -84,14 +84,14 @@ jobs:
         uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
         with:
           endpoint: https://eus.codesigning.azure.net/
-          signing-account-name: anti-design-signing
-          certificate-profile-name: anti-design-windows
-          files: ${{ github.workspace }}\unsigned\anti-design.exe
+          signing-account-name: anti-ai-design-signing
+          certificate-profile-name: anti-ai-design-windows
+          files: ${{ github.workspace }}\unsigned\anti-ai-design.exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-          description: Anti-Design engine
-          description-url: https://anti-design.example
+          description: Anti-AI Design engine
+          description-url: https://github.com/Choxie77/anti-ai-design
           exclude-environment-credential: true
           # Only the preceding OIDC Azure CLI login is used. Other credential
           # types are excluded by this pinned action's defaults.
@@ -101,7 +101,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $signature = Get-AuthenticodeSignature -LiteralPath 'unsigned/anti-design.exe'
+          $signature = Get-AuthenticodeSignature -LiteralPath 'unsigned/anti-ai-design.exe'
           if ($signature.Status -ne 'Valid') {
             throw "Invalid Windows signature: $($signature.Status) — $($signature.StatusMessage)"
           }
@@ -115,8 +115,8 @@ jobs:
           Write-Output "Verified publisher: $publisher; certificate: $($signature.SignerCertificate.Thumbprint)"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: anti-design-windows-x64
-          path: unsigned/anti-design.exe
+          name: anti-ai-design-windows-x64
+          path: unsigned/anti-ai-design.exe
           if-no-files-found: error
   publish:
     needs: [build, sign-windows]
@@ -126,16 +126,16 @@ jobs:
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          pattern: anti-design-*
+          pattern: anti-ai-design-*
           path: artifacts
       - name: Lay out release assets with checksums
         run: |
           set -e
           mkdir -p out
-          for d in artifacts/anti-design-*; do
-            short=$(basename "$d" | sed 's/^anti-design-//')
+          for d in artifacts/anti-ai-design-*; do
+            short=$(basename "$d" | sed 's/^anti-ai-design-//')
             f=$(ls "$d" | head -1)
-            case "$short" in windows-*) dest="out/anti-design-$short.exe" ;; *) dest="out/anti-design-$short" ;; esac
+            case "$short" in windows-*) dest="out/anti-ai-design-$short.exe" ;; *) dest="out/anti-ai-design-$short" ;; esac
             cp "$d/$f" "$dest"
             (cd out && sha256sum "$(basename "$dest")" > "$(basename "$dest").sha256")
           done
@@ -150,5 +150,5 @@ jobs:
         run: |
           set -e
           tag="${GITHUB_REF_NAME}"
-          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "anti-design engine $tag" \
-            --notes "Prebuilt anti-design engine binaries ($tag). The launcher, the npm shim and anti-design install download these on first run. Docs: https://anti-design.example" out/*
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "anti-ai-design engine $tag" \
+            --notes "Prebuilt anti-ai-design engine binaries ($tag). The launcher, the npm shim and anti-ai-design install download these on first run. Docs: https://github.com/Choxie77/anti-ai-design" out/*

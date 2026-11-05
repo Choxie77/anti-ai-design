@@ -1,10 +1,10 @@
 {
   "stdout": "",
-  "stderr": "Live server already running on port 65531 (pid <PID>).\nStop it first with: <ANTI_DESIGN> live-server stop\n",
+  "stderr": "Live server already running on port 65531 (pid <PID>).\nStop it first with: <ANTI_AI_DESIGN> live-server stop\n",
   "exit": 1,
   "signal": null,
   "files": {
-    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n",
-    ".anti-design/live/server.json": "{\"pid\":<PID>,\"port\":65531,\"token\":\"oracle-token\"}"
+    ".anti-ai-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n",
+    ".anti-ai-design/live/server.json": "{\"pid\":<PID>,\"port\":65531,\"token\":\"oracle-token\"}"
   }
 }

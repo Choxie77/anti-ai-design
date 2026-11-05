@@ -40,8 +40,8 @@ use ego_tree::{NodeId, NodeRef};
 use html5ever::tendril::TendrilSink;
 use html5ever::tree_builder::TreeBuilderOpts;
 use html5ever::ParseOpts;
-use anti_design_core::color::Rgba;
-use anti_design_core::js;
+use anti_ai_design_core::color::Rgba;
+use anti_ai_design_core::js;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use scraper::{Html, HtmlTreeSink, Node};
@@ -573,7 +573,7 @@ impl<'a> StaticElement<'a> {
     pub fn has_direct_text_longer_than(&self, min_len: usize) -> bool {
         self.node.children().any(|c| match c.value() {
             Node::Text(t) => {
-                anti_design_core::js_ext_b::utf16_len(anti_design_core::js::trim(&t.text)) > min_len
+                anti_ai_design_core::js_ext_b::utf16_len(anti_ai_design_core::js::trim(&t.text)) > min_len
             }
             _ => false,
         })

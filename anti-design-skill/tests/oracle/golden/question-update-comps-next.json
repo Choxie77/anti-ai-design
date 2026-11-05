@@ -4,6 +4,6 @@
   "exit": 0,
   "signal": null,
   "files": {
-    ".anti-design/questions/k1.hand.json": "{\"id\":\"<HAND_ID>\",\"digest\":\"5ae7176bafc2d5b5\",\"comps\":[\".anti-design/mocks/decision/a.png\",\".anti-design/mocks/decision/b.png\"],\"pre\":{},\"startedAt\": <EPOCH>}"
+    ".anti-ai-design/questions/k1.hand.json": "{\"id\":\"<HAND_ID>\",\"digest\":\"5ae7176bafc2d5b5\",\"comps\":[\".anti-ai-design/mocks/decision/a.png\",\".anti-ai-design/mocks/decision/b.png\"],\"pre\":{},\"startedAt\": <EPOCH>}"
   }
 }

@@ -7,7 +7,7 @@
 //! static scan still cannot clear is pinned here too, so the gap is visible
 //! rather than folded into a golden.
 
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::{Path, PathBuf};
 
 fn scan(html: &str) -> Vec<String> {
@@ -296,7 +296,7 @@ const STATIC_ONLY_LEFTOVERS: &[&str] = &[
 ];
 
 fn fixture(name: &str) -> Option<PathBuf> {
-    let root = match std::env::var("ANTI_DESIGN_PUBLIC_REPO") {
+    let root = match std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO") {
         Ok(p) => PathBuf::from(p),
         Err(_) => Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."),
     };

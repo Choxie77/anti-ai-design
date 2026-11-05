@@ -1,6 +1,6 @@
 {
   "stdout": "",
-  "stderr": "usage: anti-design surface-brief write <primary-target> <body-file>\n",
+  "stderr": "usage: anti-ai-design surface-brief write <primary-target> <body-file>\n",
   "exit": 1,
   "signal": null,
   "files": {}

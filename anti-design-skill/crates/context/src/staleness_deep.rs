@@ -11,7 +11,7 @@ use regex::Regex;
 use serde_json::{Map, Value};
 
 const VISUAL_SOURCE_DIRS: [&str; 7] = ["src", "app", "pages", "components", "site", "styles", "public"];
-const LEGACY_LIVE_PATHS: [&str; 2] = [".anti-design-live.json", ".anti-design-live"];
+const LEGACY_LIVE_PATHS: [&str; 2] = [".anti-ai-design-live.json", ".anti-ai-design-live"];
 
 fn git(args: &[&str], cwd: &str) -> Option<String> {
     git_run(args, cwd, true, Some(5000))
@@ -83,7 +83,7 @@ fn has_coverage_value(v: Option<&Value>) -> bool {
     }
 }
 
-const SEED_MARKER_TAIL: &str = "anti-design document once there's code to capture the actual tokens and components. -->";
+const SEED_MARKER_TAIL: &str = "anti-ai-design document once there's code to capture the actual tokens and components. -->";
 
 /// JS: checkDesignCoverage
 pub fn check_design_coverage(design: Option<&str>, design_path: Option<&str>) -> Vec<Finding> {
@@ -134,7 +134,7 @@ pub fn check_detector_ignores(project_root: &str, known_rule_ids: Option<&[Strin
         return out;
     }
     for name in ["config.json", "config.local.json"] {
-        let fp = jsp::join(&[project_root, ".anti-design", name]);
+        let fp = jsp::join(&[project_root, ".anti-ai-design", name]);
         let Some(raw) = read_json(&fp) else { continue };
         let Some(detector) = raw.get("detector") else { continue };
         if !js_truthy(detector) || !(detector.is_object() || detector.is_array()) {
@@ -293,7 +293,7 @@ pub fn check_hook_installation(
                     "{} still runs the design hook as Cursor's `preToolUse` write gate, which is retired. Cursor now runs it after each edit on `postToolUse` and hands the findings to the agent as context.",
                     ia
                 ),
-                "Move the entry to `postToolUse`: `anti-design doctor --fix`, `anti-design hooks on`, or the next `anti-design update` does it.".to_string(),
+                "Move the entry to `postToolUse`: `anti-ai-design doctor --fix`, `anti-ai-design hooks on`, or the next `anti-ai-design update` does it.".to_string(),
             ));
         }
         if !broken.is_empty() {
@@ -312,11 +312,11 @@ pub fn check_hook_installation(
                 // providers get project hooks, and a launcher entry in their
                 // home file is never repointed.
                 if *is_user && provider_id == "claude-code" {
-                    "Reinstall with `anti-design update --user`, which rewrites this user-level manifest against the skill's current location."
+                    "Reinstall with `anti-ai-design update --user`, which rewrites this user-level manifest against the skill's current location."
                 } else if *is_user {
-                    "Edit this user-level manifest by hand: point the command at the installed skill's launcher, or remove the Anti-Design entry. `anti-design update --user` installs project hooks and does not repoint this file."
+                    "Edit this user-level manifest by hand: point the command at the installed skill's launcher, or remove the Anti-AI Design entry. `anti-ai-design update --user` installs project hooks and does not repoint this file."
                 } else {
-                    "Reinstall with `anti-design hooks on`, which rewrites the manifest against the skill's current location."
+                    "Reinstall with `anti-ai-design hooks on`, which rewrites the manifest against the skill's current location."
                 }
                 .to_string(),
             ));
@@ -325,7 +325,7 @@ pub fn check_hook_installation(
     if let Some(ia) = installed_at {
         for root in &project_roots {
             for name in ["config.json", "config.local.json"] {
-                let cp = jsp::join(&[root, ".anti-design", name]);
+                let cp = jsp::join(&[root, ".anti-ai-design", name]);
                 let Some(raw) = read_json(&cp) else { continue };
                 let Some(hook) = raw.get("hook") else { continue };
                 if js_truthy(hook) && hook.get("enabled") == Some(&Value::Bool(false)) {
@@ -339,7 +339,7 @@ pub fn check_hook_installation(
                             "{} installs the design hook while this config sets `hook.enabled: false`, so the hook fires and then declines to scan.",
                             ia
                         ),
-                        "Ask which was intended: `anti-design hooks on` to enable, or `anti-design hooks off` to uninstall the manifest entry as well.".to_string(),
+                        "Ask which was intended: `anti-ai-design hooks on` to enable, or `anti-ai-design hooks off` to uninstall the manifest entry as well.".to_string(),
                     ));
                     return out;
                 }
@@ -364,7 +364,7 @@ pub fn check_legacy_live_state(project_root: &str) -> Vec<Finding> {
         Some(present.join(", ")),
         "auto",
         format!(
-            "Live-mode state sits in retired location(s): {}. Current live mode writes under `.anti-design/live/`.",
+            "Live-mode state sits in retired location(s): {}. Current live mode writes under `.anti-ai-design/live/`.",
             present.iter().map(|r| format!("`{}`", r)).collect::<Vec<_>>().join(", ")
         ),
         "These are read only through backward-compatible fallbacks and are safe to delete once no live session is running. No user decision is needed.".to_string(),
@@ -378,7 +378,7 @@ pub fn check_spent_build_artifacts(project_root: &str) -> Vec<Finding> {
     if project_root.is_empty() {
         return vec![];
     }
-    let Some(state) = read_json(&jsp::join(&[project_root, ".anti-design", "build", "state.json"])) else {
+    let Some(state) = read_json(&jsp::join(&[project_root, ".anti-ai-design", "build", "state.json"])) else {
         return vec![];
     };
     let spent: Vec<&str> = state
@@ -389,7 +389,7 @@ pub fn check_spent_build_artifacts(project_root: &str) -> Vec<Finding> {
             files
                 .iter()
                 .filter_map(Value::as_str)
-                .filter(|f| (f.starts_with(".anti-design/mocks/") || f.starts_with(".anti-design/review/")) && !f.split('/').any(|p| p == ".."))
+                .filter(|f| (f.starts_with(".anti-ai-design/mocks/") || f.starts_with(".anti-ai-design/review/")) && !f.split('/').any(|p| p == ".."))
                 .filter(|f| exists(&jsp::join(&[project_root, f])))
                 .collect()
         })
@@ -397,7 +397,7 @@ pub fn check_spent_build_artifacts(project_root: &str) -> Vec<Finding> {
     if spent.is_empty() {
         return vec![];
     }
-    let dirs: Vec<&str> = [".anti-design/mocks", ".anti-design/review"].into_iter().filter(|d| spent.iter().any(|f| f.starts_with(&format!("{d}/")))).collect();
+    let dirs: Vec<&str> = [".anti-ai-design/mocks", ".anti-ai-design/review"].into_iter().filter(|d| spent.iter().any(|f| f.starts_with(&format!("{d}/")))).collect();
     let named = spent.iter().take(5).map(|f| format!("`{}`", f)).collect::<Vec<_>>().join(", ");
     let more = if spent.len() > 5 { format!(" and {} more", spent.len() - 5) } else { String::new() };
     vec![finding(
@@ -507,7 +507,7 @@ pub fn check_workspaces(repo_root: &str, candidates: &[TargetCandidate]) -> (Vec
 
 /// JS: loadKnownRuleIds -> the bundled registry, lowercased ids.
 pub fn load_known_rule_ids() -> Option<Vec<String>> {
-    Some(anti_design_core::registry::ANTIPATTERNS.iter().map(|r| r.id.to_lowercase()).collect())
+    Some(anti_ai_design_core::registry::ANTIPATTERNS.iter().map(|r| r.id.to_lowercase()).collect())
 }
 
 #[cfg(test)]
@@ -518,7 +518,7 @@ mod tests {
 
     fn tmp() -> String {
         let base = std::env::temp_dir().join(format!(
-            "anti-design-doctor-hook-{}-{}-{}",
+            "anti-ai-design-doctor-hook-{}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos(),
             // A per-process counter: Windows' clock is coarse enough that two
@@ -544,11 +544,11 @@ mod tests {
     fn hook_script_missing_resolves_launcher_and_legacy_forms() {
         let root = tmp();
         // Launcher form pointing at a launcher that exists: no finding.
-        write(&root, ".claude/skills/anti-design/scripts/anti-design", "#!/bin/sh\n");
+        write(&root, ".claude/skills/anti-ai-design/scripts/anti-ai-design", "#!/bin/sh\n");
         write(
             &root,
             ".claude/settings.local.json",
-            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"\"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" hook"}]}]}}"#,
+            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"\"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" hook"}]}]}}"#,
         );
         assert!(check_hook_installation(&root, None, "claude-code", None).is_empty());
 
@@ -556,7 +556,7 @@ mod tests {
         write(
             &root,
             ".claude/settings.local.json",
-            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"\"${CLAUDE_PROJECT_DIR}/.other/skills/anti-design/scripts/anti-design\" hook"}]}]}}"#,
+            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"\"${CLAUDE_PROJECT_DIR}/.other/skills/anti-ai-design/scripts/anti-ai-design\" hook"}]}]}}"#,
         );
         let f = check_hook_installation(&root, None, "claude-code", None);
         assert_eq!(f.len(), 1, "{f:?}");
@@ -566,11 +566,11 @@ mod tests {
         write(
             &root,
             ".claude/settings.local.json",
-            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"node \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/hook.mjs\""}]}]}}"#,
+            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"node \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/hook.mjs\""}]}]}}"#,
         );
         let f = check_hook_installation(&root, None, "claude-code", None);
         assert_eq!(f.len(), 1, "{f:?}");
-        write(&root, ".claude/skills/anti-design/scripts/hook.mjs", "");
+        write(&root, ".claude/skills/anti-ai-design/scripts/hook.mjs", "");
         assert!(check_hook_installation(&root, None, "claude-code", None).is_empty());
         let _ = std::fs::remove_dir_all(&root);
     }
@@ -580,24 +580,24 @@ mod tests {
         let root = tmp();
         let rm = |rel: &str| std::fs::remove_file(std::path::Path::new(&root).join(rel)).unwrap();
         // A comp from a later round is on disk but was never recorded as spent.
-        for rel in [".anti-design/mocks/comp-2.png", ".anti-design/review/diff/hero/side-by-side.png", ".anti-design/mocks/decision/next.png"] {
+        for rel in [".anti-ai-design/mocks/comp-2.png", ".anti-ai-design/review/diff/hero/side-by-side.png", ".anti-ai-design/mocks/decision/next.png"] {
             write(&root, rel, "x");
         }
         assert!(check_spent_build_artifacts(&root).is_empty(), "no state");
-        write(&root, ".anti-design/build/state.json", r#"{"finish":{"disposition":"fix"}}"#);
+        write(&root, ".anti-ai-design/build/state.json", r#"{"finish":{"disposition":"fix"}}"#);
         assert!(check_spent_build_artifacts(&root).is_empty(), "no recorded ship");
         // Entries outside the two runtime directories are never named, even when they exist.
         write(&root, "src/app.css", "x");
-        write(&root, ".anti-design/build/state.json", r#"{"finish":{"disposition":"ship","spent":["src/app.css",".anti-design/mocks/../../src/app.css"]}}"#);
+        write(&root, ".anti-ai-design/build/state.json", r#"{"finish":{"disposition":"ship","spent":["src/app.css",".anti-ai-design/mocks/../../src/app.css"]}}"#);
         assert!(check_spent_build_artifacts(&root).is_empty(), "outside paths");
-        write(&root, ".anti-design/build/state.json", r#"{"finish":{"disposition":"ship","spent":[".anti-design/mocks/comp-2.png",".anti-design/mocks/comp-3.png",".anti-design/review/diff/hero/side-by-side.png"]}}"#);
+        write(&root, ".anti-ai-design/build/state.json", r#"{"finish":{"disposition":"ship","spent":[".anti-ai-design/mocks/comp-2.png",".anti-ai-design/mocks/comp-3.png",".anti-ai-design/review/diff/hero/side-by-side.png"]}}"#);
         let f = check_spent_build_artifacts(&root);
         assert_eq!(f.len(), 1, "{f:?}");
         assert_eq!((f[0].id.as_str(), f[0].severity), ("spent-build-artifacts", "mention"));
-        assert_eq!(f[0].path.as_deref(), Some(".anti-design/mocks, .anti-design/review"));
-        assert!(f[0].summary.ends_with(" 2 rejected comp, gate diff, or capture file(s) that nothing reads any more: `.anti-design/mocks/comp-2.png`, `.anti-design/review/diff/hero/side-by-side.png`."), "{}", f[0].summary);
-        rm(".anti-design/mocks/comp-2.png");
-        rm(".anti-design/review/diff/hero/side-by-side.png");
+        assert_eq!(f[0].path.as_deref(), Some(".anti-ai-design/mocks, .anti-ai-design/review"));
+        assert!(f[0].summary.ends_with(" 2 rejected comp, gate diff, or capture file(s) that nothing reads any more: `.anti-ai-design/mocks/comp-2.png`, `.anti-ai-design/review/diff/hero/side-by-side.png`."), "{}", f[0].summary);
+        rm(".anti-ai-design/mocks/comp-2.png");
+        rm(".anti-ai-design/review/diff/hero/side-by-side.png");
         assert!(check_spent_build_artifacts(&root).is_empty(), "all deleted");
         let _ = std::fs::remove_dir_all(&root);
     }
@@ -605,13 +605,13 @@ mod tests {
     #[test]
     fn cursor_gate_is_an_auto_finding_and_the_post_edit_hook_is_not() {
         let root = tmp();
-        write(&root, ".cursor/skills/anti-design/scripts/anti-design", "#!/bin/sh\n");
-        write(&root, ".cursor/hooks.json", r#"{"version":1,"hooks":{"preToolUse":[{"command":"\".cursor/skills/anti-design/scripts/anti-design\" hook-before-edit","timeout":5}]}}"#);
+        write(&root, ".cursor/skills/anti-ai-design/scripts/anti-ai-design", "#!/bin/sh\n");
+        write(&root, ".cursor/hooks.json", r#"{"version":1,"hooks":{"preToolUse":[{"command":"\".cursor/skills/anti-ai-design/scripts/anti-ai-design\" hook-before-edit","timeout":5}]}}"#);
         let f = check_hook_installation(&root, None, "cursor", None);
         assert_eq!(f.len(), 1, "{:?}", f.iter().map(|x| &x.id).collect::<Vec<_>>());
         assert_eq!(f[0].id, "cursor-hook-pre-edit-gate");
         assert_eq!(f[0].severity, "auto");
-        write(&root, ".cursor/hooks.json", r#"{"version":1,"hooks":{"postToolUse":[{"command":"\".cursor/skills/anti-design/scripts/anti-design\" hook","matcher":"^Write$","timeout":5}]}}"#);
+        write(&root, ".cursor/hooks.json", r#"{"version":1,"hooks":{"postToolUse":[{"command":"\".cursor/skills/anti-ai-design/scripts/anti-ai-design\" hook","matcher":"^Write$","timeout":5}]}}"#);
         assert!(check_hook_installation(&root, None, "cursor", None).is_empty());
         let _ = std::fs::remove_dir_all(&root);
     }
@@ -626,12 +626,12 @@ mod tests {
             &home,
             ".claude",
             "skills",
-            "anti-design",
+            "anti-ai-design",
             "scripts",
-            "anti-design",
+            "anti-ai-design",
         ]);
         let manifest = crate::jsp::join(&[&home, ".claude", "settings.json"]);
-        write(&home, ".claude/skills/anti-design/scripts/anti-design", "#!/bin/sh\n");
+        write(&home, ".claude/skills/anti-ai-design/scripts/anti-ai-design", "#!/bin/sh\n");
         write(
             &home,
             ".claude/settings.json",
@@ -650,7 +650,7 @@ mod tests {
         write(
             &home,
             ".claude/settings.local.json",
-            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"\"/missing/user-local/anti-design\" hook"}]}]}}"#,
+            r#"{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"\"/missing/user-local/anti-ai-design\" hook"}]}]}}"#,
         );
         assert!(check_hook_installation(&project, None, "claude-code", Some(&manifest)).is_empty());
 
@@ -658,7 +658,7 @@ mod tests {
         let findings = check_hook_installation(&project, None, "claude-code", Some(&manifest));
         assert_eq!(findings.len(), 1, "{findings:?}");
         assert_eq!(findings[0].id, "hook-script-missing");
-        assert!(findings[0].fix.starts_with("Reinstall with `anti-design update --user`"), "{:?}", findings[0].fix);
+        assert!(findings[0].fix.starts_with("Reinstall with `anti-ai-design update --user`"), "{:?}", findings[0].fix);
         let _ = std::fs::remove_dir_all(&root);
     }
 
@@ -668,9 +668,9 @@ mod tests {
         let project = crate::jsp::join(&[&root, "project"]);
         let home = crate::jsp::join(&[&root, "home"]);
         std::fs::create_dir_all(&project).unwrap();
-        let launcher = crate::jsp::join(&[&home, ".agents", "skills", "anti-design", "scripts", "anti-design"]);
+        let launcher = crate::jsp::join(&[&home, ".agents", "skills", "anti-ai-design", "scripts", "anti-ai-design"]);
         let manifest = crate::jsp::join(&[&root, "codex-home", "hooks.json"]);
-        write(&home, ".agents/skills/anti-design/scripts/anti-design", "#!/bin/sh\n");
+        write(&home, ".agents/skills/anti-ai-design/scripts/anti-ai-design", "#!/bin/sh\n");
         write(
             &root,
             "codex-home/hooks.json",

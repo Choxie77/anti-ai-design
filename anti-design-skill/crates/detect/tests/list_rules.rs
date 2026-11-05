@@ -1,11 +1,11 @@
-//! `anti-design detect --list-rules` prints the catalog and never scans.
+//! `anti-ai-design detect --list-rules` prints the catalog and never scans.
 
 use std::collections::HashMap;
 
-use anti_design_common::Io;
-use anti_design_core::registry::all_antipatterns;
-use anti_design_detect::cli::run_detect;
-use anti_design_detect::{Engines, MissingHtmlEngine};
+use anti_ai_design_common::Io;
+use anti_ai_design_core::registry::all_antipatterns;
+use anti_ai_design_detect::cli::run_detect;
+use anti_ai_design_detect::{Engines, MissingHtmlEngine};
 use serde_json::Value;
 
 fn run(args: &[&str]) -> (i32, String, String) {
@@ -67,7 +67,7 @@ fn list_rules_help_wins() {
     let (code, out, err) = run(&["--list-rules", "--help"]);
     assert_eq!(code, 0, "{err}");
     assert!(err.is_empty(), "{err}");
-    assert!(out.starts_with("Usage: anti-design detect"));
+    assert!(out.starts_with("Usage: anti-ai-design detect"));
     assert!(out.contains("--list-rules"));
     assert!(!out.contains("  side-tab\n"));
 }

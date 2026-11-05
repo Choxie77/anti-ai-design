@@ -2,10 +2,10 @@
 //! appear after the built-ins, inline ignores waive them, and a run without the
 //! pack is unchanged.
 
-use anti_design_aad_rules::{install_default, PACK, ROWS};
-use anti_design_core::registry::get_antipattern;
-use anti_design_core::rule_pack::{default_pack, RulePack};
-use anti_design_detect::detect_text::{detect_text, TextOptions};
+use anti_ai_design_aad_rules::{install_default, PACK, ROWS};
+use anti_ai_design_core::registry::get_antipattern;
+use anti_ai_design_core::rule_pack::{default_pack, RulePack};
+use anti_ai_design_detect::detect_text::{detect_text, TextOptions};
 
 const CSS: &str = "button {\n  outline: none;\n}\n";
 
@@ -40,7 +40,7 @@ fn findings_come_from_the_pack_only_when_it_is_passed() {
 #[test]
 fn inline_ignore_waives_a_pack_rule() {
     install_default();
-    let src = "/* anti-design-disable aad-focus-removed: custom ring drawn by the component */\nbutton {\n  outline: none;\n}\n";
+    let src = "/* anti-ai-design-disable aad-focus-removed: custom ring drawn by the component */\nbutton {\n  outline: none;\n}\n";
     assert!(!scan(src, "/app/a.css", true).contains(&"aad-focus-removed".to_string()));
 }
 

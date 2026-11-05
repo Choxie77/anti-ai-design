@@ -1,6 +1,6 @@
 /**
  * Tests for syncRootCommands. The post-merge release sync must mirror
- * generated provider command files (e.g. OpenCode's commands/anti-design.md)
+ * generated provider command files (e.g. OpenCode's commands/anti-ai-design.md)
  * into the tracked root harness folders, or direct GitHub / submodule /
  * npx-skills installs ship OpenCode without the slash command bridge (#483).
  */
@@ -24,11 +24,11 @@ describe('syncRootCommands', () => {
   test('mirrors generated command files into the root harness folder', () => {
     const dist = mkdtempSync(join(tmpdir(), 'imp-sync-dist-'));
     const root = mkdtempSync(join(tmpdir(), 'imp-sync-root-'));
-    setupDist(dist, 'opencode', '.opencode', { 'anti-design.md': 'bridge v1\n' });
+    setupDist(dist, 'opencode', '.opencode', { 'anti-ai-design.md': 'bridge v1\n' });
     try {
       const synced = syncRootCommands(dist, root, [{ provider: 'opencode', configDir: '.opencode' }]);
       expect(synced).toEqual(['.opencode']);
-      expect(readFileSync(join(root, '.opencode', 'commands', 'anti-design.md'), 'utf8')).toBe('bridge v1\n');
+      expect(readFileSync(join(root, '.opencode', 'commands', 'anti-ai-design.md'), 'utf8')).toBe('bridge v1\n');
     } finally {
       rmSync(dist, { recursive: true, force: true });
       rmSync(root, { recursive: true, force: true });
@@ -38,15 +38,15 @@ describe('syncRootCommands', () => {
   test('preserves repo-local or pinned command files already at the destination', () => {
     const dist = mkdtempSync(join(tmpdir(), 'imp-sync-dist-'));
     const root = mkdtempSync(join(tmpdir(), 'imp-sync-root-'));
-    setupDist(dist, 'opencode', '.opencode', { 'anti-design.md': 'bridge v2\n' });
+    setupDist(dist, 'opencode', '.opencode', { 'anti-ai-design.md': 'bridge v2\n' });
     const destDir = join(root, '.opencode', 'commands');
     mkdirSync(destDir, { recursive: true });
-    writeFileSync(join(destDir, 'anti-design-audit.md'), 'pinned by user\n');
-    writeFileSync(join(destDir, 'anti-design.md'), 'stale bridge\n');
+    writeFileSync(join(destDir, 'anti-ai-design-audit.md'), 'pinned by user\n');
+    writeFileSync(join(destDir, 'anti-ai-design.md'), 'stale bridge\n');
     try {
       syncRootCommands(dist, root, [{ provider: 'opencode', configDir: '.opencode' }]);
-      expect(readFileSync(join(destDir, 'anti-design.md'), 'utf8')).toBe('bridge v2\n');
-      expect(readFileSync(join(destDir, 'anti-design-audit.md'), 'utf8')).toBe('pinned by user\n');
+      expect(readFileSync(join(destDir, 'anti-ai-design.md'), 'utf8')).toBe('bridge v2\n');
+      expect(readFileSync(join(destDir, 'anti-ai-design-audit.md'), 'utf8')).toBe('pinned by user\n');
     } finally {
       rmSync(dist, { recursive: true, force: true });
       rmSync(root, { recursive: true, force: true });
@@ -56,7 +56,7 @@ describe('syncRootCommands', () => {
   test('skips providers whose dist variant has no commands dir', () => {
     const dist = mkdtempSync(join(tmpdir(), 'imp-sync-dist-'));
     const root = mkdtempSync(join(tmpdir(), 'imp-sync-root-'));
-    setupDist(dist, 'opencode', '.opencode', { 'anti-design.md': 'bridge\n' });
+    setupDist(dist, 'opencode', '.opencode', { 'anti-ai-design.md': 'bridge\n' });
     setupDist(dist, 'claude-code', '.claude', null);
     try {
       const synced = syncRootCommands(dist, root, [

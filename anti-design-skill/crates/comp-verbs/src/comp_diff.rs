@@ -6,15 +6,15 @@
 
 use std::path::{Path, PathBuf};
 
-use anti_design_comp::hero::{ink_box, InkBox};
-use anti_design_comp::metrics as m;
-use anti_design_comp::png_io;
-use anti_design_comp::raster::{self as r, Image};
+use anti_ai_design_comp::hero::{ink_box, InkBox};
+use anti_ai_design_comp::metrics as m;
+use anti_ai_design_comp::png_io;
+use anti_ai_design_comp::raster::{self as r, Image};
 use serde_json::{json, Value};
 
 use crate::util::{self, arg, arg_or, flag, num, pad_end, pad_start, r4f, round, to_fixed};
 
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 
 // ---- scoring ---------------------------------------------------------------
 
@@ -704,7 +704,7 @@ fn resolve(io: &Io, p: &str) -> PathBuf {
 
 // ---- CLI -------------------------------------------------------------------
 
-/// `anti-design comp-diff --comp <png> --build <png> ...`
+/// `anti-ai-design comp-diff --comp <png> --build <png> ...`
 pub fn run(argv: &[String], io: &mut Io) -> i32 {
     let comp_path = arg(argv, "comp");
     let build_path = arg(argv, "build");

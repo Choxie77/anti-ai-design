@@ -1,7 +1,7 @@
 {
-  "name": "anti-design",
+  "name": "anti-ai-design",
   "version": "4.8.0",
-  "author": "Anti-Design contributors",
+  "author": "Anti-AI Design contributors",
   "contributors": ["Paul Bakaus (upstream Impeccable)"],
   "description": "Design skills, commands, and anti-pattern detection for AI coding agents",
   "keywords": [
@@ -40,7 +40,7 @@
   },
   "type": "module",
   "bin": {
-    "anti-design": "cli/bin/cli.js"
+    "anti-ai-design": "cli/bin/cli.js"
   },
   "files": [
     "cli/bin/",
@@ -90,11 +90,11 @@
     "build:component-review": "bun scripts/build-component-review.mjs"
   },
   "optionalDependencies": {
-    "@anti-design/cli-darwin-arm64": "0.1.18",
-    "@anti-design/cli-darwin-x64": "0.1.18",
-    "@anti-design/cli-linux-x64": "0.1.18",
-    "@anti-design/cli-linux-arm64": "0.1.18",
-    "@anti-design/cli-windows-x64": "0.1.18"
+    "@anti-ai-design/cli-darwin-arm64": "0.1.18",
+    "@anti-ai-design/cli-darwin-x64": "0.1.18",
+    "@anti-ai-design/cli-linux-x64": "0.1.18",
+    "@anti-ai-design/cli-linux-arm64": "0.1.18",
+    "@anti-ai-design/cli-windows-x64": "0.1.18"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^4.0.7",

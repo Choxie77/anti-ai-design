@@ -6,7 +6,7 @@
 //! Text is handled as `Vec<char>` so index arithmetic mirrors the JS string
 //! indices (all structural characters are ASCII).
 
-use anti_design_core::js::{is_js_whitespace, trim, WS};
+use anti_ai_design_core::js::{is_js_whitespace, trim, WS};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{Map, Value};
@@ -462,7 +462,7 @@ pub fn js_string(value: &Value) -> String {
         Value::Bool(b) => b.to_string(),
         Value::Number(n) => n
             .as_f64()
-            .map(anti_design_core::js::number_to_string)
+            .map(anti_ai_design_core::js::number_to_string)
             .unwrap_or_else(|| n.to_string()),
         Value::String(t) => t.clone(),
         Value::Array(a) => a.iter().map(js_string).collect::<Vec<_>>().join(","),
@@ -610,7 +610,7 @@ pub fn strip_param_selector(
 
 static READY_DECL_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(&format!(
-        r"(^|;){ws}*--anti-design-variant-ready{ws}*:[^;{{}}]*",
+        r"(^|;){ws}*--anti-ai-design-variant-ready{ws}*:[^;{{}}]*",
         ws = WS
     ))
     .unwrap()

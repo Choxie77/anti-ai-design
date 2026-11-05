@@ -1,10 +1,10 @@
 {
-  "stdout": "  SKIP: <WS>/.opencode/commands/anti-design-polish.md (non-pinned command already exists)\n",
+  "stdout": "  SKIP: <WS>/.opencode/commands/anti-ai-design-polish.md (non-pinned command already exists)\n",
   "stderr": "",
   "exit": 0,
   "signal": null,
   "files": {
-    ".opencode/commands/anti-design-polish.md": "---\ndescription: hand written\n---\n",
-    ".opencode/skills/anti-design/SKILL.md": "---\nname: anti-design\n---\n"
+    ".opencode/commands/anti-ai-design-polish.md": "---\ndescription: hand written\n---\n",
+    ".opencode/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\n---\n"
   }
 }

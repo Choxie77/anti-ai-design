@@ -2,10 +2,10 @@
 //!
 //! The engine in this workspace ships its own built-in rules. These six rows are
 //! ours: they are added through the engine's rule-pack extension point
-//! (`anti_design_core::rule_pack`), so they live in their own crate and never touch
+//! (`anti_ai_design_core::rule_pack`), so they live in their own crate and never touch
 //! the built-in rule code. Ids start with `aad-` so they are easy to tell apart.
 //! All of them run in the text engine, which also covers `.html` files, and are
-//! waivable with `anti-design-disable` like any built-in rule.
+//! waivable with `anti-ai-design-disable` like any built-in rule.
 //!
 //! Heuristics are deliberately conservative and, where a rule can be a matter of
 //! taste (accent count, radius scale, glass), reported as advisories.
@@ -18,9 +18,9 @@ mod radii;
 pub mod safe_fix;
 mod util;
 
-use anti_design_core::findings::Finding;
-use anti_design_core::registry::Antipattern;
-use anti_design_core::rule_pack::RulePack;
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_core::registry::Antipattern;
+use anti_ai_design_core::rule_pack::RulePack;
 
 pub(crate) const ROW_EMOJI: usize = 0;
 pub(crate) const ROW_FOCUS: usize = 1;
@@ -94,9 +94,9 @@ pub struct AadPack;
 /// The pack value the binary installs.
 pub static PACK: AadPack = AadPack;
 
-/// Register the rows and make this the pack the `anti-design` CLI runs. Call once at startup.
+/// Register the rows and make this the pack the `anti-ai-design` CLI runs. Call once at startup.
 pub fn install_default() {
-    anti_design_core::rule_pack::install_default(&PACK);
+    anti_ai_design_core::rule_pack::install_default(&PACK);
 }
 
 impl RulePack for AadPack {

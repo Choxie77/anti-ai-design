@@ -1,25 +1,25 @@
-//! JS: lib/anti-design-paths.mjs (the live subset): `.anti-design/live` paths,
+//! JS: lib/anti-ai-design-paths.mjs (the live subset): `.anti-ai-design/live` paths,
 //! the live config path, server.json read/write, session ids.
 
 use crate::util::{exists, jsp, pid_reachable, read_json, Env};
-use anti_design_context::context::resolve_project_root;
-use anti_design_context::target_args::TargetOptions;
+use anti_ai_design_context::context::resolve_project_root;
+use anti_ai_design_context::target_args::TargetOptions;
 use serde_json::Value;
 
-pub const ANTI_DESIGN_DIR: &str = ".anti-design";
+pub const ANTI_AI_DESIGN_DIR: &str = ".anti-ai-design";
 pub const LIVE_DIR: &str = "live";
 
-/// JS: getAntiDesignDir(cwd)
-pub fn anti_design_dir(cwd: &str, env: &Env) -> String {
+/// JS: getAntiAiDesignDir(cwd)
+pub fn anti_ai_design_dir(cwd: &str, env: &Env) -> String {
     jsp::join(&[
         &resolve_project_root(cwd, &TargetOptions::default(), env),
-        ANTI_DESIGN_DIR,
+        ANTI_AI_DESIGN_DIR,
     ])
 }
 
 /// JS: getLiveDir(cwd)
 pub fn live_dir(cwd: &str, env: &Env) -> String {
-    jsp::join(&[&anti_design_dir(cwd, env), LIVE_DIR])
+    jsp::join(&[&anti_ai_design_dir(cwd, env), LIVE_DIR])
 }
 
 /// JS: getLiveConfigPath(cwd)
@@ -31,8 +31,8 @@ pub fn live_config_path(cwd: &str, env: &Env) -> String {
 /// `<scriptsDir>/config.json` fallback has no home in a single binary; the
 /// primary path is returned when the env override is unset.
 pub fn resolve_live_config_path(cwd: &str, env: &Env) -> String {
-    if let Some(v) = env.get("ANTI_DESIGN_LIVE_CONFIG") {
-        let t = anti_design_context::util::js_trim(v);
+    if let Some(v) = env.get("ANTI_AI_DESIGN_LIVE_CONFIG") {
+        let t = anti_ai_design_context::util::js_trim(v);
         if !t.is_empty() {
             return if jsp::is_absolute(t) {
                 t.to_string()
@@ -53,7 +53,7 @@ pub fn live_server_path(cwd: &str, env: &Env) -> String {
 pub fn legacy_live_server_path(cwd: &str, env: &Env) -> String {
     jsp::join(&[
         &resolve_project_root(cwd, &TargetOptions::default(), env),
-        ".anti-design-live.json",
+        ".anti-ai-design-live.json",
     ])
 }
 
@@ -66,7 +66,7 @@ pub fn live_sessions_dir(cwd: &str, env: &Env) -> String {
 pub fn legacy_live_sessions_dir(cwd: &str, env: &Env) -> String {
     jsp::join(&[
         &resolve_project_root(cwd, &TargetOptions::default(), env),
-        ".anti-design-live",
+        ".anti-ai-design-live",
         "sessions",
     ])
 }

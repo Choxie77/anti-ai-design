@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Replay the corpus against an implementation and diff against goldens.
- *   ANTI_DESIGN_BIN=/path/to/anti-design node tests/oracle/run.mjs [prefix]
+ *   ANTI_AI_DESIGN_BIN=/path/to/anti-ai-design node tests/oracle/run.mjs [prefix]
  *   node tests/oracle/run.mjs --js [prefix]     # self-check: JS vs its own goldens
  * Exit 1 on any difference. Cases whose id appears in DELTAS.md as accepted
  * are reported but not counted as failures.

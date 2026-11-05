@@ -25,32 +25,32 @@
 //! The findings are identical to the in-page bundle's; the differential
 //! (`crates/browser/tests/differential.rs`) is the gate.
 
-use anti_design_core::browser::snapshot::{Facts, ScrollShown, SnapshotDom};
-use anti_design_core::browser::visual::{self, CssPlan, Prepared, StackNode};
-use anti_design_core::browser::{BrowserConfig, ElId};
-use anti_design_core::color::Rgba;
+use anti_ai_design_core::browser::snapshot::{Facts, ScrollShown, SnapshotDom};
+use anti_ai_design_core::browser::visual::{self, CssPlan, Prepared, StackNode};
+use anti_ai_design_core::browser::{BrowserConfig, ElId};
+use anti_ai_design_core::color::Rgba;
 use serde_json::{json, Value};
 
 use crate::cdp::{CdpError, CdpResult, Page, NATIVES_JS};
 
 /// `browser-bundle/15-snapshot.js` — the page-measurement producer. It defines
-/// `const __antiDesignSnapshot = {...}` plus its helpers; [`ensure_snapshot_js`]
-/// wraps it so it installs `window.__antiDesignSnapshot` once per page.
+/// `const __antiAiDesignSnapshot = {...}` plus its helpers; [`ensure_snapshot_js`]
+/// wraps it so it installs `window.__antiAiDesignSnapshot` once per page.
 const SNAPSHOT_JS: &str = include_str!("../../../browser-bundle/15-snapshot.js");
 
-/// Install `window.__antiDesignSnapshot` from [`SNAPSHOT_JS`] (idempotent).
+/// Install `window.__antiAiDesignSnapshot` from [`SNAPSHOT_JS`] (idempotent).
 /// [`NATIVES_JS`] goes first in the same function, so the producer reaches
 /// the built-ins the new-document prelude stashed before the page's scripts
 /// ran, not whatever the page left on `window` (a site's own global `Map`).
 pub fn ensure_snapshot_js(page: &mut Page<'_>) -> CdpResult<()> {
     let expr = format!(
-        "(function(){{ if (window.__antiDesignSnapshot) return true;\n{NATIVES_JS}\n{SNAPSHOT_JS}\nwindow.__antiDesignSnapshot = __antiDesignSnapshot; return true; }})()"
+        "(function(){{ if (window.__antiAiDesignSnapshot) return true;\n{NATIVES_JS}\n{SNAPSHOT_JS}\nwindow.__antiAiDesignSnapshot = __antiAiDesignSnapshot; return true; }})()"
     );
     page.evaluate_value(&expr)?;
     Ok(())
 }
 
-/// `__antiDesignSnapshot.capture()` in the page: serialize the current DOM,
+/// `__antiAiDesignSnapshot.capture()` in the page: serialize the current DOM,
 /// keep the capture (`window.__impCap`) and its visual IO (`window.__impIO`)
 /// alive for hit-test answering and pixel reads, and hand the JSON back to be
 /// parsed into a [`SnapshotDom`]. Every re-capture (after a scroll) replaces
@@ -68,7 +68,7 @@ pub fn capture_snapshot_json(page: &mut Page<'_>) -> CdpResult<String> {
     // channel. Over CDP the websocket accepts 256 MiB (`cdp.rs`), so a URL scan
     // allows a capture up to 200 MiB: large commerce pages serialize to 70+ MiB
     // (cvs.com, 2026-09) and used to fail the scan outright.
-    let expr = "(function(){ const s = window.__antiDesignSnapshot; const c = s.capture({ maxBytes: 200 * 1024 * 1024 }); if (c.error) return { error: c.error }; window.__impCap = c; window.__impIO = s.visualIO(c); return { json: c.json }; })()";
+    let expr = "(function(){ const s = window.__antiAiDesignSnapshot; const c = s.capture({ maxBytes: 200 * 1024 * 1024 }); if (c.error) return { error: c.error }; window.__impCap = c; window.__impIO = s.visualIO(c); return { json: c.json }; })()";
     let out = page.evaluate_value(expr)?;
     if let Some(err) = out.get("error").and_then(Value::as_str) {
         return Err(CdpError::new(format!("snapshot capture failed: {err}")));
@@ -226,7 +226,7 @@ pub fn recapture_geometry(page: &mut Page<'_>, base: &SnapshotDom) -> CdpResult<
     Ok(SnapshotDom::new(snap))
 }
 
-/// Answer the hit-test points a run recorded (`__antiDesignSnapshot.answer`
+/// Answer the hit-test points a run recorded (`__antiAiDesignSnapshot.answer`
 /// over the live page and the held capture).
 fn answer_needs(page: &mut Page<'_>, hit_tests: &[[f64; 2]]) -> CdpResult<Facts> {
     if hit_tests.is_empty() {
@@ -234,7 +234,7 @@ fn answer_needs(page: &mut Page<'_>, hit_tests: &[[f64; 2]]) -> CdpResult<Facts>
     }
     let hits = serde_json::to_string(hit_tests).unwrap_or_else(|_| "[]".into());
     let expr = format!(
-        "(function(){{ return window.__antiDesignSnapshot.answer({{ hitTests: {hits} }}, window.__impCap); }})()"
+        "(function(){{ return window.__antiAiDesignSnapshot.answer({{ hitTests: {hits} }}, window.__impCap); }})()"
     );
     let out = page.evaluate_value(&expr)?;
     Ok(serde_json::from_value(out).unwrap_or_default())
@@ -278,13 +278,13 @@ pub fn resolve_needs_recording<T>(
 }
 
 /// The design-system config the browser rules read, built the way
-/// `configure-pure-detect` fed `window.__ANTI_DESIGN_CONFIG__` to the bundle,
-/// plus the rule pack the caller installed (`None` in the `anti-design`
+/// `configure-pure-detect` fed `window.__ANTI_AI_DESIGN_CONFIG__` to the bundle,
+/// plus the rule pack the caller installed (`None` in the `anti-ai-design`
 /// binary) and the rules the caller leaves out of the report
 /// ([`BrowserConfig::unreported_rules`]).
 pub fn browser_config(
     design_system: Value,
-    rule_pack: Option<&'static dyn anti_design_core::rule_pack::RulePack>,
+    rule_pack: Option<&'static dyn anti_ai_design_core::rule_pack::RulePack>,
     unreported_rules: &[String],
 ) -> BrowserConfig {
     BrowserConfig {
@@ -370,7 +370,7 @@ fn scroll_into_view(page: &mut Page<'_>, candidate: &Value) -> CdpResult<bool> {
     // it moves (a page that scrolls inside its body or an app shell's main) can
     // be put back: `window.scrollTo` never reaches those.
     let expr = format!(
-        "(function(){{ const el = ({})({}, {}); if (!el || typeof el.scrollIntoView !== 'function') return false; const saved = window.__antiDesignVisualScrollSaved || (window.__antiDesignVisualScrollSaved = new Map()); const up = n => n.assignedSlot || n.parentElement || (n.parentNode && n.parentNode.host) || null; for (let p = up(el); p; p = up(p)) {{ if (!saved.has(p)) saved.set(p, [p.scrollTop, p.scrollLeft]); }} el.scrollIntoView({{ block: 'center', inline: 'nearest', behavior: 'instant' }}); return true; }})()",
+        "(function(){{ const el = ({})({}, {}); if (!el || typeof el.scrollIntoView !== 'function') return false; const saved = window.__antiAiDesignVisualScrollSaved || (window.__antiAiDesignVisualScrollSaved = new Map()); const up = n => n.assignedSlot || n.parentElement || (n.parentNode && n.parentNode.host) || null; for (let p = up(el); p; p = up(p)) {{ if (!saved.has(p)) saved.set(p, [p.scrollTop, p.scrollLeft]); }} el.scrollIntoView({{ block: 'center', inline: 'nearest', behavior: 'instant' }}); return true; }})()",
         crate::screenshot_contrast::PICK_CANDIDATE_JS,
         json!(selector),
         identity
@@ -382,7 +382,7 @@ fn scroll_into_view(page: &mut Page<'_>, candidate: &Value) -> CdpResult<bool> {
 /// any element had moved.
 fn restore_element_scroll(page: &mut Page<'_>) -> CdpResult<bool> {
     let out = page.evaluate_value(
-        "(function(){ const saved = window.__antiDesignVisualScrollSaved; window.__antiDesignVisualScrollSaved = undefined; if (!saved) return false; let moved = false; for (const [p, [t, l]] of saved) { if (p.scrollTop !== t || p.scrollLeft !== l) { p.scrollTo({ top: t, left: l, behavior: 'instant' }); moved = true; } } return moved; })()",
+        "(function(){ const saved = window.__antiAiDesignVisualScrollSaved; window.__antiAiDesignVisualScrollSaved = undefined; if (!saved) return false; let moved = false; for (const [p, [t, l]] of saved) { if (p.scrollTop !== t || p.scrollLeft !== l) { p.scrollTo({ top: t, left: l, behavior: 'instant' }); moved = true; } } return moved; })()",
     )?;
     Ok(out.as_bool() == Some(true))
 }
@@ -394,7 +394,7 @@ fn wait_for_paint(page: &mut Page<'_>) -> CdpResult<()> {
     Ok(())
 }
 
-fn media(dom: &SnapshotDom, el: ElId) -> anti_design_core::browser::snapshot::MediaInfo {
+fn media(dom: &SnapshotDom, el: ElId) -> anti_ai_design_core::browser::snapshot::MediaInfo {
     dom.snap
         .get(el)
         .and_then(|n| n.media.clone())

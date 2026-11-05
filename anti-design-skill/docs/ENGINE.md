@@ -1,7 +1,7 @@
 # The engine: the Rust runtime behind every skill verb
 
-Every command the skill text runs is `{{scripts_path}}/anti-design <verb>`. The
-launcher next to the skill (`skill/scripts/anti-design`, `anti-design.cmd`)
+Every command the skill text runs is `{{scripts_path}}/anti-ai-design <verb>`. The
+launcher next to the skill (`skill/scripts/anti-ai-design`, `anti-ai-design.cmd`)
 finds or downloads one static binary per platform and execs it. That binary
 is built from this repo's Cargo workspace. There is no Node at runtime.
 
@@ -21,7 +21,7 @@ ENGINE_VERSION          which engine release the launcher / npm shim download
 .cargo/config.toml      the `cargo xtask` alias
 browser-bundle/         the page JS the in-page bundle is built from
 crates/
-  cli          the `anti-design` binary: verb router, exit codes
+  cli          the `anti-ai-design` binary: verb router, exit codes
   common       Io handle (stdout/stderr/stdin/env/cwd), path + process helpers,
                the HTTP/1.1 server core (`http`) behind every local server
   context      context, doctor, staleness, signals, concept-seed, pin, ...
@@ -30,10 +30,10 @@ crates/
   skills       install / update / check / link (the old npm CLI verbs)
   comp         comp-fidelity pure libs (raster, png, metrics, fonts)
   comp-verbs   build-phase, comp-diff, comp-spec, font-match
-  detect       `anti-design detect`: file walk, config, ignores, output, regex engine
+  detect       `anti-ai-design detect`: file walk, config, ignores, output, regex engine
   html         the static HTML engine: parser, cascade, static DOM, rule adapters
   browser      the URL engine: Chrome discovery, CDP, snapshot, visual pass
-  aad-rules    Anti-Design's own rules (aad-*), shipped as a rule pack (added by the fork)
+  aad-rules    Anti-AI Design's own rules (aad-*), shipped as a rule pack (added by the fork)
   foundation   JS-semantics helpers, color, findings, the rule registry, inline
                ignores, the Dom trait, SnapshotDom, and the plain-data types
                every check takes in and hands back
@@ -47,28 +47,28 @@ crates/
 ```
 
 `crates/core` re-exports the foundation modules under its own paths, so every
-consumer names one crate: `anti_design_core::js`, `anti_design_core::color`,
-`anti_design_core::checks::rules::check_colors`,
-`anti_design_core::browser::driver::collect_browser_findings`. The split
+consumer names one crate: `anti_ai_design_core::js`, `anti_ai_design_core::color`,
+`anti_ai_design_core::checks::rules::check_colors`,
+`anti_ai_design_core::browser::driver::collect_browser_findings`. The split
 between the two crates is about what a check is written against, not about
 who may see it.
 
 Build and test:
 
 ```bash
-cargo build --release -p anti-design      # target/release/anti-design
+cargo build --release -p anti-ai-design      # target/release/anti-ai-design
 cargo test --workspace
-ANTI_DESIGN_BIN=target/release/anti-design node tests/oracle/run.mjs   # the behavior gate
+ANTI_AI_DESIGN_BIN=target/release/anti-ai-design node tests/oracle/run.mjs   # the behavior gate
 ```
 
-`bun run test` and the oracle find the binary through `ANTI_DESIGN_BIN`, then
+`bun run test` and the oracle find the binary through `ANTI_AI_DESIGN_BIN`, then
 `skill/scripts/bin/<os>-<arch>/` (`bun run fetch:engine` downloads the pinned
-release there; `ANTI_DESIGN_BIN=target/release/anti-design bun run fetch:engine`
-copies a local build), then `target/release/anti-design`, so a plain
-`cargo build --release -p anti-design` is enough.
+release there; `ANTI_AI_DESIGN_BIN=target/release/anti-ai-design bun run fetch:engine`
+copies a local build), then `target/release/anti-ai-design`, so a plain
+`cargo build --release -p anti-ai-design` is enough.
 
 Every local server the engine runs (`live-server`, the `serve-question`
-decision page, `component-review serve`) is built on `anti_design_common::http`:
+decision page, `component-review serve`) is built on `anti_ai_design_common::http`:
 a `TcpListener`, one thread per connection, request parsing with a body cap,
 and responses that close their connection. The live server drives connections
 itself (turnstile ordering, SSE, parked polls); the other two take requests one
@@ -78,7 +78,7 @@ pool could leave part of a browser's connection burst unanswered (#1071). Add
 new servers on the same core rather than another HTTP crate.
 
 The frozen function-level vectors in `tests/oracle/vectors/calls/` replay
-through `anti_design_core::vectors::call` (`cargo test -p anti-design-core`),
+through `anti_ai_design_core::vectors::call` (`cargo test -p anti-ai-design-core`),
 which is the union of foundation's dispatch arms and the core's.
 
 ## The browser bundle
@@ -100,7 +100,7 @@ The same rules that run natively run in a page, compiled to WebAssembly.
    (`[{ id, name, category, description }]`, plus `severity` on a row that
    declares one, such as `"advisory"`) that a consumer working from a
    source checkout or a repo tarball reads without a Rust toolchain, since
-   `extension/detector/` is gitignored; anti-design.example counts and renders
+   `extension/detector/` is gitignored; github.com/Choxie77/anti-ai-design counts and renders
    the rules from it.
 4. Write the five extension pieces into `extension/detector/`
    (`snapshot.js`, `overlay.js`, `core.js`, `core_bg.wasm`,
@@ -113,9 +113,9 @@ sources, same bytes.
 
 `wasm-pack` is the one extra tool this needs (`cargo install wasm-pack
 --locked`) plus the `wasm32-unknown-unknown` target, which
-`rust-toolchain.toml` requests. `ANTI_DESIGN_BUNDLE_SKIP_WASM_PACK=1` reuses
+`rust-toolchain.toml` requests. `ANTI_AI_DESIGN_BUNDLE_SKIP_WASM_PACK=1` reuses
 whatever is already in `target/wasm-bundle/`, for iterating on the page JS
-alone. `ANTI_DESIGN_EXTENSION_SKIP_BUNDLE=1` lets `bun run build:extension`
+alone. `ANTI_AI_DESIGN_EXTENSION_SKIP_BUNDLE=1` lets `bun run build:extension`
 skip the bundle step when `extension/detector/` is already complete, for CI
 matrices that pre-built it.
 
@@ -124,29 +124,29 @@ Run `cargo xtask bundle` after touching `crates/core`, `crates/foundation`,
 
 ### Reusing the bundler downstream
 
-None of that lives in the task. `anti-design-bundle` (`crates/bundle`) embeds
+None of that lives in the task. `anti-ai-design-bundle` (`crates/bundle`) embeds
 `browser-bundle/*.js` with `include_str!` and owns the assembly, so a crate
-that links `anti-design-core` + `anti-design-wasm` plus its own rule pack into
+that links `anti-ai-design-core` + `anti-ai-design-wasm` plus its own rule pack into
 one wasm module builds the same artifacts for that module without copying a
 file out of this repo:
 
 ```rust
-let (glue, wasm) = anti_design_bundle::wasm_pack_build(
+let (glue, wasm) = anti_ai_design_bundle::wasm_pack_build(
     Path::new("crates/my-wasm"),      // engine + pack, not crates/wasm
     Path::new("target/wasm-bundle"),
     &[],                              // extra cargo args, after `--`
 )?;
-let js = anti_design_bundle::in_page_bundle(&glue, &wasm);   // /detect.js
-let registry = anti_design_bundle::registry_json();          // built-ins + pack rows
-let ext = anti_design_bundle::extension_pieces(&glue, &wasm, &registry);
-anti_design_bundle::check_capture_contract()?;               // snapshot/core drift
+let js = anti_ai_design_bundle::in_page_bundle(&glue, &wasm);   // /detect.js
+let registry = anti_ai_design_bundle::registry_json();          // built-ins + pack rows
+let ext = anti_ai_design_bundle::extension_pieces(&glue, &wasm, &registry);
+anti_ai_design_bundle::check_capture_contract()?;               // snapshot/core drift
 ```
 
 Nothing there writes files or exits: the caller places the bytes and reports
 its own failures. The pack's registry rows appear in `registry_json` once the
 pack is installed, since the registry reads built-ins plus every registered
-slice. `ANTI_DESIGN_BUNDLE_SKIP_WASM_PACK=1` is the library's name for the
-skip switch (the old `ANTI_DESIGN_XTASK_SKIP_WASM_PACK=1` still works).
+slice. `ANTI_AI_DESIGN_BUNDLE_SKIP_WASM_PACK=1` is the library's name for the
+skip switch (the old `ANTI_AI_DESIGN_XTASK_SKIP_WASM_PACK=1` still works).
 
 ## Rule packs
 
@@ -158,18 +158,18 @@ enforces byte-for-byte.
 
 The traits:
 
-- `anti_design_core::rule_pack::RulePack` (object-safe, `Send + Sync + Debug`)
+- `anti_ai_design_core::rule_pack::RulePack` (object-safe, `Send + Sync + Debug`)
   with three hooks, each defaulting to empty: `check_text(content, file_path,
   ext)` for the text engine, `check_element_dom(dom, el)` and
   `check_page_dom(dom)` for the browser engines.
-- `anti_design_html::StaticRulePack` with `check_document(doc, file_path)`.
+- `anti_ai_design_html::StaticRulePack` with `check_document(doc, file_path)`.
   The `StaticDocument` model belongs to `crates/html`, and `detect` cannot
   name a type from a crate that depends on it, so the static engine's hook is
   a separate trait. A pack that covers HTML implements both.
 
 Three steps for the downstream crate: declare `static ROWS: &[Antipattern]`
 with namespaced ids (`mypack/my-rule`) and return them from `registry()`;
-call `anti_design_core::rule_pack::install(&PACK)` once at startup, which is
+call `anti_ai_design_core::rule_pack::install(&PACK)` once at startup, which is
 what makes `get_antipattern` resolve the pack's ids and therefore what gives
 its findings a name, description, category, and severity; then pass the pack
 to the engine being run.
@@ -187,7 +187,7 @@ Where each hook runs, and why there:
 - **Text engine** (`detect_text`): after every built-in matcher, style-block
   and CSS-in-JS pass, the design-system scan, the dedupe, and the page
   analyzers, and before inline ignores. Appending last keeps built-in output
-  identical, and being inside the waiver step means `anti-design-disable`
+  identical, and being inside the waiver step means `anti-ai-design-disable`
   covers a pack's rules the same way it covers built-in ones.
 - **Static HTML engine** (`detect_html_source`): after the element rules, the
   design-system merge, the page-level checks and the pattern checks, again
@@ -218,30 +218,30 @@ over the file-scanning engines, JSON in and JSON out:
 - `detect_html_source_json(html, file_path, options_json)`
 
 Both take `{ inlineIgnores?: boolean, designSystem?: { frontmatter?, sidecar? } }`
-and return the findings array `anti-design detect --json` prints, same keys and
+and return the findings array `anti-ai-design detect --json` prints, same keys and
 same order. `designSystem` carries the DESIGN.md inputs rather than a
 normalized object, because the JS API's normalized form used `Set`s and
 `Map`s that JSON cannot hold. Unparseable options fall back to the defaults.
 `antipatterns_json()` lists the built-ins followed by any pack's rows, and
 `immediate_tier_rules_json()` returns the design hook's immediate tier (the
 rule ids worth fixing at the edit site). That list lives in
-`anti_design_core::registry::IMMEDIATE_TIER_RULES`, which `anti-design-hook`
+`anti_ai_design_core::registry::IMMEDIATE_TIER_RULES`, which `anti-ai-design-hook`
 re-exports, so a wasm consumer reads the same one the hook runs on instead of
 keeping a copy.
 
-A pack reaches those exports through `anti_design_wasm::set_rule_pack` and
+A pack reaches those exports through `anti_ai_design_wasm::set_rule_pack` and
 `exports_detect::set_static_rule_pack`, both Rust-only: the consumer is a
-crate that links `anti-design-wasm` as an rlib, registers its pack, and runs
+crate that links `anti-ai-design-wasm` as an rlib, registers its pack, and runs
 `wasm-pack` over itself. There is deliberately no JS-facing setter.
 
 ```bash
-cargo build -p anti-design-wasm --features detect --target wasm32-unknown-unknown --release
+cargo build -p anti-ai-design-wasm --features detect --target wasm32-unknown-unknown --release
 ```
 
 Pristine (the PR design-review bot) is the first consumer: its `rules/` crate
 carries `pristine/*` rules on all three hooks and reaches the engine through
 this feature, replacing the `detectText` call it makes into the npm
-`anti-design@3` package today.
+`anti-ai-design@3` package today.
 
 ## Releases
 
@@ -266,14 +266,14 @@ Two release kinds touch the runtime, in this order:
    3. `.github/workflows/release-engine.yml` builds darwin arm64/x64, linux
       x64/arm64 (musl) and windows x64, smokes the native ones with
       `engine-probe`, and publishes the release `engine-v<X>` with each
-      `anti-design-<os>-<arch>[.exe]`, its `.sha256`, and
+      `anti-ai-design-<os>-<arch>[.exe]`, its `.sha256`, and
       `engine-checksums.txt` generated from those exact files
       (`check-engine-release.mjs --from-dir`). A manual run builds and smokes
       without publishing. The Windows binary is not Authenticode-signed.
    4. Copy `engine-checksums.txt` from the release into
       `skill/scripts/engine-checksums.txt` (or run `bun run release:checksums`,
       which downloads the five binaries and hashes them) and commit it. The launcher, the npm shim and
-      `anti-design install` download from
+      `anti-ai-design install` download from
       `github.com/Choxie77/anti-ai-design/releases/download/engine-v<X>/` and
       verify each binary against that file, never the `.sha256` sidecar.
       `scripts/fetch-engine.mjs` defines the repository, download base and npm

@@ -3,21 +3,21 @@ import path from 'node:path';
 import { buildCursorHooksManifest } from './transformers/hooks.js';
 import { quoteLauncher } from './plugin-paths.js';
 
-const PROJECT_SCRIPTS = '.cursor/skills/anti-design/scripts';
+const PROJECT_SCRIPTS = '.cursor/skills/anti-ai-design/scripts';
 
 export function rewriteCursorPluginMarkdown(text, { agent = false } = {}) {
   // Installed plugins live outside the workspace. Keep the shared Setup flow,
   // but remove its project-install fallback and quote executable paths.
   text = text.replace(`, and \`${PROJECT_SCRIPTS}\` is the fallback only when the runtime reports no base directory`, '');
-  text = text.replaceAll(`${PROJECT_SCRIPTS}/anti-design.cmd`, quoteLauncher('<skill-base-dir>', true));
-  text = text.replaceAll(`${PROJECT_SCRIPTS}/anti-design`, quoteLauncher('<skill-base-dir>'));
+  text = text.replaceAll(`${PROJECT_SCRIPTS}/anti-ai-design.cmd`, quoteLauncher('<skill-base-dir>', true));
+  text = text.replaceAll(`${PROJECT_SCRIPTS}/anti-ai-design`, quoteLauncher('<skill-base-dir>'));
   text = text.replaceAll(PROJECT_SCRIPTS, '<skill-base-dir>/scripts');
-  text = text.replace('`<skill-base-dir>/scripts/anti-design context`', '`"<skill-base-dir>/scripts/anti-design" context`');
+  text = text.replace('`<skill-base-dir>/scripts/anti-ai-design context`', '`"<skill-base-dir>/scripts/anti-ai-design" context`');
   if (agent && text.includes('<skill-base-dir>')) {
     const end = text.indexOf('\n---', 4);
     if (end < 0) throw new Error('Cursor agent is missing frontmatter');
     const offset = end + 4;
-    text = `${text.slice(0, offset)}\n\nResolve \`<skill-base-dir>\` from the skill scripts path supplied in the handoff (its parent directory), or from \`../skills/anti-design\` relative to this agent file. Keep cwd at the user's project.${text.slice(offset)}`;
+    text = `${text.slice(0, offset)}\n\nResolve \`<skill-base-dir>\` from the skill scripts path supplied in the handoff (its parent directory), or from \`../skills/anti-ai-design\` relative to this agent file. Keep cwd at the user's project.${text.slice(offset)}`;
   }
   return text.replace(/[\t ]+$/gm, '').trimEnd() + '\n';
 }
@@ -34,7 +34,7 @@ export function stageCursorPlugin(rootDir, distDir) {
   const provider = path.join(distDir, 'cursor', '.cursor');
   const icon = path.join(rootDir, 'scripts/lib/assets/plugin-icon.png');
   const readme = path.join(rootDir, 'docs/CURSOR-PLUGIN.md');
-  for (const input of [path.join(provider, 'skills/anti-design/SKILL.md'), path.join(provider, 'agents'), icon, readme]) {
+  for (const input of [path.join(provider, 'skills/anti-ai-design/SKILL.md'), path.join(provider, 'agents'), icon, readme]) {
     if (!fs.existsSync(input)) throw new Error(`Cannot build Cursor plugin: missing ${input}`);
   }
   const source = JSON.parse(fs.readFileSync(path.join(rootDir, '.claude-plugin/plugin.json'), 'utf8'));
@@ -50,8 +50,8 @@ export function stageCursorPlugin(rootDir, distDir) {
   fs.copyFileSync(readme, path.join(output, 'README.md'));
   fs.copyFileSync(path.join(rootDir, 'LICENSE'), path.join(output, 'LICENSE'));
   fs.writeFileSync(path.join(output, '.cursor-plugin/plugin.json'), `${JSON.stringify({
-    name: 'anti-design', version: source.version,
-    description: 'Design and refine interfaces with Anti-Design skills, specialist agents, and design checks.',
+    name: 'anti-ai-design', version: source.version,
+    description: 'Design and refine interfaces with Anti-AI Design skills, specialist agents, and design checks.',
     author: { name: 'Renaissance Geek, Inc.' },
     homepage: source.homepage, repository: source.repository,
     license: 'Apache-2.0', keywords: ['design', 'frontend', 'accessibility', 'ui', 'ux'],
@@ -59,7 +59,7 @@ export function stageCursorPlugin(rootDir, distDir) {
   }, null, 2)}\n`);
   fs.mkdirSync(path.join(output, 'hooks'));
   fs.writeFileSync(path.join(output, 'hooks/hooks.json'), `${JSON.stringify(
-    buildCursorHooksManifest('${CURSOR_PLUGIN_ROOT}/skills/anti-design/scripts'), null, 2,
+    buildCursorHooksManifest('${CURSOR_PLUGIN_ROOT}/skills/anti-ai-design/scripts'), null, 2,
   )}\n`);
   return output;
 }

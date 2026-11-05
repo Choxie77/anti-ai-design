@@ -1,5 +1,5 @@
 [package]
-name = "anti-design-comp-verbs"
+name = "anti-ai-design-comp-verbs"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -14,10 +14,10 @@ publish.workspace = true
 # `crates/browser`, so the browser (and its `core` dependency) stays out of here.
 
 [dependencies]
-anti-design-comp = { workspace = true }
-anti-design-common = { workspace = true, features = ["seed"] }
+anti-ai-design-comp = { workspace = true }
+anti-ai-design-common = { workspace = true, features = ["seed"] }
 # The plates -> hero gate reads the human plan review (component_review::plan::gate).
-anti-design-context = { workspace = true }
+anti-ai-design-context = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true, features = ["preserve_order", "float_roundtrip"] }
 regex = { workspace = true }

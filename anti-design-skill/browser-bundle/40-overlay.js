@@ -5,7 +5,7 @@
 // names and categories come from the registry it is handed. Ported from
 // cli/engine/browser/injected/index.mjs Section 7.
 //
-// createAntiDesignOverlay({ extensionMode, antipatterns }) ->
+// createAntiAiDesignOverlay({ extensionMode, antipatterns }) ->
 //   { highlight(el, findings), showPageBanner(findings), clearOverlays(),
 //     remove(), toggleOverlays() -> visible, spotlight(target),
 //     unspotlight(), highlightSelector(selector), setFirstScanDone(),
@@ -13,7 +13,7 @@
 // Used by the in-page bundle (50-scan.js) and, as `overlay.js`, by the
 // extension's content script.
 
-function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = {}) {
+function createAntiAiDesignOverlay({ extensionMode = false, antipatterns = [] } = {}) {
   // Kinpaku gold — pinned to the site's brand token (see
   // site/styles/kinpaku-tokens.css --ks-kinpaku). Keep this in sync with
   // the picker's C.brand in skill/scripts/live-browser.js, the extension's
@@ -55,40 +55,40 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   // Inject hover styles via CSS (more reliable than JS event listeners)
   const styleEl = document.createElement('style');
   styleEl.textContent = `
-    @keyframes anti-design-reveal {
+    @keyframes anti-ai-design-reveal {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    .anti-design-overlay:not(.anti-design-banner) {
+    .anti-ai-design-overlay:not(.anti-ai-design-banner) {
       pointer-events: none;
       outline: 1px solid ${OUTLINE_COLOR};
       box-shadow: ${GLOW};
       border-radius: 4px;
       transition: outline-color 0.15s ease, box-shadow 0.15s ease;
-      animation: anti-design-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: anti-ai-design-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-play-state: paused;
       border-top-left-radius: 0;
     }
-    .anti-design-overlay.anti-design-visible {
+    .anti-ai-design-overlay.anti-ai-design-visible {
       animation-play-state: running;
     }
-    .anti-design-overlay.anti-design-hover {
+    .anti-ai-design-overlay.anti-ai-design-hover {
       outline-color: ${BRAND_COLOR_HOVER};
       box-shadow: ${GLOW_HOVER};
       z-index: 100001 !important;
     }
-    .anti-design-overlay.anti-design-hover .anti-design-label {
+    .anti-ai-design-overlay.anti-ai-design-hover .anti-ai-design-label {
       background: ${BRAND_COLOR_HOVER};
     }
-    .anti-design-overlay.anti-design-spotlight {
+    .anti-ai-design-overlay.anti-ai-design-spotlight {
       z-index: 100002 !important;
     }
-    .anti-design-overlay.anti-design-spotlight-dimmed {
+    .anti-ai-design-overlay.anti-ai-design-spotlight-dimmed {
       opacity: 0.15 !important;
       animation: none !important;
       filter: blur(3px);
     }
-    .anti-design-spotlight-backdrop {
+    .anti-ai-design-spotlight-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       backdrop-filter: blur(3px) brightness(0.6);
@@ -99,10 +99,10 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
       outline: none !important;
       animation: none !important;
     }
-    .anti-design-spotlight-backdrop.anti-design-visible {
+    .anti-ai-design-spotlight-backdrop.anti-ai-design-visible {
       opacity: 1;
     }
-    .anti-design-hidden .anti-design-overlay${extensionMode ? '' : ':not(.anti-design-banner)'} {
+    .anti-ai-design-hidden .anti-ai-design-overlay${extensionMode ? '' : ':not(.anti-ai-design-banner)'} {
       display: none !important;
     }
   `;
@@ -117,7 +117,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   function getSpotlightBackdrop() {
     if (!spotlightBackdrop) {
       spotlightBackdrop = document.createElement('div');
-      spotlightBackdrop.className = 'anti-design-spotlight-backdrop';
+      spotlightBackdrop.className = 'anti-ai-design-spotlight-backdrop';
       document.body.appendChild(spotlightBackdrop);
     }
     return spotlightBackdrop;
@@ -143,19 +143,19 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   function showSpotlight(target) {
     if (!target || !target.getBoundingClientRect) return;
     // Respect the spotlightBlur setting: if disabled, don't show the backdrop
-    if (window.__ANTI_DESIGN_CONFIG__?.spotlightBlur === false) {
+    if (window.__ANTI_AI_DESIGN_CONFIG__?.spotlightBlur === false) {
       spotlightTarget = target;
       return;
     }
     spotlightTarget = target;
     const bd = getSpotlightBackdrop();
     updateSpotlightClipPath();
-    bd.classList.add('anti-design-visible');
+    bd.classList.add('anti-ai-design-visible');
   }
 
   function hideSpotlight() {
     spotlightTarget = null;
-    if (spotlightBackdrop) spotlightBackdrop.classList.remove('anti-design-visible');
+    if (spotlightBackdrop) spotlightBackdrop.classList.remove('anti-ai-design-visible');
   }
 
   function isInViewport(el) {
@@ -208,20 +208,20 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
 
   // Where an outline lives and which coordinates it takes. A modal <dialog>
   // paints over everything outside its subtree, so live mode parks a popover
-  // (#anti-design-live-top-layer) inside the topmost open one; an outline
+  // (#anti-ai-design-live-top-layer) inside the topmost open one; an outline
   // whose target is in that dialog mounts there, in viewport coordinates
   // because the host is a fixed box. Live fires an event of the same name on
   // every move of the host, and every outline is placed again. Without live
   // mode the lookup misses.
   function placeOverlay(overlay) {
-    const host = document.getElementById('anti-design-live-top-layer');
+    const host = document.getElementById('anti-ai-design-live-top-layer');
     const mount = host && host.parentNode.contains(overlay._targetEl) ? host : document.body;
     if (overlay.parentNode !== mount) mount.appendChild(overlay);
     overlay._isFixed = mount === host || isInFixedContext(overlay._targetEl);
     overlay.style.position = overlay._isFixed ? 'fixed' : 'absolute';
   }
 
-  document.addEventListener('anti-design-live-top-layer', () => {
+  document.addEventListener('anti-ai-design-live-top-layer', () => {
     for (const o of overlays) {
       if (!o._targetEl) continue;
       placeOverlay(o);
@@ -231,7 +231,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
 
   function repositionOverlays() {
     for (const o of overlays) {
-      if (!o._targetEl || o.classList.contains('anti-design-banner')) continue;
+      if (!o._targetEl || o.classList.contains('anti-ai-design-banner')) continue;
       // Skip overlays whose target is currently hidden (display: none on the overlay)
       if (o.style.display === 'none') continue;
       positionOverlay(o);
@@ -259,7 +259,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   let overlayIndex = 0;
   const visibilityObserver = new IntersectionObserver((entries) => {
     for (const entry of entries) {
-      const overlay = entry.target._antiDesignOverlay;
+      const overlay = entry.target._antiAiDesignOverlay;
       if (!overlay) continue;
       if (entry.isIntersecting) {
         overlay.style.display = '';
@@ -275,7 +275,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
             overlay.style.animationDelay = `${Math.min((overlay._staggerIndex || 0) * 60, 600)}ms`;
           }
           requestAnimationFrame(() => {
-            overlay.classList.add('anti-design-visible');
+            overlay.classList.add('anti-ai-design-visible');
             if (overlay._checkLabel) overlay._checkLabel();
           });
         }
@@ -290,9 +290,9 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
     if (typeof overlay._cleanup === 'function') {
       try { overlay._cleanup(); } catch { /* best effort overlay teardown */ }
     }
-    if (overlay._targetEl && overlay._targetEl._antiDesignOverlay === overlay) {
+    if (overlay._targetEl && overlay._targetEl._antiAiDesignOverlay === overlay) {
       visibilityObserver.unobserve(overlay._targetEl);
-      delete overlay._targetEl._antiDesignOverlay;
+      delete overlay._targetEl._antiAiDesignOverlay;
     }
     const idx = overlays.indexOf(overlay);
     if (idx >= 0) overlays.splice(idx, 1);
@@ -305,7 +305,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   document.addEventListener('transitionend', (e) => {
     if (e.propertyName !== 'transform') return;
     for (const o of overlays) {
-      if (!o._targetEl || o.classList.contains('anti-design-banner') || o.style.display === 'none') continue;
+      if (!o._targetEl || o.classList.contains('anti-ai-design-banner') || o.style.display === 'none') continue;
       if (e.target === o._targetEl || e.target.contains(o._targetEl)) {
         positionOverlay(o);
       }
@@ -313,11 +313,11 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   });
 
   const highlight = function(el, findings) {
-    if (el._antiDesignOverlay) detachOverlay(el._antiDesignOverlay);
+    if (el._antiAiDesignOverlay) detachOverlay(el._antiAiDesignOverlay);
     const hasSlop = findings.some(f => RULE_CATEGORY[f.type || f.id] === 'slop');
 
     const outline = document.createElement('div');
-    outline.className = 'anti-design-overlay';
+    outline.className = 'anti-ai-design-overlay';
     outline._targetEl = el;
     Object.assign(outline.style, { zIndex: '99999', boxSizing: 'border-box' });
 
@@ -330,7 +330,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
     const allText = entries.map(e => e.name).join(', ');
 
     const label = document.createElement('div');
-    label.className = 'anti-design-label';
+    label.className = 'anti-ai-design-label';
     Object.assign(label.style, {
       position: 'absolute', bottom: '100%', left: '-2px',
       display: 'flex', alignItems: 'center',
@@ -407,7 +407,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
     // Start hidden; the IntersectionObserver will show it once the target is rendered
     outline.style.display = 'none';
     outline._staggerIndex = overlayIndex++;
-    el._antiDesignOverlay = outline;
+    el._antiAiDesignOverlay = outline;
     visibilityObserver.observe(el);
 
     // After first paint, check label width vs outline
@@ -420,7 +420,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
     // Hover: show detail text, darken
     const onMouseEnter = () => {
       isHovered = true;
-      outline.classList.add('anti-design-hover');
+      outline.classList.add('anti-ai-design-hover');
       outline.style.outlineColor = BRAND_COLOR_HOVER;
       label.style.background = BRAND_COLOR_HOVER;
       if (cycleMode) {
@@ -431,7 +431,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
     };
     const onMouseLeave = () => {
       isHovered = false;
-      outline.classList.remove('anti-design-hover');
+      outline.classList.remove('anti-ai-design-hover');
       outline.style.outlineColor = '';
       label.style.background = LABEL_BG;
       if (cycleMode) {
@@ -455,7 +455,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   const showPageBanner = function(findings) {
     if (!findings.length) return;
     const banner = document.createElement('div');
-    banner.className = 'anti-design-overlay anti-design-banner';
+    banner.className = 'anti-ai-design-overlay anti-ai-design-banner';
     Object.assign(banner.style, {
       position: 'fixed', top: '0', left: '0', right: '0', zIndex: '100000',
       background: PAPER, color: PAPER_INK,
@@ -540,7 +540,7 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
       let overlaysVisible = true;
       toggle.addEventListener('click', () => {
         overlaysVisible = !overlaysVisible;
-        document.body.classList.toggle('anti-design-hidden', !overlaysVisible);
+        document.body.classList.toggle('anti-ai-design-hidden', !overlaysVisible);
         toggle.textContent = overlaysVisible ? '\u25C9' : '\u25CB'; // filled vs empty circle
         toggle.style.opacity = overlaysVisible ? '0.85' : '0.5';
       });
@@ -575,13 +575,13 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
     clearOverlays();
     styleEl.remove();
     if (spotlightBackdrop) { spotlightBackdrop.remove(); spotlightBackdrop = null; }
-    document.body.classList.remove('anti-design-hidden');
+    document.body.classList.remove('anti-ai-design-hidden');
   }
 
   // Toggle every overlay; returns the new visibility.
   function toggleOverlays() {
-    const visible = !document.body.classList.contains('anti-design-hidden');
-    document.body.classList.toggle('anti-design-hidden', visible);
+    const visible = !document.body.classList.contains('anti-ai-design-hidden');
+    document.body.classList.toggle('anti-ai-design-hidden', visible);
     return !visible;
   }
 
@@ -595,15 +595,15 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
         target.scrollIntoView({ behavior: 'instant', block: 'center' });
       }
       for (const o of overlays) {
-        if (o.classList.contains('anti-design-banner')) continue;
+        if (o.classList.contains('anti-ai-design-banner')) continue;
         const isMatch = o._targetEl === target;
-        o.classList.toggle('anti-design-spotlight', isMatch);
-        o.classList.toggle('anti-design-spotlight-dimmed', !isMatch);
+        o.classList.toggle('anti-ai-design-spotlight', isMatch);
+        o.classList.toggle('anti-ai-design-spotlight-dimmed', !isMatch);
         if (isMatch) {
           // Force the matching overlay visible immediately, don't wait for IntersectionObserver
           o.style.display = '';
           o.style.animation = 'none';
-          o.classList.add('anti-design-visible');
+          o.classList.add('anti-ai-design-visible');
           o._revealed = true;
           positionOverlay(o);
         }
@@ -615,8 +615,8 @@ function createAntiDesignOverlay({ extensionMode = false, antipatterns = [] } = 
   function unspotlight() {
     hideSpotlight();
     for (const o of overlays) {
-      o.classList.remove('anti-design-spotlight');
-      o.classList.remove('anti-design-spotlight-dimmed');
+      o.classList.remove('anti-ai-design-spotlight');
+      o.classList.remove('anti-ai-design-spotlight-dimmed');
     }
   }
 

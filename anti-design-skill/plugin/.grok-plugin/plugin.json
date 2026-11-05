@@ -1,13 +1,13 @@
 {
-  "name": "anti-design",
+  "name": "anti-ai-design",
   "version": "4.8.0",
-  "description": "Design fluency for frontend development. 1 skill with 24 commands (/anti-design polish, /anti-design audit, /anti-design critique, etc.) and curated anti-pattern detection.",
+  "description": "Design fluency for frontend development. 1 skill with 24 commands (/anti-ai-design polish, /anti-ai-design audit, /anti-ai-design critique, etc.) and curated anti-pattern detection.",
   "author": {
     "name": "Paul Bakaus",
     "email": "paul@paulbakaus.com"
   },
-  "homepage": "https://anti-design.example",
-  "repository": "https://github.com/OWNER/anti-design",
+  "homepage": "https://github.com/Choxie77/anti-ai-design",
+  "repository": "https://github.com/Choxie77/anti-ai-design",
   "license": "MIT",
   "keywords": [
     "design",

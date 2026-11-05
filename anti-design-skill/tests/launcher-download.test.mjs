@@ -15,12 +15,12 @@ const COMSPEC = process.env.ComSpec || process.env.COMSPEC || 'C:\\Windows\\Syst
 // downloaded release binary is executed, and all network traffic is loopback.
 const PAYLOAD = WINDOWS ? fs.readFileSync(COMSPEC) : Buffer.from('#!/bin/sh\necho verified-engine\n');
 const HASH = createHash('sha256').update(PAYLOAD).digest('hex');
-const BIN = WINDOWS ? 'anti-design.exe' : 'anti-design';
+const BIN = WINDOWS ? 'anti-ai-design.exe' : 'anti-ai-design';
 // The release asset this host's launcher asks for (the cmd tests pin AMD64).
-const ASSET = `anti-design-${WINDOWS ? 'windows' : process.platform === 'darwin' ? 'darwin' : 'linux'}-${!WINDOWS && process.arch === 'arm64' ? 'arm64' : 'x64'}${WINDOWS ? '.exe' : ''}`;
+const ASSET = `anti-ai-design-${WINDOWS ? 'windows' : process.platform === 'darwin' ? 'darwin' : 'linux'}-${!WINDOWS && process.arch === 'arm64' ? 'arm64' : 'x64'}${WINDOWS ? '.exe' : ''}`;
 
 async function exercise(t, scenario) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-launcher-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-launcher-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const scripts = path.join(root, 'skill scripts');
   const home = path.join(root, 'home');
@@ -28,7 +28,7 @@ async function exercise(t, scenario) {
   fs.mkdirSync(scripts);
   fs.mkdirSync(home);
   fs.writeFileSync(path.join(scripts, 'VERSION'), '0.0.0-test\n');
-  const name = WINDOWS ? 'anti-design.cmd' : 'anti-design';
+  const name = WINDOWS ? 'anti-ai-design.cmd' : 'anti-ai-design';
   const launcher = path.join(scripts, name);
   fs.copyFileSync(path.join(ROOT, 'skill/scripts', name), launcher);
   // The launchers verify against the manifest next to them, never the server.
@@ -78,7 +78,7 @@ async function exercise(t, scenario) {
     // Leftovers from an older launcher (fixed staging names) or a killed run
     // must not block or be reused by a new download.
     fs.mkdirSync(cacheDir, { recursive: true });
-    for (const name of ['anti-design.exe.part', 'anti-design.exe.sha256', '.anti-design.part.1']) {
+    for (const name of ['anti-ai-design.exe.part', 'anti-ai-design.exe.sha256', '.anti-ai-design.part.1']) {
       const stale = path.join(cacheDir, name);
       fs.writeFileSync(stale, 'stale');
       fs.chmodSync(stale, 0o444);
@@ -89,7 +89,7 @@ async function exercise(t, scenario) {
   if (!WINDOWS && scenario === 'cache-write-failure') {
     // The POSIX staging name contains the launcher's PID, so intercept the
     // preceding mkdir to place a directory at precisely that file path.
-    fs.writeFileSync(path.join(tools, 'mkdir'), '#!/bin/sh\n/bin/mkdir "$@" || exit $?\n/bin/mkdir "$ANTI_DESIGN_HOME/bin/0.0.0-test/.anti-design.part.$PPID"\n', { mode: 0o755 });
+    fs.writeFileSync(path.join(tools, 'mkdir'), '#!/bin/sh\n/bin/mkdir "$@" || exit $?\n/bin/mkdir "$ANTI_AI_DESIGN_HOME/bin/0.0.0-test/.anti-ai-design.part.$PPID"\n', { mode: 0o755 });
   }
   if (!WINDOWS && ['hash-failure', 'removed-during-hash'].includes(scenario)) {
     fs.writeFileSync(path.join(tools, 'shasum'),
@@ -162,8 +162,8 @@ async function exercise(t, scenario) {
   const env = {
     PATH: WINDOWS ? `${process.env.SystemRoot}\\System32;${process.env.SystemRoot}` : `${tools}:/usr/bin:/bin`,
     HOME: home, USERPROFILE: home, TEMP: root, TMP: root,
-    ANTI_DESIGN_HOME: cache,
-    ANTI_DESIGN_DOWNLOAD_BASE: `http://127.0.0.1:${server.address().port}`,
+    ANTI_AI_DESIGN_HOME: cache,
+    ANTI_AI_DESIGN_DOWNLOAD_BASE: `http://127.0.0.1:${server.address().port}`,
     ...(WINDOWS ? { SystemRoot: process.env.SystemRoot, ComSpec: COMSPEC, PROCESSOR_ARCHITECTURE: scenario === 'arm64-fallback' ? 'ARM64' : 'AMD64' } : {}),
   };
   const run = () => new Promise((resolve, reject) => {
@@ -207,8 +207,8 @@ for (const scenario of ['cache-directory-failure', 'cache-write-failure', 'downl
     assert.match(result.stderr, /engine 0\.0\.0-test/);
     assert.ok(result.stderr.includes(result.cacheDir), result.stderr);
     assert.match(result.stderr, /engine-probe/);
-    assert.match(result.stderr, /ANTI_DESIGN_HOME/);
-    assert.match(result.stderr, /ANTI_DESIGN_BIN/);
+    assert.match(result.stderr, /ANTI_AI_DESIGN_HOME/);
+    assert.match(result.stderr, /ANTI_AI_DESIGN_BIN/);
     if (['download-failure', 'transport-failure'].includes(scenario)) {
       assert.match(result.stderr, /could not download/);
       assert.match(result.stderr, /network/);
@@ -239,7 +239,7 @@ test('cmd launcher on ARM64 fetches the x64 asset when only x64 has a line', { s
   const result = await exercise(t, 'arm64-fallback');
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /verified-engine/);
-  assert.deepEqual(result.requests, ['/engine-v0.0.0-test/anti-design-windows-x64.exe'], 'no arm64 request without an arm64 line');
+  assert.deepEqual(result.requests, ['/engine-v0.0.0-test/anti-ai-design-windows-x64.exe'], 'no arm64 request without an arm64 line');
   assert.deepEqual(result.files, [BIN, `${BIN}.verified`]);
 });
 
@@ -296,36 +296,36 @@ test('launcher ignores stale staging files from older or killed runs', async t =
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /verified-engine/);
   assert.deepEqual(result.files.sort(),
-    ['.anti-design.part.1', BIN, `${BIN}.verified`, 'anti-design.exe.part', 'anti-design.exe.sha256'].sort(),
+    ['.anti-ai-design.part.1', BIN, `${BIN}.verified`, 'anti-ai-design.exe.part', 'anti-ai-design.exe.sha256'].sort(),
     'the new download lands and leaves the leftovers untouched');
 });
 
 test('cmd launcher stages each run under its own name', () => {
   // Concurrent first runs used to share %cached%.part and %cached%.sha256 (#1002).
-  const source = fs.readFileSync(path.join(ROOT, 'skill/scripts/anti-design.cmd'), 'utf8');
+  const source = fs.readFileSync(path.join(ROOT, 'skill/scripts/anti-ai-design.cmd'), 'utf8');
   assert.doesNotMatch(source, /%cached%\.(part|sha256)/);
   assert.match(source, /set "staging=[^"\n]*%RANDOM%/);
   assert.match(source, /mkdir "%staging%" >nul 2>nul\r?\nif errorlevel 1 goto claim_staging/);
 });
 
 test('cmd launcher is checked out with CRLF line endings', () => {
-  const source = fs.readFileSync(path.join(ROOT, 'skill/scripts/anti-design.cmd'));
+  const source = fs.readFileSync(path.join(ROOT, 'skill/scripts/anti-ai-design.cmd'));
   const withoutCrlf = Buffer.from(source.toString('binary').replaceAll('\r\n', ''));
   assert.equal(withoutCrlf.includes(10), false, 'cmd.exe batch labels require CRLF line endings');
 });
 
 test('cmd launcher forwards engine exit code through cmd /c', { skip: WINDOWS ? false : 'Windows-only cmd /c exit-code forwarding' }, async t => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-launcher-exit-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-launcher-exit-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const home = path.join(root, 'home');
   fs.mkdirSync(home);
-  const launcher = path.join(root, 'anti-design.cmd');
-  fs.copyFileSync(path.join(ROOT, 'skill/scripts/anti-design.cmd'), launcher);
+  const launcher = path.join(root, 'anti-ai-design.cmd');
+  fs.copyFileSync(path.join(ROOT, 'skill/scripts/anti-ai-design.cmd'), launcher);
   const env = {
     PATH: `${process.env.SystemRoot}\\System32;${process.env.SystemRoot}`,
     HOME: home, USERPROFILE: home, TEMP: root, TMP: root,
-    ANTI_DESIGN_HOME: path.join(root, 'cache'),
-    ANTI_DESIGN_BIN: COMSPEC,
+    ANTI_AI_DESIGN_HOME: path.join(root, 'cache'),
+    ANTI_AI_DESIGN_BIN: COMSPEC,
     SystemRoot: process.env.SystemRoot,
     ComSpec: COMSPEC,
     PROCESSOR_ARCHITECTURE: 'AMD64',
@@ -344,20 +344,20 @@ test('cmd launcher forwards engine exit code through cmd /c', { skip: WINDOWS ? 
 
 for (const [probeStatus, trusted] of [[0, true], [1, false]]) {
   test(`sh launcher ${trusted ? 'runs' : 'skips'} a home binary whose engine-probe exits ${probeStatus}`, { skip: WINDOWS ? 'POSIX launcher probe' : false }, async t => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-launcher-probe-'));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-launcher-probe-'));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const scripts = path.join(root, 'scripts');
     const home = path.join(root, 'home');
-    const homeBin = path.join(home, '.anti-design', 'bin');
+    const homeBin = path.join(home, '.anti-ai-design', 'bin');
     fs.mkdirSync(scripts);
     fs.mkdirSync(homeBin, { recursive: true });
     fs.writeFileSync(path.join(scripts, 'VERSION'), '0.0.0-test\n');
     fs.writeFileSync(path.join(scripts, 'engine-checksums.txt'), `0.0.0-test ${ASSET} ${HASH}\n`);
-    const launcher = path.join(scripts, 'anti-design');
-    fs.copyFileSync(path.join(ROOT, 'skill/scripts/anti-design'), launcher);
+    const launcher = path.join(scripts, 'anti-ai-design');
+    fs.copyFileSync(path.join(ROOT, 'skill/scripts/anti-ai-design'), launcher);
     // Prints the handshake marker either way; only the exit status differs.
-    fs.writeFileSync(path.join(homeBin, 'anti-design'),
-      `#!/bin/sh\nif [ "$1" = engine-probe ]; then echo anti-design-engine 0.0.0-test; exit ${probeStatus}; fi\necho home-engine-ran\n`,
+    fs.writeFileSync(path.join(homeBin, 'anti-ai-design'),
+      `#!/bin/sh\nif [ "$1" = engine-probe ]; then echo anti-ai-design-engine 0.0.0-test; exit ${probeStatus}; fi\necho home-engine-ran\n`,
       { mode: 0o755 });
     const requests = [];
     const server = http.createServer((req, res) => {
@@ -370,8 +370,8 @@ for (const [probeStatus, trusted] of [[0, true], [1, false]]) {
     const env = {
       PATH: '/usr/bin:/bin',
       HOME: home,
-      ANTI_DESIGN_HOME: path.join(root, 'cache'),
-      ANTI_DESIGN_DOWNLOAD_BASE: `http://127.0.0.1:${server.address().port}`,
+      ANTI_AI_DESIGN_HOME: path.join(root, 'cache'),
+      ANTI_AI_DESIGN_DOWNLOAD_BASE: `http://127.0.0.1:${server.address().port}`,
     };
     const result = await new Promise((resolve, reject) => {
       const child = spawn('/bin/sh', [launcher, 'detect'], { env, cwd: root, timeout: 20000 });
@@ -396,12 +396,12 @@ for (const [probeStatus, trusted] of [[0, true], [1, false]]) {
 // The sibling engine slot is gitignored, so a skill upgrade that copies files
 // over it leaves the old engine behind. POSIX: a sh stub. Windows: a copy of
 // node.exe that answers `engine-probe` through engine-probe.js in the cwd.
-const SIBLING_DIR = ASSET.slice('anti-design-'.length).replace(/\.exe$/, '');
+const SIBLING_DIR = ASSET.slice('anti-ai-design-'.length).replace(/\.exe$/, '');
 // Args for a run that reaches the cached engine (a copy of cmd.exe on Windows).
 const CACHED_ARGS = WINDOWS ? ['/d', '/c', 'echo verified-engine'] : ['engine-probe'];
 
 async function runWithSibling(t, { version, probeStatus = 0, mode = 0o755, cached = false, args = ['engine-probe'] }) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-launcher-sibling-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-launcher-sibling-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   // A space and a parenthesis, as in C:\\Program Files (x86).
   const scripts = path.join(root, 'skill (scripts)');
@@ -415,14 +415,14 @@ async function runWithSibling(t, { version, probeStatus = 0, mode = 0o755, cache
   // was honored in a path with a space and a parenthesis, without a rehash.
   const digest = '1'.repeat(64);
   fs.writeFileSync(path.join(scripts, 'engine-checksums.txt'), `0.0.0-test ${ASSET} ${digest}\n`);
-  const name = WINDOWS ? 'anti-design.cmd' : 'anti-design';
+  const name = WINDOWS ? 'anti-ai-design.cmd' : 'anti-ai-design';
   const launcher = path.join(scripts, name);
   fs.copyFileSync(path.join(ROOT, 'skill/scripts', name), launcher);
   if (WINDOWS) {
     fs.copyFileSync(process.execPath, sibling);
-    fs.writeFileSync(path.join(root, 'engine-probe.js'), `console.log('anti-design-engine ${version}');\nprocess.exitCode = ${probeStatus};\n`);
+    fs.writeFileSync(path.join(root, 'engine-probe.js'), `console.log('anti-ai-design-engine ${version}');\nprocess.exitCode = ${probeStatus};\n`);
   } else {
-    fs.writeFileSync(sibling, `#!/bin/sh\necho anti-design-engine ${version}\nexit ${probeStatus}\n`, { mode });
+    fs.writeFileSync(sibling, `#!/bin/sh\necho anti-ai-design-engine ${version}\nexit ${probeStatus}\n`, { mode });
   }
   if (cached) {
     // A trusted cache entry: a stamp holding the manifest digest and size, newer than the binary.
@@ -444,8 +444,8 @@ async function runWithSibling(t, { version, probeStatus = 0, mode = 0o755, cache
   const env = {
     PATH: WINDOWS ? `${process.env.SystemRoot}\\System32;${process.env.SystemRoot}` : '/usr/bin:/bin',
     HOME: home,
-    ANTI_DESIGN_HOME: cache,
-    ANTI_DESIGN_DOWNLOAD_BASE: `http://127.0.0.1:${server.address().port}`,
+    ANTI_AI_DESIGN_HOME: cache,
+    ANTI_AI_DESIGN_DOWNLOAD_BASE: `http://127.0.0.1:${server.address().port}`,
     ...(WINDOWS ? { USERPROFILE: home, TEMP: root, TMP: root, SystemRoot: process.env.SystemRoot, ComSpec: COMSPEC, PROCESSOR_ARCHITECTURE: 'AMD64' } : {}),
   };
   const result = await new Promise((resolve, reject) => {
@@ -466,7 +466,7 @@ async function runWithSibling(t, { version, probeStatus = 0, mode = 0o755, cache
 test('launcher runs a sibling engine that reports the pinned version', async t => {
   const result = await runWithSibling(t, { version: '0.0.0-test' });
   assert.equal(result.status, 0, JSON.stringify(result));
-  assert.match(result.stdout, /anti-design-engine 0\.0\.0-test/);
+  assert.match(result.stdout, /anti-ai-design-engine 0\.0\.0-test/);
   assert.equal(result.stderr, '');
   assert.deepEqual(result.requests, []);
 });
@@ -475,7 +475,7 @@ test('launcher skips a sibling engine from another version and runs the cached o
   const result = await runWithSibling(t, { version: '0.0.0-old', cached: true, args: CACHED_ARGS });
   assert.equal(result.status, 0, JSON.stringify(result));
   assert.match(result.stdout, /verified-engine/);
-  assert.doesNotMatch(result.stdout, /anti-design-engine/);
+  assert.doesNotMatch(result.stdout, /anti-ai-design-engine/);
   for (const part of [path.join('bin', SIBLING_DIR, BIN), '0.0.0-old', '0.0.0-test']) {
     assert.ok(result.stderr.includes(part), result.stderr);
   }
@@ -486,7 +486,7 @@ test('sh launcher skips a sibling engine whose probe fails', { skip: WINDOWS ? '
   const result = await runWithSibling(t, { version: '0.0.0-test', probeStatus: 1, cached: true, args: CACHED_ARGS });
   assert.equal(result.status, 0, JSON.stringify(result));
   assert.match(result.stdout, /verified-engine/);
-  assert.doesNotMatch(result.stdout, /anti-design-engine/);
+  assert.doesNotMatch(result.stdout, /anti-ai-design-engine/);
   assert.match(result.stderr, /reports engine unknown/);
   assert.deepEqual(result.requests, []);
 });
@@ -494,7 +494,7 @@ test('sh launcher skips a sibling engine whose probe fails', { skip: WINDOWS ? '
 test('sh launcher runs a current sibling engine that lost its executable bit', { skip: WINDOWS ? 'POSIX file modes' : false }, async t => {
   const result = await runWithSibling(t, { version: '0.0.0-test', mode: 0o644 });
   assert.equal(result.status, 0, JSON.stringify(result));
-  assert.match(result.stdout, /anti-design-engine 0\.0\.0-test/);
+  assert.match(result.stdout, /anti-ai-design-engine 0\.0\.0-test/);
   assert.equal(result.stderr, '');
   assert.deepEqual(result.requests, []);
 });
@@ -517,7 +517,7 @@ for (const scenario of ['empty-download', 'no-manifest-line', 'no-manifest', 'mi
     } else if (scenario === 'move-failure') {
       assert.match(result.stderr, /could not cache the verified download/);
     } else if (scenario.startsWith('no-manifest')) {
-      assert.match(result.stderr, /no checksum for engine 0\.0\.0-test \(anti-design-/);
+      assert.match(result.stderr, /no checksum for engine 0\.0\.0-test \(anti-ai-design-/);
       assert.match(result.stderr, /refusing the unverified download/);
     } else {
       assert.match(result.stderr, /refusing the unverified download/);

@@ -1,6 +1,6 @@
 {
   "stdout": "",
-  "stderr": "Error: Pass a rule id, e.g. /anti-design hooks ignore-rule side-tab\n",
+  "stderr": "Error: Pass a rule id, e.g. /anti-ai-design hooks ignore-rule side-tab\n",
   "exit": 1,
   "signal": null,
   "files": {}

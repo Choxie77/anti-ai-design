@@ -10,7 +10,7 @@
  *   regions.json   three regions (chrome / plate / text) with allowUncovered
  *   spec.json      a pre-measured spec of comp.png+regions.json (the fixture the
  *                  print / diff / measure cases read; the regions case rewrites
- *                  its own under .anti-design/build/)
+ *                  its own under .anti-ai-design/build/)
  *
  * ISO timestamps in stdout and in the written spec/state are masked by the
  * harness, so the createdAt/startedAt fields never make a golden run-dependent.
@@ -32,10 +32,10 @@ const write = (ws, rel, body) => {
 // skill-dir overrides so a recording machine's env never leaks a font-index
 // path or a native reference into the output.
 const BASE_ENV = {
-  ANTI_DESIGN_CATALOG_DIR: null,
-  ANTI_DESIGN_SKILL_DIR: null,
-  ANTI_DESIGN_SELF: null,
-  ANTI_DESIGN_BROWSER: null,
+  ANTI_AI_DESIGN_CATALOG_DIR: null,
+  ANTI_AI_DESIGN_SKILL_DIR: null,
+  ANTI_AI_DESIGN_SELF: null,
+  ANTI_AI_DESIGN_BROWSER: null,
   PUPPETEER_EXECUTABLE_PATH: null,
   CHROME_PATH: null,
   CI: null,
@@ -48,7 +48,7 @@ const cases = [
   {
     id: 'comp-spec-regions', verb: 'comp-spec', workspace: WS,
     args: ['--comp', 'comp.png', '--regions', 'regions.json'],
-    files: ['.anti-design/build/spec.json'], env: env(),
+    files: ['.anti-ai-design/build/spec.json'], env: env(),
   },
   { id: 'comp-spec-print', verb: 'comp-spec', workspace: WS, args: ['--print', '--spec', 'spec.json'], env: env() },
   { id: 'comp-spec-plate-prompt', verb: 'comp-spec', workspace: WS, args: ['--plate-prompt', 'art', '--spec', 'spec.json'], env: env() },
@@ -83,38 +83,38 @@ const cases = [
   // build-phase: start (reads comp dims) then status, sharing one workspace.
   {
     id: 'build-phase-start-status', verb: 'build-phase', workspace: WS,
-    files: ['.anti-design/build/state.json'], env: { ...env(), ANTI_DESIGN_SESSION_ID: 'oracle-build' },
+    files: ['.anti-ai-design/build/state.json'], env: { ...env(), ANTI_AI_DESIGN_SESSION_ID: 'oracle-build' },
     steps: [{ args: ['start', '--comp', 'comp.png'] }, { args: ['status'] }],
   },
   { id: 'build-phase-usage', verb: 'build-phase', workspace: WS, args: [], env: env() },
 
   // The direction round's chosen comp is option one of the comp round: start
-  // records it, the comps gate counts it from .anti-design/mocks/decision/ (an
+  // records it, the comps gate counts it from .anti-ai-design/mocks/decision/ (an
   // unrelated decision comp never counts), and an approval on it closes the
   // gate with the decision path as the approved comp. --decision-comp with
   // --comp, or naming a missing file, is refused.
   {
     id: 'build-phase-decision-comp-option-one', verb: 'build-phase', workspace: WS,
-    files: ['.anti-design/build/state.json', '.anti-design/build/approved-comp.json'], env: env(),
+    files: ['.anti-ai-design/build/state.json', '.anti-ai-design/build/approved-comp.json'], env: env(),
     setup: (ws) => {
-      fs.mkdirSync(path.join(ws, '.anti-design/mocks/decision'), { recursive: true });
-      fs.copyFileSync(path.join(ws, 'comp.png'), path.join(ws, '.anti-design/mocks/decision/assigned.png'));
-      write(ws, '.anti-design/mocks/decision/assigned.png.json', JSON.stringify({ prompt: 'assigned' }));
-      fs.copyFileSync(path.join(ws, 'build.png'), path.join(ws, '.anti-design/mocks/decision/pick.png'));
-      write(ws, '.anti-design/mocks/decision/pick.png.json', JSON.stringify({ prompt: 'pick', approved: true }));
+      fs.mkdirSync(path.join(ws, '.anti-ai-design/mocks/decision'), { recursive: true });
+      fs.copyFileSync(path.join(ws, 'comp.png'), path.join(ws, '.anti-ai-design/mocks/decision/assigned.png'));
+      write(ws, '.anti-ai-design/mocks/decision/assigned.png.json', JSON.stringify({ prompt: 'assigned' }));
+      fs.copyFileSync(path.join(ws, 'build.png'), path.join(ws, '.anti-ai-design/mocks/decision/pick.png'));
+      write(ws, '.anti-ai-design/mocks/decision/pick.png.json', JSON.stringify({ prompt: 'pick', approved: true }));
     },
     steps: [
-      { args: ['start', '--comp', 'comp.png', '--decision-comp', '.anti-design/mocks/decision/assigned.png'] },
-      { args: ['start', '--direction', 'seed', '--decision-comp', '.anti-design/mocks/decision/missing.png'] },
-      { args: ['start', '--direction', 'seed', '--decision-comp', '.anti-design/mocks/decision/assigned.png'] },
+      { args: ['start', '--comp', 'comp.png', '--decision-comp', '.anti-ai-design/mocks/decision/assigned.png'] },
+      { args: ['start', '--direction', 'seed', '--decision-comp', '.anti-ai-design/mocks/decision/missing.png'] },
+      { args: ['start', '--direction', 'seed', '--decision-comp', '.anti-ai-design/mocks/decision/assigned.png'] },
       { args: ['advance'] },
       {
         setup: (ws) => {
           for (const n of [2, 3]) {
-            fs.copyFileSync(path.join(ws, 'build.png'), path.join(ws, `.anti-design/mocks/comp-${n}.png`));
-            write(ws, `.anti-design/mocks/comp-${n}.png.json`, JSON.stringify({ prompt: `variation ${n}` }));
+            fs.copyFileSync(path.join(ws, 'build.png'), path.join(ws, `.anti-ai-design/mocks/comp-${n}.png`));
+            write(ws, `.anti-ai-design/mocks/comp-${n}.png.json`, JSON.stringify({ prompt: `variation ${n}` }));
           }
-          write(ws, '.anti-design/mocks/decision/assigned.png.json', JSON.stringify({ prompt: 'assigned', approved: true }));
+          write(ws, '.anti-ai-design/mocks/decision/assigned.png.json', JSON.stringify({ prompt: 'assigned', approved: true }));
         },
         args: ['advance'],
       },
@@ -128,13 +128,13 @@ const cases = [
   // the spec gate measures again (its own readings, not the refusal).
   {
     id: 'build-phase-approved-comp-edited', verb: 'build-phase', workspace: WS,
-    files: ['.anti-design/build/approved-comp.json'], env: env(),
+    files: ['.anti-ai-design/build/approved-comp.json'], env: env(),
     steps: [
       { args: ['start', '--comp', 'comp.png'] },
       { verb: 'comp-spec', args: ['--comp', 'comp.png', '--regions', 'regions.json'] },
       { setup: (ws) => fs.copyFileSync(path.join(ws, 'build.png'), path.join(ws, 'comp.png')), args: ['advance'] },
       { verb: 'comp-spec', args: ['--comp', 'comp.png', '--regions', 'regions.json'] },
-      { verb: 'comp-diff', args: ['--comp', 'comp.png', '--build', 'build.png', '--spec', '.anti-design/build/spec.json', '--no-files'] },
+      { verb: 'comp-diff', args: ['--comp', 'comp.png', '--build', 'build.png', '--spec', '.anti-ai-design/build/spec.json', '--no-files'] },
       { args: ['restore-comp'] },
       { args: ['advance'] },
     ],
@@ -142,19 +142,19 @@ const cases = [
 
   // build-phase responsive (workspace comp-responsive: a menu column ending in a
   // sign-off line; spec.json and a state at the responsive phase are staged
-  // under .anti-design/build/, which git ignores in fixtures). A desktop capture whose
+  // under .anti-ai-design/build/, which git ignores in fixtures). A desktop capture whose
   // column grew pushes the sign-off 40px down past the first viewport: the gate
   // calls it displaced, prints the repair crops, and on the third failed attempt
   // leads with the route to the user. A capture without the line calls it missing.
   {
     id: 'build-phase-responsive-displaced', verb: 'build-phase', workspace: 'comp-responsive',
     setup: (ws) => {
-      fs.mkdirSync(path.join(ws, '.anti-design/review'), { recursive: true });
-      fs.mkdirSync(path.join(ws, '.anti-design/build'), { recursive: true });
-      fs.copyFileSync(path.join(ws, 'spec.json'), path.join(ws, '.anti-design/build/spec.json'));
-      fs.copyFileSync(path.join(ws, 'state.json'), path.join(ws, '.anti-design/build/state.json'));
-      fs.copyFileSync(path.join(ws, 'desktop-pushed.png'), path.join(ws, '.anti-design/review/desktop.png'));
-      fs.copyFileSync(path.join(ws, 'mobile.png'), path.join(ws, '.anti-design/review/mobile.png'));
+      fs.mkdirSync(path.join(ws, '.anti-ai-design/review'), { recursive: true });
+      fs.mkdirSync(path.join(ws, '.anti-ai-design/build'), { recursive: true });
+      fs.copyFileSync(path.join(ws, 'spec.json'), path.join(ws, '.anti-ai-design/build/spec.json'));
+      fs.copyFileSync(path.join(ws, 'state.json'), path.join(ws, '.anti-ai-design/build/state.json'));
+      fs.copyFileSync(path.join(ws, 'desktop-pushed.png'), path.join(ws, '.anti-ai-design/review/desktop.png'));
+      fs.copyFileSync(path.join(ws, 'mobile.png'), path.join(ws, '.anti-ai-design/review/mobile.png'));
     },
     env: env(),
     steps: [{ args: ['advance', '--min', '0.1'] }, { args: ['advance', '--min', '0.1'] }, { args: ['advance', '--min', '0.1'] }],
@@ -162,12 +162,12 @@ const cases = [
   {
     id: 'build-phase-responsive-missing', verb: 'build-phase', workspace: 'comp-responsive',
     setup: (ws) => {
-      fs.mkdirSync(path.join(ws, '.anti-design/review'), { recursive: true });
-      fs.mkdirSync(path.join(ws, '.anti-design/build'), { recursive: true });
-      fs.copyFileSync(path.join(ws, 'spec.json'), path.join(ws, '.anti-design/build/spec.json'));
-      fs.copyFileSync(path.join(ws, 'state.json'), path.join(ws, '.anti-design/build/state.json'));
-      fs.copyFileSync(path.join(ws, 'desktop-gone.png'), path.join(ws, '.anti-design/review/desktop.png'));
-      fs.copyFileSync(path.join(ws, 'mobile.png'), path.join(ws, '.anti-design/review/mobile.png'));
+      fs.mkdirSync(path.join(ws, '.anti-ai-design/review'), { recursive: true });
+      fs.mkdirSync(path.join(ws, '.anti-ai-design/build'), { recursive: true });
+      fs.copyFileSync(path.join(ws, 'spec.json'), path.join(ws, '.anti-ai-design/build/spec.json'));
+      fs.copyFileSync(path.join(ws, 'state.json'), path.join(ws, '.anti-ai-design/build/state.json'));
+      fs.copyFileSync(path.join(ws, 'desktop-gone.png'), path.join(ws, '.anti-ai-design/review/desktop.png'));
+      fs.copyFileSync(path.join(ws, 'mobile.png'), path.join(ws, '.anti-ai-design/review/mobile.png'));
     },
     args: ['advance', '--min', '0.1'], env: env(),
   },
@@ -187,7 +187,7 @@ const cases = [
           write(ws, 'fonts/face.ttf', 'font v1');
           const phases = Object.fromEntries(['comps', 'spec', 'plates', 'hero', 'sections', 'motion', 'responsive', 'review']
             .map((p) => [p, { status: 'closed', attempts: 1, gate: { ok: true, summary: 'oracle' } }]));
-          write(ws, '.anti-design/build/state.json', JSON.stringify({
+          write(ws, '.anti-ai-design/build/state.json', JSON.stringify({
             tool: 'build-phase', version: 2, startedAt: '2026-10-04T00:00:00.000Z', comp: 'comp.png', breakpoint: '768x512',
             artifact: 'index.html', phase: 'review', capturePolicy: 'native-html-v1', sessionId: 'oracle-build', phases,
             finish: { disposition: 'ship', at: '2026-10-04T00:00:00.000Z', phaseAtFinish: 'review', artifactSha256: sha('index.html'),
@@ -202,7 +202,7 @@ const cases = [
   },
   {
     id: 'build-phase-review-next-native', verb: 'build-phase', workspace: WS,
-    setup: (ws) => write(ws, '.anti-design/build/state.json', JSON.stringify({
+    setup: (ws) => write(ws, '.anti-ai-design/build/state.json', JSON.stringify({
       tool: 'build-phase', version: 2, startedAt: '2026-10-04T00:00:00.000Z', comp: 'comp.png', breakpoint: '768x512',
       artifact: 'index.html', phase: 'review', capturePolicy: 'native-html-v1', phases: {},
     }, null, 2)),
@@ -215,16 +215,16 @@ const cases = [
   { id: 'component-review-usage', verb: 'component-review', workspace: WS, args: [], env: env() },
   {
     id: 'component-review-plan-missing-plates', verb: 'component-review', workspace: WS,
-    setup: (ws) => write(ws, '.anti-design/build/spec.json', fs.readFileSync(path.join(ws, 'spec.json'))),
+    setup: (ws) => write(ws, '.anti-ai-design/build/spec.json', fs.readFileSync(path.join(ws, 'spec.json'))),
     args: ['plan'], env: env(),
   },
   {
     id: 'component-review-plan', verb: 'component-review', workspace: WS,
     setup: (ws) => {
-      write(ws, '.anti-design/build/spec.json', fs.readFileSync(path.join(ws, 'spec.json')));
+      write(ws, '.anti-ai-design/build/spec.json', fs.readFileSync(path.join(ws, 'spec.json')));
       write(ws, 'assets/plates/art.png', fs.readFileSync(path.join(ws, 'comp.png')));
     },
-    args: ['plan'], files: ['.anti-design/review/components.json'], env: env(),
+    args: ['plan'], files: ['.anti-ai-design/review/components.json'], env: env(),
   },
   // Absolute paths inside the project and backslashed ones come back project-relative
   // with forward slashes (comp-spec may record either).
@@ -234,10 +234,10 @@ const cases = [
       const spec = JSON.parse(fs.readFileSync(path.join(ws, 'spec.json'), 'utf8'));
       spec.comp = path.join(fs.realpathSync(ws), 'comp.png');
       for (const r of spec.regions) if (r.id === 'art') r.plate = 'assets\\plates\\art.png';
-      write(ws, '.anti-design/build/spec.json', JSON.stringify(spec));
+      write(ws, '.anti-ai-design/build/spec.json', JSON.stringify(spec));
       write(ws, 'assets/plates/art.png', fs.readFileSync(path.join(ws, 'comp.png')));
     },
-    args: ['plan'], files: ['.anti-design/review/components.json'], env: env(),
+    args: ['plan'], files: ['.anti-ai-design/review/components.json'], env: env(),
     // The spec names the staged workspace, so its digest is run-dependent.
     normalize: [['("specSha256": ")[0-9a-f]{64}', 'g', '$1<SHA256>']],
   },

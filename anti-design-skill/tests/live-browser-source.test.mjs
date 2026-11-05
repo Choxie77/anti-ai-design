@@ -148,7 +148,7 @@ describe('live-browser source contracts', () => {
     assert.match(
       SOURCE,
       /function parseManualEditRefSegment\(segment\)[\s\S]*?function elementMatchesManualRefSegment\(el, segment\)/,
-      'Discard restore should parse Anti-Design document refs instead of treating them as raw CSS selectors',
+      'Discard restore should parse Anti-AI Design document refs instead of treating them as raw CSS selectors',
     );
     const refMatchStart = SOURCE.indexOf('function elementMatchesManualRefSegment');
     const refMatchEnd = SOURCE.indexOf('function cssIdent', refMatchStart);
@@ -411,7 +411,7 @@ describe('live-browser source contracts', () => {
   it('keeps sendEvent fire-and-forget by default while accept/discard opt into rejection', () => {
     assert.match(
       SOURCE,
-      /function sendEvent\(msg, opts\)[\s\S]*if \(opts && opts\.throwOnError\) \{[\s\S]*console\.error\('\[anti-design\] Failed to send event:', err\);[\s\S]*throw err;[\s\S]*\}[\s\S]*console\.debug\('\[anti-design\] Dropped optional live event:', err\);[\s\S]*return null;/,
+      /function sendEvent\(msg, opts\)[\s\S]*if \(opts && opts\.throwOnError\) \{[\s\S]*console\.error\('\[anti-ai-design\] Failed to send event:', err\);[\s\S]*throw err;[\s\S]*\}[\s\S]*console\.debug\('\[anti-ai-design\] Dropped optional live event:', err\);[\s\S]*return null;/,
       'event=live_browser.send_event_contract actor=browser operation=send_event_failure risk=fire_and_forget_callers_get_unhandled_rejections expected=default swallow with opt-in throw actual=missing',
     );
     assert.match(SOURCE, /if \(res\.ok\) return res;[\s\S]*const body = await res\.json\(\)\.catch\(\(\) => \(\{\}\)\);[\s\S]*handleFailure\(new Error\(body\.error \|\| \('HTTP ' \+ res\.status \+ ' ' \+ res\.statusText\)\)\)/);
@@ -475,12 +475,12 @@ describe('live-browser source contracts', () => {
     );
     assert.match(
       SOURCE,
-      /function acceptedDomAlreadyClean\(pending\)[\s\S]*?matches\.length > 0[\s\S]*?matches\.every[\s\S]*?data-anti-design-carbonize/,
+      /function acceptedDomAlreadyClean\(pending\)[\s\S]*?matches\.length > 0[\s\S]*?matches\.every[\s\S]*?data-anti-ai-design-carbonize/,
       'accepted DOM should not be considered clean while any matching root is still inside a carbonize wrapper',
     );
     assert.match(
       SOURCE,
-      /function findAcceptedRuntimeWrappers\(sessionId\)[\s\S]*?querySelectorAll\('\[data-anti-design-variants=[\s\S]*?querySelectorAll\('\[data-anti-design-carbonize=/,
+      /function findAcceptedRuntimeWrappers\(sessionId\)[\s\S]*?querySelectorAll\('\[data-anti-ai-design-variants=[\s\S]*?querySelectorAll\('\[data-anti-ai-design-carbonize=/,
       'post-cleanup fallback should remove every stale variants/carbonize wrapper left by React HMR after accept',
     );
     assert.match(
@@ -562,7 +562,7 @@ describe('live-browser source contracts', () => {
     const start = SOURCE.indexOf('function scheduleHandledRuntimeWrapperReload(wrapper,');
     const end = SOURCE.indexOf('\n  function resumeSession(', start);
     const recovery = SOURCE.slice(start, end);
-    assert.match(recovery, /antiDesignCarbonize/);
+    assert.match(recovery, /antiAiDesignCarbonize/);
     assert.match(recovery, /sessionStorage\.getItem\(handledWrapperReloadKey\(sessionId\)\)/);
     assert.match(recovery, /sessionStorage\.setItem\(handledWrapperReloadKey\(sessionId\), String\(reloadAttempts \+ 1\)\)/);
     assert.match(recovery, /if \(reloadAttempts >= 2\) return true;/);
@@ -578,11 +578,11 @@ describe('live-browser source contracts', () => {
       /const handledRuntimeWrapperReloadSessions = new Set\(\);[\s\S]*?function handledWrapperReloadKey\(sessionId\)[\s\S]{0,100}?HANDLED_WRAPPER_RELOAD_KEY \+ ':' \+ sessionId/,
       'overlapping handled sessions must have independent timers and retry budgets',
     );
-    assert.match(recovery, /\[data-anti-design-variants=.+\[data-anti-design-carbonize=/s);
+    assert.match(recovery, /\[data-anti-ai-design-variants=.+\[data-anti-ai-design-carbonize=/s);
     assert.match(recovery, /if \(staleWrapper\) location\.reload\(\);/);
     assert.match(
       SOURCE,
-      /function resumeSession\(recoveryRevision = liveInteractionRevision, opts = \{\}\)[\s\S]{0,700}?\[data-anti-design-carbonize\][\s\S]{0,180}?scheduleHandledRuntimeWrapperReload\(runtimeWrapper, recoveryRevision\)/,
+      /function resumeSession\(recoveryRevision = liveInteractionRevision, opts = \{\}\)[\s\S]{0,700}?\[data-anti-ai-design-carbonize\][\s\S]{0,180}?scheduleHandledRuntimeWrapperReload\(runtimeWrapper, recoveryRevision\)/,
       'resume must inspect handled carbonize wrappers before clearing handled state',
     );
     assert.match(
@@ -592,7 +592,7 @@ describe('live-browser source contracts', () => {
     );
     assert.match(
       SOURCE,
-      /function isUsableInjectionAnchor\(el\)[\s\S]{0,250}?closest\?\.\('\[data-anti-design-variants\],\[data-anti-design-carbonize\]'\)/,
+      /function isUsableInjectionAnchor\(el\)[\s\S]{0,250}?closest\?\.\('\[data-anti-ai-design-variants\],\[data-anti-ai-design-carbonize\]'\)/,
       'a newer restored session must wait for a real page anchor outside stale handled wrappers',
     );
     const resumeStart = SOURCE.indexOf('function resumeSession(');
@@ -633,7 +633,7 @@ describe('live-browser source contracts', () => {
   it('keeps watching for a framework wrapper when session restore wins the hydration race', () => {
     assert.match(
       SOURCE,
-      /const resumed = resumeSession\(\);[\s\S]{0,1200}?if \(!resumed \|\| !document\.querySelector\('\[data-anti-design-variants\],\[data-anti-design-carbonize\]'\)\) \{[\s\S]{0,500}?const scout = new MutationObserver/,
+      /const resumed = resumeSession\(\);[\s\S]{0,1200}?if \(!resumed \|\| !document\.querySelector\('\[data-anti-ai-design-variants\],\[data-anti-ai-design-carbonize\]'\)\) \{[\s\S]{0,500}?const scout = new MutationObserver/,
       'restoring durable session state before hydration must still install the deferred-wrapper scout',
     );
     assert.match(
@@ -802,7 +802,7 @@ describe('live-browser source contracts', () => {
     assert.match(helper, /if \(matches\.length < 2\) return matches\[0\] \|\| null;/);
     assert.match(
       helper,
-      /candidate\.querySelector\('\[data-anti-design-variant\]:not\(\[data-anti-design-variant="original"\]\)'\)[\s\S]{0,80}?return candidate;/,
+      /candidate\.querySelector\('\[data-anti-ai-design-variant\]:not\(\[data-anti-ai-design-variant="original"\]\)'\)[\s\S]{0,80}?return candidate;/,
       'the preferred wrapper is the one holding non-original variants',
     );
     assert.match(helper, /return matches\[0\];/, 'with no populated wrapper the old first match still wins');
@@ -813,7 +813,7 @@ describe('live-browser source contracts', () => {
     );
     assert.match(
       helper,
-      /function findAnyVariantsWrapper\(\) \{[\s\S]{0,120}?'\[data-anti-design-variants\]'/,
+      /function findAnyVariantsWrapper\(\) \{[\s\S]{0,120}?'\[data-anti-ai-design-variants\]'/,
       'the resume paths that have no id yet need their own entry point',
     );
   });
@@ -837,7 +837,7 @@ describe('live-browser source contracts', () => {
       const body = SOURCE.slice(at, SOURCE.indexOf('\n  }', at));
       assert.doesNotMatch(
         body,
-        /document\.querySelector\('\[data-anti-design-variants="'/,
+        /document\.querySelector\('\[data-anti-ai-design-variants="'/,
         `${fn} must resolve the session wrapper through findVariantsWrapper`,
       );
     }
@@ -846,7 +846,7 @@ describe('live-browser source contracts', () => {
     // or a cleanup sweep. Pinning the exact set means a new raw lookup has to
     // justify itself here rather than quietly reintroducing the bug.
     const rawSites = [...SOURCE.matchAll(
-      /(?:const (\w+) = (?:!!)?|(if) \()[^\n]{0,40}?document\.querySelector\('\[data-anti-design-variants="' \+ [\w.?]+ \+ '"\]'\)/g,
+      /(?:const (\w+) = (?:!!)?|(if) \()[^\n]{0,40}?document\.querySelector\('\[data-anti-ai-design-variants="' \+ [\w.?]+ \+ '"\]'\)/g,
     )].map((m) => m[1] || m[2]);
     assert.deepEqual(
       [...rawSites].sort(),
@@ -863,11 +863,11 @@ describe('live-browser source contracts', () => {
         // pendingAcceptedSession existence guard
         'if',
       ].sort(),
-      'a new raw [data-anti-design-variants=...] first-match lookup appeared; route it through findVariantsWrapper, or add it here with the reason it may take the first match',
+      'a new raw [data-anti-ai-design-variants=...] first-match lookup appeared; route it through findVariantsWrapper, or add it here with the reason it may take the first match',
     );
     assert.equal(
       rawSites.length,
-      SOURCE.split(`document.querySelector('[data-anti-design-variants="'`).length - 1,
+      SOURCE.split(`document.querySelector('[data-anti-ai-design-variants="'`).length - 1,
       'every raw session-wrapper lookup must be shaped so this guard can see it',
     );
   });
@@ -944,7 +944,7 @@ describe('live-browser source contracts', () => {
     // The generate lane's helper says so in the script prelude, so the bar
     // is never drawn and then hidden (no entrance flash, no leftover); a
     // plain helper serves no such line and the bar mounts exactly as before.
-    assert.match(SOURCE, /const barHiddenFromStart = window\.__ANTI_DESIGN_LIVE_BAR_HIDDEN__ === true;/);
+    assert.match(SOURCE, /const barHiddenFromStart = window\.__ANTI_AI_DESIGN_LIVE_BAR_HIDDEN__ === true;/);
     assert.match(SOURCE, /display: barHiddenFromStart \? 'none' : 'flex', alignItems: 'stretch',/);
     assert.match(SOURCE, /if \(barHiddenFromStart\) \{\s*liveBarHiddenByHelper = true;\s*globalBarEl\.dataset\.liveBarDisplay = 'flex';\s*\}/);
   });
@@ -1031,7 +1031,7 @@ describe('live-browser source contracts', () => {
       /updateGlobalBarState\(\);\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*if \(liveBarHiddenByHelper\) setLiveBarHidden\(true\);/,
       'a bar built after the helper spoke still ends up hidden',
     );
-    assert.ok(!/sessionStorage\.getItem\('anti-design-live:hide-bar/.test(SOURCE), 'no per-tab memory: the helper is the single source of truth');
+    assert.ok(!/sessionStorage\.getItem\('anti-ai-design-live:hide-bar/.test(SOURCE), 'no per-tab memory: the helper is the single source of truth');
     assert.match(
       SOURCE,
       /function setLiveBarHidden\(hidden\) \{[\s\S]{0,700}?if \(globalBarEl\.style\.display === 'none'\) \{\s*globalBarEl\.style\.display = globalBarEl\.dataset\.liveBarDisplay \|\| 'flex';/,
@@ -1162,7 +1162,7 @@ describe('live-browser source contracts', () => {
     );
     assert.match(
       jsxGate,
-      /if \(!liveWrapper\) \{[\s\S]*?showToast\([\s\S]*?return;[\s\S]*?if \(liveWrapper\.dataset\.antiDesignMode !== 'insert'\) \{[\s\S]*?recoverEmptyCycling\('source-fallback-empty'\)/,
+      /if \(!liveWrapper\) \{[\s\S]*?showToast\([\s\S]*?return;[\s\S]*?if \(liveWrapper\.dataset\.antiAiDesignMode !== 'insert'\) \{[\s\S]*?recoverEmptyCycling\('source-fallback-empty'\)/,
       'missing wrap waits; empty replace wrap recovers after retries; insert scaffolds stay',
     );
     assert.doesNotMatch(SOURCE, /function normalizeSourceFallbackBlock/);
@@ -1174,7 +1174,7 @@ describe('live-browser source contracts', () => {
     );
     assert.match(
       injectFn,
-      /const startMark = '<!-- anti-design-variants-start ' \+ sessionId \+ ' -->'/,
+      /const startMark = '<!-- anti-ai-design-variants-start ' \+ sessionId \+ ' -->'/,
       'HTML fallback should still scan HTML comment markers',
     );
     assert.doesNotMatch(
@@ -1269,10 +1269,10 @@ describe('live-browser source contracts', () => {
     const sourceHasSessionWrapper = new Function(
       SOURCE.slice(matchStart, probeStart) + '\nreturn sourceHasSessionWrapper;',
     )();
-    assert.equal(sourceHasSessionWrapper('<div data-anti-design-variants="ab12cd34">', 'ab12cd34'), true);
-    assert.equal(sourceHasSessionWrapper("<div data-anti-design-variants='ab12cd34'>", 'ab12cd34'), true);
-    assert.equal(sourceHasSessionWrapper('{/* anti-design-variants-start ab12cd34 */}', 'ab12cd34'), true);
-    assert.equal(sourceHasSessionWrapper('<div data-anti-design-variants="99887766">', 'ab12cd34'), false);
+    assert.equal(sourceHasSessionWrapper('<div data-anti-ai-design-variants="ab12cd34">', 'ab12cd34'), true);
+    assert.equal(sourceHasSessionWrapper("<div data-anti-ai-design-variants='ab12cd34'>", 'ab12cd34'), true);
+    assert.equal(sourceHasSessionWrapper('{/* anti-ai-design-variants-start ab12cd34 */}', 'ab12cd34'), true);
+    assert.equal(sourceHasSessionWrapper('<div data-anti-ai-design-variants="99887766">', 'ab12cd34'), false);
     assert.equal(sourceHasSessionWrapper('', 'ab12cd34'), false);
   });
 
@@ -1351,7 +1351,7 @@ describe('live-browser source contracts', () => {
 
   it('resets the init guard when session state cannot be created', () => {
     const boot = SOURCE.slice(0, SOURCE.indexOf('const HIGHLIGHT_TRANSITION'));
-    assert.match(boot, /catch \(err\) \{[\s\S]*?__ANTI_DESIGN_LIVE_INIT__ = false;/);
+    assert.match(boot, /catch \(err\) \{[\s\S]*?__ANTI_AI_DESIGN_LIVE_INIT__ = false;/);
   });
 
   it('never auto-focuses live inputs on a touch-primary device (#1067)', () => {
@@ -1397,15 +1397,15 @@ describe('live-browser source contracts', () => {
 
   it('removes the helper token from window on every run, including a double-init', () => {
     for (const alreadyInit of [false, true]) {
-      const window = { __ANTI_DESIGN_TOKEN__: 'secret', __ANTI_DESIGN_LIVE_INIT__: alreadyInit };
+      const window = { __ANTI_AI_DESIGN_TOKEN__: 'secret', __ANTI_AI_DESIGN_LIVE_INIT__: alreadyInit };
       // No port: a fresh run returns right after reading it, before any DOM work.
       runInNewContext(SOURCE, { window, console });
-      assert.equal('__ANTI_DESIGN_TOKEN__' in window, false, `alreadyInit=${alreadyInit}`);
+      assert.equal('__ANTI_AI_DESIGN_TOKEN__' in window, false, `alreadyInit=${alreadyInit}`);
     }
   });
   it('reads localStorage for the session helper inside a try', () => {
     // A denied store throws on the property read itself; unguarded, init
-    // aborts with __ANTI_DESIGN_LIVE_INIT__ still true and never retries.
+    // aborts with __ANTI_AI_DESIGN_LIVE_INIT__ still true and never retries.
     assert.doesNotMatch(SOURCE, /storage: localStorage,/);
     assert.match(SOURCE, /try \{ liveStorage = window\.localStorage; \} catch/);
   });

@@ -1,8 +1,8 @@
-//! JS: palette.mjs -> `anti-design palette`
+//! JS: palette.mjs -> `anti-ai-design palette`
 
 use crate::palette_data::{Seed, SEEDS, TEMPLATE};
 use crate::util::to_fixed;
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use sha2::{Digest, Sha256};
 
 fn hash_unit(key: &str) -> f64 {
@@ -106,7 +106,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             }
         }
     } else {
-        let env_from = io.env.get("ANTI_DESIGN_PALETTE_SEED").cloned().filter(|s| !s.is_empty());
+        let env_from = io.env.get("ANTI_AI_DESIGN_PALETTE_SEED").cloned().filter(|s| !s.is_empty());
         let key = from.filter(|s| !s.is_empty()).or(env_from);
         let unit = match key {
             Some(k) => hash_unit(&k),

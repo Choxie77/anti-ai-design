@@ -11,7 +11,7 @@ export const WORKSPACE_FILES = [/^Cargo\.(toml|lock)$/, /^rust-toolchain(\.toml)
 // in them names the directory. Add a row here for any other path a crate
 // assembles piece by piece.
 export const KNOWN_READERS = [
-  { prefix: 'tests/oracle/vectors/', crates: ['anti-design-core', 'anti-design-html'] },
+  { prefix: 'tests/oracle/vectors/', crates: ['anti-ai-design-core', 'anti-ai-design-html'] },
 ];
 
 // Crates name what they read either relative to their manifest
