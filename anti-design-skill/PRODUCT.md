@@ -8,62 +8,55 @@ web
 
 ## Users
 
-Designers, product managers, and engineers who use AI coding tools (Cursor, Claude Code, GitHub Copilot, Gemini CLI, Codex CLI, and others) and want better design output from their AI. They land on the site from GitHub, social media, or word of mouth, already aware that AI-generated UIs have quality problems. They're looking for a practical solution, not education about the problem.
+Developers, designers and product people who build interfaces with an AI coding agent and are tired of results that all look the same. They already know the problem. They want a tool they can run today, inside the agent they use, that names the problem on a specific file and helps fix it.
 
 ## Product Purpose
 
-Anti-Design gives builders a shared design vocabulary with their AI, delivered as a plug-and-play skill that works in every major AI coding harness. Success is measured in two ways: (1) the user can steer AI output with design precision instead of vague prose, and (2) the AI produces interfaces that pass professional design review, not "looks like an AI made it" output.
+Anti-AI Design gives an agent a shared design vocabulary (24 commands, each backed by a focused playbook) and gives the team a deterministic detector that flags the habits that make generated interfaces look alike. Success means two things: a person can steer the agent with a named move instead of vague prose, and the interface that comes back passes a design review rather than reading as machine-made.
 
 ## Positioning
 
-Anti-Design combines an opinionated design skill, live browser iteration, and deterministic anti-pattern detection in one source-first system that is transformed for supported AI coding harnesses. The repository ships the same design vocabulary through harness-native distributions instead of maintaining unrelated prompts for each tool.
+One source tree, three surfaces: the skill, a command-line detector that needs no model and no API key, and live iteration in the browser. The same design vocabulary is generated for each supported coding tool, so teams do not keep separate prompts per tool. The project is a modified fork of Impeccable (see `UPSTREAM.md`); what we add and change is recorded in the git history.
 
 ## Operating Context
 
-Builders install Anti-Design from the repository or package, run `/anti-design init` once to record product truth, then direct design work through the shared command vocabulary. They may iterate against a runnable interface in live mode and use the CLI or browser extension for deterministic checks. Maintainers author the canonical skill under `skill/`; build scripts derive provider distributions, site assets, and validation output.
+Someone installs the skill (from a release when one exists, from source today), runs `init` once so the agent records who the product is for, then directs work through the commands. The detector runs in three places: as a hook in the agent's edit loop, from a terminal or CI, and against a rendered page. Maintainers edit the sources under `skill/`, `crates/`, `scripts/` and `cli/`; the per-tool folders in the repository are generated.
 
 ## Capabilities and Constraints
 
-- The skill exposes 23 design commands covering new work, critique, technical audit, refinement, hardening, adaptation, and live iteration.
-- The CLI and browser extension run deterministic detector rules without an LLM or API key; LLM critique remains a separate judgment layer.
-- Provider-specific root harness folders and `plugin/` are generated distribution artifacts. Source changes belong in `skill/`, `scripts/`, `cli/`, `site/`, `extension/`, `functions/`, or `tests/`.
-- Product claims, testimonials, customers, benchmarks, pricing, licensing, and deployment facts must not be invented when evidence is absent.
+- The skill exposes 24 commands. One of them, `craft`, is a deprecated alias for an ordinary build request.
+- The detector's rules are fixed and deterministic. Judgment about whether a design is good stays with a person or with the skill's `critique` command.
+- Several parts of the fork call a hosted service that does not exist yet (the `help` command list, the visual-direction catalog, engine downloads). Anything that depends on one must say so rather than fail silently.
+- The project is pre-release. Do not describe features as shipped, published or tested end to end unless that has been checked.
+- Do not invent customers, testimonials, benchmarks or pricing.
 
 ## Brand Commitments
 
-Expert, opinionated, refined. Anti-Design speaks with an authoritative design voice: confident taste, editorial quality, zero hedging. It's the design director in the room who knows exactly what's wrong and how to fix it. The tone is **direct** (no "maybe consider"), **specific** (no "improve the vibe"), and **rooted in craft** (no hype, no hedging).
+Plain, specific and direct. Say what a command does and what a rule flags. Avoid hype, avoid hedging, and do not lecture people about a problem they already know they have.
 
-Three-word personality: **expert, decisive, editorial**.
+Three-word personality: **plain, exact, unfussy**.
 
-The site and brand must be the antithesis of everything Anti-Design critiques. Specifically, avoid:
+The project's own surfaces should pass its own detector. Avoid in anything we publish:
 
-- **Generic AI tool marketing**: dark mode with purple gradients, neon accents, glassmorphism, glowing particles, cyan-on-black.
-- **SaaS landing-page clichés**: hero-metric layouts, identical-card feature grids, sparkline decorations, "boost your productivity" copy.
-- **Hedging language**: "might", "could", "consider", "perhaps". Anti-Design is opinionated — it picks a direction and commits.
-- **Educational framing**: this product is for people who already know they have a problem; we solve it, we don't teach it.
-- **Over-decoration**: every visual element must earn its place. No ornament for ornament's sake.
+- Generic AI-tool marketing: purple gradients, neon on black, glassmorphism, glowing particles.
+- Landing-page filler: hero metrics, identical feature-card grids, "boost your productivity" copy.
+- Decoration with no job to do.
 
 ## Evidence on Hand
 
-- `README.md` documents the public command set, supported installation paths, and deterministic detector behavior.
-- `skill/` contains the canonical guidance and command references; `tests/` contains regression coverage for its build and runtime behavior.
-- `site/` is the public product surface and a direct demonstration of the design standard Anti-Design advocates.
-- `cli/` and `extension/` are working detector implementations, not roadmap claims.
-- The existing product record names no customer testimonials or quantified outcome studies. Future surfaces must not fabricate them.
+- `README.md` and `README.npm.md` describe the command set, installation paths and detector behavior as they work today, checked against the engine's own `--help` output.
+- `skill/` holds the playbooks; `tests/` holds regression coverage for the build and runtime.
+- `crates/` and `cli/` are the working engine and launcher.
+- There are no customer quotes or quantified outcome studies on record.
 
 ## Product Principles
 
-1. **Practice what you preach.** The site must pass its own anti-pattern tests with flying colors. If we ship anything we'd flag in an audit, we've lost.
-2. **Show, don't tell.** Demonstrate design quality through execution, not through words about design quality. The site IS the demo.
-3. **Expert confidence.** Direct, opinionated, decisive. No hedging. Every assertion should sound like it comes from someone who has seen a thousand interfaces and knows what works.
-4. **Editorial over marketing.** Feels like a design publication (Eye Magazine, It's Nice That, A List Apart) rather than a SaaS landing page. Long-form reading, considered typography, breathing room.
-5. **Purposeful restraint.** Every element earns its place. Nothing decorative without function. Nothing included because "landing pages usually have that".
+1. **Say only what is true.** A claim in the README must be something we ran or can point to.
+2. **Name the move.** A command should tell the agent exactly what kind of change to make and to what.
+3. **Same answer every run.** The detector must not depend on a model or on chance.
+4. **Pass our own checks.** Our docs, diagrams and demos should not trip the rules we ship.
+5. **Credit the source.** The fork notice stays visible and accurate.
 
 ## Accessibility & Inclusion
 
-Baseline: WCAG 2.1 AA on all pages. Key commitments:
-- Color contrast ratios verified with actual contrast checks, not eyeballing.
-- All interactive elements keyboard-navigable with visible focus states.
-- `prefers-reduced-motion` respected for every animation.
-- Semantic HTML first, ARIA as a supplement, never as a workaround.
-- Copy readable at an 8th-grade level; jargon only when precisely needed (design terms like "OKLCH", "chroma" are acceptable because they're the actual vocabulary users are here to learn).
+Baseline: WCAG 2.1 AA for anything we publish. Contrast is measured, not judged by eye. Interactive elements work with a keyboard and show focus. Motion respects `prefers-reduced-motion`. Images carry accurate alt text. Copy is written to be readable at a plain-language level; design terms such as OKLCH are fine when they are the exact word.
