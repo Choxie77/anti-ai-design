@@ -24,7 +24,9 @@ cd "$ROOT"
 # (see below), never rewritten as text.
 SCOPE=(anti-design-skill docs
   ':(exclude)docs/ours/status' ':(exclude)docs/ours/agent-prompts' ':(exclude)docs/ours/BASELINE.md'
-  ':(exclude)anti-design-skill/crates/live/assets/detect-antipatterns-browser.js')
+  ':(exclude)anti-design-skill/crates/live/assets/detect-antipatterns-browser.js'
+  # attribution files: the history they quote keeps its own names (UPSTREAM.md was edited by hand)
+  ':(exclude)anti-design-skill/LICENSE' ':(exclude)anti-design-skill/NOTICE.md' ':(exclude)anti-design-skill/UPSTREAM.md')
 PATTERN='anti-design|anti_design|antiDesign|AntiDesign|Anti-Design|ANTI_DESIGN|Anti Design|OWNER/'
 
 # 1. contents. Do NOT use `git grep` here: .gitattributes marks the oracle goldens, call vectors and the

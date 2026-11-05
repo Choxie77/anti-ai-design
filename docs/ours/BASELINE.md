@@ -142,15 +142,18 @@ time out now and then when other heavy work is running; rerun a failing one alon
 
 ## How to reproduce
 
+(Updated after the rename to `anti-ai-design`: the commands below use the current names. The tables above are
+the historical runs and keep the names of their time. The whole workspace compiles now, so no crate has to
+be excluded.)
+
 ```bash
 cd anti-design-skill
-export ANTI_DESIGN_BIN="$PWD/target/release/anti-design"
+export ANTI_AI_DESIGN_BIN="$PWD/target/release/anti-ai-design"
 . "$HOME/.cargo/env"; export PATH="$HOME/.bun/bin:$PATH"
 bun install --frozen-lockfile
 bun run test                                  # stops at the first failing suite
 for s in oracle detector live framework plugin-e2e; do node scripts/run-tests.mjs $s; done
-cargo test --workspace --exclude anti-design --no-fail-fast
-cargo test -p anti-design --lib --bins
+cargo test --workspace --no-fail-fast
 ```
 
 Note: macOS has no `timeout` command, so do not wrap these in it.
