@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anti-AI Design — Progress</title>
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#fff; --ink:#1b1b18; --muted:#6b6a63; --line:#e3e1d8;
+  --accent:#1f6f4a; --accent-soft:#e3f1ea; --next:#b45309; --next-soft:#fdf0dc; --dim:#9a988e; --dim-soft:#efeee8;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141413; --panel:#1d1d1b; --ink:#ecebe4; --muted:#9b9a91; --line:#2c2c29;
+  --accent:#5fc796; --accent-soft:#17301f; --next:#f0a548; --next-soft:#35260f; --dim:#77766d; --dim-soft:#242422;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:13px}
+.live{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.stat b{display:block;font-size:30px;letter-spacing:-.02em;line-height:1.1}
+.stat span{color:var(--muted);font-size:13px}
+.bar{height:12px;border-radius:99px;background:var(--dim-soft);overflow:hidden;display:flex;margin:10px 0 8px}
+.bar i{display:block;height:100%}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend em{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-top:18px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
+.task{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.task:first-of-type{border-top:0}
+.id{font:12px ui-monospace,Menlo,monospace;color:var(--muted);min-width:52px;padding-top:2px}
+.task h3{margin:0;font-size:14.5px;font-weight:600}
+.task p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.pill{font-size:11px;padding:2px 8px;border-radius:99px;white-space:nowrap;height:fit-content;font-weight:600}
+.pill.completed{background:var(--accent-soft);color:var(--accent)}
+.pill.pending{background:var(--next-soft);color:var(--next)}
+.pill.superseded{background:var(--dim-soft);color:var(--dim)}
+.log{border-left:2px solid var(--line);padding-left:14px;margin:0 0 16px 4px;position:relative}
+.log::before{content:"";position:absolute;left:-6px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--panel)}
+.log h3{margin:0 0 3px;font-size:13.5px}
+.log pre{margin:0;white-space:pre-wrap;font:12.5px/1.55 ui-monospace,Menlo,monospace;color:var(--muted)}
+.commit{display:flex;gap:10px;font-size:13px;padding:5px 0}
+.commit code{color:var(--muted);font-size:12px}
+button.tab{background:none;border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:3px 12px;font-size:12.5px;cursor:pointer;margin-right:6px}
+button.tab[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.scroll{max-height:560px;overflow:auto}
+.tabs{margin-bottom:10px}
+a{color:var(--accent)}
+.links li{margin:4px 0;font-size:13.5px}
+code.c{background:var(--dim-soft);padding:1px 6px;border-radius:5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 id="title">Anti-AI Design</h1>
+      <div class="sub" id="branch">loading…</div>
+    </div>
+    <div class="live"><span class="dot"></span><span id="updated">connecting…</span></div>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="card">
+    <h2>Overall progress</h2>
+    <div class="bar" id="bar"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Tasks</h2>
+      <div class="tabs" id="tabs"></div>
+      <div class="scroll" id="tasks"></div>
+    </section>
+    <div>
+      <section class="card" style="margin-bottom:18px">
+        <h2>Latest work log</h2>
+        <div class="scroll" style="max-height:340px" id="log"></div>
+      </section>
+      <section class="card" style="margin-bottom:18px">
+        <h2>Recent commits <span id="dirty" class="sub"></span></h2>
+        <div id="commits"></div>
+      </section>
+      <section class="card">
+        <h2>See the product itself</h2>
+        <ul class="links" style="padding-left:18px;margin:0">
+          <li>Live design overlay: <code class="c">anti-design live</code> in a web project</li>
+          <li>Detector on any CSS/HTML: <code class="c">target/release/anti-design detect &lt;file&gt;</code></li>
+          <li>Demo site: <code class="c">anti-design-skill/demos/landing-demo/index.html</code></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let filter = "pending", data = null;
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+function render() {
+  if (!data) return;
+  const t = data.tasks, n = s => t.filter(x => x.status === s).length;
+  const done = n("completed"), pend = n("pending"), sup = n("superseded");
+  const live = done + pend, pct = live ? Math.round(done / live * 100) : 0;
+  $("title").textContent = data.project;
+  $("stats").innerHTML = [
+    [pct + "%", "of active tasks done"], [done, "completed"], [pend, "still to do"], [sup, "superseded by the fork"]
+  ].map(([b, s]) => `<div class="card stat"><b>${b}</b><span>${s}</span></div>`).join("");
+  const w = k => (n(k) / t.length * 100) + "%";
+  $("bar").innerHTML = `<i style="width:${w("completed")};background:var(--accent)"></i><i style="width:${w("pending")};background:var(--next)"></i><i style="width:${w("superseded")};background:var(--dim)"></i>`;
+  $("legend").innerHTML = `<span><em style="background:var(--accent)"></em>Completed ${done}</span><span><em style="background:var(--next)"></em>Pending ${pend}</span><span><em style="background:var(--dim)"></em>Superseded ${sup}</span><span>Total ${t.length}</span>`;
+  $("tabs").innerHTML = [["pending","To do"],["completed","Done"],["superseded","Superseded"]]
+    .map(([k, l]) => `<button class="tab" data-k="${k}" aria-pressed="${filter===k}">${l} (${n(k)})</button>`).join("");
+  document.querySelectorAll(".tab").forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
+  $("tasks").innerHTML = t.filter(x => x.status === filter).map(x =>
+    `<div class="task"><span class="id">${esc(x.id)}</span><div style="flex:1"><h3>${esc(x.title)}</h3><p>${esc((x.description||"").slice(0,230))}${(x.description||"").length>230?"…":""}</p></div><span class="pill ${x.status}">${x.status}</span></div>`).join("") || `<p class="sub">Nothing here.</p>`;
+}
+
+function renderLog(text) {
+  const entries = text.split(/\n(?=\[)/).map(e => e.trim()).filter(Boolean).reverse().slice(0, 8);
+  $("log").innerHTML = entries.map(e => {
+    const i = e.indexOf("\n"), head = i < 0 ? e : e.slice(0, i), body = i < 0 ? "" : e.slice(i + 1);
+    return `<div class="log"><h3>${esc(head)}</h3><pre>${esc(body)}</pre></div>`;
+  }).join("");
+}
+
+async function refresh() {
+  try {
+    const [p, l, g] = await Promise.all(["/prd.json", "/progress.txt", "/git.json"].map(u => fetch(u, {cache: "no-store"})));
+    data = await p.json(); renderLog(await l.text());
+    const gj = await g.json();
+    $("branch").textContent = `Branch ${gj.branch} · fork of Impeccable 4.8.0 (Apache-2.0)`;
+    $("dirty").textContent = gj.changed ? `· ${gj.changed} uncommitted files` : "";
+    $("commits").innerHTML = gj.commits.map(c => `<div class="commit"><code>${c.hash}</code><span>${esc(c.subject)}</span></div>`).join("");
+    render();
+    $("updated").textContent = "Live · updated " + new Date().toLocaleTimeString();
+  } catch (e) { $("updated").textContent = "Server not reachable"; }
+}
+refresh(); setInterval(refresh, 5000);
+</script>
+</body>
+</html>
