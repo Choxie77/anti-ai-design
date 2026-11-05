@@ -6,3 +6,76 @@ config, context, detector, hooks, ...), /slop, /changelog, /live-mode, /designin
 Notes for later tasks: site is server-rendered Astro HTML (readable with grep); the site also lists extra commands
 (adapt, animate, bolder, clarify, colorize, delight, harden, ...) and an open-source repo (pbakaus/impeccable).
 Verified: test -s SOURCES.md && file count >= 2 -> OK (44 files).
+
+[task-02..06] COMPLETED - Baseline research and spec (2026-11-05)
+Wrote docs/research/commands.md (8 required commands + 18 more + detector CLI), docs/research/slop-catalog.md
+(51 rules, own IDs AAD-<domain><nn>), docs/research/context-files.md (PRODUCT.md/DESIGN.md, folder layout,
+our run-log design), docs/spec/cli-schema.json (9 required commands + detect), docs/spec/originality.md.
+Decisions: product "Anti-AI Design", npm package + bin name "anti-ai-design" (npm 404 on 2026-11-05; "aad" taken),
+folder .anti-ai-design/, dry-run by default with --write, changelog at .anti-ai-design/changelog.md.
+Key finding: the reference tool is an agent skill plus a small detector CLI; only detect runs standalone, so our
+rewrite commands need a safe-fix tier and a suggestion tier. Project field in prd.json renamed to "Anti-AI Design".
+Notes for later tasks: package.json files list must exclude docs/research/raw/; render-only rules deferred.
+Open: .env and .pnpm/ cache are tracked in git (see report); not changed.
+
+[decision] 2026-11-05 - Build on the fork in anti-design-skill/ (Impeccable 4.8.0, Apache-2.0, forked at c8891a9).
+docs/spec/originality.md rewritten as fork provenance and Apache-2.0 obligations. PRD tasks 07-41 marked superseded;
+new tasks 42-49 cover fork hygiene, toolchain, test baseline, rule gap analysis, our first rules, contract diff,
+safe-fix tier, e2e run. Findings: no cargo/bun on this machine; engine download base is the placeholder
+github.com/OWNER/anti-design, so the pinned binary cannot be fetched; 220 files hold OWNER/anti-design.example
+placeholders; fork name is "anti-design" vs our brief "anti-AI design" (open).
+
+[task-43] COMPLETED - Toolchain and engine build (2026-11-05)
+Installed Rust 1.99.1 and Bun 1.4.4. cargo build --release -p anti-design OK in 2m34s, binary reports 0.1.18+engine.
+detect smoke test on a CSS file: 3 findings, exit 2. Details in docs/ours/BUILD.md.
+
+[fork-rebrand] 2026-11-05 - Mechanical rebrand of the fork done by tools/rebrand/ (rebrand_all.sh; needs UPSTREAM_DIR; refuses if
+anti-design-skill/ exists). impeccable -> anti-design in contents and paths; code identifiers handled per language (Rust ->
+anti_design, JS props -> ['anti-design'], bare JS ids -> antiDesign). NOTICE.md/UPSTREAM.md hold the Apache-2.0 attribution.
+Verified: JS syntax matches upstream baseline; Node tests match upstream except release.test.mjs "outside the workspace"
+(needs the fork committed: it uses git ls-files). bundle-signature.json vector regenerated (domain string changed).
+NOT verified: any Rust (no cargo here; identifier/serde-key renames unchecked), bun build, engine binary, telemetry/catalog
+backend (placeholders; .example domains never resolve, so nothing reaches upstream).
+
+[task-44] COMPLETED - Test baseline (2026-11-05)
+Bun/Node: detector 82/82, framework 196/196, plugin-e2e 4/4, core 485/486, live 262/265 (2 skipped, 1 fail),
+oracle 1292 pass / 31 fail / 20 accepted. Rust: 2395 pass, 7 fail; crates/cli integration tests do not compile
+(CARGO_BIN_EXE_anti_design vs anti-design). Likely rebrand leftovers: the CLI env var name, two placeholder
+domains (anti-design.style vs anti-design.example), oracle goldens. Nothing fixed. See docs/ours/BASELINE.md.
+Suggested follow-up task: fix the rebrand leftovers so the baseline goes green before adding our rules.
+
+[task-44 follow-up] 2026-11-05 18:35 - fixes applied, second full run
+Bun core green, live/detector/framework/plugin green, Rust workspace compiles (2468 pass, 2 fail). Remaining: macOS-only
+comp-verbs rename test, dev_url flake under load, release.test file list, 7 oracle live-* cases whose goldens were
+rewritten by a second session in the same checkout (conflict: pause one of the sessions before re-recording).
+
+[fork-verify] 2026-11-05 - Toolchains installed (rustup via brew, bun 1.4.4). Fork verified against pristine upstream (c8891a9):
+Rust: workspace compiles; cargo test passes except artifact_cleanup_failure_blocks_the_gate (also fails on upstream); two tests are
+flaky under load (pass alone). Node/bun: 444 bun tests pass; node tests match upstream; review-theme needs `npx playwright install`
+(fails upstream too); release.test.mjs "outside the workspace" passes once the fork is committed. Oracle: 1317 pass, 5 fail =
+upstream's own 5 baseline live-* failures (styleClose field). 25 goldens re-recorded for hash/size drift only.
+Bugs found and fixed in the rename (tools/rebrand updated): CARGO_BIN_EXE_anti-design, br#"..."# raw strings, http:// upgraded to
+https:// in the placeholder-domain rule, mixed-case host. OPEN before release: bundle-signing-keys.json still holds UPSTREAM's
+public key (generate our own); optional deps @anti-design/cli-* do not exist on npm (claim the scope or drop them); engine release
+channel + checksums are OWNER placeholders; catalog/telemetry backend not ours.
+
+[task-44 follow-up 2] 2026-11-05 18:55 - other session idle; oracle green
+Oracle replay: 1322 pass, 0 fail, 21 accepted deltas. Five live cases re-recorded (only "styleClose" added).
+Remaining red: macOS-only comp-verbs rename test, dev_url flake under load, tests/release.test.mjs:426 file list.
+
+[task-44 follow-up 3] 2026-11-05 19:00 - release test resolved
+tests/release.test.mjs failed only because the fork was untracked (git ls-files empty); after commit 69aea44 all 27 pass.
+Core: 486 Bun + 254 Node pass. Remaining red: 2 Rust tests (macOS rename of read-only dir; dev_url flake under load).
+
+[task-45] COMPLETED - Rule gap analysis (2026-11-05)
+Engine lists 62 rules (anti-design detect --list-rules --json). 40 of our 51 catalog entries map to fork rules, 11 fork rules
+are not in our catalog, 11 catalog entries have no fork rule. Task-46 re-scoped to AAD-Q02, C07, V07, V06, V02.
+See docs/ours/rule-gap.md.
+
+[task-46] COMPLETED - First Anti-AI Design rules (2026-11-05)
+New crate anti-design-skill/crates/aad-rules (rule pack): aad-emoji-icons, aad-focus-removed, aad-icon-button-name,
+aad-multiple-accents, aad-mixed-radii, aad-glass-overuse. Upstream edits (marked): foundation/rule_pack.rs
+(install_default/default_pack), detect/cli.rs (uses default pack), cli/main.rs (installs it unless
+ANTI_DESIGN_BUILTIN_ONLY=1), oracle lib.mjs sets that env so goldens stay pinned. 68 rules listed.
+Tests: 30 crate tests, tests/aad-rules.test.mjs 6/6, oracle 1322/1322, core 486+254. Not re-run: full cargo
+workspace and live/framework suites with the pack. Hook verb does not pass the pack yet.

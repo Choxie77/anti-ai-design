@@ -1,0 +1,166 @@
+{
+  "$comment": "Wish list for Anti-AI Design written before we chose to fork. It is NOT the contract: the fork's real contract is anti-design-skill/docs/CLI-CONTRACT.md. Task-47 diffs the two.",
+  "name": "anti-ai-design",
+  "displayName": "Anti-AI Design",
+  "version": "0.1.0",
+  "description": "Find the design habits that make an interface look AI-generated, then remove them or show how to improve them.",
+  "bin": "anti-ai-design",
+  "contextFolder": ".anti-ai-design",
+  "globalFlags": [
+    { "name": "--help", "alias": "-h", "type": "boolean", "description": "Show help for the CLI or a command." },
+    { "name": "--version", "alias": "-v", "type": "boolean", "description": "Print the version." },
+    { "name": "--json", "type": "boolean", "description": "Machine-readable result on stdout; human text goes to stderr." },
+    { "name": "--quiet", "alias": "-q", "type": "boolean", "description": "Print only the final count and exit code." },
+    { "name": "--no-color", "type": "boolean", "description": "Disable ANSI color." },
+    { "name": "--cwd", "type": "string", "description": "Run as if started in this directory." },
+    { "name": "--no-config", "type": "boolean", "description": "Ignore .anti-ai-design config and context files." },
+    { "name": "--no-inline-ignores", "type": "boolean", "description": "Do not honor inline disable comments." }
+  ],
+  "exitCodes": {
+    "0": "Completed; no findings at or above the failing severity.",
+    "1": "Runtime failure: a target could not be read or scanned.",
+    "2": "Completed with findings at or above the failing severity, or unknown command or invalid usage."
+  },
+  "findingShape": {
+    "ruleId": "string, e.g. AAD-C02",
+    "domain": "type | color | layout | visual | motion | copy | imagery | quality | system",
+    "kind": "slop | quality",
+    "severity": "high | medium | low",
+    "check": "source | render | review",
+    "file": "string (relative path)",
+    "line": "number | null",
+    "column": "number | null",
+    "message": "string, plain-language reason",
+    "suggestion": "string, how to improve",
+    "fix": "null | { tier: 'safe' | 'manual', patch: 'unified diff or null' }"
+  },
+  "commands": [
+    {
+      "name": "detect",
+      "summary": "Scan files, a folder or piped text for slop and quality findings.",
+      "args": [{ "name": "target", "required": false, "variadic": true, "description": "File or folder. Reads stdin when omitted and input is piped." }],
+      "flags": [
+        { "name": "--scope", "type": "string", "description": "Comma-separated domains to check." },
+        { "name": "--fail-on", "type": "string", "enum": ["high", "medium", "low"], "default": "medium", "description": "Lowest severity that makes the exit code 2." },
+        { "name": "--no-design-system", "type": "boolean", "description": "Skip drift rules against DESIGN.md." },
+        { "name": "--no-advisory", "type": "boolean", "description": "Hide low-severity hints." }
+      ],
+      "output": { "shape": "{ findings: Finding[], counts: { high, medium, low }, score: number, filesScanned: number }", "stdout": "json when --json", "stderr": "text report" },
+      "mutates": false
+    },
+    {
+      "name": "audit",
+      "summary": "Read-only implementation report: accessibility, theming, responsiveness, integrity, ordered by severity.",
+      "args": [{ "name": "target", "required": false, "variadic": true, "description": "Page, component or folder." }],
+      "flags": [
+        { "name": "--save", "type": "boolean", "description": "Save the report under .anti-ai-design/reports/." },
+        { "name": "--scope", "type": "string", "description": "Limit to domains." }
+      ],
+      "output": { "shape": "{ priorities: { P0, P1, P2, P3 }, areas: AreaScore[], findings: Finding[], total: number }", "areaScore": "0 to 4 per area" },
+      "mutates": false
+    },
+    {
+      "name": "critique",
+      "summary": "Read-only design review: what makes the page feel generic and what to fix first.",
+      "args": [{ "name": "target", "required": false, "variadic": true, "description": "Page, component or folder." }],
+      "flags": [
+        { "name": "--task", "type": "string", "description": "The main thing a visitor must do; sharpens priorities." },
+        { "name": "--save", "type": "boolean", "description": "Save the report under .anti-ai-design/reports/." }
+      ],
+      "output": { "shape": "{ strengths: string[], issues: Issue[], questions: string[], usability: { check, score|'n/a', reason }[], next: string[] }" },
+      "mutates": false
+    },
+    {
+      "name": "polish",
+      "summary": "Finish an existing page: apply safe fixes and list the rest.",
+      "args": [{ "name": "target", "required": true, "variadic": true, "description": "Page, component or folder." }],
+      "flags": [
+        { "name": "--write", "type": "boolean", "description": "Apply safe fixes. Default is a dry run that prints a diff." },
+        { "name": "--keep", "type": "string", "repeatable": true, "description": "Property or token to leave alone, e.g. colors." },
+        { "name": "--rules", "type": "string", "description": "Comma-separated rule IDs to include." }
+      ],
+      "output": { "shape": "{ applied: Fix[], suggested: Finding[], diff: string }" },
+      "mutates": true,
+      "writesOnlyWith": "--write"
+    },
+    {
+      "name": "typeset",
+      "summary": "Fix typography: hierarchy, size, line height, measure, tracking, font defaults.",
+      "args": [{ "name": "target", "required": true, "variadic": true, "description": "Page, component or folder." }],
+      "flags": [
+        { "name": "--write", "type": "boolean", "description": "Apply safe fixes." },
+        { "name": "--keep-fonts", "type": "boolean", "description": "Never change font families." }
+      ],
+      "output": { "shape": "{ applied: Fix[], suggested: Finding[], diff: string }" },
+      "mutates": true,
+      "writesOnlyWith": "--write"
+    },
+    {
+      "name": "distill",
+      "summary": "Reduce clutter around the main task: duplicates, decoration, nested containers.",
+      "args": [{ "name": "target", "required": true, "variadic": true, "description": "Page, component or folder." }],
+      "flags": [
+        { "name": "--write", "type": "boolean", "description": "Apply safe removals." },
+        { "name": "--keep", "type": "string", "repeatable": true, "description": "Selector or text that must remain." },
+        { "name": "--task", "type": "string", "description": "The main task to protect." }
+      ],
+      "output": { "shape": "{ removed: Fix[], suggested: Finding[], diff: string }" },
+      "mutates": true,
+      "writesOnlyWith": "--write"
+    },
+    {
+      "name": "generate",
+      "summary": "Produce alternative versions of one element and let the user compare and keep one.",
+      "args": [{ "name": "element", "required": true, "description": "Selector, file:line or a plain-language name." }],
+      "flags": [
+        { "name": "--count", "type": "number", "default": 3, "min": 1, "max": 8, "description": "Number of variants." },
+        { "name": "--direction", "type": "string", "description": "bolder, quieter, simpler, typography, color, layout, motion." },
+        { "name": "--accept", "type": "number", "description": "Keep variant N and write it to source." },
+        { "name": "--discard", "type": "boolean", "description": "Discard the current set and restore the original." }
+      ],
+      "output": { "shape": "{ sessionId: string, variants: { index, summary, diff }[], previewUrl: string|null }" },
+      "mutates": true,
+      "writesOnlyWith": "--accept"
+    },
+    {
+      "name": "live",
+      "summary": "Local preview server for comparing variants in a running page.",
+      "args": [{ "name": "url", "required": false, "description": "Dev-server URL to attach to." }],
+      "flags": [
+        { "name": "--port", "type": "number", "default": 4977, "description": "Helper server port." },
+        { "name": "--watch", "type": "boolean", "default": true, "description": "Re-scan files on change." },
+        { "name": "--stop", "type": "boolean", "description": "Stop a running session and clean up." }
+      ],
+      "output": { "shape": "{ url: string, sessionId: string }", "streams": "server-sent events of findings" },
+      "mutates": true,
+      "writesOnlyWith": "accepting a variant"
+    },
+    {
+      "name": "document",
+      "summary": "Record the project's existing visual system as DESIGN.md.",
+      "args": [{ "name": "target", "required": false, "variadic": true, "description": "Folder to read. Defaults to the project." }],
+      "flags": [
+        { "name": "--seed", "type": "boolean", "description": "Write a marked starting record for a project with no design yet." },
+        { "name": "--write", "type": "boolean", "description": "Write DESIGN.md. Default prints the proposal." },
+        { "name": "--force", "type": "boolean", "description": "Overwrite an existing DESIGN.md." }
+      ],
+      "output": { "shape": "{ tokens: object, sections: string[], path: string|null }" },
+      "mutates": true,
+      "writesOnlyWith": "--write",
+      "touches": ["DESIGN.md", ".anti-ai-design/design.json"]
+    },
+    {
+      "name": "init",
+      "summary": "Create PRODUCT.md and the .anti-ai-design folder from what the project already tells us.",
+      "args": [],
+      "flags": [
+        { "name": "--yes", "type": "boolean", "description": "Accept inferred answers without prompting." },
+        { "name": "--platform", "type": "string", "enum": ["web", "ios", "android", "adaptive"], "description": "Override the inferred platform." },
+        { "name": "--force", "type": "boolean", "description": "Overwrite an existing PRODUCT.md." }
+      ],
+      "output": { "shape": "{ created: string[], inferred: object, open: string[] }" },
+      "mutates": true,
+      "touches": ["PRODUCT.md", ".anti-ai-design/config.json"]
+    }
+  ]
+}

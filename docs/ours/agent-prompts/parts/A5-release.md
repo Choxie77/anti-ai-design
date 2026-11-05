@@ -1,0 +1,10 @@
+NAME=release  BASE=main
+Task (new task-53): make the project releasable from Choxie77/anti-ai-design. Read docs/BUNDLE-SIGNING.md, docs/ENGINE.md, scripts/release.mjs, scripts/fetch-engine.mjs, scripts/check-engine-release.mjs first.
+1. Generate OUR bundle-signing keypair. Commit only the PUBLIC key in scripts/bundle-signing-keys.json (replace upstream's). Write the private key to ~/aad-secrets/ OUTSIDE the repo, mode 600, and tell the user to store it as a GitHub Actions secret. Never print or commit the private key or any token. Fix docs/BUNDLE-SIGNING.md to match.
+2. Engine release channel = GitHub Releases of Choxie77/anti-ai-design: update fetch-engine.mjs, check-engine-release.mjs, checksum generation (engine-checksums.txt) and the ENGINE_VERSION flow. The OWNER placeholders in these files become Choxie77/anti-ai-design.
+3. .github/workflows: test (bun, node, cargo, oracle), build-engine matrix (darwin arm64/x64, linux x64/arm64, windows x64), release on tag v*. Pin action versions.
+4. cli/platform-packages and scripts/publish-platform-packages.mjs use the scope @anti-ai-design (the user must claim it on npm; never publish).
+5. Run every `release:*` script in dry-run / no-publish mode and record the real output.
+OWNERSHIP (under anti-design-skill/): scripts/**, .github/** (create at repo level if the workflows must live there; say where in the status file), cli/platform-packages/**, package.json, docs/BUNDLE-SIGNING.md, docs/ENGINE.md. Do not touch crates/. The running session has an uncommitted edit in scripts/test-suites.mjs: do not rewrite that file wholesale; keep your changes there minimal and note them.
+Rust build is only needed to produce a binary for the dry run (step 2 of the rules applies if you do).
+Done when: `node scripts/run-tests.mjs core` still passes, workflows parse (actionlint if installed, otherwise a YAML parse), dry runs succeed, and the status file lists the exact human steps (claim npm scope, add secrets, set repo visibility, first tag).
