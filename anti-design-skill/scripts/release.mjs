@@ -257,7 +257,10 @@ const changelogCandidates = [
   path.join(repoRoot, 'site/pages/changelog.astro'),
   path.join(repoRoot, '..', 'anti-design-site', 'site/pages/changelog.astro'),
 ];
-const changelogSource = changelogCandidates.find(p => existsSync(p)) || changelogCandidates[0];
+const changelogSource = changelogCandidates.find(p => existsSync(p));
+if (!changelogSource) {
+  fail('No changelog source found. This script reads release notes from site/pages/changelog.astro (or ../anti-design-site/site/pages/changelog.astro), and neither exists in this checkout. Add one, or publish through .github/workflows/release.yml (tag v<version>), which generates its own notes.');
+}
 const changelogHtml = readFileSync(changelogSource, 'utf8');
 const expectedHeader = `<span class="cf-version">${cfg.changelogLabel}${version}</span>`;
 const headerIdx = changelogHtml.indexOf(expectedHeader);
