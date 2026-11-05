@@ -15,6 +15,7 @@ mod emoji;
 mod focus;
 mod glass;
 mod radii;
+pub mod safe_fix;
 mod util;
 
 use anti_design_core::findings::Finding;

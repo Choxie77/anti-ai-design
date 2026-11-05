@@ -10,3 +10,7 @@ pub mod entry_capture;
 pub mod capture_service;
 
 pub mod reviewed_entry;
+
+// Modified by Anti-Design contributors, 2026-11-05: the safe-fix tier
+// (`anti-design detect --fix [--write]`), a new module; see docs/ours/safe-fix.md.
+pub mod safe_fix;
