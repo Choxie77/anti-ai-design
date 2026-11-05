@@ -174,7 +174,7 @@ export function renderFixes(main, ctx) {
     }
     if (fx.changelog?.exists) {
       body.append(
-        h('section', {}, h('h2', { class: 'section-title', text: 'Changelog' }), h('p', { class: 'meta' }, h('code', { text: fx.changelog.path }), ` · last ${fx.changelog.entries.length} of ${fx.changelog.total}`), h('table', { class: 'log' }, h('thead', {}, h('tr', {}, ['When (UTC)', 'Rule', 'Where', 'Change'].map((t) => h('th', { scope: 'col', text: t })))), h('tbody', {}, fx.changelog.entries.map((e) => h('tr', {}, h('td', { class: 'mono', text: e.time }), h('td', { class: 'mono', text: e.rule }), h('td', { class: 'mono', text: e.where }), h('td', { text: e.change })))))),
+        h('section', {}, h('h2', { class: 'section-title', text: 'Changelog' }), h('p', { class: 'meta' }, h('code', { text: fx.changelog.path }), ` · last ${fx.changelog.entries.length} of ${fx.changelog.total}`), h('table', { class: 'log' }, h('thead', {}, h('tr', {}, ['When (UTC)', 'Rule', 'Where', 'Change'].map((t) => h('th', { scope: 'col', text: t })))), h('tbody', {}, fx.changelog.entries.map((e) => h('tr', {}, h('td', { class: 'mono', 'data-label': 'When (UTC)', text: e.time }), h('td', { class: 'mono', 'data-label': 'Rule', text: e.rule }), h('td', { class: 'mono', 'data-label': 'Where', text: e.where }), h('td', { 'data-label': 'Change', text: e.change })))))),
       );
     }
     body.append(
@@ -184,7 +184,7 @@ export function renderFixes(main, ctx) {
         h('h2', { class: 'section-title', text: 'Scanned again' }),
         h('p', { class: gone ? 'verdict' : 'verdict verdict-open', text: gone ? `The fixed findings are gone. ${plural(fx.rescan.after, 'finding')} left, down from ${fx.rescan.before}.` : `Some fixed findings still show up. ${plural(fx.rescan.after, 'finding')} now, ${fx.rescan.before} before.` }),
         h('ul', { class: 'rule-list' }, fx.compare.map((c) => h('li', { class: 'tally-row2' }, h('code', { text: `${c.rule} · ${c.file}` }), ` ${c.gone ? 'not reported any more' : `still ${c.after} reported`} (was ${c.before})`))),
-        h('div', { class: 'row' }, h('a', { class: 'btn btn-quiet', href: '#/results', text: 'See the remaining findings' }), h('a', { class: 'btn btn-quiet', href: '#/scan', text: 'Scan something else' })),
+        h('div', { class: 'row' }, fx.rescan.after > 0 ? h('a', { class: 'btn btn-quiet', href: '#/results', text: 'See the remaining findings' }) : null, h('a', { class: 'btn btn-quiet', href: '#/scan', text: 'Scan something else' })),
       ),
     );
   }
