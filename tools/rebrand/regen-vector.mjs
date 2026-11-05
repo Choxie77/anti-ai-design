@@ -1,0 +1,10 @@
+import { createPrivateKey } from 'node:crypto';
+import { readFileSync, writeFileSync } from 'node:fs';
+const root = process.argv[2];
+const { signBundle } = await import(root + '/scripts/sign-bundle.mjs');
+const p = root + '/tests/fixtures/bundle-signature.json';
+const fx = JSON.parse(readFileSync(p, 'utf8'));
+const key = createPrivateKey({ key: Buffer.concat([Buffer.from('302e020100300506032b657004220420', 'hex'), Buffer.alloc(32, 7)]), format: 'der', type: 'pkcs8' });
+fx.envelope = signBundle(Buffer.from(fx.bundle), '4.2.0', key, fx.keys);
+writeFileSync(p, JSON.stringify(fx, null, 2) + '\n');
+console.log('vector regenerated; signature', fx.envelope.signature.slice(0, 16) + '…');

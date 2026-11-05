@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "^run_shell_command$",
+        "hooks": [
+          {
+            "name": "anti-design-session",
+            "type": "command",
+            "command": "[ ! -f $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design ] || $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design hook",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "name": "anti-design-completion",
+            "type": "command",
+            "command": "[ ! -f $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design ] || $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design hook",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  }
+}

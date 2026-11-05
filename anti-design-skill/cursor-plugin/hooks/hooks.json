@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "[ ! -f \"${CURSOR_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || \"${CURSOR_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
+        "matcher": "^Write$",
+        "timeout": 5
+      }
+    ]
+  }
+}

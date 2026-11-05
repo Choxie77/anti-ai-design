@@ -1,0 +1,22 @@
+{
+  "name": "anti-design",
+  "version": "4.8.0",
+  "description": "Design and refine interfaces with Anti-Design skills, specialist agents, and design checks.",
+  "author": {
+    "name": "Renaissance Geek, Inc."
+  },
+  "homepage": "https://anti-design.example",
+  "repository": "https://github.com/OWNER/anti-design",
+  "license": "Apache-2.0",
+  "keywords": [
+    "design",
+    "frontend",
+    "accessibility",
+    "ui",
+    "ux"
+  ],
+  "logo": "assets/icon.png",
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}

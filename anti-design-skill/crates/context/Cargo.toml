@@ -1,0 +1,32 @@
+[package]
+name = "anti-design-context"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+# Use anti_design_core::registry::ANTIPATTERNS for doctor's known rule ids
+# instead of the embedded snapshot in src/rule_ids.rs.
+core-registry = []
+
+[dependencies]
+anti-design-common = { workspace = true, features = ["seed"] }
+anti-design-comp = { workspace = true }
+anti-design-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+regex = { workspace = true }
+once_cell = { workspace = true }
+sha2 = "0.10"
+flate2 = { version = "1", default-features = false, features = ["zlib-rs"] }
+ureq = { version = "2", default-features = false, features = ["tls", "json", "socks-proxy"] }
+rustls-native-certs = "0.8"
+webpki-roots = "1"
+unicode-normalization = "0.1.25"
+
+[dev-dependencies]
+# Stand-in upstream APIs in unit tests only; the runtime servers use
+# anti_design_common::http.
+tiny_http = "0.12"

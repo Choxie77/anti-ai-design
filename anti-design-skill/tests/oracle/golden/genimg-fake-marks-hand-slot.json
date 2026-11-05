@@ -1,0 +1,10 @@
+{
+  "stdout": "IMAGE: .anti-design/mocks/decision/a.png (64x40, fake synthetic comp, $0.00, no API call)\n",
+  "stderr": "",
+  "exit": 0,
+  "signal": null,
+  "files": {
+    ".anti-design/questions/k1.generated/bc804e5cae3cb360-0123456789abcdef.json": "{\"slot\":\".anti-design/mocks/decision/a.png\",\"hand\":\"0123456789abcdef\"}",
+    ".anti-design/questions/k1.hand.json": "{\"digest\":\"0123456789abcdef\",\"comps\":[\".anti-design/mocks/decision/a.png\",\".anti-design/mocks/decision/b.png\"],\"pre\":{}}"
+  }
+}

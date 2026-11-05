@@ -1,0 +1,33 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "anti-design",
+  "metadata": {
+    "description": "Design fluency for AI harnesses. 1 skill, 24 commands, and curated anti-patterns for anti-design frontend design."
+  },
+  "owner": {
+    "name": "Paul Bakaus",
+    "email": "paul@paulbakaus.com"
+  },
+  "plugins": [
+    {
+      "name": "anti-design",
+      "description": "Design fluency for frontend development. 1 skill with 24 commands (/anti-design polish, /anti-design audit, /anti-design critique, etc.) and curated anti-pattern detection.",
+      "version": "4.8.0",
+      "author": {
+        "name": "Paul Bakaus",
+        "email": "paul@paulbakaus.com"
+      },
+      "source": "./plugin",
+      "category": "design",
+      "homepage": "https://anti-design.example",
+      "tags": [
+        "design",
+        "frontend",
+        "ui",
+        "ux",
+        "skills",
+        "commands"
+      ]
+    }
+  ]
+}

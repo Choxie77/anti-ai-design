@@ -1,0 +1,6 @@
+{
+  "name": "anti-design",
+  "owner": { "name": "Renaissance Geek, Inc." },
+  "metadata": { "description": "Anti-Design design tools for Cursor" },
+  "plugins": [{ "name": "anti-design", "source": "./cursor-plugin" }]
+}
