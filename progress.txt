@@ -79,3 +79,6 @@ aad-multiple-accents, aad-mixed-radii, aad-glass-overuse. Upstream edits (marked
 ANTI_DESIGN_BUILTIN_ONLY=1), oracle lib.mjs sets that env so goldens stay pinned. 68 rules listed.
 Tests: 30 crate tests, tests/aad-rules.test.mjs 6/6, oracle 1322/1322, core 486+254. Not re-run: full cargo
 workspace and live/framework suites with the pack. Hook verb does not pass the pack yet.
+
+[task-46 verification] 2026-11-05 - with the pack: cargo workspace 2499 pass / 1 Chrome timeout (passes alone), live 263,
+framework 196, plugin-e2e 4, detector 82, core 486+254, oracle 1322, aad-rules.test 6. Details in docs/ours/BASELINE.md.
