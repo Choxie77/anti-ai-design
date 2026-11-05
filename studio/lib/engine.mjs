@@ -26,8 +26,9 @@ function isExecutable(p) {
 
 /** Resolve the engine binary. Returns an absolute path or null. */
 export function resolveBinary({ explicit, env = process.env } = {}) {
+  // An explicit --engine path is exclusive: if it does not run, there is no fallback.
+  if (explicit) return isExecutable(path.resolve(explicit)) ? path.resolve(explicit) : null;
   const candidates = [];
-  if (explicit) candidates.push(path.resolve(explicit));
   for (const v of ENGINE_ENV_VARS) if (env[v]) candidates.push(path.resolve(env[v]));
   for (const n of ENGINE_NAMES) candidates.push(path.join(REPO_RELEASE, n));
   for (const dir of (env.PATH || '').split(path.delimiter)) {
