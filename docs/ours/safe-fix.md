@@ -67,5 +67,5 @@ never create the folder.
   `anti_ai_design_live::paths::ANTI_AI_DESIGN_DIR`, `.anti-ai-design`) and `CHANGELOG_FILE`.
 * The tests hard-code `.anti-ai-design/changelog.md` in `crates/cli/tests/safe_fix.rs` and
   `tests/aad-safe-fix.test.mjs`, plus the `anti-ai-design-disable` waiver comment in one test.
-* The `--fix`/`--write` help text is not in `detect --help` yet (the usage text lives in
-  `crates/detect/src/cli.rs` and the oracle pins it); adding it needs a golden update.
+* `--fix` and `--write` are listed in `detect --help` (the usage text lives in
+  `crates/detect/src/cli.rs`; the oracle golden `detect-help` pins it).

@@ -10,7 +10,7 @@ Anti-AI Design is a modified fork of **Impeccable** by Paul Bakaus.
 | Upstream license | Apache License 2.0 (`LICENSE`, "Copyright 2025 Paul Bakaus") |
 | This fork | https://github.com/Choxie77/anti-ai-design |
 | License of this fork | Apache License 2.0, unchanged |
-| Fork commit | `69aea44` ("feat: fork Impeccable 4.8.0 as Anti-AI Design") |
+| Fork commit | `69aea44` ("feat: fork Impeccable 4.8.0 as Anti-Design") |
 
 The upstream history is not part of this repository. Commit `c8891a9` is the upstream state we started from; the first commit here is the renamed copy of it.
 
@@ -20,9 +20,10 @@ The whole tree under `anti-design-skill/` started as a copy of upstream at the c
 
 ## What we changed
 
-1. **Rename and rebrand (commit `69aea44`).** A scripted pass, kept in `tools/rebrand/` at the repository root, replaced the upstream name with "Anti-AI Design" in text files and in file and folder names, and renamed the command, package and skill folder to match. It replaced the upstream website, repository and download URLs with placeholders, so nothing in the tree points at the upstream project's services. It also rewrote the author and contributor fields in `package.json`, removed upstream-specific maintainer rules, and wrote the first versions of this file and of `NOTICE.md`. A few tests needed hand fixes that the scripted rename could not make. The script needs a clean upstream checkout at `c8891a9` and refuses to overwrite an existing fork directory, so the rename can be reproduced.
+1. **Rename and rebrand (commit `69aea44`).** A scripted pass, kept in `tools/rebrand/` at the repository root, replaced the upstream name with the working name "Anti-Design" in text files and in file and folder names, and renamed the command, package and skill folder to match. It replaced the upstream website, repository and download URLs with placeholders, so nothing in the tree points at the upstream project's services. It also rewrote the author and contributor fields in `package.json`, removed upstream-specific maintainer rules, and wrote the first versions of this file and of `NOTICE.md`. A few tests needed hand fixes that the scripted rename could not make. The script needs a clean upstream checkout at `c8891a9` and refuses to overwrite an existing fork directory, so the rename can be reproduced.
 2. **Branding and marketing pass (2026-11-05).** We deleted the two upstream README comparison images that were in `docs/images/` and the README's link to an upstream case study about a third-party project, and replaced them with our own text and an original diagram (`docs/images/overview.svg`). We rewrote `README.md`, `README.npm.md`, `PRODUCT.md`, `DESIGN.md`, `NOTICE.md` and this file in our own words. The rest of the tree is not touched by this pass.
-3. **Later work.** Everything after the fork commit, including our own detector rules and anything else added or edited, is recorded in this repository's git history (`git log`, `git blame`).
+3. **Second rename (2026-11-05, `tools/rebrand/rebrand2.sh`).** The working name `anti-design` became the final name `anti-ai-design` (display name "Anti-AI Design") in contents and paths: crates, binary, environment variables, project folder (`.anti-ai-design/`), npm scope (`@anti-ai-design/`), generated skill folders. The `OWNER` and placeholder-domain URLs became `https://github.com/Choxie77/anti-ai-design`. The repository subfolder keeps the name `anti-design-skill`.
+4. **Later work.** Everything after the fork commit, including our own detector rules and anything else added or edited, is recorded in this repository's git history (`git log`, `git blame`).
 
 ## Where modifications are marked
 

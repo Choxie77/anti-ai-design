@@ -105,7 +105,7 @@ Type the command name alone to see a context-aware menu. `pin <command>` creates
 Live mode is for a local checkout. Do not inject it into a deployed site or loosen a production Content-Security-Policy to make it work. Two behaviors to know before you use it in a repo you do not trust:
 
 - Applying copy edits runs the optional `anti-ai-design:manual-edit-validate` script from your `package.json`, with your permissions.
-- If no chat agent has polled for a minute, Apply starts the `codex` CLI (or `claude` if codex is missing) with approvals and sandboxing turned off and your environment inherited. Set `ANTI_AI_DESIGN_LIVE_COPY_AGENT=chat` to keep Apply in your chat session, or `off` to disable it.
+- If no chat agent has polled for a minute, Apply starts the `codex` CLI (with `--dangerously-bypass-approvals-and-sandbox`), or `claude` if codex is missing (with `--permission-mode bypassPermissions`), so approvals and sandboxing are off, and your environment is inherited. Set `ANTI_AI_DESIGN_LIVE_COPY_AGENT=chat` to keep Apply in your chat session, or `off` to disable it.
 
 ## Run the detector
 
