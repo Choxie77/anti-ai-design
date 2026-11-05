@@ -139,7 +139,35 @@ npx anti-ai-design ignores list
 
 ## Project files and git
 
-Working files live in `.anti-design/` (renamed with the rest). Keep `PRODUCT.md`, `DESIGN.md` and the shared `config.json`, `live/config.json`, `design.json`, `surfaces/*.md` and `critique/*.md` files in version control. Everything else there is per-developer or runtime state and belongs in `.gitignore`: `config.local.json`, `hook.cache.json`, `hook.pending.json`, screenshots, `review/`, `questions/`, and the rest of `live/` (sessions, previews, annotations, caches). Add those entries to your `.gitignore` yourself. A `.gitignore` cannot untrack files git already tracks; use `git rm --cached <path>` for those.
+Working files live in `.anti-design/` (renamed with the rest). Keep `PRODUCT.md`, `DESIGN.md` and the shared `config.json`, `live/config.json`, `design.json`, `surfaces/*.md` and `critique/*.md` files in version control. Everything else there is per-developer or runtime state and belongs in `.gitignore`: `config.local.json`, `hook.cache.json`, `hook.pending.json`, screenshots, `review/`, `questions/`, and the rest of `live/` (sessions, previews, annotations, caches).
+
+Copy this block into your `.gitignore` (the `**/` prefix also covers nested workspaces):
+
+```gitignore
+# anti-design-ignore-start
+# Per-developer and runtime files. Shared files (config.json, live/config.json,
+# design.json, surfaces/*.md, critique/*.md) stay tracked.
+**/.anti-design/config.local.json
+**/.anti-design/hook.cache.json
+**/.anti-design/hook.pending.json
+**/.anti-design/*.png
+**/.anti-design/review/
+**/.anti-design/questions/
+**/.anti-design/live/server.json
+**/.anti-design/live/sessions/
+**/.anti-design/live/previews/
+**/.anti-design/live/annotations/
+**/.anti-design/live/cache/
+**/.anti-design/live/manual-edit-apply-transaction.json
+**/.anti-design/live/manual-edit-events.jsonl
+**/.anti-design/live/manual-edit-evidence/
+**/.anti-design/live/pending-manual-edits.json
+**/.anti-design/live/deferred-svelte-component-accepts.json
+**/.anti-design/live/*.png
+# anti-design-ignore-end
+```
+
+A `.gitignore` cannot untrack files git already tracks; use `git rm --cached <path>` for those. (The folder name changes to `.anti-ai-design/` in the rename pass; this block and its test change with it.)
 
 ## Good to know
 
