@@ -1,0 +1,4 @@
+/* anti-design-disable aad-focus-removed: the component draws its own focus ring */
+button {
+  outline: none;
+}

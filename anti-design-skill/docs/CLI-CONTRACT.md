@@ -2164,3 +2164,18 @@ carrying a visual decision never creates a submitted receipt or accepts stale fi
 this rule to an existing unsubmitted draft. It verifies stored image blobs and
 current source integrity, preserves any new reviewer decisions, records the
 prior approval revision, and leaves packet revisions and old receipts unchanged.
+
+## Anti-AI Design rule pack (fork addition)
+
+Modified by Anti-Design contributors, 2026-11-05. The `anti-design` binary installs one first-party rule pack
+(`crates/aad-rules`) at startup, so `detect` and `detect --list-rules` include six rules beyond the built-ins:
+`aad-emoji-icons`, `aad-focus-removed`, `aad-icon-button-name` (findings), and `aad-multiple-accents`,
+`aad-mixed-radii`, `aad-glass-overuse` (advisories). They are text rules: they run on every scanned source file
+and on raw `.html`, follow the same inline-ignore and `ignores` mechanics as built-in rules, and are not part of
+the in-page browser bundle or the URL engine.
+
+`ANTI_DESIGN_BUILTIN_ONLY=1` leaves the pack out (the rule list is back to the built-in 62, scans report only
+built-in rules). The oracle sets it so its goldens keep pinning the built-in behavior; the pack's own contract is
+`tests/aad-rules.test.mjs` and the crate tests. Not yet covered: the edit `hook` verb, which builds its own scan
+options and does not pass the pack.
+
