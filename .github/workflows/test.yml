@@ -1,0 +1,88 @@
+name: test
+# Gate for pull requests and main: bun/node core suite, the Rust workspace
+# (Linux and Windows), and the oracle replay against an engine built from the
+# checkout under test.
+#
+# This file lives at the repository root because GitHub only runs workflows
+# from <root>/.github/workflows. The project itself is in anti-design-skill/.
+# (The upstream-derived anti-design-skill/.github/workflows/* are inert there
+# and are covered by that tree's own tests; they are not run by GitHub.)
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    working-directory: anti-design-skill
+env:
+  ANTI_DESIGN_TELEMETRY_CHANNEL: test
+jobs:
+  core:
+    name: core (bun + node)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: anti-design-skill/.bun-version
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Core suite
+        run: node scripts/run-tests.mjs core
+  rust:
+    name: cargo (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # rust-toolchain.toml names the channel; `rustup show` installs it.
+      - name: Install the pinned toolchain
+        shell: bash
+        run: rustup show
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: anti-design-skill
+      - name: Build
+        run: cargo build --workspace --all-targets
+      - name: Test
+        run: cargo test --workspace
+  oracle:
+    name: oracle replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: anti-design-skill/.bun-version
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Install the pinned toolchain
+        run: rustup show
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: anti-design-skill
+      - name: Build the engine from source
+        run: cargo build --release -p anti-design
+      - name: Replay oracle goldens
+        env:
+          ANTI_DESIGN_BIN: ${{ github.workspace }}/anti-design-skill/target/release/anti-design
+        run: node tests/oracle/run.mjs

@@ -1,12 +1,12 @@
 {
-  "name": "@anti-design/cli-windows-x64",
+  "name": "@anti-ai-design/cli-windows-x64",
   "version": "0.0.0-engine",
   "description": "anti-design engine binary for windows-x64. Installed as an optional dependency of the anti-design npm package; do not depend on it directly.",
-  "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://anti-design.example",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Choxie77/anti-ai-design",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/anti-design.git"
+    "url": "git+https://github.com/Choxie77/anti-ai-design.git"
   },
   "os": ["win32"],
   "cpu": ["x64"],

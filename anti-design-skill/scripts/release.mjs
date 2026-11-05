@@ -5,7 +5,7 @@
 // Usage: node scripts/release.mjs <skill|cli|extension|engine> [--dry-run]
 //
 // `engine` is different: it only tags `engine-v<ENGINE_VERSION>` and pushes the
-// tag; .github/workflows/release-engine.yml builds the five binaries and
+// tag; .github/workflows/release-engine.yml (repo root) builds the five binaries and
 // publishes the GitHub Release. It has no changelog entry and no local
 // artifacts.
 //
@@ -18,7 +18,7 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkEngineRelease } from './check-engine-release.mjs';
-import { readEngineVersion } from './fetch-engine.mjs';
+import { readEngineVersion, REPO_URL, NPM_SCOPE } from './fetch-engine.mjs';
 import { signReleaseBundle } from './sign-bundle.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -45,7 +45,7 @@ const COMPONENTS = {
     tagPrefix: 'cli-v',
     label: 'CLI',
     changelogLabel: 'CLI v',
-    // The npm shim resolves the engine binary through the @anti-design/cli-<os>-<arch>
+    // The npm shim resolves the engine binary through the @anti-ai-design/cli-<os>-<arch>
     // platform packages (pinned at ENGINE_VERSION) and the dist channel; publishing
     // it before those exist strands `npx anti-design`. Enforce release order (D4).
     engineGated: true,
@@ -79,7 +79,6 @@ const COMPONENTS = {
   },
 };
 
-const REPO_URL = 'https://github.com/OWNER/anti-design';
 const TWEET_LIMIT = 280;
 
 const args = process.argv.slice(2);
@@ -182,7 +181,7 @@ if (cfg.engineGated && process.env.ANTI_DESIGN_SKIP_ENGINE_SOURCE_CHECK !== '1')
 
 // Release-order guard (triage decision D4). Engine-gated components refuse to
 // tag/publish until the engine release for the pinned ENGINE_VERSION is fully
-// live: the five engine-v<version> release binaries + .sha256 and the five @anti-design/cli-<os>-<arch>
+// live: the five engine-v<version> release binaries + .sha256 and the five @anti-ai-design/cli-<os>-<arch>
 // npm platform packages. Without this the launcher, the npm shim, and
 // `anti-design install` all dead-end. Set ANTI_DESIGN_SKIP_ENGINE_CHECK=1 only
 // when you know the assets exist and the registry probe is unreachable.
@@ -195,7 +194,7 @@ if (cfg.engineGated && process.env.ANTI_DESIGN_SKIP_ENGINE_CHECK !== '1') {
     for (const m of result.missing) console.error(`    · ${m.what}\n        ${m.url}`);
     fail(
       `Refusing to release ${cfg.label} ${version}: engine v${engineVersion} is not fully published.\n` +
-      `  Publish engine v${engineVersion} (bun run release:engine) AND the five @anti-design/cli-<os>-<arch>\n` +
+      `  Publish engine v${engineVersion} (bun run release:engine) AND the five ${NPM_SCOPE}/cli-<os>-<arch>\n` +
       '  npm platform packages first. Ordering: engine release → platform packages → skill/CLI release.\n' +
       '  See CLAUDE.md "Releases" and the engine repo docs/REVIEW-TRIAGE.md D4.'
     );
@@ -258,7 +257,10 @@ const changelogCandidates = [
   path.join(repoRoot, 'site/pages/changelog.astro'),
   path.join(repoRoot, '..', 'anti-design-site', 'site/pages/changelog.astro'),
 ];
-const changelogSource = changelogCandidates.find(p => existsSync(p)) || changelogCandidates[0];
+const changelogSource = changelogCandidates.find(p => existsSync(p));
+if (!changelogSource) {
+  fail('No changelog source found. This script reads release notes from site/pages/changelog.astro (or ../anti-design-site/site/pages/changelog.astro), and neither exists in this checkout. Add one, or publish through .github/workflows/release.yml (tag v<version>), which generates its own notes.');
+}
 const changelogHtml = readFileSync(changelogSource, 'utf8');
 const expectedHeader = `<span class="cf-version">${cfg.changelogLabel}${version}</span>`;
 const headerIdx = changelogHtml.indexOf(expectedHeader);
@@ -466,7 +468,9 @@ async function releaseEngine() {
 
   step('Checking package.json optionalDependencies pin the same engine version');
   const pkg = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
-  const pins = Object.entries(pkg.optionalDependencies || {}).filter(([name]) => name.startsWith('@anti-design/cli-'));
+  // Any scope: package.json still names the legacy scope until the rename pass
+  // (see LEGACY_NPM_SCOPE in fetch-engine.mjs); the version is what must agree.
+  const pins = Object.entries(pkg.optionalDependencies || {}).filter(([name]) => /^@[^/]+\/cli-/.test(name));
   const wrong = pins.filter(([, range]) => String(range).replace(/^[^\d]*/, '') !== version);
   if (wrong.length) fail(`package.json pins ${wrong.map(([n, r]) => `${n}@${r}`).join(', ')}; expected ${version}. Bump them with ENGINE_VERSION.`);
   ok(`${pins.length} platform package pins agree`);
@@ -510,5 +514,5 @@ async function releaseEngine() {
   console.log(`\n✓ Engine ${version} tagged as ${tag}`);
   console.log(`\n→ Next step: watch the release-engine workflow (${REPO_URL}/actions/workflows/release-engine.yml).`);
   console.log(`  It publishes the five binaries + .sha256 as ${REPO_URL}/releases/tag/${tag}.`);
-  console.log('  Then publish the five @anti-design/cli-<os>-<arch> npm platform packages with `bun run release:platform-packages`, then release the CLI/skill.');
+  console.log(`  Then publish the five ${NPM_SCOPE}/cli-<os>-<arch> npm platform packages with \`bun run release:platform-packages\`, then release the CLI/skill.`);
 }
