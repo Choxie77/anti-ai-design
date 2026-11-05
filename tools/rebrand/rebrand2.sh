@@ -1,0 +1,48 @@
+#!/bin/bash
+# Second rename pass for the fork: anti-design -> anti-ai-design, and the OWNER / placeholder-domain
+# cleanup. Run from anywhere inside the repository, once per checkout; running it again changes nothing.
+#
+#   bash tools/rebrand/rebrand2.sh
+#
+# Scope: everything tracked under anti-design-skill/ and docs/, except the historical records:
+#   docs/ours/status/, docs/ours/agent-prompts/, docs/ours/BASELINE.md  (what an agent did / saw at the time)
+#   tools/rebrand/                                                       (the first pass still says anti-design)
+# The repository subfolder keeps its name `anti-design-skill` (see rebrand2.pl).
+#
+# What it does NOT do (the task runs these by hand after it, in this order):
+#   cargo build --release                    rewrites Cargo.lock for the new crate names; builds the engine
+#   (cd anti-design-skill && bun run build)  regenerates dist/ and the generated harness copies
+#   node tools/rebrand/regen-vector.mjs "$PWD/anti-design-skill"   (this script already calls it once)
+set -euo pipefail
+S="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(git -C "$S" rev-parse --show-toplevel)"
+cd "$ROOT"
+
+SCOPE=(anti-design-skill docs
+  ':(exclude)docs/ours/status' ':(exclude)docs/ours/agent-prompts' ':(exclude)docs/ours/BASELINE.md')
+PATTERN='anti-design|anti_design|antiDesign|AntiDesign|Anti-Design|ANTI_DESIGN|Anti Design|OWNER/'
+
+# 1. contents (text files only; `git grep -I` skips binaries)
+LIST="$(mktemp)"
+git grep -lIz -E "$PATTERN" -- "${SCOPE[@]}" > "$LIST" || true
+n=$(tr -cd '\0' < "$LIST" | wc -c | tr -d ' ')
+if [ "$n" -gt 0 ]; then xargs -0 perl -pi "$S/rebrand2.pl" < "$LIST"; fi
+rm -f "$LIST"
+echo "contents: $n files rewritten"
+
+# 2. paths (git mv keeps history; deepest files first is not needed because every file is moved on its own)
+moved=0
+while IFS=$'\t' read -r old new; do
+  mkdir -p "$(dirname "$new")"
+  git mv -k "$old" "$new"
+  moved=$((moved+1))
+done < <(git ls-files -z -- anti-design-skill docs | perl "$S/rebrand2_paths.pl")
+# git leaves emptied directories behind
+find anti-design-skill docs -type d -empty -not -path '*/node_modules/*' -not -path '*/target/*' -delete 2>/dev/null || true
+echo "paths: $moved files moved"
+
+# 3. the bundle-signature test vector depends on the payload tag, which changed
+if [ -f anti-design-skill/tests/fixtures/bundle-signature.json ]; then
+  node "$S/regen-vector.mjs" "$ROOT/anti-design-skill"
+fi
+echo done
