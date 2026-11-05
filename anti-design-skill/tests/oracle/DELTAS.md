@@ -7363,3 +7363,11 @@ a hash or digest, a number, or a string that matches the old one after the renam
 - `seed-mode-rules-*` (persuade, experience, operate, read, missing-file, missing-section), `seed-direction-local-reroll`, `seed-direction-local-reroll-bolder`, `seed-direction-local-reroll-safer`, `seed-direction-local-unscoped`, `seed-direction-env-key`, `seed-surface-local-default-scope`, `seed-surface-local-grain-flow`, `seed-surface-local-compositions`, `seed-surface-local-card-base`, `seed-degraded-surface`, `seed-degraded-safer`, `seed-degraded-bolder`, `seed-presentation-build-path-code`, `seed-presentation-build-path-local`: seed references and digests are hashes of strings that contain the product name.
 - `question-update-comps-next`: question digest (hash).
 - `live-complete-source-dirty`, `live-complete-source-in-node-modules`, `live-wrap-text-picks-later-file`, `live-wrap-text-single-file-dynamic`, `live-wrap-text-style-hit-and-dynamic`, `live-wrap-text-picks-later-search-dir`, `live-insert-text-picks-later-file`: excerpts are cut at a fixed length, and the longer attribute name moves the cut.
+
+## Re-recorded 2026-11-05 (second pass): `styleClose` on text wraps
+
+Modified by Anti-Design contributors. `live-wrap-text-picks-later-file`, `live-wrap-text-single-file-dynamic`,
+`live-wrap-text-style-hit-and-dynamic`, `live-wrap-text-picks-later-search-dir` and
+`live-insert-text-picks-later-file`: the engine now adds `"styleClose":"</style>"` to the scope-rule output.
+Checked by script: removing that one field from the new golden reproduces the old golden exactly. This field
+is already present in the other `live-wrap-*` goldens, so these five were stale before the fork.

@@ -689,11 +689,37 @@ fn artifact_cleanup_failure_blocks_the_gate() {
     let report: Value = serde_json::from_slice(&std::fs::read(ws.path.join("diff/report.json")).unwrap()).unwrap();
     assert_eq!(report["measurementsAvailable"], false);
     assert_eq!(report["gate"]["ok"], false);
+    if !can_rename_read_only_dir() {
+        // Modified by Anti-Design contributors, 2026-11-05: macOS refuses to rename a
+        // read-only directory even inside its own parent, so the evidence cannot be
+        // quarantined there. The gate must still fail closed: the report says cleanup
+        // failed, records the quarantine error, and marks the regions as invalid.
+        let cleanup = &report["artifactCleanup"];
+        assert_eq!(cleanup["status"], "failed");
+        assert!(cleanup["invalidArtifacts"].as_array().unwrap().iter().any(|a| a == "regions/"), "{cleanup}");
+        let errors = cleanup["quarantine"]["errors"].as_array().map(|e| !e.is_empty()).unwrap_or(false);
+        assert!(errors || cleanup["quarantineError"].is_string(), "{cleanup}");
+        return;
+    }
     assert_no_current_measurements(&ws);
     let quarantine = ws.path.join(report["artifactCleanup"]["quarantine"]["artifacts"]["regions"].as_str().expect("cleanup failure must identify quarantined evidence"));
     assert!(quarantine.join("retired.png").is_file());
     assert_eq!(report["artifactCleanup"]["quarantine"]["errors"], json!([]));
     std::fs::set_permissions(quarantine, std::fs::Permissions::from_mode(0o755)).unwrap();
+}
+
+/// Whether this platform lets a read-only directory be renamed inside its parent
+/// (Linux does, macOS does not). Decides which quarantine behaviour is testable.
+fn can_rename_read_only_dir() -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    let ws = Workspace::new();
+    let from = ws.path.join("probe-from");
+    let to = ws.path.join("probe-to");
+    std::fs::create_dir(&from).unwrap();
+    std::fs::set_permissions(&from, std::fs::Permissions::from_mode(0o555)).unwrap();
+    let ok = std::fs::rename(&from, &to).is_ok();
+    let _ = std::fs::set_permissions(if ok { &to } else { &from }, std::fs::Permissions::from_mode(0o755));
+    ok
 }
 
 
