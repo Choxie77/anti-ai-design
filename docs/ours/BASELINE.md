@@ -122,11 +122,23 @@ accepted deltas), detector 82, live 263, framework 196, plugin-e2e 4. Remaining 
 
 ## After task-46 (the Anti-AI Design rule pack)
 
-Full Rust workspace before the pack was added: **2470 pass, 0 fail, 9 ignored** (153 targets); the two
-Rust tests that were red are fixed (see `integrity_tests.rs`, `dev_url.rs`). With the pack: pack crate 30 pass;
-core suite 486 Bun + 254 Node pass; oracle 1322 pass, 0 fail (the oracle runs with `ANTI_DESIGN_BUILTIN_ONLY=1`);
-`tests/aad-rules.test.mjs` 6 pass. The whole Rust workspace and the live/framework suites have not been re-run
-since the pack was added.
+Full Rust workspace before the pack: 2470 pass, 0 fail, 9 ignored (153 targets); the two Rust tests that
+were red are fixed (`integrity_tests.rs`, `dev_url.rs`).
+
+With the pack, committed as `37c1b2f`:
+
+| Suite | Result |
+|---|---|
+| Rust workspace (156 targets) | 2499 pass, 1 fail, 9 ignored. The one failure, `entry_capture::raster_page_that_requests_the_comp_is_refused`, was a Chrome `Browser.getVersion timed out` under load; run alone the target passes 10 of 10 |
+| Pack crate | 30 pass (25 unit, 5 engine-level) |
+| `tests/aad-rules.test.mjs` | 6 pass |
+| Oracle | 1322 pass, 0 fail, 21 accepted deltas (runs with `ANTI_DESIGN_BUILTIN_ONLY=1`) |
+| Core | 486 Bun + 254 Node pass, 2 skipped |
+| Live | 263 pass, 2 skipped |
+| Framework, plugin-e2e, detector | 196, 4 and 82 pass |
+
+Chrome-driven Rust tests (`evidence*`, `card_heuristics`, `heading_rhythm`, `entry_capture`, `fullpage_screenshot`)
+time out now and then when other heavy work is running; rerun a failing one alone first.
 
 ## How to reproduce
 
