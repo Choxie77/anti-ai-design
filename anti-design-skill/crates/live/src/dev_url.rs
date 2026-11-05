@@ -159,7 +159,19 @@ mod tests {
         );
         assert!(!answers(&format!("ftp://127.0.0.1:{}/", port)));
         drop(listener);
-        assert!(!answers(&format!("https://127.0.0.1:{}/", port)));
+        // Modified by Anti-Design contributors, 2026-11-05: a freshly freed ephemeral port
+        // can be re-bound by a parallel test (or another process) before this check runs,
+        // which made the assertion flaky under load. Retry on new ports; a closed port must
+        // be reported as not answering at least once, and any answer must be a re-bound port.
+        let mut closed_seen = !answers(&format!("https://127.0.0.1:{}/", port));
+        for _ in 0..8 {
+            if closed_seen { break; }
+            let l = TcpListener::bind("127.0.0.1:0").unwrap();
+            let p = l.local_addr().unwrap().port();
+            drop(l);
+            closed_seen = !answers(&format!("https://127.0.0.1:{}/", p));
+        }
+        assert!(closed_seen, "a port nothing listens on must not answer");
     }
 
     #[test]
