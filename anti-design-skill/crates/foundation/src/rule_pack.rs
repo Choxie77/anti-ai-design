@@ -73,3 +73,22 @@ pub trait RulePack: Send + Sync + std::fmt::Debug {
 pub fn install(pack: &'static dyn RulePack) {
     crate::registry::extend(pack.registry());
 }
+
+// Modified by Anti-Design contributors, 2026-11-05: the `anti-design` binary ships
+// one first-party pack (crates/aad-rules). `install_default` registers its rows like
+// `install` and remembers the pack so the CLI can hand it to the text and static
+// engines; `default_pack` is what the CLI reads. A library caller that never calls
+// `install_default` sees `None`, so built-in output is unchanged for them.
+static DEFAULT_PACK: std::sync::OnceLock<&'static dyn RulePack> = std::sync::OnceLock::new();
+
+/// Register `pack` and make it the pack the `anti-design` CLI runs on every scan.
+/// Only the first call stores the pack; later calls only (idempotently) register rows.
+pub fn install_default(pack: &'static dyn RulePack) {
+    install(pack);
+    let _ = DEFAULT_PACK.set(pack);
+}
+
+/// The pack set by [`install_default`], if any.
+pub fn default_pack() -> Option<&'static dyn RulePack> {
+    DEFAULT_PACK.get().copied()
+}

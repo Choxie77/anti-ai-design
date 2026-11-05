@@ -14,6 +14,7 @@ anti-design-html = { path = "../html" }
 anti-design-hook = { path = "../hook" }
 anti-design-live = { path = "../live" }
 anti-design-skills = { path = "../skills" }
+anti-design-aad-rules = { path = "../aad-rules" }
 anti-design-core = { workspace = true }
 anti-design-comp = { workspace = true }
 anti-design-comp-verbs = { workspace = true }

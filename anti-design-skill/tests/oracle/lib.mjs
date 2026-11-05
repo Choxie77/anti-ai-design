@@ -323,6 +323,10 @@ function buildInvocation(c, { impl, bin, ws, isolatedHome }) {
     NO_COLOR: '1',
     FORCE_COLOR: '0',
     ANTI_DESIGN_NO_UPDATE_CHECK: '1',
+    // Modified by Anti-Design contributors: the oracle pins the built-in rules; the first-party
+    // aad-* rules (crates/aad-rules) are covered by tests/aad-rules.test.mjs. A case can turn
+    // them on with env: { ANTI_DESIGN_BUILTIN_ONLY: null }.
+    ANTI_DESIGN_BUILTIN_ONLY: '1',
     ANTI_DESIGN_NO_TELEMETRY: '1',
     DO_NOT_TRACK: '1',
     // Seed references are salted per user; a pinned salt keeps goldens stable.

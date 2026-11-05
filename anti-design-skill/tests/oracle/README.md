@@ -104,3 +104,11 @@ the codex/claude subprocess providers, Svelte revision-dir publishing, and
 `live.mjs`'s dev-server-dependent flows. Lock-file names hash the absolute
 source path, so lock cases do not snapshot `.anti-design/live/locks/`.
 `live-poll-*-connection-refused` assumes nothing listens on 127.0.0.1:65531.
+
+## Built-in rules only
+
+Modified by Anti-Design contributors. `lib.mjs` sets `ANTI_DESIGN_BUILTIN_ONLY=1` for every case, so the
+first-party `aad-*` rules (crates/aad-rules) do not appear in oracle output and the goldens keep pinning the
+built-in rules. A case that wants the pack sets `env: { ANTI_DESIGN_BUILTIN_ONLY: null }`. The pack is tested
+by `tests/aad-rules.test.mjs`.
+

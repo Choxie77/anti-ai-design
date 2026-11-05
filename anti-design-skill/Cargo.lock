@@ -21,6 +21,7 @@ dependencies = [
 name = "anti-design"
 version = "0.1.18"
 dependencies = [
+ "anti-design-aad-rules",
  "anti-design-browser",
  "anti-design-common",
  "anti-design-comp",
@@ -35,6 +36,16 @@ dependencies = [
  "base64",
  "serde_json",
  "sha2",
+]
+
+[[package]]
+name = "anti-design-aad-rules"
+version = "0.1.18"
+dependencies = [
+ "anti-design-core",
+ "anti-design-detect",
+ "once_cell",
+ "regex",
 ]
 
 [[package]]

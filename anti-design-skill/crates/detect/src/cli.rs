@@ -636,9 +636,10 @@ fn detect_cli(args_in: &[String], io: &mut Io, engines: &Engines) -> Result<i32,
         design_system: None,
         viewport,
         profile: None,
-        // The `anti-design` binary installs no rule pack; a library caller that
-        // does sets this before handing the options to an engine.
-        rule_pack: None,
+        // Modified by Anti-Design contributors, 2026-11-05: the binary installs its
+        // first-party pack (crates/aad-rules) through `install_default`; a library caller
+        // that never does gets `None`, as before.
+        rule_pack: anti_design_core::rule_pack::default_pack(),
         keep_consent_banners: has(&args, "--no-consent-hiding"),
         keep_overlays: has(&args, "--no-overlay-hiding"),
         unreported_rules: unreported_rules(&detection_config.ignore_rules, &scopes),

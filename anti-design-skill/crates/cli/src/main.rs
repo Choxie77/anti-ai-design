@@ -16,6 +16,13 @@ mod font_render;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() {
+    // Modified by Anti-Design contributors, 2026-11-05: register the first-party Anti-AI
+    // Design rules (crates/aad-rules) so `detect` and `--list-rules` include them.
+    // ANTI_DESIGN_BUILTIN_ONLY=1 leaves them out, so the oracle keeps pinning the
+    // built-in rules byte for byte (tests/oracle/lib.mjs sets it).
+    if std::env::var_os("ANTI_DESIGN_BUILTIN_ONLY").map_or(true, |v| v.is_empty() || v == "0") {
+        anti_design_aad_rules::install_default();
+    }
     let args: Vec<String> = std::env::args().skip(1).collect();
     let mut io = Io::stdio();
     let code = run(&args, &mut io);
@@ -125,7 +132,8 @@ fn run(args: &[String], io: &mut Io) -> i32 {
 /// lands; until then URL scans report the puppeteer message.
 fn engines() -> anti_design_detect::Engines<'static> {
     static HTML: anti_design_html::StaticHtmlEngine = anti_design_html::StaticHtmlEngine {
-        // The shipped binary carries the built-in rules only.
+        // The shipped binary's extra rules are text rules (crates/aad-rules), which the
+        // static engine already runs on raw HTML through the scan options' rule pack.
         static_rule_pack: None,
     };
     anti_design_detect::Engines {

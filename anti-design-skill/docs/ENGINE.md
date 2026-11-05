@@ -33,6 +33,7 @@ crates/
   detect       `anti-design detect`: file walk, config, ignores, output, regex engine
   html         the static HTML engine: parser, cascade, static DOM, rule adapters
   browser      the URL engine: Chrome discovery, CDP, snapshot, visual pass
+  aad-rules    Anti-Design's own rules (aad-*), shipped as a rule pack (added by the fork)
   foundation   JS-semantics helpers, color, findings, the rule registry, inline
                ignores, the Dom trait, SnapshotDom, and the plain-data types
                every check takes in and hands back
