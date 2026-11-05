@@ -1,0 +1,21 @@
+{
+  "steps": [
+    {
+      "stdout": "{\"ok\":true,\"port\":8412,\"gitIgnore\":{\"file\":\".gitignore\",\"mode\":\"gitignore\",\"changed\":true,\"patterns\":[\".anti-design/hook.cache.json\",\".anti-design/hook.pending.json\",\".anti-design/config.local.json\",\".anti-design/live/server.json\",\".anti-design/live/roots.json\",\".anti-design/live/app-root.json\",\".anti-design/live/inject-journal.json\",\".anti-design/live/sessions/\",\".anti-design/live/previews/\",\".anti-design/live/annotations/\",\".anti-design/live/artifacts/\",\".anti-design/live/accept-receipts/\",\".anti-design/live/locks/\",\".anti-design/live/cache/\",\".anti-design/live/manual-edit-apply-transaction.json\",\".anti-design/live/manual-edit-events.jsonl\",\".anti-design/live/manual-edit-evidence/\",\".anti-design/live/pending-manual-edits.json\",\".anti-design/live/deferred-svelte-component-accepts.json\",\".anti-design-live.json\",\".anti-design-live/\",\"app/.anti-design-live/\",\"src/.anti-design-live/\",\"node_modules/.anti-design-live/\",\"src/lib/anti-design/AntiDesignLiveRoot.svelte\",\"src/lib/anti-design/__runtime.js\",\"src/lib/anti-design/[0-9a-f]*/\",\"plugins/anti-design-live.client.ts\",\"app/plugins/anti-design-live.client.ts\",\"src/plugins/anti-design-live.client.ts\"]},\"results\":[{\"file\":\"index.html\",\"inserted\":true,\"cspPatched\":true}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "{\"ok\":true,\"results\":[{\"file\":\"index.html\",\"removed\":true,\"cspReverted\":true}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "files": {
+    ".gitignore": "# anti-design-live-ignore-start\n.anti-design/hook.cache.json\n.anti-design/hook.pending.json\n.anti-design/config.local.json\n.anti-design/live/server.json\n.anti-design/live/roots.json\n.anti-design/live/app-root.json\n.anti-design/live/inject-journal.json\n.anti-design/live/sessions/\n.anti-design/live/previews/\n.anti-design/live/annotations/\n.anti-design/live/artifacts/\n.anti-design/live/accept-receipts/\n.anti-design/live/locks/\n.anti-design/live/cache/\n.anti-design/live/manual-edit-apply-transaction.json\n.anti-design/live/manual-edit-events.jsonl\n.anti-design/live/manual-edit-evidence/\n.anti-design/live/pending-manual-edits.json\n.anti-design/live/deferred-svelte-component-accepts.json\n.anti-design-live.json\n.anti-design-live/\napp/.anti-design-live/\nsrc/.anti-design-live/\nnode_modules/.anti-design-live/\nsrc/lib/anti-design/AntiDesignLiveRoot.svelte\nsrc/lib/anti-design/__runtime.js\nsrc/lib/anti-design/[0-9a-f]*/\nplugins/anti-design-live.client.ts\napp/plugins/anti-design-live.client.ts\nsrc/plugins/anti-design-live.client.ts\n# anti-design-live-ignore-end\n",
+    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n",
+    "index.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta\n      http-equiv=\"Content-Security-Policy\"\n      content=\"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:; img-src 'self' data:;\"\n    />\n    <title>CSP</title>\n  </head>\n  <body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.jsx\"></script>\n  </body>\n</html>\n"
+  }
+}

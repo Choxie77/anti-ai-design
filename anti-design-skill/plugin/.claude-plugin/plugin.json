@@ -1,0 +1,12 @@
+{
+  "name": "anti-design",
+  "description": "Design fluency for frontend development. 1 skill with 24 commands (/anti-design polish, /anti-design audit, /anti-design critique, etc.) and curated anti-pattern detection.",
+  "version": "4.8.0",
+  "author": {
+    "name": "Paul Bakaus",
+    "email": "paul@paulbakaus.com"
+  },
+  "homepage": "https://anti-design.example",
+  "repository": "https://github.com/OWNER/anti-design",
+  "skills": "./skills/"
+}

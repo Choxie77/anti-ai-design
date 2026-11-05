@@ -1,0 +1,15 @@
+{
+  "bundle": "test bundle",
+  "keys": {
+    "test-only": "ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"
+  },
+  "envelope": {
+    "schema": 1,
+    "keyId": "test-only",
+    "version": "4.2.0",
+    "artifact": "universal.zip",
+    "size": 11,
+    "sha256": "9df2a47bee5f48b9752b2cbd2d6075076556ee293adc97f66f0e0a916e4f6471",
+    "signature": "ca40755f61e21aa8633fa4514a202e3d782601831fd5963bc0e3da1499abad8c68a83a8400b873b3d4be80de0a8ec15955ce3f1755070f180062967957bcca0d"
+  }
+}

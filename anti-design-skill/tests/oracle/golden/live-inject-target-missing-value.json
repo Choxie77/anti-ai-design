@@ -1,0 +1,7 @@
+{
+  "stdout": "",
+  "stderr": "[anti-design live] --target requires a path value (use --target <path> or --target=<path>)\n",
+  "exit": 1,
+  "signal": null,
+  "files": {}
+}

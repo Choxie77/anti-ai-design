@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
+            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook",
+            "env": {
+              "ANTI_DESIGN_HOOK_HARNESS": "vscode"
+            },
+            "timeout": 5,
+            "statusMessage": "Preparing build session"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
+            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook",
+            "env": {
+              "ANTI_DESIGN_HOOK_HARNESS": "vscode"
+            },
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
+            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook",
+            "env": {
+              "ANTI_DESIGN_HOOK_HARNESS": "vscode"
+            },
+            "timeout": 30,
+            "statusMessage": "Design deep pass"
+          }
+        ]
+      }
+    ]
+  }
+}

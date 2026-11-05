@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "[ ! -f \".cursor/skills/anti-design/scripts/anti-design\" ] || \".cursor/skills/anti-design/scripts/anti-design\" hook",
+        "matcher": "^Write$",
+        "timeout": 5
+      }
+    ]
+  }
+}

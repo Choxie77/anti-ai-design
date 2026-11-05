@@ -1,0 +1,143 @@
+# Dependencies
+node_modules/
+
+# npm lockfile (project uses bun.lock; npm may regenerate this as a side
+# effect of npm subprocesses, but it should not be tracked)
+package-lock.json
+
+# Generated files
+dist/
+build/
+
+# Test fixtures simulate "generated dist" trees; keep them tracked so tests
+# can copy them into tmp git repos and assert is-generated behavior.
+!tests/framework-fixtures/**/dist/
+!tests/framework-fixtures/**/dist/**
+# Same for the oracle workspaces: live-html carries a dist/generated.html
+# that the generated-file cases point at.
+!tests/oracle/workspaces/**/dist/
+!tests/oracle/workspaces/**/dist/**
+
+# Build artifacts
+*.log
+
+# Cargo (the Rust workspace; Cargo.lock IS tracked, it pins the engine build)
+/target/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code local state
+.claude/projects/
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Environment
+.env
+.env.local
+
+# Cloudflare
+.wrangler/
+
+# Anti-Design-owned project files are split: generated sidecars/config may be
+# tracked, but runtime recovery state and local assets should stay local.
+.anti-design/live/server.json
+.anti-design/live/codex-worker.json
+.anti-design/live/codex-worker.log
+# Ephemeral hook cache/state, at the project root and inside generated harness
+# skill dirs (**/skills/anti-design/scripts/.anti-design/). Anchored patterns
+# would miss the nested copies the build/hook writes.
+**/.anti-design/hook.cache.json
+.anti-design/live/sessions/
+.anti-design/live/previews/
+.anti-design/live/annotations/
+.anti-design/live/artifacts/
+.anti-design/live/accept-receipts/
+.anti-design/live/locks/
+.anti-design/live/cache/
+.anti-design/live/benchmarks/
+.anti-design/live/manual-edit-apply-transaction.json
+.anti-design/live/manual-edit-events.jsonl
+.anti-design/live/manual-edit-evidence/
+.anti-design/live/pending-manual-edits.json
+.anti-design/live/deferred-svelte-component-accepts.json
+.anti-design/history/
+.anti-design/config.local.json
+**/.anti-design/hook.pending.json
+.anti-design/provider-smoke/
+src/__anti_design_provider_smoke_*.html
+# Per-run critique snapshots are local artifacts. ignore.md (also under
+# this dir) carries deferrals the user may want to share, so it's
+# explicitly re-included below.
+.anti-design/critique/*
+!.anti-design/critique/ignore.md
+
+# Legacy live mode session file + annotation screenshots
+.anti-design-live.json
+.anti-design-live/
+src/lib/anti-design/AntiDesignLiveRoot.svelte
+src/lib/anti-design/__runtime.js
+
+# Legacy per-project live mode injection config. New installs use
+# .anti-design/live/config.json in the project root instead.
+**/skills/anti-design/scripts/config.json
+
+# Extension build artifacts
+extension/detector/
+
+# Engine binaries: fetched per platform (scripts/fetch-engine.mjs), never tracked.
+# The launcher next to them (skill/scripts/anti-design) is the tracked file.
+skill/scripts/bin/
+**/skills/anti-design/scripts/bin/
+
+# Legacy design context (pre-v3.1, auto-migrated to PRODUCT.md by load-context.mjs)
+.anti-design.md
+# Note: PRODUCT.md and DESIGN.md are INTENTIONALLY tracked in this repo —
+# they serve as reference implementations for users installing anti-design.
+# Users of anti-design in their own projects can choose whether to track them.
+
+# Evals (private, commercial)
+evals/
+tests/evals-v2/
+
+# Video backlog & scripts (local working files, not for distribution)
+videos/
+
+# Talk decks & speaker materials (local working files, not for distribution)
+talks/
+
+# Generated sub-pages (legacy, now replaced by Astro content collections)
+
+# World design-system cards live in R2 (functions/worlds/cards); only the
+# manifest is tracked. Generate: bun run world-cards; upload: world-cards:publish.
+
+# Build artifacts written to site/public/ so Astro copies them to build/
+
+# Note: harness skill directories (.claude/skills/, .cursor/skills/, etc.)
+# are intentionally tracked. npx skills reads them from this repo at install
+# time, and they enable clean submodule use. Run `bun run build` to refresh
+# them after editing skill/.
+#
+# Codex CLI consumes `.agents/skills/`; the asset-producer subagent ships
+# nested inside that skill (agents/*.toml), auto-discovered on install.
+# The project-local hook manifest is the one tracked `.codex/` artifact.
+.codex/*
+!.codex/hooks.json
+.astro/
+
+# Local-only scratch for exploratory scripts, parked pages, and unused asset candidates.
+tmp/
+
+# Isolated ablation staging (anti-design-evals copies the built staged skill here
+# per rule, removes one rule, points a worker at it). Throwaway; never committed.
+.ablate-stage/
+
+# Local scratch from iterating on the OG card (weight comparisons, intermediate
+# PNGs, the old card backup). The canonical generator is `bun run og-image`
+# (scripts/generate-og-image.js); this dir is throwaway and safe to delete.
+.og-build/

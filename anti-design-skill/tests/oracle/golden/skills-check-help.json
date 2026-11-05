@@ -1,0 +1,7 @@
+{
+  "stdout": "Usage: anti-design check [options]\n\nCheck whether installed Anti-Design skills are up to date.\n\nOptions:\n  -h, --help             Show this help message\n",
+  "stderr": "",
+  "exit": 0,
+  "signal": null,
+  "files": {}
+}

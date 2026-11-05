@@ -1,0 +1,35 @@
+{
+  "steps": [
+    {
+      "stdout": "{\"ok\":true,\"port\":8412,\"gitIgnore\":{\"file\":\".gitignore\",\"mode\":\"gitignore\",\"changed\":true,\"patterns\":[\".anti-design/hook.cache.json\",\".anti-design/hook.pending.json\",\".anti-design/config.local.json\",\".anti-design/live/server.json\",\".anti-design/live/roots.json\",\".anti-design/live/app-root.json\",\".anti-design/live/inject-journal.json\",\".anti-design/live/sessions/\",\".anti-design/live/previews/\",\".anti-design/live/annotations/\",\".anti-design/live/artifacts/\",\".anti-design/live/accept-receipts/\",\".anti-design/live/locks/\",\".anti-design/live/cache/\",\".anti-design/live/manual-edit-apply-transaction.json\",\".anti-design/live/manual-edit-events.jsonl\",\".anti-design/live/manual-edit-evidence/\",\".anti-design/live/pending-manual-edits.json\",\".anti-design/live/deferred-svelte-component-accepts.json\",\".anti-design-live.json\",\".anti-design-live/\",\"app/.anti-design-live/\",\"src/.anti-design-live/\",\"node_modules/.anti-design-live/\",\"src/lib/anti-design/AntiDesignLiveRoot.svelte\",\"src/lib/anti-design/__runtime.js\",\"src/lib/anti-design/[0-9a-f]*/\",\"plugins/anti-design-live.client.ts\",\"app/plugins/anti-design-live.client.ts\",\"src/plugins/anti-design-live.client.ts\"]},\"results\":[{\"file\":\"index.html\",\"inserted\":true,\"cspPatched\":false},{\"file\":\"public/no-body.html\",\"error\":\"insertion_point_not_found\",\"anchor\":\"</body>\"},{\"file\":\"public/docs/guide.html\",\"inserted\":true,\"cspPatched\":false}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "{\"ok\":true,\"port\":8413,\"gitIgnore\":{\"file\":\".gitignore\",\"mode\":\"gitignore\",\"changed\":false,\"patterns\":[\".anti-design/hook.cache.json\",\".anti-design/hook.pending.json\",\".anti-design/config.local.json\",\".anti-design/live/server.json\",\".anti-design/live/roots.json\",\".anti-design/live/app-root.json\",\".anti-design/live/inject-journal.json\",\".anti-design/live/sessions/\",\".anti-design/live/previews/\",\".anti-design/live/annotations/\",\".anti-design/live/artifacts/\",\".anti-design/live/accept-receipts/\",\".anti-design/live/locks/\",\".anti-design/live/cache/\",\".anti-design/live/manual-edit-apply-transaction.json\",\".anti-design/live/manual-edit-events.jsonl\",\".anti-design/live/manual-edit-evidence/\",\".anti-design/live/pending-manual-edits.json\",\".anti-design/live/deferred-svelte-component-accepts.json\",\".anti-design-live.json\",\".anti-design-live/\",\"app/.anti-design-live/\",\"src/.anti-design-live/\",\"node_modules/.anti-design-live/\",\"src/lib/anti-design/AntiDesignLiveRoot.svelte\",\"src/lib/anti-design/__runtime.js\",\"src/lib/anti-design/[0-9a-f]*/\",\"plugins/anti-design-live.client.ts\",\"app/plugins/anti-design-live.client.ts\",\"src/plugins/anti-design-live.client.ts\"]},\"results\":[{\"file\":\"index.html\",\"inserted\":true,\"cspPatched\":false},{\"file\":\"public/no-body.html\",\"error\":\"insertion_point_not_found\",\"anchor\":\"</body>\"},{\"file\":\"public/docs/guide.html\",\"inserted\":true,\"cspPatched\":false}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "{\"ok\":true,\"results\":[{\"file\":\"index.html\",\"removed\":true,\"cspReverted\":false},{\"file\":\"public/no-body.html\",\"removed\":false,\"note\":\"no tag present\"},{\"file\":\"public/docs/guide.html\",\"removed\":true,\"cspReverted\":false}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "{\"ok\":true,\"results\":[{\"file\":\"index.html\",\"removed\":false,\"note\":\"no tag present\"},{\"file\":\"public/no-body.html\",\"removed\":false,\"note\":\"no tag present\"},{\"file\":\"public/docs/guide.html\",\"removed\":false,\"note\":\"no tag present\"}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "files": {
+    ".gitignore": "# anti-design-live-ignore-start\n.anti-design/hook.cache.json\n.anti-design/hook.pending.json\n.anti-design/config.local.json\n.anti-design/live/server.json\n.anti-design/live/roots.json\n.anti-design/live/app-root.json\n.anti-design/live/inject-journal.json\n.anti-design/live/sessions/\n.anti-design/live/previews/\n.anti-design/live/annotations/\n.anti-design/live/artifacts/\n.anti-design/live/accept-receipts/\n.anti-design/live/locks/\n.anti-design/live/cache/\n.anti-design/live/manual-edit-apply-transaction.json\n.anti-design/live/manual-edit-events.jsonl\n.anti-design/live/manual-edit-evidence/\n.anti-design/live/pending-manual-edits.json\n.anti-design/live/deferred-svelte-component-accepts.json\n.anti-design-live.json\n.anti-design-live/\napp/.anti-design-live/\nsrc/.anti-design-live/\nnode_modules/.anti-design-live/\nsrc/lib/anti-design/AntiDesignLiveRoot.svelte\nsrc/lib/anti-design/__runtime.js\nsrc/lib/anti-design/[0-9a-f]*/\nplugins/anti-design-live.client.ts\napp/plugins/anti-design-live.client.ts\nsrc/plugins/anti-design-live.client.ts\n# anti-design-live-ignore-end\n",
+    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n",
+    "index.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Oracle Live HTML Fixture</title>\n    <style>\n      .hero-title { font-size: 2rem; }\n      .hero-hook { color: #555; }\n    </style>\n  </head>\n  <body>\n    <main class=\"page\">\n      <h1 id=\"hero\" class=\"hero-title\">Oracle Fixture</h1>\n      <p class=\"hero-hook\">Minimal static page for oracle live-mode goldens.</p>\n      <section id=\"features\" class=\"feature-grid\">\n        <article class=\"feature-card\">One</article>\n        <article class=\"feature-card\">Two</article>\n      </section>\n      <aside class=\"side-note\">\n        <h2 class=\"note-title\">Aside</h2>\n        <p>Nested content.</p>\n      </aside>\n    </main>\n  </body>\n</html>\n",
+    "public/docs/guide.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Guide</title>\n  </head>\n  <body>\n    <article class=\"doc\">\n      <h1 class=\"doc-title\">Guide</h1>\n      <p class=\"doc-lead\">A second page covered by the config glob.</p>\n    </article>\n  </body>\n</html>\n",
+    "public/no-body.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head><title>No body tag</title></head>\n  <p class=\"orphan\">This file has no closing body tag.</p>\n</html>\n"
+  }
+}

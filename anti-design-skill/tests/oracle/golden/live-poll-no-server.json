@@ -1,0 +1,9 @@
+{
+  "stdout": "",
+  "stderr": "No running live server found. Start one with: <ANTI_DESIGN> live\n",
+  "exit": 1,
+  "signal": null,
+  "files": {
+    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
+  }
+}

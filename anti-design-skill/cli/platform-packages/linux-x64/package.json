@@ -1,0 +1,17 @@
+{
+  "name": "@anti-design/cli-linux-x64",
+  "version": "0.0.0-engine",
+  "description": "anti-design engine binary for linux-x64. Installed as an optional dependency of the anti-design npm package; do not depend on it directly.",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://anti-design.example",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/anti-design.git"
+  },
+  "os": ["linux"],
+  "cpu": ["x64"],
+  "files": ["bin/", "LICENSE"],
+  "bin": {
+    "anti-design-linux-x64": "bin/anti-design"
+  }
+}

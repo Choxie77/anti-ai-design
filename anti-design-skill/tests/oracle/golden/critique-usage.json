@@ -1,0 +1,7 @@
+{
+  "stdout": "",
+  "stderr": "usage: anti-design critique-storage <slug|write|latest|trend|close> [args]\n",
+  "exit": 1,
+  "signal": null,
+  "files": {}
+}

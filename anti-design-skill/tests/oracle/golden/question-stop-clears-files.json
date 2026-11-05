@@ -1,0 +1,9 @@
+{
+  "stdout": "stopped\n",
+  "stderr": "",
+  "exit": 0,
+  "signal": null,
+  "files": {
+    ".anti-design/questions/k1.log": "log\n"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "steps": [
+    {
+      "stdout": "  + <WS>/.opencode/commands/anti-design-polish.md\n\nPinned 'polish' as a standalone shortcut in 1 location(s).\nUse the pinned command directly in each harness.\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "  - <WS>/.opencode/commands/anti-design-polish.md\n\nUnpinned 'polish' from 1 location(s).\nUse Anti-Design's 'polish' workflow directly to access it.\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "No pinned 'polish' shortcut found.\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "files": {
+    ".opencode/skills/anti-design/SKILL.md": "---\nname: anti-design\n---\n"
+  }
+}

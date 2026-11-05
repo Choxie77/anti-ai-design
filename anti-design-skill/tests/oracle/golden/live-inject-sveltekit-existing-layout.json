@@ -1,0 +1,23 @@
+{
+  "steps": [
+    {
+      "stdout": "{\"ok\":true,\"port\":8412,\"adapter\":\"sveltekit\",\"gitIgnore\":{\"file\":\".gitignore\",\"mode\":\"gitignore\",\"changed\":true,\"patterns\":[\".anti-design/hook.cache.json\",\".anti-design/hook.pending.json\",\".anti-design/config.local.json\",\".anti-design/live/server.json\",\".anti-design/live/roots.json\",\".anti-design/live/app-root.json\",\".anti-design/live/inject-journal.json\",\".anti-design/live/sessions/\",\".anti-design/live/previews/\",\".anti-design/live/annotations/\",\".anti-design/live/artifacts/\",\".anti-design/live/accept-receipts/\",\".anti-design/live/locks/\",\".anti-design/live/cache/\",\".anti-design/live/manual-edit-apply-transaction.json\",\".anti-design/live/manual-edit-events.jsonl\",\".anti-design/live/manual-edit-evidence/\",\".anti-design/live/pending-manual-edits.json\",\".anti-design/live/deferred-svelte-component-accepts.json\",\".anti-design-live.json\",\".anti-design-live/\",\"app/.anti-design-live/\",\"src/.anti-design-live/\",\"node_modules/.anti-design-live/\",\"src/lib/anti-design/AntiDesignLiveRoot.svelte\",\"src/lib/anti-design/__runtime.js\",\"src/lib/anti-design/[0-9a-f]*/\",\"plugins/anti-design-live.client.ts\",\"app/plugins/anti-design-live.client.ts\",\"src/plugins/anti-design-live.client.ts\"]},\"results\":[{\"file\":\"src/routes/+layout.svelte\",\"adapter\":\"sveltekit\",\"inserted\":true,\"appHtmlUntouched\":true,\"rootComponent\":\"src/lib/anti-design/AntiDesignLiveRoot.svelte\"}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "stdout": "{\"ok\":true,\"adapter\":\"sveltekit\",\"results\":[{\"file\":\"src/routes/+layout.svelte\",\"adapter\":\"sveltekit\",\"removed\":true,\"appHtmlUntouched\":true,\"rootComponent\":\"src/lib/anti-design/AntiDesignLiveRoot.svelte\"}]}\n",
+      "stderr": "",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "files": {
+    ".gitignore": "# anti-design-live-ignore-start\n.anti-design/hook.cache.json\n.anti-design/hook.pending.json\n.anti-design/config.local.json\n.anti-design/live/server.json\n.anti-design/live/roots.json\n.anti-design/live/app-root.json\n.anti-design/live/inject-journal.json\n.anti-design/live/sessions/\n.anti-design/live/previews/\n.anti-design/live/annotations/\n.anti-design/live/artifacts/\n.anti-design/live/accept-receipts/\n.anti-design/live/locks/\n.anti-design/live/cache/\n.anti-design/live/manual-edit-apply-transaction.json\n.anti-design/live/manual-edit-events.jsonl\n.anti-design/live/manual-edit-evidence/\n.anti-design/live/pending-manual-edits.json\n.anti-design/live/deferred-svelte-component-accepts.json\n.anti-design-live.json\n.anti-design-live/\napp/.anti-design-live/\nsrc/.anti-design-live/\nnode_modules/.anti-design-live/\nsrc/lib/anti-design/AntiDesignLiveRoot.svelte\nsrc/lib/anti-design/__runtime.js\nsrc/lib/anti-design/[0-9a-f]*/\nplugins/anti-design-live.client.ts\napp/plugins/anti-design-live.client.ts\nsrc/plugins/anti-design-live.client.ts\n# anti-design-live-ignore-end\n",
+    ".anti-design/live/config.json": "{\n  \"files\": [\"src/app.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n",
+    "src/app.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <title>SvelteKit Fixture</title>\n    %sveltekit.head%\n  </head>\n  <body data-sveltekit-preload-data=\"hover\">\n    <div style=\"display: contents\">%sveltekit.body%</div>\n  </body>\n</html>\n",
+    "src/routes/+layout.svelte": "<script>\n  import '../app.css';\n  let { children } = $props();\n</script>\n\n<nav>Top</nav>\n{@render children()}\n",
+    "src/routes/+page.svelte": "<script>\n  let title = 'SvelteKit Fixture';\n  let expenses = [\n    { id: 1, label: 'Coffee', amount: 3 },\n    { id: 2, label: 'Lunch', amount: 12 },\n  ];\n</script>\n\n<main class=\"page\">\n  <h1 class=\"hero-title\">{title}</h1>\n  <p class=\"hero-hook\">Minimal SvelteKit route for oracle live-mode goldens.</p>\n  <ul class=\"expense-list\">\n    {#each expenses as expense (expense.id)}\n      <li class=\"expense-row\">{expense.label}: {expense.amount}</li>\n    {/each}\n  </ul>\n  <section id=\"features\" class=\"feature-grid\">\n    <article class=\"feature-card\">One</article>\n    <article class=\"feature-card\">Two</article>\n  </section>\n</main>\n\n<style>\n  .hero-title { font-size: 2rem; }\n  .expense-list { list-style: none; padding: 0; }\n  .expense-row { padding: 4px 0; }\n</style>\n"
+  }
+}
