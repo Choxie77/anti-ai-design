@@ -5,7 +5,7 @@
  * The launcher (skill/scripts/anti-design), the npm shim (cli/bin/cli.js), and
  * `anti-design install` all dead-end unless the engine release for the pinned
  * ENGINE_VERSION exists FIRST: the five platform binaries in the engine-v<version> GitHub Release
- * release channel AND the five @anti-design/cli-<os>-<arch> npm platform packages.
+ * of Choxie77/anti-ai-design AND the five @anti-ai-design/cli-<os>-<arch> npm platform packages.
  * Nothing else mechanically stops a maintainer from tagging the skill release (or
  * merging and letting the sync workflow rewrite provider dirs) before those assets
  * are published, which breaks every install path.
@@ -14,7 +14,9 @@
  *   1. each of the five release binaries anti-design-<os>-<arch>[.exe] is fetchable
  *   2. each binary's .sha256 sidecar is fetchable
  *   3. skill/scripts/engine-checksums.txt records the digest each sidecar publishes
- *   4. each npm platform package @anti-design/cli-<os>-<arch>@<version> is published
+ *   4. each npm platform package @anti-ai-design/cli-<os>-<arch>@<version> is published
+ *      (skipped with --no-npm, which the tag-triggered skill release workflow uses
+ *      because npm publishing is a separate, human-run step)
  *
  * Downloads trust engine-checksums.txt, never the sidecar; check 3 only proves
  * the two still agree. `--record` hashes the five downloaded binaries into the
@@ -26,16 +28,22 @@
  *
  *   node scripts/check-engine-release.mjs            # check the pinned ENGINE_VERSION
  *   node scripts/check-engine-release.mjs --json     # machine-readable report
- *   node scripts/check-engine-release.mjs --record   # write engine-checksums.txt, then check
+ *   node scripts/check-engine-release.mjs --no-npm   # skip the npm platform-package probe
+ *   node scripts/check-engine-release.mjs --record   # download the release binaries, write engine-checksums.txt, then check
+ *   node scripts/check-engine-release.mjs --from-dir <dir>   # write engine-checksums.txt from local release assets (no network, no check)
  *
  * Environment:
- *   ANTI_DESIGN_DOWNLOAD_BASE  release root (default: the public repo's GitHub Releases)
+ *   ANTI_DESIGN_DOWNLOAD_BASE  release root (default: GitHub Releases of Choxie77/anti-ai-design)
  */
 import fs from 'node:fs';
+import path from 'node:path';
 import { createHash } from 'node:crypto';
 import {
   ENGINE_TARGETS,
   DEFAULT_DOWNLOAD_BASE,
+  NPM_SCOPE,
+  LEGACY_NPM_SCOPE,
+  platformPackageName,
   readEngineVersion,
   assetName,
   assetUrl,
@@ -69,20 +77,23 @@ async function sidecarDigest(url) {
   }
 }
 
-function npmPackageUrl(target, version, registry) {
+function npmPackageUrl(target, version, registry, scope = NPM_SCOPE) {
   // Scoped name: the slash is percent-encoded for the registry path.
-  const name = `@anti-design/cli-${target}`;
-  return `${registry}/${name.replace('/', '%2f')}/${version}`;
+  return `${registry}/${platformPackageName(target, scope).replace('/', '%2f')}/${version}`;
 }
 
+// The package counts as published under our scope, or (until the rename pass
+// moves the npm shim over) under the scope the shim still names.
 async function npmVersionExists(target, version, registry) {
-  const url = npmPackageUrl(target, version, registry);
-  try {
-    const res = await fetch(url, { redirect: 'follow' });
-    return res.ok;
-  } catch {
-    return false;
+  for (const scope of [NPM_SCOPE, LEGACY_NPM_SCOPE]) {
+    try {
+      const res = await fetch(npmPackageUrl(target, version, registry, scope), { redirect: 'follow' });
+      if (res.ok) return true;
+    } catch {
+      // try the next scope
+    }
   }
+  return false;
 }
 
 /**
@@ -94,6 +105,7 @@ export async function checkEngineRelease({
   base = process.env.ANTI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE,
   root,
   registry = NPM_REGISTRY,
+  npm = true,
 } = {}) {
   const missing = [];
 
@@ -106,7 +118,7 @@ export async function checkEngineRelease({
       const [binOk, published, npmOk] = await Promise.all([
         urlExists(binUrl),
         sidecarDigest(shaUrl),
-        npmVersionExists(target, version, registry),
+        npm ? npmVersionExists(target, version, registry) : true,
       ]);
       const recorded = expectedChecksum(version, target, root);
 
@@ -120,7 +132,7 @@ export async function checkEngineRelease({
           url: manifestPath(root),
         });
       }
-      if (!npmOk) missing.push({ kind: 'npm', target, what: `@anti-design/cli-${target}@${version}`, url: npmUrl });
+      if (!npmOk) missing.push({ kind: 'npm', target, what: `${platformPackageName(target)}@${version}`, url: npmUrl });
     })
   );
 
@@ -129,6 +141,19 @@ export async function checkEngineRelease({
   missing.sort((a, b) => ENGINE_TARGETS.indexOf(a.target) - ENGINE_TARGETS.indexOf(b.target) || order[a.kind] - order[b.kind]);
 
   return { ok: missing.length === 0, version, base, missing };
+}
+
+const MANIFEST_HEADER = [
+  '# Engine binary digests for the pinned ENGINE_VERSION: <engine-version> <asset> <sha256>.',
+  '# The launchers, the npm shim, `anti-design install` and scripts/fetch-engine.mjs verify',
+  '# every engine download against this file. Written by',
+  '# `node scripts/check-engine-release.mjs --record` (or --from-dir, which the',
+  '# build-engine workflow runs on the assets it publishes) after each engine release.',
+];
+
+/** The manifest text for `[version, asset, sha256]` rows, in ENGINE_TARGETS order. */
+export function renderManifest(rows) {
+  return [...MANIFEST_HEADER, ...rows.map((row) => row.join(' ')), ''].join('\n');
 }
 
 /**
@@ -141,24 +166,33 @@ export async function recordEngineChecksums({
   base = process.env.ANTI_DESIGN_DOWNLOAD_BASE || DEFAULT_DOWNLOAD_BASE,
   root,
 } = {}) {
-  const lines = await Promise.all(ENGINE_TARGETS.map(async (target) => {
+  const rows = await Promise.all(ENGINE_TARGETS.map(async (target) => {
     const digest = createHash('sha256').update(await download(assetUrl(version, target, base))).digest('hex');
-    return `${version} ${assetName(target)} ${digest}`;
+    return [version, assetName(target), digest];
   }));
-  fs.writeFileSync(manifestPath(root), [
-    '# Engine binary digests for the pinned ENGINE_VERSION: <engine-version> <asset> <sha256>.',
-    '# The launchers, the npm shim, `anti-design install` and scripts/fetch-engine.mjs verify',
-    '# every engine download against this file. Written by',
-    '# `node scripts/check-engine-release.mjs --record` after each engine release.',
-    ...lines,
-    '',
-  ].join('\n'));
+  fs.writeFileSync(manifestPath(root), renderManifest(rows));
+}
+
+/**
+ * Hash the five release assets already on disk in `dir` (the layout
+ * release-engine publishes: <dir>/anti-design-<os>-<arch>[.exe]) and write the
+ * manifest to `out` (default: skill/scripts/engine-checksums.txt). Throws when
+ * any asset is missing, so a partial build never yields a partial manifest.
+ */
+export function writeChecksumsFromDir(dir, { version = readEngineVersion(), out = manifestPath() } = {}) {
+  const rows = ENGINE_TARGETS.map((target) => {
+    const file = path.join(dir, assetName(target));
+    if (!fs.existsSync(file)) throw new Error(`missing release asset ${file}`);
+    return [version, assetName(target), createHash('sha256').update(fs.readFileSync(file)).digest('hex')];
+  });
+  fs.writeFileSync(out, renderManifest(rows));
+  return out;
 }
 
 function report(result) {
   const { ok, version, base, missing } = result;
   if (ok) {
-    console.log(`✓ engine v${version} release is complete: all ${ENGINE_TARGETS.length} binaries + .sha256 + npm platform packages are published, and engine-checksums.txt matches.`);
+    console.log(`✓ engine v${version} release is complete: all ${ENGINE_TARGETS.length} binaries + .sha256 (+ npm platform packages unless --no-npm) are published, and engine-checksums.txt matches.`);
     console.log(`  release base: ${base}`);
     return;
   }
@@ -175,7 +209,7 @@ function report(result) {
     list(unpublished);
     console.error('');
     console.error(`Publish engine v${version} (tag engine-v${version}, bun run release:engine) AND the`);
-    console.error('five @anti-design/cli-<os>-<arch> npm platform packages BEFORE releasing the');
+    console.error('five @anti-ai-design/cli-<os>-<arch> npm platform packages BEFORE releasing the');
     console.error('skill or merging rust-swap. Ordering: engine release → platform packages →');
     console.error('skill release/merge. See CLAUDE.md "Releases" and docs REVIEW-TRIAGE.md D4.');
   }
@@ -190,8 +224,15 @@ function report(result) {
 
 async function main(argv = process.argv.slice(2)) {
   const json = argv.includes('--json');
+  const fromDir = argv.indexOf('--from-dir');
+  if (fromDir !== -1) {
+    const dir = argv[fromDir + 1];
+    if (!dir) throw new Error('--from-dir needs a directory of release assets');
+    console.log(`wrote ${writeChecksumsFromDir(path.resolve(dir))}`);
+    return 0;
+  }
   if (argv.includes('--record')) await recordEngineChecksums();
-  const result = await checkEngineRelease();
+  const result = await checkEngineRelease({ npm: !argv.includes('--no-npm') });
   if (json) {
     console.log(JSON.stringify(result, null, 2));
   } else {

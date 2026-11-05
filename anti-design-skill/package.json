@@ -19,10 +19,14 @@
     "ci-cd"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://anti-design.example",
+  "homepage": "https://github.com/Choxie77/anti-ai-design#readme",
+  "bugs": {
+    "url": "https://github.com/Choxie77/anti-ai-design/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/anti-design.git"
+    "url": "git+https://github.com/Choxie77/anti-ai-design.git",
+    "directory": "anti-design-skill"
   },
   "engines": {
     "node": ">=18.19.0"
@@ -81,6 +85,7 @@
     "release:ext": "node scripts/release.mjs extension",
     "release:engine": "node scripts/release.mjs engine",
     "release:platform-packages": "node scripts/publish-platform-packages.mjs",
+    "release:checksums": "node scripts/check-engine-release.mjs --record",
     "check:engine-release": "node scripts/check-engine-release.mjs",
     "build:component-review": "bun scripts/build-component-review.mjs"
   },

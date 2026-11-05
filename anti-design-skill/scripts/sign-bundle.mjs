@@ -1,6 +1,11 @@
 #!/usr/bin/env node
-// Local release signing. Private key material travels from op through a pipe
-// into crypto, never through argv, environment values, logs or temporary files.
+// Release signing. The private key comes from one of three places, tried in
+// this order:
+//   1. ANTI_DESIGN_SIGNING_KEY_FILE  path to a PKCS#8 PEM (a local 0600 file)
+//   2. ANTI_DESIGN_SIGNING_KEY       the PEM itself (the GitHub Actions secret)
+//   3. 1Password via `op read` (ANTI_DESIGN_SIGNING_KEY_REF)
+// Key material is never put on a command line, logged or written to a
+// temporary file, and failures never echo it.
 import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, statSync } from 'node:fs';
@@ -60,11 +65,24 @@ function readFrom1Password(reference, account) {
   });
 }
 
+function readFromFile(file) {
+  const mode = statSync(file).mode & 0o077;
+  // A key readable by group/other is a key somebody else may already have.
+  if (process.platform !== 'win32' && mode) throw new Error('signing key file is group/world accessible');
+  return readFileSync(file);
+}
+
 export function signReleaseBundle({ zipPath, version, trustedKeys = readTrustedKeys(),
+  keyFile = process.env.ANTI_DESIGN_SIGNING_KEY_FILE, keyEnv = process.env.ANTI_DESIGN_SIGNING_KEY,
   secretReference = process.env.ANTI_DESIGN_SIGNING_KEY_REF ?? localSetting('anti-design.signingKeyRef'),
-  account = process.env.OP_ACCOUNT ?? localSetting('anti-design.signingAccount'), readSecret = readFrom1Password }) {
-  if (!secretReference?.startsWith('op://')) {
-    throw new Error('Set ANTI_DESIGN_SIGNING_KEY_REF to the 1Password private-key reference (op://vault/item/field).');
+  account = process.env.OP_ACCOUNT ?? localSetting('anti-design.signingAccount'), readSecret }) {
+  if (!readSecret) {
+    if (keyFile) readSecret = () => readFromFile(keyFile);
+    else if (keyEnv) readSecret = () => Buffer.from(keyEnv.replace(/\\n/g, '\n'));
+    else readSecret = readFrom1Password;
+  }
+  if (readSecret === readFrom1Password && !secretReference?.startsWith('op://')) {
+    throw new Error('Set ANTI_DESIGN_SIGNING_KEY_REF to the 1Password private-key reference (op://vault/item/field), or set ANTI_DESIGN_SIGNING_KEY_FILE (a PKCS#8 PEM path) or ANTI_DESIGN_SIGNING_KEY (the PEM).');
   }
   if (typeof version !== 'string' || version.length > 128 || !VERSION_PATTERN.test(version)) throw new Error('Invalid skill version for signing.');
   if (statSync(zipPath).size > MAX_BUNDLE_BYTES) throw new Error('Invalid bundle size for signing.');
@@ -75,13 +93,13 @@ export function signReleaseBundle({ zipPath, version, trustedKeys = readTrustedK
     pem = Buffer.isBuffer(secret) ? secret : Buffer.from(secret);
   } catch {
     // Child-process exceptions can contain stdout/stderr. Never propagate them.
-    throw new Error('Could not read the signing key from 1Password. Check CLI integration and unlock the vault.');
+    throw new Error('Could not read the signing key (key file, ANTI_DESIGN_SIGNING_KEY, or 1Password). Check the setting and, for 1Password, CLI integration and vault unlock.');
   }
   let privateKey;
   try {
     privateKey = createPrivateKey(pem);
   } catch {
-    throw new Error('The 1Password field is not a valid PKCS#8 private key.');
+    throw new Error('The signing key is not a valid PKCS#8 Ed25519 PEM.');
   } finally {
     pem.fill(0);
   }
