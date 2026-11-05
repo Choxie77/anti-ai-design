@@ -6,79 +6,110 @@ the ZIP's SHA-256 digest, byte length, release version, artifact name, and key
 ID. The engine trusts only `scripts/bundle-signing-keys.json`, compiled into
 the binary. A signature cannot introduce a new trusted key.
 
-The download endpoint on anti-design.example redirects to a versioned GitHub
-release. The installer resolves that redirect once and downloads the ZIP and
-its signature from that same release. Every subsequent redirect must use
-HTTPS. Missing signatures, unknown keys, changed metadata, and changed ZIP
-bytes stop the operation before extraction or writes to installed skills.
-The temporary download directory is removed on failure.
+The release lives in GitHub Releases of `Choxie77/anti-ai-design`, under the
+tag `skill-v<version>`. The installer resolves the download to that release
+once and fetches the ZIP and its signature from the same release. Every
+subsequent redirect must use HTTPS. Missing signatures, unknown keys, changed
+metadata, and changed ZIP bytes stop the operation before extraction or
+writes to installed skills. The temporary download directory is removed on
+failure.
+
+## The production key
+
+| | |
+|---|---|
+| Key ID | `aad-release-2026-11` |
+| Algorithm | Ed25519 |
+| Public key | `scripts/bundle-signing-keys.json` (committed, 32 bytes hex) |
+| Private key | PKCS#8 PEM, **never in the repository** |
+
+The private key was generated on the maintainer's machine and written to
+`~/aad-secrets/bundle-signing-private.pem` (directory `0700`, file `0600`).
+Treat that file as the only copy until it is stored in two places you control
+(for example a password manager and the GitHub secret below). Do not paste it
+into chat, an issue, a log, or a command line. Anyone holding it can sign
+bundles the shipped engine will trust.
+
+Store it as a GitHub Actions secret named `ANTI_DESIGN_SIGNING_KEY`
+(Settings, Secrets and variables, Actions). From the key's directory:
+
+```sh
+gh secret set ANTI_DESIGN_SIGNING_KEY --repo Choxie77/anti-ai-design < ~/aad-secrets/bundle-signing-private.pem
+```
+
+`gh secret set` reads the value from stdin, so it never appears in the shell
+history or the process list. For stricter control, create a `release`
+environment with required reviewers, put the secret there, and add
+`environment: release` to the `sign-and-publish` job in
+`.github/workflows/release.yml`.
 
 ## Sign a release
 
-Install the 1Password CLI and enable its desktop app integration. The signing
-item holds the PKCS#8 Ed25519 private key in a concealed `private-key` field.
-Set references, not key material, in your shell:
+Normally you do not sign by hand: pushing the tag `v<version>` runs
+`.github/workflows/release.yml`, which builds `dist/universal.zip` from the
+tagged commit, signs it with `ANTI_DESIGN_SIGNING_KEY`, checks the signature
+against the committed public key, and publishes `universal.zip` and
+`universal.zip.sig.json` together as the release `skill-v<version>`.
+
+`scripts/sign-bundle.mjs` reads the private key from the first of these that
+is set:
+
+1. `ANTI_DESIGN_SIGNING_KEY_FILE`: path to a PKCS#8 PEM. The file must not be
+   group or world accessible.
+2. `ANTI_DESIGN_SIGNING_KEY`: the PEM itself (what the workflow passes in).
+3. 1Password: `ANTI_DESIGN_SIGNING_KEY_REF` (`op://vault/item/field`), with
+   `OP_ACCOUNT` or the local git settings `anti-design.signingAccount` /
+   `anti-design.signingKeyRef`.
+
+Local signing of a build you made yourself:
 
 ```sh
-export OP_ACCOUNT='<account ID or sign-in address>'
-export ANTI_DESIGN_SIGNING_KEY_REF='op://<vault ID>/<item ID>/private-key'
-bun run release:skill
+export ANTI_DESIGN_SIGNING_KEY_FILE="$HOME/aad-secrets/bundle-signing-private.pem"
+node scripts/sign-bundle.mjs 4.8.0 dist/universal.zip
 ```
 
-For a persistent setup on your machine, use local Git settings instead:
+The key is read in-process, checked against the trusted keyring (a key that
+is not listed is refused), and used to write `universal.zip.sig.json` next to
+the ZIP. It is never passed as a command argument, written to a temporary
+file, or printed, and read failures are reported without forwarding the
+underlying error text.
 
-```sh
-git config --local anti-design.signingAccount '<account ID or sign-in address>'
-git config --local anti-design.signingKeyRef 'op://<vault ID>/<item ID>/private-key'
-```
+`bun run release:skill -- --dry-run` does not read any key or create a
+signature. It checks the usual release prerequisites and shows both assets in
+the upload plan; it does not prove that signing credentials work.
 
-Those values stay in `.git/config`, outside version control. Environment
-variables take precedence. Neither setting contains the private key.
-
-The release command rebuilds the ZIP, reads the key through `op read`, checks
-that its public key is trusted, and writes the sidecar before creating any
-tag or release. The ZIP and sidecar are uploaded together. The key is never
-passed as a command argument, written to a temporary file, or printed. It
-does exist briefly in the local signing process's memory. 1Password failures
-are reported without forwarding child-process output.
-
-`--dry-run` does not access 1Password or create a signature. It checks the
-usual release prerequisites and shows both assets in the upload plan; it
-does not prove that signing credentials work.
-
-To sign an already-published release for the initial rollout, download and
-review the exact released `universal.zip`, then run:
-
-```sh
-node scripts/sign-bundle.mjs 4.2.0 /path/to/universal.zip
-```
-
-Check the resulting sidecar against the Rust verifier and compiled public key:
+Check a sidecar against the Rust verifier and compiled public key:
 
 ```sh
 ANTI_DESIGN_VERIFY_BUNDLE=/path/to/universal.zip \
-ANTI_DESIGN_VERIFY_BUNDLE_VERSION=4.2.0 \
+ANTI_DESIGN_VERIFY_BUNDLE_VERSION=4.8.0 \
 cargo test -p anti-design-skills verifies_reviewed_release_with_production_keyring -- --ignored
 ```
 
-This creates only the local sidecar. It neither uploads it nor replaces the
-ZIP. Never regenerate an old ZIP and sign those different bytes as the old
-release. Uploading the sidecar is a separate maintainer approval step.
+Never regenerate an old ZIP and sign those different bytes as the old
+release. Uploading a sidecar for an already-published ZIP is a separate
+maintainer approval step.
 
 ## Rollout and rotation
 
 Before shipping the enforcing engine, publish a valid signature beside the
-exact ZIP currently served by anti-design.example. Verify the pair using a
-locally built engine, then release the engine, its npm platform packages, and
-the CLI/skill pins. Keep the existing release available throughout. Do not
-release an enforcing engine with an empty keyring or an unsigned served ZIP.
+exact ZIP the installer will resolve (the first `skill-v<version>` release
+made by the workflow does this). Verify the pair using a locally built engine,
+then release the engine, its npm platform packages, and the CLI/skill pins.
+Keep the existing release available throughout. Do not release an enforcing
+engine with an empty keyring or an unsigned served ZIP.
+
+The engine binary embeds `scripts/bundle-signing-keys.json` at build time, so
+**an engine built before the key was replaced does not trust this key.**
+Release a new engine (a new `ENGINE_VERSION`) after the keyring changes.
 
 For planned rotation, ship an engine trusting both the old and new public
 keys before signing with the new key. Older engines that do not know the new
 key will refuse the download and ask for a CLI update. A compromised key
 requires an engine update removing that public key; removing it from a
 website does not revoke trust in already-installed binaries. Keep the
-dedicated signing item separate from GitHub and deployment credentials.
+signing key separate from GitHub account credentials, npm tokens and
+deployment credentials.
 
 ## Scope
 

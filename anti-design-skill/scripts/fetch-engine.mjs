@@ -11,7 +11,7 @@
  *   node scripts/fetch-engine.mjs --lenient      # a target that cannot be fetched warns instead of failing
  *
  * Environment (same names the launcher honors):
- *   ANTI_DESIGN_DOWNLOAD_BASE  release channel root (default: the public repo's GitHub Releases)
+ *   ANTI_DESIGN_DOWNLOAD_BASE  release channel root (default: GitHub Releases of Choxie77/anti-ai-design)
  *   ANTI_DESIGN_BIN            copy this local binary for the current platform instead of downloading
  *
  * The URL scheme is the launcher's: <base>/engine-v<version>/anti-design-<os>-<arch>[.exe].
@@ -25,7 +25,22 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const DEFAULT_DOWNLOAD_BASE = 'https://github.com/OWNER/anti-design/releases/download';
+
+// The one place the release scripts learn where Anti-AI Design is published.
+// The code still ships under its working name `anti-design` (asset names,
+// launcher, npm shim), so the rename pass can find every spelling here.
+export const RELEASE_REPO = 'Choxie77/anti-ai-design';
+export const REPO_URL = `https://github.com/${RELEASE_REPO}`;
+export const DEFAULT_DOWNLOAD_BASE = `${REPO_URL}/releases/download`;
+/** npm scope of the five @<scope>/cli-<os>-<arch> platform packages. */
+export const NPM_SCOPE = '@anti-ai-design';
+/**
+ * The scope the engine's npm shim (cli/bin/cli.js) and package.json still use
+ * until the rename pass flips them with tests/cli-shim.test.mjs. Existence
+ * probes accept it as a stand-in; delete this and its uses with that change.
+ */
+export const LEGACY_NPM_SCOPE = '@anti-design';
+export const platformPackageName = (target, scope = NPM_SCOPE) => `${scope}/cli-${target}`;
 export const ENGINE_TARGETS = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'windows-x64'];
 
 export function readEngineVersion(root = ROOT) {

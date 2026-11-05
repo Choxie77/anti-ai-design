@@ -1,0 +1,115 @@
+name: release-engine
+# Builds the engine for the five supported targets and publishes them as the
+# GitHub Release `engine-v<ENGINE_VERSION>` of this repository. The launcher,
+# the npm shim, `anti-design install` and `bun run fetch:engine` download from
+# that release and verify every binary against skill/scripts/engine-checksums.txt.
+#
+# Trigger: `bun run release:engine` (anti-design-skill/scripts/release.mjs)
+# checks ENGINE_VERSION, the platform-package pins and a clean pushed tree, then
+# pushes the tag. A manual run (workflow_dispatch) builds and smokes every
+# target but publishes nothing.
+#
+# Assets of the release: anti-design-<os>-<arch>[.exe] + .sha256 for each target,
+# and engine-checksums.txt (the manifest to commit; see docs/ENGINE.md).
+# The Windows binary is NOT Authenticode-signed; there is no signing identity.
+on:
+  push:
+    tags: ['engine-v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    working-directory: anti-design-skill
+jobs:
+  build-engine:
+    name: build ${{ matrix.short }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-14,       target: aarch64-apple-darwin,       short: darwin-arm64 }
+          # No Intel runner: the toolchain builds x86_64 on arm64 natively.
+          - { os: macos-14,       target: x86_64-apple-darwin,        short: darwin-x64 }
+          - { os: ubuntu-latest,  target: x86_64-unknown-linux-musl,  short: linux-x64 }
+          - { os: ubuntu-latest,  target: aarch64-unknown-linux-musl, short: linux-arm64, cross: true }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc,     short: windows-x64 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check the tag matches ENGINE_VERSION
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          set -e
+          want="engine-v$(tr -d '[:space:]' < ENGINE_VERSION)"
+          [ "$GITHUB_REF_NAME" = "$want" ] || { echo "tag $GITHUB_REF_NAME != $want"; exit 1; }
+      # rust-toolchain.toml names the channel; `rustup show` installs it.
+      - name: Install the pinned toolchain
+        shell: bash
+        run: rustup show && rustup target add ${{ matrix.target }}
+      - if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - if: matrix.cross
+        run: cargo install cross --locked --version 0.2.5
+      - name: Build
+        shell: bash
+        run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release -p anti-design --target ${{ matrix.target }}
+      - name: Smoke the binary
+        if: ${{ !matrix.cross }}
+        shell: bash
+        run: target/${{ matrix.target }}/release/anti-design${{ runner.os == 'Windows' && '.exe' || '' }} engine-probe
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: anti-design-${{ matrix.short }}
+          path: anti-design-skill/target/${{ matrix.target }}/release/anti-design${{ runner.os == 'Windows' && '.exe' || '' }}
+          if-no-files-found: error
+  publish-engine:
+    name: publish engine release
+    needs: build-engine
+    if: startsWith(github.ref, 'refs/tags/engine-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: anti-design-*
+          path: artifacts
+      - name: Lay out release assets with checksums
+        working-directory: .
+        run: |
+          set -e
+          mkdir -p out
+          for d in artifacts/anti-design-*; do
+            short=$(basename "$d" | sed 's/^anti-design-//')
+            f=$(ls "$d" | head -1)
+            case "$short" in windows-*) dest="out/anti-design-$short.exe" ;; *) dest="out/anti-design-$short" ;; esac
+            cp "$d/$f" "$dest"
+            (cd out && sha256sum "$(basename "$dest")" > "$(basename "$dest").sha256")
+          done
+          ls -la out
+      - name: Generate engine-checksums.txt from the exact assets
+        run: |
+          set -e
+          node scripts/check-engine-release.mjs --from-dir "$GITHUB_WORKSPACE/out"
+          cp skill/scripts/engine-checksums.txt "$GITHUB_WORKSPACE/out/engine-checksums.txt"
+          cat "$GITHUB_WORKSPACE/out/engine-checksums.txt"
+      - name: Publish the GitHub Release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # `gh release create` with asset files makes a draft, uploads every
+        # asset, then publishes, and removes the draft if any step fails, so a
+        # release is never public with assets missing.
+        run: |
+          set -e
+          tag="${GITHUB_REF_NAME}"
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "Anti-AI Design engine $tag" \
+            --notes "Prebuilt engine binaries ($tag), SHA-256 sidecars, and engine-checksums.txt. The launcher, the npm shim and the installer download these on first run and verify them against the committed engine-checksums.txt. Run 'bun run release:checksums' in anti-design-skill and commit the manifest." out/*
