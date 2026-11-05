@@ -10,8 +10,8 @@
 //! hand-edited signed-number cases (see `cascade::rules`, "Signed numbers
 //! keep their space").
 
-use anti_design_html::cascade::rules::{collect_static_css_rules, CssRule};
-use anti_design_html::cascade::values::unwrap_css_at_layer;
+use anti_ai_design_html::cascade::rules::{collect_static_css_rules, CssRule};
+use anti_ai_design_html::cascade::values::unwrap_css_at_layer;
 use serde_json::Value;
 
 fn rules_to_json(rules: &[CssRule]) -> Value {

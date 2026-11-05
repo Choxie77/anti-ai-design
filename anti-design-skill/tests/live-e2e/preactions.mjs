@@ -8,7 +8,7 @@
 
 import { installLiveQueryHelpers, waitForCycling } from './ui.mjs';
 
-const PICK_TOGGLE = '#anti-design-live-pick-toggle';
+const PICK_TOGGLE = '#anti-ai-design-live-pick-toggle';
 
 /**
  * @param {import('playwright').Page} page
@@ -19,7 +19,7 @@ export async function runPreActions(page, actions) {
 
   await installLiveQueryHelpers(page);
   const wasActive = await page.evaluate((sel) =>
-    window.__antiDesignLiveQuery?.(sel)?.dataset.active === 'true',
+    window.__antiAiDesignLiveQuery?.(sel)?.dataset.active === 'true',
   PICK_TOGGLE).catch(() => false);
   if (wasActive) await clickPickToggle(page, PICK_TOGGLE);
 
@@ -51,7 +51,7 @@ export async function runPreActions(page, actions) {
   } finally {
     if (wasActive) {
       const isActive = await page.evaluate((sel) =>
-        window.__antiDesignLiveQuery?.(sel)?.dataset.active === 'true',
+        window.__antiAiDesignLiveQuery?.(sel)?.dataset.active === 'true',
       PICK_TOGGLE).catch(() => false);
       if (!isActive) await clickPickToggle(page, PICK_TOGGLE);
     }
@@ -65,7 +65,7 @@ async function clickPickToggle(page, selector) {
     return;
   } catch (err) {
     const clicked = await page.evaluate((sel) => {
-      const btn = window.__antiDesignLiveQuery(sel);
+      const btn = window.__antiAiDesignLiveQuery(sel);
       if (!btn) return false;
       btn.click();
       return true;
@@ -94,7 +94,7 @@ export async function waitForCyclingRobust(page, expectedCount, opts = {}) {
       await waitForCycling(page, expectedCount, { timeout: firstPassTimeoutMs });
       return;
     } catch (preErr) {
-      if (preErr?.antiDesignNoRetry) throw preErr;
+      if (preErr?.antiAiDesignNoRetry) throw preErr;
       log(`Cycling not reached in ${firstPassTimeoutMs}ms — retracing preActions`);
       await runPreActions(page, preActions);
     }
@@ -104,10 +104,10 @@ export async function waitForCyclingRobust(page, expectedCount, opts = {}) {
     await waitForCycling(page, expectedCount, { timeout: finalTimeoutMs });
     return;
   } catch (firstErr) {
-    if (process.env.ANTI_DESIGN_E2E_DEBUG) {
+    if (process.env.ANTI_AI_DESIGN_E2E_DEBUG) {
       firstErr.message += '\n\n--- live UI snapshot ---\n' + JSON.stringify(await liveUiSnapshot(page), null, 2);
     }
-    if (agentMode !== 'llm' || firstErr?.antiDesignNoRetry) throw firstErr;
+    if (agentMode !== 'llm' || firstErr?.antiAiDesignNoRetry) throw firstErr;
   }
 
   log('Cycling not reached after LLM generate — reloading to pick up HMR');
@@ -119,23 +119,23 @@ export async function waitForCyclingRobust(page, expectedCount, opts = {}) {
 
 async function liveUiSnapshot(page) {
   return page.evaluate(() => {
-    const query = window.__antiDesignLiveQuery || ((sel) => document.querySelector(sel));
-    const root = window.__ANTI_DESIGN_LIVE_CHROME_CORE__?.root?.() || window.__ANTI_DESIGN_LIVE_UI_ROOT__ || null;
-    const bar = query('#anti-design-live-bar');
-    const toast = query('#anti-design-live-toast');
-    const wrapper = document.querySelector('[data-anti-design-variants]');
+    const query = window.__antiAiDesignLiveQuery || ((sel) => document.querySelector(sel));
+    const root = window.__ANTI_AI_DESIGN_LIVE_CHROME_CORE__?.root?.() || window.__ANTI_AI_DESIGN_LIVE_UI_ROOT__ || null;
+    const bar = query('#anti-ai-design-live-bar');
+    const toast = query('#anti-ai-design-live-toast');
+    const wrapper = document.querySelector('[data-anti-ai-design-variants]');
     return {
       href: location.href,
-      liveInit: window.__ANTI_DESIGN_LIVE_INIT__,
-      adapter: window.__ANTI_DESIGN_LIVE_ADAPTER__,
-      hasShadowRoot: Boolean(document.getElementById('anti-design-live-root')?.shadowRoot),
+      liveInit: window.__ANTI_AI_DESIGN_LIVE_INIT__,
+      adapter: window.__ANTI_AI_DESIGN_LIVE_ADAPTER__,
+      hasShadowRoot: Boolean(document.getElementById('anti-ai-design-live-root')?.shadowRoot),
       rootText: root?.textContent?.replace(/\s+/g, ' ').trim().slice(0, 500) || null,
       bar: bar ? { display: bar.style.display, text: bar.textContent } : null,
       toast: toast ? toast.textContent : null,
-      wrapper: wrapper ? { preview: wrapper.dataset.antiDesignPreview, count: wrapper.dataset.antiDesignVariantCount, html: wrapper.outerHTML.slice(0, 800) } : null,
-      debugState: window.__ANTI_DESIGN_LIVE_CHROME_CORE__?.debugState?.() || null,
-      storage: localStorage.getItem('anti-design-live-session'),
-      scripts: document.querySelectorAll('script[data-anti-design-live-script]').length,
+      wrapper: wrapper ? { preview: wrapper.dataset.antiAiDesignPreview, count: wrapper.dataset.antiAiDesignVariantCount, html: wrapper.outerHTML.slice(0, 800) } : null,
+      debugState: window.__ANTI_AI_DESIGN_LIVE_CHROME_CORE__?.debugState?.() || null,
+      storage: localStorage.getItem('anti-ai-design-live-session'),
+      scripts: document.querySelectorAll('script[data-anti-ai-design-live-script]').length,
       consoleHint: 'See page console errors captured by the test session.',
     };
   }).catch((err) => ({ error: err.message }));

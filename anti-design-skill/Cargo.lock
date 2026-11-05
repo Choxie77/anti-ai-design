@@ -18,43 +18,43 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design"
+name = "anti-ai-design"
 version = "0.1.18"
 dependencies = [
- "anti-design-aad-rules",
- "anti-design-browser",
- "anti-design-common",
- "anti-design-comp",
- "anti-design-comp-verbs",
- "anti-design-context",
- "anti-design-core",
- "anti-design-detect",
- "anti-design-hook",
- "anti-design-html",
- "anti-design-live",
- "anti-design-skills",
+ "anti-ai-design-aad-rules",
+ "anti-ai-design-browser",
+ "anti-ai-design-common",
+ "anti-ai-design-comp",
+ "anti-ai-design-comp-verbs",
+ "anti-ai-design-context",
+ "anti-ai-design-core",
+ "anti-ai-design-detect",
+ "anti-ai-design-hook",
+ "anti-ai-design-html",
+ "anti-ai-design-live",
+ "anti-ai-design-skills",
  "base64",
  "serde_json",
  "sha2",
 ]
 
 [[package]]
-name = "anti-design-aad-rules"
+name = "anti-ai-design-aad-rules"
 version = "0.1.18"
 dependencies = [
- "anti-design-core",
- "anti-design-detect",
+ "anti-ai-design-core",
+ "anti-ai-design-detect",
  "once_cell",
  "regex",
 ]
 
 [[package]]
-name = "anti-design-browser"
+name = "anti-ai-design-browser"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-core",
- "anti-design-detect",
+ "anti-ai-design-common",
+ "anti-ai-design-core",
+ "anti-ai-design-detect",
  "base64",
  "image",
  "percent-encoding",
@@ -66,16 +66,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-bundle"
+name = "anti-ai-design-bundle"
 version = "0.1.18"
 dependencies = [
- "anti-design-core",
+ "anti-ai-design-core",
  "base64",
  "serde_json",
 ]
 
 [[package]]
-name = "anti-design-common"
+name = "anti-ai-design-common"
 version = "0.1.18"
 dependencies = [
  "getrandom 0.2.17",
@@ -85,7 +85,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-comp"
+name = "anti-ai-design-comp"
 version = "0.1.18"
 dependencies = [
  "image",
@@ -97,12 +97,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-comp-verbs"
+name = "anti-ai-design-comp-verbs"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-comp",
- "anti-design-context",
+ "anti-ai-design-common",
+ "anti-ai-design-comp",
+ "anti-ai-design-context",
  "image",
  "once_cell",
  "regex",
@@ -113,12 +113,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-context"
+name = "anti-ai-design-context"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-comp",
- "anti-design-core",
+ "anti-ai-design-common",
+ "anti-ai-design-comp",
+ "anti-ai-design-core",
  "flate2",
  "once_cell",
  "regex",
@@ -133,11 +133,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-core"
+name = "anti-ai-design-core"
 version = "0.1.18"
 dependencies = [
- "anti-design-core",
- "anti-design-foundation",
+ "anti-ai-design-core",
+ "anti-ai-design-foundation",
  "cssparser",
  "once_cell",
  "regex",
@@ -146,11 +146,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-detect"
+name = "anti-ai-design-detect"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-core",
+ "anti-ai-design-common",
+ "anti-ai-design-core",
  "once_cell",
  "regex",
  "serde",
@@ -158,7 +158,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-foundation"
+name = "anti-ai-design-foundation"
 version = "0.1.18"
 dependencies = [
  "cssparser",
@@ -171,14 +171,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-hook"
+name = "anti-ai-design-hook"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-comp-verbs",
- "anti-design-context",
- "anti-design-core",
- "anti-design-detect",
+ "anti-ai-design-aad-rules",
+ "anti-ai-design-common",
+ "anti-ai-design-comp-verbs",
+ "anti-ai-design-context",
+ "anti-ai-design-core",
+ "anti-ai-design-detect",
  "libc",
  "once_cell",
  "regex",
@@ -187,13 +188,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-html"
+name = "anti-ai-design-html"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-core",
- "anti-design-detect",
- "anti-design-html",
+ "anti-ai-design-common",
+ "anti-ai-design-core",
+ "anti-ai-design-detect",
+ "anti-ai-design-html",
  "cssparser",
  "ego-tree",
  "html5ever",
@@ -208,13 +209,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-live"
+name = "anti-ai-design-live"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-context",
- "anti-design-core",
- "anti-design-hook",
+ "anti-ai-design-common",
+ "anti-ai-design-context",
+ "anti-ai-design-core",
+ "anti-ai-design-hook",
  "getrandom 0.2.17",
  "markup5ever",
  "once_cell",
@@ -227,12 +228,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-skills"
+name = "anti-ai-design-skills"
 version = "0.1.18"
 dependencies = [
- "anti-design-common",
- "anti-design-context",
- "anti-design-detect",
+ "anti-ai-design-common",
+ "anti-ai-design-context",
+ "anti-ai-design-detect",
  "libc",
  "once_cell",
  "regex",
@@ -246,13 +247,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "anti-design-wasm"
+name = "anti-ai-design-wasm"
 version = "0.1.18"
 dependencies = [
- "anti-design-core",
- "anti-design-detect",
- "anti-design-html",
- "anti-design-wasm",
+ "anti-ai-design-core",
+ "anti-ai-design-detect",
+ "anti-ai-design-html",
+ "anti-ai-design-wasm",
  "serde_json",
  "wasm-bindgen",
 ]
@@ -1826,7 +1827,7 @@ checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 name = "xtask"
 version = "0.1.18"
 dependencies = [
- "anti-design-bundle",
+ "anti-ai-design-bundle",
 ]
 
 [[package]]

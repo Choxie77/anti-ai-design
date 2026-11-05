@@ -40,7 +40,7 @@ impl ComponentCapturer for PlanCapturer {
         };
         let comp_path = source(&packet["comp"])?;
         let comp = inputs.get(&comp_path).ok_or("missing approved reference")?;
-        if anti_design_comp::png_io::is_png(comp) && comp.len() >= 24
+        if anti_ai_design_comp::png_io::is_png(comp) && comp.len() >= 24
             && (u64::from(u32::from_be_bytes(comp[16..20].try_into().unwrap())) != packet["comp"]["width"].as_u64().unwrap_or(0)
                 || u64::from(u32::from_be_bytes(comp[20..24].try_into().unwrap())) != packet["comp"]["height"].as_u64().unwrap_or(0))
         {

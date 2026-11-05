@@ -2,9 +2,9 @@
 //! script directly does nothing, so the verb prints nothing and exits 0.
 
 use crate::util::{jsp, Env};
-use anti_design_common::Io;
-use anti_design_context::context::resolve_project_root;
-use anti_design_context::target_args::{parse_target_path, TargetOptions};
+use anti_ai_design_common::Io;
+use anti_ai_design_context::context::resolve_project_root;
+use anti_ai_design_context::target_args::{parse_target_path, TargetOptions};
 
 pub struct LiveTarget {
     pub original_cwd: String,
@@ -42,7 +42,7 @@ pub fn resolve_live_target(cwd: &str, args: &[String], env: &Env) -> Result<Live
     })
 }
 
-/// `anti-design live-target`: no CLI entry in the JS module.
+/// `anti-ai-design live-target`: no CLI entry in the JS module.
 pub fn run(_args: &[String], _io: &mut Io) -> i32 {
     0
 }

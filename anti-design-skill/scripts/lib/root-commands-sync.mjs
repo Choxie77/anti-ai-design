@@ -1,6 +1,6 @@
 /**
  * Mirror generated provider command files (e.g. OpenCode's
- * commands/anti-design.md) from dist/ into the tracked root harness folders.
+ * commands/anti-ai-design.md) from dist/ into the tracked root harness folders.
  * Without this, the release sync ships skills/agents/hooks but no slash
  * command bridge, so direct GitHub, npx-skills, and submodule installs of
  * OpenCode stay bridge-less (#483). Per-entry copy like the skills sync:

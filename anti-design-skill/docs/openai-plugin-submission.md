@@ -1,25 +1,25 @@
 # OpenAI plugin submission packet
 
-Use this packet for the initial public submission of Anti-Design. The release build creates the upload at `dist/openai-plugin.zip`.
+Use this packet for the initial public submission of Anti-AI Design. The release build creates the upload at `dist/openai-plugin.zip`.
 
 ## Submission type
 
-Choose **Skills only**. Anti-Design has no MCP server. The package includes one skill, its referenced scripts and files, a branded icon, and a `PostToolUse` lifecycle hook.
+Choose **Skills only**. Anti-AI Design has no MCP server. The package includes one skill, its referenced scripts and files, a branded icon, and a `PostToolUse` lifecycle hook.
 
-The hook runs locally after supported file edits, checks changed UI files for known anti-patterns, and returns findings to the active coding-agent session. It does not call an Anti-Design service. Codex asks each user to review and trust the hook before it can run.
+The hook runs locally after supported file edits, checks changed UI files for known anti-patterns, and returns findings to the active coding-agent session. It does not call an Anti-AI Design service. Codex asks each user to review and trust the hook before it can run.
 
 ## Listing
 
-- Plugin name: Anti-Design
+- Plugin name: Anti-AI Design
 - Publisher: Renaissance Geek Inc
 - Short description: Design and refine interfaces
-- Long description: Create, critique, and refine frontend interfaces with your coding agent. Anti-Design provides 23 focused design commands, live browser iteration for exploring visual directions, and automatic checks that flag common design anti-patterns as you work.
+- Long description: Create, critique, and refine frontend interfaces with your coding agent. Anti-AI Design provides 23 focused design commands, live browser iteration for exploring visual directions, and automatic checks that flag common design anti-patterns as you work.
 - Category: Creativity
-- Website: https://anti-design.example
-- Support: https://github.com/OWNER/anti-design/issues
-- Privacy policy: https://anti-design.example/privacy
-- Terms: https://github.com/OWNER/anti-design/blob/main/LICENSE
-- Logo: `dist/openai/anti-design/assets/icon.png`
+- Website: https://github.com/Choxie77/anti-ai-design
+- Support: https://github.com/Choxie77/anti-ai-design/issues
+- Privacy policy: https://github.com/Choxie77/anti-ai-design/privacy
+- Terms: https://github.com/Choxie77/anti-ai-design/blob/main/LICENSE
+- Logo: `dist/openai/anti-ai-design/assets/icon.png`
 
 Use the verified Renaissance Geek Inc business identity. The generated manifest uses the same publisher name in both `author.name` and `interface.developerName`.
 
@@ -27,37 +27,37 @@ Use the verified Renaissance Geek Inc business identity. The generated manifest 
 
 1. critique this interface and prioritize what to fix.
 2. craft a distinctive landing page, then polish the result.
-3. start anti-design live so I can explore bolder or more delightful variants.
+3. start anti-ai-design live so I can explore bolder or more delightful variants.
 
 ## Positive tests
 
 ### 1. Technical UI audit
 
 - User prompt: `audit demos/landing-demo/index.html for accessibility, responsive behavior, and performance problems.`
-- Expected behavior: Invoke Anti-Design, load the audit and brand references, inspect the existing HTML, CSS, PRODUCT.md, and DESIGN.md, then run the bundled detector where applicable.
+- Expected behavior: Invoke Anti-AI Design, load the audit and brand references, inspect the existing HTML, CSS, PRODUCT.md, and DESIGN.md, then run the bundled detector where applicable.
 - Expected result: A prioritized audit with evidence, affected selectors or files, severity, and concrete fixes. Do not change files unless the user also asks for fixes.
-- Fixture data: The public `demos/landing-demo/` folder in `OWNER/anti-design`.
+- Fixture data: The public `demos/landing-demo/` folder in `Choxie77/anti-ai-design`.
 
 ### 2. Final polish pass
 
 - User prompt: `polish demos/landing-demo/index.html and fix the rough edges without changing the brand.`
-- Expected behavior: Invoke Anti-Design, load the polish and brand references, preserve the existing design tokens, inspect the page in a browser when available, and make scoped edits.
+- Expected behavior: Invoke Anti-AI Design, load the polish and brand references, preserve the existing design tokens, inspect the page in a browser when available, and make scoped edits.
 - Expected result: Updated frontend files plus a concise summary of visual, responsive, and accessibility improvements and the validation performed.
-- Fixture data: The public `demos/landing-demo/` folder in `OWNER/anti-design`.
+- Fixture data: The public `demos/landing-demo/` folder in `Choxie77/anti-ai-design`.
 
 ### 3. Layout correction
 
 - User prompt: `The landing page spacing and hierarchy feel flat. Fix the layout.`
 - Expected behavior: Route to the layout workflow, inspect the existing design system, identify the marketing register, and adjust spacing, rhythm, alignment, and hierarchy without replacing unrelated styles.
 - Expected result: Scoped HTML or CSS changes that preserve content and brand, followed by responsive verification.
-- Fixture data: The public `demos/landing-demo/` folder in `OWNER/anti-design`.
+- Fixture data: The public `demos/landing-demo/` folder in `Choxie77/anti-ai-design`.
 
 ### 4. Bolder visual direction
 
 - User prompt: `make this landing page bolder, but keep it recognizable and avoid familiar AI design patterns.`
 - Expected behavior: Route to the bolder workflow, inspect PRODUCT.md and DESIGN.md, keep the established identity, and strengthen the composition, typography, color commitment, and motion where useful.
 - Expected result: Production-ready frontend changes with reduced-motion handling and a short explanation of the chosen direction.
-- Fixture data: The public `demos/landing-demo/` folder in `OWNER/anti-design`.
+- Fixture data: The public `demos/landing-demo/` folder in `Choxie77/anti-ai-design`.
 
 ### 5. UX copy clarification
 
@@ -71,13 +71,13 @@ Use the verified Renaissance Geek Inc business identity. The generated manifest 
 ### 1. Backend-only task
 
 - User prompt: `optimize this PostgreSQL query and redesign the database indexes.`
-- Expected behavior: Do not invoke Anti-Design. Explain that the plugin is scoped to frontend interface work and continue with suitable general coding help if available.
+- Expected behavior: Do not invoke Anti-AI Design. Explain that the plugin is scoped to frontend interface work and continue with suitable general coding help if available.
 - Why: Database tuning is explicitly outside the plugin's frontend scope.
 
 ### 2. Standalone bitmap asset
 
 - User prompt: `create a photorealistic PNG logo for my restaurant.`
-- Expected behavior: Do not use Anti-Design as the asset generator. Route to image generation when available, or explain that the plugin handles interface design rather than standalone raster artwork.
+- Expected behavior: Do not use Anti-AI Design as the asset generator. Route to image generation when available, or explain that the plugin handles interface design rather than standalone raster artwork.
 - Why: The request is for a bitmap asset, not a frontend interface or design-system task.
 
 ### 3. Skip required project context
@@ -88,14 +88,14 @@ Use the verified Renaissance Geek Inc business identity. The generated manifest 
 
 ## Initial release notes
 
-Initial submission of Anti-Design, a frontend design skill for ChatGPT and Codex. It packages one skill with 23 design workflows, referenced scripts and guidance, a local anti-pattern detector, and an optional `PostToolUse` hook. No MCP server, authentication, demo account, or private network is required. The only network request made by the skill is the documented optional daily version check to `https://anti-design.example/api/version`.
+Initial submission of Anti-AI Design, a frontend design skill for ChatGPT and Codex. It packages one skill with 23 design workflows, referenced scripts and guidance, a local anti-pattern detector, and an optional `PostToolUse` hook. No MCP server, authentication, demo account, or private network is required. The only network request made by the skill is the documented optional daily version check to `https://github.com/Choxie77/anti-ai-design/api/version`.
 
 ## Final checks
 
 - Confirm Apps Management write access for the submitting role.
 - Select a verified developer or business identity and align the manifest and listing publisher name.
 - Confirm the website, support, privacy, and terms links are public.
-- Upload `dist/openai-plugin.zip` and confirm the scanner recognizes `skills/anti-design/SKILL.md` and `hooks/hooks.json`.
+- Upload `dist/openai-plugin.zip` and confirm the scanner recognizes `skills/anti-ai-design/SKILL.md` and `hooks/hooks.json`.
 - Enter exactly five positive and three negative tests from this packet.
 - Review the hook description and the optional version check against the privacy policy.
 - Submit for review only after the automated scan is clean.

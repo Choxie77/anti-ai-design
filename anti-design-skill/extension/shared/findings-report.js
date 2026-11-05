@@ -1,5 +1,5 @@
 // Shared by the popup and DevTools. Page URLs come from the caller.
-globalThis.AntiDesignReport = (() => {
+globalThis.AntiAiDesignReport = (() => {
   const CATEGORY_LABELS = { slop: 'AI tells', quality: 'Quality issues', advisory: 'Advisories' };
 
   function isAdvisory(finding) {
@@ -11,7 +11,7 @@ globalThis.AntiDesignReport = (() => {
     return finding.category === 'slop' ? 'slop' : 'quality';
   }
 
-  // Maps each anti-pattern to the most relevant Anti-Design skill(s) for fixing it.
+  // Maps each anti-pattern to the most relevant Anti-AI Design skill(s) for fixing it.
   // These are suggestions; the user decides whether and how to apply them.
   const FIX_SKILLS = {
     // AI slop
@@ -69,13 +69,13 @@ globalThis.AntiDesignReport = (() => {
 
   function formatFindingsForCopy(findings, pageUrl = '') {
     const url = pageUrl.split('#')[0];
-    const lines = ['# Anti-Design findings'];
+    const lines = ['# Anti-AI Design findings'];
     const count = findings.reduce((sum, item) => sum + item.findings.length, 0);
     if (url) lines.push(`URL: ${url}`);
     lines.push(`Total findings: ${count}`);
     lines.push('');
     if (!count) {
-      lines.push('Anti-Design found no anti-patterns on this page.');
+      lines.push('Anti-AI Design found no anti-patterns on this page.');
       return lines.join('\n');
     }
 
@@ -100,19 +100,19 @@ globalThis.AntiDesignReport = (() => {
     // Roll up suggested skills across all findings (most-relevant first)
     const skills = uniqueSkillsForFindings(findings);
     if (skills.length) {
-      lines.push(`Suggested Anti-Design skills to fix: ${skills.join(', ')}`);
+      lines.push(`Suggested Anti-AI Design skills to fix: ${skills.join(', ')}`);
       lines.push('');
     }
 
     lines.push('---');
-    lines.push('Detected by [Anti-Design](https://anti-design.example). Skills are suggestions, not required.');
+    lines.push('Detected by [Anti-AI Design](https://github.com/Choxie77/anti-ai-design). Skills are suggestions, not required.');
     return lines.join('\n');
   }
 
   function formatSingleFindingForCopy(item, finding, pageUrl = '') {
     const url = pageUrl.split('#')[0];
     const where = item.isPageLevel ? '_(page-level)_' : `\`${item.selector}\``;
-    const lines = [`# Anti-Design: ${finding.name}`];
+    const lines = [`# Anti-AI Design: ${finding.name}`];
     if (url) lines.push(`URL: ${url}`);
     lines.push(`Element: ${where}`);
     lines.push(`Detail: ${finding.detail}`);
@@ -120,7 +120,7 @@ globalThis.AntiDesignReport = (() => {
     lines.push(finding.description);
     lines.push('');
     const skills = fixSkillFor(finding);
-    if (skills) lines.push(`Suggested Anti-Design skill(s) to fix: ${skills}`);
+    if (skills) lines.push(`Suggested Anti-AI Design skill(s) to fix: ${skills}`);
     return lines.join('\n');
   }
 

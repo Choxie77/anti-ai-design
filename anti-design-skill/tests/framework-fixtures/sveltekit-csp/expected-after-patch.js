@@ -5,9 +5,9 @@
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-// Dev-only allowance so anti-design live mode can load. Empty array in any
+// Dev-only allowance so anti-ai-design live mode can load. Empty array in any
 // non-development environment.
-const __antiDesignLiveDev =
+const __antiAiDesignLiveDev =
   process.env.NODE_ENV === 'development' ? ['http://localhost:8400'] : [];
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -19,10 +19,10 @@ const config = {
       mode: 'auto',
       directives: {
         'default-src': ['self'],
-        'script-src': ['self', 'unsafe-inline', ...__antiDesignLiveDev],
+        'script-src': ['self', 'unsafe-inline', ...__antiAiDesignLiveDev],
         'style-src': ['self', 'unsafe-inline'],
         'img-src': ['self', 'data:', 'blob:'],
-        'connect-src': ['self', ...__antiDesignLiveDev],
+        'connect-src': ['self', ...__antiAiDesignLiveDev],
         'frame-ancestors': ['self'],
       },
     },

@@ -17,7 +17,7 @@ use regex::Regex;
 
 /// The corpora type is shared; re-exported so `checks::html_patterns` stays
 /// one path.
-pub use anti_design_foundation::rules::html_patterns::*;
+pub use anti_ai_design_foundation::rules::html_patterns::*;
 
 macro_rules! re {
     ($name:ident, $pat:expr) => {

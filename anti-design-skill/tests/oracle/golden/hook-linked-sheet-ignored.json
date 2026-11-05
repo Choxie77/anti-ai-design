@@ -1,10 +1,10 @@
 {
-  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"[anti-design@1] Design hook scanned src/linked.html. No deterministic design-quality issues found. That does not mean the design is good: keep following the project design system and the anti-design skill guidance.\"}}",
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"[anti-ai-design@1] Design hook scanned src/linked.html. No deterministic design-quality issues found. That does not mean the design is good: keep following the project design system and the anti-ai-design skill guidance.\"}}",
   "stderr": "",
   "exit": 0,
   "signal": null,
   "files": {
-    ".anti-design/config.json": "{\n  \"detector\": {\n    \"ignoreFiles\": [\n      \"src/vendor/**\"\n    ]\n  }\n}\n",
-    ".anti-design/hook.cache.json": "{\"version\":1,\"sessions\":{\"s1\":{\"updatedAt\": <EPOCH>,\"files\":{\"<WS>/src/linked.html\":{\"editCount\":1,\"findings\":[],\"cleanAcked\":true}}}}}"
+    ".anti-ai-design/config.json": "{\n  \"detector\": {\n    \"ignoreFiles\": [\n      \"src/vendor/**\"\n    ]\n  }\n}\n",
+    ".anti-ai-design/hook.cache.json": "{\"version\":1,\"sessions\":{\"s1\":{\"updatedAt\": <EPOCH>,\"files\":{\"<WS>/src/linked.html\":{\"editCount\":1,\"findings\":[],\"cleanAcked\":true}}}}}"
   }
 }

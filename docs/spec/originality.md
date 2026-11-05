@@ -13,9 +13,9 @@ below. Everything we add, and everything user-facing that is not required to sta
 | Forked at | commit `c8891a9ae865d6ee311836ae5199bfce0fe115b1`, package version 4.8.0 (see `anti-design-skill/UPSTREAM.md`) |
 | License | Apache-2.0 (`anti-design-skill/LICENSE`) |
 | Notices | `anti-design-skill/NOTICE.md` (fork notice; also credits Anthropic's `frontend-design` skill and MIT-licensed `platform-design-skills` by ehmo for the iOS/Android reference files) |
-| Current fork name | **Anti-Design** (package `anti-design`, bin name `anti-design`; the bin name is what users type) |
+| Current fork name | **Anti-AI Design** (package `anti-ai-design`, bin name `anti-ai-design`; the bin name is what users type) |
 | Our product name | **Anti-AI Design** (the original brief). Reconcile with the fork's name: open decision, see below |
-| npm availability | `anti-design` and `anti-ai-design` were both unpublished (404) when checked on 2026-11-05; `aad` is taken |
+| npm availability | `anti-ai-design` and `anti-ai-design` were both unpublished (404) when checked on 2026-11-05; `aad` is taken |
 | Runtime | Rust engine in `crates/` (one static binary, also the detector), Node shim in `cli/`, skill sources in `skill/`, Bun build scripts in `scripts/` |
 | Rule count | upstream documents 62 detector rules; our own catalog (`docs/research/slop-catalog.md`) lists 51 candidates, to be compared in a gap analysis |
 
@@ -25,7 +25,7 @@ below. Everything we add, and everything user-facing that is not required to sta
 2. **Retain** all copyright, patent, trademark and attribution notices in source files we keep.
 3. **Mark changes.** Files we modify must carry a prominent notice that we changed them. For a rename-only
    change, `NOTICE.md` and `UPSTREAM.md` cover it; for any substantive edit, add a short "Modified by
-   Anti-Design contributors, <date>" line in the file header (or the file's comment style), and keep the
+   Anti-AI Design contributors, <date>" line in the file header (or the file's comment style), and keep the
    upstream header.
 4. **Keep the NOTICE text** in distributions and extend it when we add third-party material.
 5. **Our additions** may carry our own copyright line and can be licensed as we choose, but the
@@ -40,8 +40,8 @@ These are not code, and the license does not give us the right to present them a
 - The upstream name, logo, slash command name `/impeccable`, tagline and site identity.
 - Marketing prose, case studies (the "Neo Mirai" case), gallery and README comparison images
   (`docs/images/readme-with.webp`, `readme-without.webp`) and example sites. Replace with our own, or remove.
-- Public URLs and accounts. 220 files in the fork still hold the placeholders `github.com/OWNER/anti-design`
-  and `anti-design.example`; the engine download base points at the placeholder, so installs cannot work
+- Public URLs and accounts. 220 files in the fork still hold the placeholders `github.com/Choxie77/anti-ai-design`
+  and `github.com/Choxie77/anti-ai-design`; the engine download base points at the placeholder, so installs cannot work
   until it names a real release location.
 - Their raw captured pages in `docs/research/raw/`: private research only. They must not be published or
   packaged (keep them out of the npm `files` list).
@@ -67,7 +67,7 @@ Apache-2.0 with the original notices, and we edit them as we change behavior.
 
 ## Open decisions (waiting on the owner)
 
-1. **Product name.** Keep the fork's `anti-design` (`.anti-design/` folder, `/anti-design` command), or
+1. **Product name.** Keep the fork's `anti-ai-design` (`.anti-ai-design/` folder, `/anti-ai-design` command), or
    rename to `anti-ai-design` everywhere. A rename touches many files and generated harness folders, so it
    is a separate task.
 2. **GitHub owner and release location.** Needed to replace `OWNER` and to host engine binaries.

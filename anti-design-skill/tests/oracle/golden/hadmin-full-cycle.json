@@ -7,31 +7,31 @@
       "signal": null
     },
     {
-      "stdout": "Added \"x/**\" to local detector.ignoreFiles (.anti-design/config.local.json). Current: x/**\n",
+      "stdout": "Added \"x/**\" to local detector.ignoreFiles (.anti-ai-design/config.local.json). Current: x/**\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     },
     {
-      "stdout": "Added overused-font=inter to shared detector.ignoreValues (.anti-design/config.json).\n",
+      "stdout": "Added overused-font=inter to shared detector.ignoreValues (.anti-ai-design/config.json).\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     },
     {
-      "stdout": "Anti-Design design hook\n  state:        enabled\n  shared file:  .anti-design/config.json\n  local file:   .anti-design/config.local.json\n  ignoreRules:  side-tab\n  ignoreFiles:  x/**\n  ignoreValues: overused-font=inter\n  maxFindings:  5\n  maxChars:     8000\n  env override: unset\n  cache file:   .anti-design/hook.cache.json (not present)\n",
+      "stdout": "Anti-AI Design design hook\n  state:        enabled\n  shared file:  .anti-ai-design/config.json\n  local file:   .anti-ai-design/config.local.json\n  ignoreRules:  side-tab\n  ignoreFiles:  x/**\n  ignoreValues: overused-font=inter\n  maxFindings:  5\n  maxChars:     8000\n  env override: unset\n  cache file:   .anti-ai-design/hook.cache.json (not present)\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     },
     {
-      "stdout": "Reset design hook config and cache (removed: .anti-design/config.json, .anti-design/config.local.json).\n",
+      "stdout": "Reset design hook config and cache (removed: .anti-ai-design/config.json, .anti-ai-design/config.local.json).\n",
       "stderr": "",
       "exit": 0,
       "signal": null
     },
     {
-      "stdout": "Anti-Design design hook\n  state:        enabled\n  shared file:  .anti-design/config.json (using defaults; file not present)\n  local file:   .anti-design/config.local.json (not present)\n  ignoreRules:  (none)\n  ignoreFiles:  (none)\n  ignoreValues: (none)\n  maxFindings:  5\n  maxChars:     8000\n  env override: unset\n  cache file:   .anti-design/hook.cache.json (not present)\n",
+      "stdout": "Anti-AI Design design hook\n  state:        enabled\n  shared file:  .anti-ai-design/config.json (using defaults; file not present)\n  local file:   .anti-ai-design/config.local.json (not present)\n  ignoreRules:  (none)\n  ignoreFiles:  (none)\n  ignoreValues: (none)\n  maxFindings:  5\n  maxChars:     8000\n  env override: unset\n  cache file:   .anti-ai-design/hook.cache.json (not present)\n",
       "stderr": "",
       "exit": 0,
       "signal": null

@@ -5,17 +5,17 @@
 //! to their own file. One binary serves every harness, so both are resolved
 //! at run time:
 //!
-//! - **Skill dir**: `ANTI_DESIGN_SKILL_DIR` when set; otherwise walk up from the
+//! - **Skill dir**: `ANTI_AI_DESIGN_SKILL_DIR` when set; otherwise walk up from the
 //!   executable's path (the binary ships at `<skill>/scripts/bin/<target>/` or
-//!   is launched via `<skill>/scripts/anti-design`) until a directory holding
+//!   is launched via `<skill>/scripts/anti-ai-design`) until a directory holding
 //!   `reference/ios.md` is found. `None` when neither works (source checkouts
-//!   running `target/debug/anti-design` need the env var).
-//! - **Provider id**: `ANTI_DESIGN_PROVIDER_ID` when set; otherwise derived from
-//!   the skill dir's harness folder (`<root>/.codex/skills/anti-design` ->
+//!   running `target/debug/anti-ai-design` need the env var).
+//! - **Provider id**: `ANTI_AI_DESIGN_PROVIDER_ID` when set; otherwise derived from
+//!   the skill dir's harness folder (`<root>/.codex/skills/anti-ai-design` ->
 //!   `codex`); otherwise `source`, exactly what the JS reads in a source
 //!   checkout. The command prefix is `$` for `codex`, `/` for everything else.
 //! - **Self command**: the text a directive prints where the JS printed
-//!   `node <scripts>/<script>.mjs`. `ANTI_DESIGN_SELF` when set (the launcher
+//!   `node <scripts>/<script>.mjs`. `ANTI_AI_DESIGN_SELF` when set (the launcher
 //!   exports it), else the executable path. Printed as `<self> <verb>`.
 
 use crate::jsp;
@@ -26,11 +26,11 @@ pub const SOURCE_PROVIDER: &str = "source";
 pub struct Provider {
     pub id: String,
     pub command_prefix: String,
-    /// `<prefix>anti-design`
+    /// `<prefix>anti-ai-design`
     pub command: String,
     pub skill_dir: Option<String>,
     /// How to spell this binary in printed commands
-    /// (`anti_design_common::launcher::spell_self` of `self_raw`).
+    /// (`anti_ai_design_common::launcher::spell_self` of `self_raw`).
     pub self_cmd: String,
     /// The unquoted self path, for callers that quote it themselves.
     pub self_raw: String,
@@ -56,7 +56,7 @@ fn find_skill_dir_from(start: &str) -> Option<String> {
 }
 
 fn provider_from_skill_dir(skill_dir: &str) -> Option<&'static str> {
-    // <root>/<harness>/skills/anti-design
+    // <root>/<harness>/skills/anti-ai-design
     let skills = jsp::dirname(skill_dir);
     if jsp::basename(&skills) != "skills" {
         return None;
@@ -88,11 +88,11 @@ fn provider_from_skill_dir(skill_dir: &str) -> Option<&'static str> {
 }
 
 pub fn detect(env: &Env, cwd: &str) -> Provider {
-    let skill_dir = match env.get("ANTI_DESIGN_SKILL_DIR").filter(|v| !v.trim().is_empty()) {
+    let skill_dir = match env.get("ANTI_AI_DESIGN_SKILL_DIR").filter(|v| !v.trim().is_empty()) {
         Some(v) => Some(jsp::resolve(cwd, &[v.trim()])),
         None => exe_path().and_then(|p| find_skill_dir_from(&jsp::dirname(&p))),
     };
-    let id = match env.get("ANTI_DESIGN_PROVIDER_ID").filter(|v| !v.trim().is_empty()) {
+    let id = match env.get("ANTI_AI_DESIGN_PROVIDER_ID").filter(|v| !v.trim().is_empty()) {
         Some(v) => v.trim().to_string(),
         None => skill_dir
             .as_deref()
@@ -101,12 +101,12 @@ pub fn detect(env: &Env, cwd: &str) -> Provider {
             .to_string(),
     };
     let command_prefix = if id == "codex" { "$" } else { "/" }.to_string();
-    let command = format!("{}anti-design", command_prefix);
-    let self_raw = match env.get("ANTI_DESIGN_SELF").filter(|v| !v.trim().is_empty()) {
+    let command = format!("{}anti-ai-design", command_prefix);
+    let self_raw = match env.get("ANTI_AI_DESIGN_SELF").filter(|v| !v.trim().is_empty()) {
         Some(v) => v.trim().to_string(),
-        None => exe_path().unwrap_or_else(|| "anti-design".to_string()),
+        None => exe_path().unwrap_or_else(|| "anti-ai-design".to_string()),
     };
-    let self_cmd = anti_design_common::launcher::spell_self(&self_raw);
+    let self_cmd = anti_ai_design_common::launcher::spell_self(&self_raw);
     Provider { id, command_prefix, command, skill_dir, self_cmd, self_raw }
 }
 
@@ -131,7 +131,7 @@ mod tests {
     use super::*;
 
     fn with_self(value: &str) -> Provider {
-        let env: Env = [("ANTI_DESIGN_SELF".to_string(), value.to_string())].into_iter().collect();
+        let env: Env = [("ANTI_AI_DESIGN_SELF".to_string(), value.to_string())].into_iter().collect();
         detect(&env, "/project")
     }
 
@@ -140,14 +140,14 @@ mod tests {
         // PowerShell rejects `"<path>" <verb>` and splits an unquoted spaced
         // path; `& "<path>" <verb>` runs (#744). The raw path stays available
         // for callers that quote it themselves.
-        let p = with_self(r"C:\Users\A B\skill\scripts\anti-design.cmd");
-        assert_eq!(p.verb_cmd("context"), r"& 'C:\Users\A B\skill\scripts\anti-design.cmd' context");
-        assert_eq!(p.self_raw, r"C:\Users\A B\skill\scripts\anti-design.cmd");
+        let p = with_self(r"C:\Users\A B\skill\scripts\anti-ai-design.cmd");
+        assert_eq!(p.verb_cmd("context"), r"& 'C:\Users\A B\skill\scripts\anti-ai-design.cmd' context");
+        assert_eq!(p.self_raw, r"C:\Users\A B\skill\scripts\anti-ai-design.cmd");
     }
 
     #[test]
     fn other_spellings_are_unchanged() {
-        for value in [r"C:\skill\scripts\anti-design.cmd", "/Users/a b/skill/scripts/anti-design", "npx anti-design"] {
+        for value in [r"C:\skill\scripts\anti-ai-design.cmd", "/Users/a b/skill/scripts/anti-ai-design", "npx anti-ai-design"] {
             let p = with_self(value);
             assert_eq!(p.self_cmd, value);
             assert_eq!(p.self_raw, value);

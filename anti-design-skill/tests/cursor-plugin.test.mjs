@@ -10,8 +10,8 @@ import { collectPluginVersions } from '../scripts/lib/validate-plugin-versions.j
 import { readSourceFiles } from '../scripts/lib/utils.js';
 import { createTransformer, PROVIDERS } from '../scripts/lib/transformers/index.js';
 
-const scripts = '.cursor/skills/anti-design/scripts';
-const sample = `---\nname: anti-design\ndescription: Design\n---\nRun \`${scripts}/anti-design context\`, and \`${scripts}\` is the fallback only when the runtime reports no base directory. Windows: \`${scripts}/anti-design.cmd context\`.\n`;
+const scripts = '.cursor/skills/anti-ai-design/scripts';
+const sample = `---\nname: anti-ai-design\ndescription: Design\n---\nRun \`${scripts}/anti-ai-design context\`, and \`${scripts}\` is the fallback only when the runtime reports no base directory. Windows: \`${scripts}/anti-ai-design.cmd context\`.\n`;
 
 describe('Cursor native plugin', () => {
   let root;
@@ -21,16 +21,16 @@ describe('Cursor native plugin', () => {
     fs.writeFileSync(file, content);
   };
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-cursor-plugin-'));
-    write('.claude-plugin/plugin.json', JSON.stringify({ version: '4.2.2', homepage: 'https://anti-design.example', repository: 'https://github.com/OWNER/anti-design' }));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-cursor-plugin-'));
+    write('.claude-plugin/plugin.json', JSON.stringify({ version: '4.2.2', homepage: 'https://github.com/Choxie77/anti-ai-design', repository: 'https://github.com/Choxie77/anti-ai-design' }));
     write('scripts/lib/assets/plugin-icon.png', 'icon');
     write('docs/CURSOR-PLUGIN.md', 'Readme');
     write('LICENSE', 'license');
-    write('dist/cursor/.cursor/skills/anti-design/SKILL.md', sample);
-    write('dist/cursor/.cursor/skills/anti-design/reference/polish.md', sample);
-    write('dist/cursor/.cursor/skills/anti-design/scripts/anti-design', '#!/bin/sh\nprintf "%s\\n" "$PWD" "$1"\ncat\nexit 2\n');
-    fs.chmodSync(path.join(root, 'dist/cursor/.cursor/skills/anti-design/scripts/anti-design'), 0o755);
-    write('dist/cursor/.cursor/agents/anti-design-asset-producer.md', sample);
+    write('dist/cursor/.cursor/skills/anti-ai-design/SKILL.md', sample);
+    write('dist/cursor/.cursor/skills/anti-ai-design/reference/polish.md', sample);
+    write('dist/cursor/.cursor/skills/anti-ai-design/scripts/anti-ai-design', '#!/bin/sh\nprintf "%s\\n" "$PWD" "$1"\ncat\nexit 2\n');
+    fs.chmodSync(path.join(root, 'dist/cursor/.cursor/skills/anti-ai-design/scripts/anti-ai-design'), 0o755);
+    write('dist/cursor/.cursor/agents/anti-ai-design-asset-producer.md', sample);
   });
   afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
 
@@ -41,16 +41,16 @@ describe('Cursor native plugin', () => {
     assert.equal(manifest.skills, './skills/');
     assert.equal(manifest.agents, './agents/');
     for (const rel of [manifest.logo, manifest.hooks, 'README.md', 'LICENSE']) assert.ok(fs.existsSync(path.join(output, rel)));
-    for (const rel of ['skills/anti-design/SKILL.md', 'skills/anti-design/reference/polish.md', 'agents/anti-design-asset-producer.md']) {
+    for (const rel of ['skills/anti-ai-design/SKILL.md', 'skills/anti-ai-design/reference/polish.md', 'agents/anti-ai-design-asset-producer.md']) {
       const text = fs.readFileSync(path.join(output, rel), 'utf8');
       assert.doesNotMatch(text, /\.cursor\/skills|fallback only/);
-      assert.match(text, /"<skill-base-dir>\/scripts\/anti-design" context/);
-      assert.match(text, /& "<skill-base-dir>\/scripts\/anti-design\.cmd" context/);
-      assert.doesNotMatch(text, /& "<skill-base-dir>\/scripts\/anti-design"/);
+      assert.match(text, /"<skill-base-dir>\/scripts\/anti-ai-design" context/);
+      assert.match(text, /& "<skill-base-dir>\/scripts\/anti-ai-design\.cmd" context/);
+      assert.doesNotMatch(text, /& "<skill-base-dir>\/scripts\/anti-ai-design"/);
     }
-    assert.match(fs.readFileSync(path.join(output, 'agents/anti-design-asset-producer.md'), 'utf8'), /supplied in the handoff/);
-    assert.equal(fs.statSync(path.join(output, 'skills/anti-design/scripts/anti-design')).mode & 0o111, 0o111);
-    assert.equal(fs.readFileSync(path.join(root, 'dist/cursor/.cursor/skills/anti-design/SKILL.md'), 'utf8'), sample);
+    assert.match(fs.readFileSync(path.join(output, 'agents/anti-ai-design-asset-producer.md'), 'utf8'), /supplied in the handoff/);
+    assert.equal(fs.statSync(path.join(output, 'skills/anti-ai-design/scripts/anti-ai-design')).mode & 0o111, 0o111);
+    assert.equal(fs.readFileSync(path.join(root, 'dist/cursor/.cursor/skills/anti-ai-design/SKILL.md'), 'utf8'), sample);
     write('dist/cursor-plugin/stale.txt', 'stale');
     stageCursorPlugin(root, path.join(root, 'dist'));
     assert.equal(fs.existsSync(path.join(output, 'stale.txt')), false);
@@ -67,7 +67,7 @@ describe('Cursor native plugin', () => {
     const result = spawnSync('sh', ['-c', command], { cwd: root, input: '{"tool_name":"Edit"}\n', encoding: 'utf8' });
     assert.equal(result.status, 2, result.stderr);
     assert.equal(result.stdout, `${fs.realpathSync(root)}\nhook\n{"tool_name":"Edit"}\n`);
-    assert.match(buildCursorHooksManifest().hooks.postToolUse[0].command, /\.cursor\/skills\/anti-design/);
+    assert.match(buildCursorHooksManifest().hooks.postToolUse[0].command, /\.cursor\/skills\/anti-ai-design/);
   });
 
   it('does not add path prose to agents that do not use scripts', () => {
@@ -77,7 +77,7 @@ describe('Cursor native plugin', () => {
   it('detects version drift in both staged and tracked Cursor artifacts', () => {
     for (const prefix of ['cursor-plugin', 'dist/cursor-plugin']) {
       write(`${prefix}/.cursor-plugin/plugin.json`, JSON.stringify({ version: '0.0.1' }));
-      write(`${prefix}/skills/anti-design/SKILL.md`, '---\nversion: 0.0.1\n---\n');
+      write(`${prefix}/skills/anti-ai-design/SKILL.md`, '---\nversion: 0.0.1\n---\n');
     }
     assert.equal(collectPluginVersions(root).mismatches.length, 4);
   });
@@ -105,7 +105,7 @@ describe('Cursor native plugin', () => {
     for (const rel of fs.readdirSync(output, { recursive: true }).filter(file => file.endsWith('.md'))) {
       const filename = path.join(output, rel);
       const text = fs.readFileSync(filename, 'utf8');
-      assert.doesNotMatch(text, /\.cursor\/skills\/anti-design\/scripts|\{\{scripts_path\}\}|fallback only when/);
+      assert.doesNotMatch(text, /\.cursor\/skills\/anti-ai-design\/scripts|\{\{scripts_path\}\}|fallback only when/);
       for (const match of text.matchAll(/\]\(([^)\s]+)\)/g)) {
         if (!/^(reference|scripts)\//.test(match[1])) continue;
         assert.ok(fs.existsSync(path.resolve(path.dirname(filename), match[1].split('#')[0])), `${rel}: ${match[1]}`);
@@ -113,8 +113,8 @@ describe('Cursor native plugin', () => {
       }
     }
     assert.ok(links > 20);
-    assert.equal(fs.existsSync(path.join(output, 'skills/anti-design/scripts/bin')), false);
-    const entrypoint = fs.readFileSync(path.join(output, 'skills/anti-design/SKILL.md'), 'utf8');
-    assert.match(entrypoint, /Run `"<skill-base-dir>\/scripts\/anti-design" context` once per session/);
+    assert.equal(fs.existsSync(path.join(output, 'skills/anti-ai-design/scripts/bin')), false);
+    const entrypoint = fs.readFileSync(path.join(output, 'skills/anti-ai-design/SKILL.md'), 'utf8');
+    assert.match(entrypoint, /Run `"<skill-base-dir>\/scripts\/anti-ai-design" context` once per session/);
   });
 });

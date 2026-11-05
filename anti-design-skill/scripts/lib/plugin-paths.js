@@ -6,7 +6,7 @@ import { generateYamlFrontmatter, parseFrontmatter } from './utils.js';
  * Rewrite project-relative script paths for the plugin subtree (issue #523).
  *
  * The ./plugin subtree is a verbatim copy of the dist/claude-code output,
- * where {{scripts_path}} resolves to `.claude/skills/anti-design/scripts`,
+ * where {{scripts_path}} resolves to `.claude/skills/anti-ai-design/scripts`,
  * a path relative to the user's project. Run from the plugin cache, that
  * path points at whatever the project has installed: a plugin-only user
  * gets MODULE_NOT_FOUND, and a dual-install user silently runs the
@@ -24,8 +24,8 @@ import { generateYamlFrontmatter, parseFrontmatter } from './utils.js';
  */
 
 // The resolved {{scripts_path}} in dist/claude-code output, fixed by the
-// Claude Code transformer's configDir (.claude) + skill name (anti-design).
-export const CLAUDE_PROJECT_SCRIPTS_PATH = '.claude/skills/anti-design/scripts';
+// Claude Code transformer's configDir (.claude) + skill name (anti-ai-design).
+export const CLAUDE_PROJECT_SCRIPTS_PATH = '.claude/skills/anti-ai-design/scripts';
 
 export const PLUGIN_SCRIPTS_PATH = '${CLAUDE_SKILL_DIR}/scripts';
 
@@ -33,7 +33,7 @@ export const PLUGIN_SCRIPTS_PATH = '${CLAUDE_SKILL_DIR}/scripts';
 // declares allowed-tools; non-interactive hosts (`claude -p`) cannot provide
 // it and the skill silently degrades (issue #736). The plugin copy drops the
 // key via structured frontmatter rewrite, not regex.
-export const PROJECT_ALLOWED_TOOLS_LINE = `  - Bash(${CLAUDE_PROJECT_SCRIPTS_PATH}/anti-design *)\n`;
+export const PROJECT_ALLOWED_TOOLS_LINE = `  - Bash(${CLAUDE_PROJECT_SCRIPTS_PATH}/anti-ai-design *)\n`;
 
 function stripAllowedToolsFrontmatter(content) {
   const { frontmatter, body } = parseFrontmatter(content);
@@ -48,10 +48,10 @@ function stripAllowedToolsFrontmatter(content) {
 // fix). SKILL.md receives host substitution; references need the directory
 // resolved by the assistant, so spell out that boundary in the entrypoint.
 const SETUP_FALLBACK_TEXT =
-  'That base directory resolves every `.claude/skills/anti-design/scripts/anti-design <verb>` command in this skill and its references, ' +
-  'and `.claude/skills/anti-design/scripts` is the fallback only when the runtime reports no base directory.';
+  'That base directory resolves every `.claude/skills/anti-ai-design/scripts/anti-ai-design <verb>` command in this skill and its references, ' +
+  'and `.claude/skills/anti-ai-design/scripts` is the fallback only when the runtime reports no base directory.';
 const SETUP_PLUGIN_TEXT =
-  'Every `"${CLAUDE_SKILL_DIR}/scripts/anti-design" <verb>` command in this skill and its references resolves against that base directory. ' +
+  'Every `"${CLAUDE_SKILL_DIR}/scripts/anti-ai-design" <verb>` command in this skill and its references resolves against that base directory. ' +
   'In reference files, replace the skill-base-dir placeholder with this directory before running commands; it is not a shell variable.';
 
 // Agent files are subagent system prompts: a spawned agent never loads
@@ -65,7 +65,7 @@ const SETUP_PLUGIN_TEXT =
 // rather than rewritten.) Grok Build reads this same subtree with its own
 // substitution behavior, so the embed instruction carries a sidecar
 // fallback for any harness that hands the agent the unexpanded literal.
-export const PLUGIN_AGENT_SCRIPTS_PATH = '${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts';
+export const PLUGIN_AGENT_SCRIPTS_PATH = '${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts';
 
 // Appended as its own sentence after the agent's embed instruction so
 // behavior is defined even where the variable reaches the agent
@@ -92,18 +92,18 @@ export function rewritePluginMarkdown(content, { isSkillEntrypoint = true } = {}
     // carries natively (Setup step 1). Runs after the path replacement so
     // one pattern covers both origins; already-quoted forms don't match.
     .replace(/node (\$\{CLAUDE_SKILL_DIR\}|<skill-base-dir>)\/scripts\/([^\s`"]+)/g, 'node "$1/scripts/$2"')
-    // The engine launcher is the command itself (`${CLAUDE_SKILL_DIR}/scripts/anti-design <verb>`,
-    // or `anti-design.cmd` on a Windows shell without sh), so the launcher path
+    // The engine launcher is the command itself (`${CLAUDE_SKILL_DIR}/scripts/anti-ai-design <verb>`,
+    // or `anti-ai-design.cmd` on a Windows shell without sh), so the launcher path
     // is what gets quoted; the verb and its arguments follow unquoted.
     .replace(
-      /(?<!["\w/])(\$\{CLAUDE_SKILL_DIR\}|<skill-base-dir>)\/scripts\/anti-design(\.cmd)?(?=[\s`])/g,
+      /(?<!["\w/])(\$\{CLAUDE_SKILL_DIR\}|<skill-base-dir>)\/scripts\/anti-ai-design(\.cmd)?(?=[\s`])/g,
       (_, dir, cmd) => quoteLauncher(dir, Boolean(cmd)),
     );
 }
 
 /**
  * Spell a quoted launcher path as a command (issue #744). The sh launcher is
- * `"<dir>/scripts/anti-design"`. The `.cmd` launcher also gets PowerShell's call
+ * `"<dir>/scripts/anti-ai-design"`. The `.cmd` launcher also gets PowerShell's call
  * operator: PowerShell parses a quoted string followed by an argument as an
  * expression and fails with `Unexpected token 'context'`, so `& "…"` is the
  * only quoted form that runs there. The `&` is safe because the `.cmd` spelling
@@ -112,7 +112,7 @@ export function rewritePluginMarkdown(content, { isSkillEntrypoint = true } = {}
  * quotes launcher paths (plugin, VS Code, Cursor plugin).
  */
 export function quoteLauncher(dir, windowsCmd = false) {
-  return windowsCmd ? `& "${dir}/scripts/anti-design.cmd"` : `"${dir}/scripts/anti-design"`;
+  return windowsCmd ? `& "${dir}/scripts/anti-ai-design.cmd"` : `"${dir}/scripts/anti-ai-design"`;
 }
 
 /**
@@ -125,14 +125,14 @@ export function rewritePluginAgentMarkdown(content) {
   return content
     .replaceAll(CLAUDE_PROJECT_SCRIPTS_PATH, PLUGIN_AGENT_SCRIPTS_PATH)
     .replace(
-      /node \$\{CLAUDE_PLUGIN_ROOT\}\/skills\/anti-design\/scripts\/([^\s`"]+)/g,
-      'node "${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/$1"',
+      /node \$\{CLAUDE_PLUGIN_ROOT\}\/skills\/anti-ai-design\/scripts\/([^\s`"]+)/g,
+      'node "${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/$1"',
     )
     // Anchors on the command this rewrite just produced plus the rest of
     // its sentence, so the fallback lands as the following sentence rather
     // than splicing into the middle of one.
     .replace(
-      /(`node "\$\{CLAUDE_PLUGIN_ROOT\}\/skills\/anti-design\/scripts\/embed-prompt\.mjs"[^`]*`[^.]*\.)/g,
+      /(`node "\$\{CLAUDE_PLUGIN_ROOT\}\/skills\/anti-ai-design\/scripts\/embed-prompt\.mjs"[^`]*`[^.]*\.)/g,
       `$1${AGENT_EMBED_FALLBACK}`,
     );
 }
@@ -178,9 +178,9 @@ export function verifyPluginSkillRewrite(skillMdPath) {
       'scripts/lib/plugin-paths.js (issue #523); update SETUP_FALLBACK_TEXT to the new wording.',
     );
   }
-  if (/(?<!& )"\$\{CLAUDE_SKILL_DIR\}\/scripts\/anti-design\.cmd"/.test(content)) {
+  if (/(?<!& )"\$\{CLAUDE_SKILL_DIR\}\/scripts\/anti-ai-design\.cmd"/.test(content)) {
     throw new Error(
-      `Plugin rewrite drift: ${skillMdPath} quotes the anti-design.cmd launcher without PowerShell's ` +
+      `Plugin rewrite drift: ${skillMdPath} quotes the anti-ai-design.cmd launcher without PowerShell's ` +
       'call operator. A quoted path followed by a verb fails to parse in PowerShell (issue #744); ' +
       'every quoted .cmd spelling must go through quoteLauncher in scripts/lib/plugin-paths.js.',
     );
@@ -199,7 +199,7 @@ export function verifyPluginSkillRewrite(skillMdPath) {
       'the skill (issue #736); update the removal in scripts/lib/plugin-paths.js.',
     );
   }
-  if (/Bash\((?:node |[^)]*scripts\/anti-design)/.test(content)) {
+  if (/Bash\((?:node |[^)]*scripts\/anti-ai-design)/.test(content)) {
     throw new Error(
       `Plugin rewrite drift: ${skillMdPath} still pre-approves an engine launcher or node script path. ` +
       'A stray Bash(...) entry survived the allowed-tools removal in ' +

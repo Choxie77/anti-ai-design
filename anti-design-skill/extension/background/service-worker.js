@@ -1,5 +1,5 @@
 /**
- * Anti-Design DevTools Extension - Service Worker
+ * Anti-AI Design DevTools Extension - Service Worker
  *
  * Routes messages between popup, DevTools panel, and content scripts.
  * Maintains per-tab state and updates the badge. Also owns the offscreen
@@ -62,7 +62,7 @@ async function prepareRuleCore(tabId, scanId) {
 }
 
 function cancelTabScans(tabId) {
-  return chrome.runtime.sendMessage({ target: 'anti-design-offscreen', action: 'scan-cancel-tab', tabId }).catch(() => {});
+  return chrome.runtime.sendMessage({ target: 'anti-ai-design-offscreen', action: 'scan-cancel-tab', tabId }).catch(() => {});
 }
 
 function updateBadge(tabId) {
@@ -103,7 +103,7 @@ async function getSettings() {
     disabledRules: [],
     lineLengthMode: 'strict', // 'strict' = 80, 'lax' = 120
     spotlightBlur: true,      // dim/blur the page on hover-highlight
-    autoScan: 'panel',        // 'panel' = scan when Anti-Design UI opens, 'devtools' = scan when DevTools opens
+    autoScan: 'panel',        // 'panel' = scan when Anti-AI Design UI opens, 'devtools' = scan when DevTools opens
   });
 }
 
@@ -142,9 +142,9 @@ async function ensureOffscreenDocument() {
       // Firefox's getContexts exists, but OFFSCREEN_DOCUMENT is not a valid
       // context type there. Do not call it on this path.
       if (typeof document === 'undefined') throw new Error('No supported rule-core document host');
-      if (!document.getElementById('anti-design-core')) {
+      if (!document.getElementById('anti-ai-design-core')) {
         const frame = document.createElement('iframe');
-        frame.id = 'anti-design-core';
+        frame.id = 'anti-ai-design-core';
         frame.hidden = true;
         frame.src = chrome.runtime.getURL(OFFSCREEN_URL);
         document.body.appendChild(frame);
@@ -153,7 +153,7 @@ async function ensureOffscreenDocument() {
     // Wait for the core to be instantiated so the first scan does not race it.
     for (let attempt = 0; attempt < 50; attempt++) {
       try {
-        const r = await chrome.runtime.sendMessage({ target: 'anti-design-offscreen', action: 'ping' });
+        const r = await chrome.runtime.sendMessage({ target: 'anti-ai-design-offscreen', action: 'ping' });
         if (r && r.ok) return true;
         if (r && r.error) throw new Error(r.error);
       } catch (err) {
@@ -222,7 +222,7 @@ async function sendScanToTab(tabId) {
     let url = '';
     try { url = (await chrome.tabs.get(tabId))?.url || ''; } catch { /* tab gone */ }
     const message = url.startsWith('file:')
-      ? 'Can’t scan local files. Enable “Allow access to file URLs” for Anti-Design in chrome://extensions.'
+      ? 'Can’t scan local files. Enable “Allow access to file URLs” for Anti-AI Design in chrome://extensions.'
       : `Couldn’t scan this page${error ? `: ${error}` : '.'}`;
     reportScanFailure(tabId, message, scanId);
     return;
@@ -247,7 +247,7 @@ async function sendScanToTab(tabId) {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Content script <-> offscreen document traffic (snapshots, facts, results)
   // is addressed to the offscreen document; it answers, this worker stays out.
-  if (msg && msg.target === 'anti-design-offscreen') return false;
+  if (msg && msg.target === 'anti-ai-design-offscreen') return false;
 
   const tabId = msg.tabId || sender.tab?.id;
 
@@ -351,8 +351,8 @@ async function tearDownTab(tabId) {
 // Handle long-lived connections from DevTools pages and panels
 chrome.runtime.onConnect.addListener((port) => {
   // Lifecycle port from devtools.js -- tracks DevTools open/close
-  if (port.name.startsWith('anti-design-devtools-')) {
-    const tabId = parseInt(port.name.replace('anti-design-devtools-', ''), 10);
+  if (port.name.startsWith('anti-ai-design-devtools-')) {
+    const tabId = parseInt(port.name.replace('anti-ai-design-devtools-', ''), 10);
     devtoolsTabs.add(tabId);
 
     port.onMessage.addListener((msg) => {
@@ -368,8 +368,8 @@ chrome.runtime.onConnect.addListener((port) => {
   }
 
   // Panel port from panel.js -- for forwarding findings/state
-  if (port.name.startsWith('anti-design-panel-')) {
-    const tabId = parseInt(port.name.replace('anti-design-panel-', ''), 10);
+  if (port.name.startsWith('anti-ai-design-panel-')) {
+    const tabId = parseInt(port.name.replace('anti-ai-design-panel-', ''), 10);
     if (!panelPorts.has(tabId)) panelPorts.set(tabId, new Set());
     panelPorts.get(tabId).add(port);
 
@@ -401,10 +401,10 @@ chrome.runtime.onConnect.addListener((port) => {
   }
 
   // Sidebar pane port (Elements panel sidebar) -- receives findings updates.
-  // Connecting the sidebar is a strong signal of "user engaged with Anti-Design"
+  // Connecting the sidebar is a strong signal of "user engaged with Anti-AI Design"
   // so we trigger a scan if no findings exist yet (matches the panel port behavior).
-  if (port.name.startsWith('anti-design-sidebar-')) {
-    const tabId = parseInt(port.name.replace('anti-design-sidebar-', ''), 10);
+  if (port.name.startsWith('anti-ai-design-sidebar-')) {
+    const tabId = parseInt(port.name.replace('anti-ai-design-sidebar-', ''), 10);
     if (!panelPorts.has(tabId)) panelPorts.set(tabId, new Set());
     panelPorts.get(tabId).add(port);
 

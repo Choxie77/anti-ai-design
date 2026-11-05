@@ -31,14 +31,14 @@ const COMPONENTS = {
     tagPrefix: 'skill-v',
     label: 'Skill',
     changelogLabel: 'v',
-    // The skill's launcher and `anti-design install` dead-end without the engine
+    // The skill's launcher and `anti-ai-design install` dead-end without the engine
     // release for the pinned ENGINE_VERSION. Enforce release order (D4).
     engineGated: true,
     buildCmd: 'bun run build:release',
     artifacts: ['dist/universal.zip'],
     postReleaseHint: null,
-    tweetHeader: (v) => `Anti-Design v${v} is out.`,
-    tweetCta: 'Install / update: npx anti-design install',
+    tweetHeader: (v) => `Anti-AI Design v${v} is out.`,
+    tweetCta: 'Install / update: npx anti-ai-design install',
   },
   cli: {
     manifest: 'package.json',
@@ -47,13 +47,13 @@ const COMPONENTS = {
     changelogLabel: 'CLI v',
     // The npm shim resolves the engine binary through the @anti-ai-design/cli-<os>-<arch>
     // platform packages (pinned at ENGINE_VERSION) and the dist channel; publishing
-    // it before those exist strands `npx anti-design`. Enforce release order (D4).
+    // it before those exist strands `npx anti-ai-design`. Enforce release order (D4).
     engineGated: true,
     buildCmd: null,
     artifacts: [],
     postReleaseHint: 'Run `npm publish` next to push the package to the npm registry.',
-    tweetHeader: (v) => `Anti-Design CLI v${v} is out.`,
-    tweetCta: 'npm i -g anti-design',
+    tweetHeader: (v) => `Anti-AI Design CLI v${v} is out.`,
+    tweetCta: 'npm i -g anti-ai-design',
   },
   extension: {
     manifest: 'extension/manifest.json',
@@ -67,7 +67,7 @@ const COMPONENTS = {
     artifacts: ['dist/extension.zip', 'dist/extension-firefox.zip'],
     postReleaseHint:
       'Upload `dist/extension.zip` to the Chrome Web Store dashboard, and `dist/extension-firefox.zip` to addons.mozilla.org (AMO), to publish.',
-    tweetHeader: (v) => `Anti-Design browser extension v${v} is out.`,
+    tweetHeader: (v) => `Anti-AI Design browser extension v${v} is out.`,
     tweetCta: null,
   },
   engine: {
@@ -138,7 +138,7 @@ if (cfg.sibling) {
 // It runs before the asset probe below. The local tag must be origin's, the one
 // CI built from, or the diff would compare against the wrong tree. Diffing
 // against the working tree (not HEAD) counts tracked uncommitted edits too. Set
-// ANTI_DESIGN_SKIP_ENGINE_SOURCE_CHECK=1 only when the changes cannot reach the
+// ANTI_AI_DESIGN_SKIP_ENGINE_SOURCE_CHECK=1 only when the changes cannot reach the
 // shipped binary, such as test-only edits under crates/. The paths outside the
 // workspace are the files the crates compile in with include_str! or
 // include_bytes!; tests/release.test.mjs fails when one is missing here.
@@ -150,7 +150,7 @@ const ENGINE_SOURCE_PATHS = [
   'ui/component-review/theme.css', 'ui/component-review/fonts',
   'ui/component-review/vendor/*.css', 'ui/component-review/vendor/instrument-strip.js',
 ];
-if (cfg.engineGated && process.env.ANTI_DESIGN_SKIP_ENGINE_SOURCE_CHECK !== '1') {
+if (cfg.engineGated && process.env.ANTI_AI_DESIGN_SKIP_ENGINE_SOURCE_CHECK !== '1') {
   const engineTag = `engine-v${readEngineVersion(repoRoot)}`;
   step(`Verifying engine source is unchanged since ${engineTag}`);
   const originTag = run(`git ls-remote --tags origin "refs/tags/${engineTag}"`).split('\t')[0];
@@ -176,16 +176,16 @@ if (cfg.engineGated && process.env.ANTI_DESIGN_SKIP_ENGINE_SOURCE_CHECK !== '1')
   }
   ok(`engine source unchanged since ${engineTag}`);
 } else if (cfg.engineGated) {
-  step('Skipping engine source guard (ANTI_DESIGN_SKIP_ENGINE_SOURCE_CHECK=1)');
+  step('Skipping engine source guard (ANTI_AI_DESIGN_SKIP_ENGINE_SOURCE_CHECK=1)');
 }
 
 // Release-order guard (triage decision D4). Engine-gated components refuse to
 // tag/publish until the engine release for the pinned ENGINE_VERSION is fully
 // live: the five engine-v<version> release binaries + .sha256 and the five @anti-ai-design/cli-<os>-<arch>
 // npm platform packages. Without this the launcher, the npm shim, and
-// `anti-design install` all dead-end. Set ANTI_DESIGN_SKIP_ENGINE_CHECK=1 only
+// `anti-ai-design install` all dead-end. Set ANTI_AI_DESIGN_SKIP_ENGINE_CHECK=1 only
 // when you know the assets exist and the registry probe is unreachable.
-if (cfg.engineGated && process.env.ANTI_DESIGN_SKIP_ENGINE_CHECK !== '1') {
+if (cfg.engineGated && process.env.ANTI_AI_DESIGN_SKIP_ENGINE_CHECK !== '1') {
   const engineVersion = readEngineVersion(repoRoot);
   step(`Verifying engine v${engineVersion} release assets are published (D4 release-order guard)`);
   const result = await checkEngineRelease({ version: engineVersion });
@@ -201,7 +201,7 @@ if (cfg.engineGated && process.env.ANTI_DESIGN_SKIP_ENGINE_CHECK !== '1') {
   }
   ok(`engine v${engineVersion} release assets all present`);
 } else if (cfg.engineGated) {
-  step('Skipping engine release-order guard (ANTI_DESIGN_SKIP_ENGINE_CHECK=1)');
+  step('Skipping engine release-order guard (ANTI_AI_DESIGN_SKIP_ENGINE_CHECK=1)');
 }
 
 const tag = `${cfg.tagPrefix}${version}`;
@@ -251,15 +251,15 @@ if (remoteTags.split('\n').some((line) => line.endsWith(`refs/tags/${tag}`))) {
 ok('tag is free');
 
 step(`Extracting changelog entry for "${cfg.changelogLabel}${version}"`);
-// The site (and its changelog) lives in the private anti-design-site repo;
+// The site (and its changelog) lives in the private anti-ai-design-site repo;
 // fall back to a sibling checkout when releasing from the public repo.
 const changelogCandidates = [
   path.join(repoRoot, 'site/pages/changelog.astro'),
-  path.join(repoRoot, '..', 'anti-design-site', 'site/pages/changelog.astro'),
+  path.join(repoRoot, '..', 'anti-ai-design-site', 'site/pages/changelog.astro'),
 ];
 const changelogSource = changelogCandidates.find(p => existsSync(p));
 if (!changelogSource) {
-  fail('No changelog source found. This script reads release notes from site/pages/changelog.astro (or ../anti-design-site/site/pages/changelog.astro), and neither exists in this checkout. Add one, or publish through .github/workflows/release.yml (tag v<version>), which generates its own notes.');
+  fail('No changelog source found. This script reads release notes from site/pages/changelog.astro (or ../anti-ai-design-site/site/pages/changelog.astro), and neither exists in this checkout. Add one, or publish through .github/workflows/release.yml (tag v<version>), which generates its own notes.');
 }
 const changelogHtml = readFileSync(changelogSource, 'utf8');
 const expectedHeader = `<span class="cf-version">${cfg.changelogLabel}${version}</span>`;
@@ -355,26 +355,26 @@ try {
 
 console.log(`\n✓ ${cfg.label} ${version} released as ${tag}`);
 
-// npx anti-design install/update serve the version named by anti-design-site's
+// npx anti-ai-design install/update serve the version named by anti-ai-design-site's
 // published-skill.json, a signed pointer that never follows this release on
 // its own. Redeploying alone republishes the old pointer. Warn loudly when the
 // served version lags so a release never silently strands update users on old
 // content again (the 4.0.0 release did exactly that).
 if (component === 'skill' && !dryRun) {
   try {
-    const res = await fetch('https://anti-design.example/api/version');
+    const res = await fetch('https://github.com/Choxie77/anti-ai-design/api/version');
     const served = (await res.json()).skills;
     if (served === version) {
-      console.log(`✓ anti-design.example serves ${served}`);
+      console.log(`✓ github.com/Choxie77/anti-ai-design serves ${served}`);
     } else {
-      console.log(`\n⚠ anti-design.example still serves ${served}, not ${version}.`);
-      console.log('  npx anti-design install/update serve the OLD version until the site\'s signed pointer moves.');
-      console.log(`  In anti-design-site, on a branch from main: bun run skill:publish-pointer ${version}`);
+      console.log(`\n⚠ github.com/Choxie77/anti-ai-design still serves ${served}, not ${version}.`);
+      console.log('  npx anti-ai-design install/update serve the OLD version until the site\'s signed pointer moves.');
+      console.log(`  In anti-ai-design-site, on a branch from main: bun run skill:publish-pointer ${version}`);
       console.log('  Commit published-skill.json and merge it to main; the main deploy then serves the new version.');
       console.log('  If the pointer already names this version, check the site\'s main deploy: wait if it is running, fix it if it failed.');
     }
   } catch {
-    console.log('⚠ could not reach anti-design.example/api/version to verify the served bundle');
+    console.log('⚠ could not reach github.com/Choxie77/anti-ai-design/api/version to verify the served bundle');
   }
 }
 if (cfg.postReleaseHint) {
@@ -382,7 +382,7 @@ if (cfg.postReleaseHint) {
 }
 
 const tweet = renderTweet(cfg, version, entryHtml, tag);
-console.log(`\n--- Tweet (${tweet.length}/${TWEET_LIMIT} chars) for @anti_design_ai ---`);
+console.log(`\n--- Tweet (${tweet.length}/${TWEET_LIMIT} chars) for @anti_ai_design_ai ---`);
 console.log(tweet);
 console.log('--- end tweet ---');
 
@@ -468,8 +468,7 @@ async function releaseEngine() {
 
   step('Checking package.json optionalDependencies pin the same engine version');
   const pkg = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
-  // Any scope: package.json still names the legacy scope until the rename pass
-  // (see LEGACY_NPM_SCOPE in fetch-engine.mjs); the version is what must agree.
+  // Any scope is accepted here; the version is what must agree.
   const pins = Object.entries(pkg.optionalDependencies || {}).filter(([name]) => /^@[^/]+\/cli-/.test(name));
   const wrong = pins.filter(([, range]) => String(range).replace(/^[^\d]*/, '') !== version);
   if (wrong.length) fail(`package.json pins ${wrong.map(([n, r]) => `${n}@${r}`).join(', ')}; expected ${version}. Bump them with ENGINE_VERSION.`);

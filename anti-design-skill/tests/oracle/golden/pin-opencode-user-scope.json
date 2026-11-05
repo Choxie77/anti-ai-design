@@ -1,10 +1,10 @@
 {
-  "stdout": "  + <WS>/oc-config/commands/anti-design-polish.md\n\nPinned 'polish' as a standalone shortcut in 1 location(s).\nUse the pinned command directly in each harness.\n",
+  "stdout": "  + <WS>/oc-config/commands/anti-ai-design-polish.md\n\nPinned 'polish' as a standalone shortcut in 1 location(s).\nUse the pinned command directly in each harness.\n",
   "stderr": "",
   "exit": 0,
   "signal": null,
   "files": {
-    "oc-config/commands/anti-design-polish.md": "---\ndescription: \"Performs a final quality pass fixing alignment, spacing, consistency, and micro-detail issues before shipping. Use when the user mentions polish, finishing touches, pre-launch review, something looks off, or wants to go from good to great.\"\nagent: build\nsubtask: true\n---\n\n<!-- anti-design-pinned-command -->\n\nLoad the `anti-design` skill via the skill tool (name: \"anti-design\"), then run `<skill-base-dir>/scripts/anti-design context`, then load `<skill-base-dir>/reference/polish.md` and follow it. `<skill-base-dir>` is the skill's base directory as reported by the skill tool response; substitute the actual absolute path before running or reading anything.\n\n$ARGUMENTS\n",
-    "oc-config/skills/anti-design/SKILL.md": "---\nname: anti-design\n---\n"
+    "oc-config/commands/anti-ai-design-polish.md": "---\ndescription: \"Performs a final quality pass fixing alignment, spacing, consistency, and micro-detail issues before shipping. Use when the user mentions polish, finishing touches, pre-launch review, something looks off, or wants to go from good to great.\"\nagent: build\nsubtask: true\n---\n\n<!-- anti-ai-design-pinned-command -->\n\nLoad the `anti-ai-design` skill via the skill tool (name: \"anti-ai-design\"), then run `<skill-base-dir>/scripts/anti-ai-design context`, then load `<skill-base-dir>/reference/polish.md` and follow it. `<skill-base-dir>` is the skill's base directory as reported by the skill tool response; substitute the actual absolute path before running or reading anything.\n\n$ARGUMENTS\n",
+    "oc-config/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\n---\n"
   }
 }

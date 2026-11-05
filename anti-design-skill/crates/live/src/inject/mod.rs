@@ -129,7 +129,7 @@ pub struct SourceTraits {
     pub inject_script_attrs: &'static str,
 }
 
-const DEFAULT_STYLE_TAG: &str = "<style data-anti-design-css=\"SESSION_ID\">";
+const DEFAULT_STYLE_TAG: &str = "<style data-anti-ai-design-css=\"SESSION_ID\">";
 
 /// JS: resolveSourceTraits(filePath)
 pub fn resolve_source_traits(file_path: &str) -> SourceTraits {
@@ -154,7 +154,7 @@ pub fn resolve_source_traits(file_path: &str) -> SourceTraits {
             // Vue's template compiler drops a `<style>` element inside
             // `<template>` (a hard transform error under plugin-vue 6);
             // `<component is="style">` renders as the same element.
-            style_tag: "<component is=\"style\" data-anti-design-css=\"SESSION_ID\">",
+            style_tag: "<component is=\"style\" data-anti-ai-design-css=\"SESSION_ID\">",
             style_close: "</component>",
             ..base
         },
@@ -166,7 +166,7 @@ pub fn resolve_source_traits(file_path: &str) -> SourceTraits {
         ".astro" => SourceTraits {
             framework: Some(FrameworkName::Astro),
             style_mode: "astro-global-prefixed",
-            style_tag: "<style is:inline data-anti-design-css=\"SESSION_ID\">",
+            style_tag: "<style is:inline data-anti-ai-design-css=\"SESSION_ID\">",
             inject_script_attrs: "is:inline ",
             ..base
         },

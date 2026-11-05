@@ -6,14 +6,14 @@
 //! the browser our discovery finds, so Chrome-version drift cannot explain a
 //! difference) and diffs the JSON. It skips cleanly when any prerequisite is
 //! missing: the public repo checkout, `node`, puppeteer in its node_modules,
-//! an installed browser, or the built `anti-design` binary.
+//! an installed browser, or the built `anti-ai-design` binary.
 //!
 //! Env:
-//! - `ANTI_DESIGN_PUBLIC_REPO` - repo root override (default: this workspace).
-//! - `ANTI_DESIGN_BIN` — the Rust binary (default `target/debug/anti-design`).
-//! - `ANTI_DESIGN_DIFF_ALL=1` — single-URL mode over every fixture (slow,
+//! - `ANTI_AI_DESIGN_PUBLIC_REPO` - repo root override (default: this workspace).
+//! - `ANTI_AI_DESIGN_BIN` — the Rust binary (default `target/debug/anti-ai-design`).
+//! - `ANTI_AI_DESIGN_DIFF_ALL=1` — single-URL mode over every fixture (slow,
 //!   ~3 s per fixture per side); default is a fixed subset.
-//! - `ANTI_DESIGN_DIFF_BUNDLED=1` — let puppeteer use its bundled Chrome
+//! - `ANTI_AI_DESIGN_DIFF_BUNDLED=1` — let puppeteer use its bundled Chrome
 //!   instead of the discovered one.
 
 use std::collections::HashMap;
@@ -32,7 +32,7 @@ fn workspace_root() -> PathBuf {
 }
 
 fn public_repo() -> Option<PathBuf> {
-    let p = match std::env::var("ANTI_DESIGN_PUBLIC_REPO") {
+    let p = match std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO") {
         Ok(p) => PathBuf::from(p),
         Err(_) => workspace_root(),
     };
@@ -208,7 +208,7 @@ fn compare(label: &str, js: &Run, rs: &Run, report: &mut Vec<String>) -> bool {
 #[test]
 fn url_engine_matches_js() {
     let Some(repo) = public_repo() else {
-        eprintln!("skip: public repo not found (set ANTI_DESIGN_PUBLIC_REPO)");
+        eprintln!("skip: public repo not found (set ANTI_AI_DESIGN_PUBLIC_REPO)");
         return;
     };
     let Some(node) = find_on_path("node") else {
@@ -229,16 +229,16 @@ fn url_engine_matches_js() {
         return;
     }
     let env: HashMap<String, String> = std::env::vars().collect();
-    let Ok(browser) = anti_design_browser::discovery::find_browser(&env) else {
+    let Ok(browser) = anti_ai_design_browser::discovery::find_browser(&env) else {
         eprintln!("skip: no installed browser found");
         return;
     };
-    let bin = std::env::var("ANTI_DESIGN_BIN")
+    let bin = std::env::var("ANTI_AI_DESIGN_BIN")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| workspace_root().join("target/debug/anti-design"));
+        .unwrap_or_else(|_| workspace_root().join("target/debug/anti-ai-design"));
     if !bin.exists() {
         eprintln!(
-            "skip: {} missing (cargo build -p anti-design, or set ANTI_DESIGN_BIN)",
+            "skip: {} missing (cargo build -p anti-ai-design, or set ANTI_AI_DESIGN_BIN)",
             bin.display()
         );
         return;
@@ -253,7 +253,7 @@ fn url_engine_matches_js() {
     names.sort();
     let port = serve_dir(fixtures.clone());
     let base = format!("http://127.0.0.1:{port}/");
-    let bundled = std::env::var("ANTI_DESIGN_DIFF_BUNDLED").ok().as_deref() == Some("1");
+    let bundled = std::env::var("ANTI_AI_DESIGN_DIFF_BUNDLED").ok().as_deref() == Some("1");
 
     let js_cmd = |args: &[String]| {
         let mut c = Command::new(&node);
@@ -289,7 +289,7 @@ fn url_engine_matches_js() {
     );
 
     // 2. Single-URL mode (networkidle0): a subset by default.
-    let all = std::env::var("ANTI_DESIGN_DIFF_ALL").ok().as_deref() == Some("1");
+    let all = std::env::var("ANTI_AI_DESIGN_DIFF_ALL").ok().as_deref() == Some("1");
     let subset: Vec<String> = if all {
         names.clone()
     } else {

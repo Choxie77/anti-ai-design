@@ -1,4 +1,4 @@
-//! JS: live-server.mjs -> `anti-design live-server`. The live variant mode
+//! JS: live-server.mjs -> `anti-ai-design live-server`. The live variant mode
 //! helper server: `/live.js`, SSE push, browser events, agent long-poll,
 //! manual copy-edit routes; plus the `stop`, `--background`, and `--help`
 //! branches.
@@ -33,7 +33,7 @@ use crate::svelte_component::{
 };
 use crate::svelte_sessions::apply_deferred_svelte_component_accepts;
 use crate::util::{exists, jsp, println, read_dir_names_raw, safe_read, Env};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{json, Map, Value};
 use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -50,10 +50,10 @@ static SIGNALED: AtomicBool = AtomicBool::new(false);
 /// JS: `process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown)`
 /// (Ctrl-C / console close on Windows).
 fn install_signal_handlers() {
-    anti_design_common::proc::on_interrupt(&SIGNALED);
+    anti_ai_design_common::proc::on_interrupt(&SIGNALED);
 }
 
-const HELP: &str = "Usage: anti-design live-server [options]
+const HELP: &str = "Usage: anti-ai-design live-server [options]
 
 Start the live variant mode server (zero dependencies).
 
@@ -146,7 +146,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
                 "Live server already running on port {} (pid {}).\n",
                 port, pid
             ));
-            let self_cmd = anti_design_context::provider::detect(&env, &cwd).self_cmd;
+            let self_cmd = anti_ai_design_context::provider::detect(&env, &cwd).self_cmd;
             io.err(&format!(
                 "Stop it first with: {} live-server stop\n",
                 self_cmd
@@ -160,7 +160,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
     let store = create_live_session_store(&cwd, &env, None);
     let (log_tx, log_rx) = channel::<(bool, String)>();
     let debug_events = env
-        .get("ANTI_DESIGN_LIVE_DEBUG_EVENTS")
+        .get("ANTI_AI_DESIGN_LIVE_DEBUG_EVENTS")
         .map(|v| matches!(v.to_ascii_lowercase().as_str(), "1" | "true" | "yes"))
         .unwrap_or(false);
     let detect_script = load_detect_script(&env, &cwd);
@@ -222,7 +222,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
         let failed = deferred.get("failed").and_then(|v| v.as_u64()).unwrap_or(0);
         if applied > 0 || failed > 0 {
             io.out(&format!(
-                "[anti-design] applied legacy deferred Svelte component accepts: {}\n",
+                "[anti-ai-design] applied legacy deferred Svelte component accepts: {}\n",
                 serde_json::to_string(&deferred).unwrap_or_default()
             ));
         }
@@ -242,7 +242,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             .unwrap_or(0);
         if removed_n > 0 || sweep.get("removedRoot") == Some(&Value::Bool(true)) {
             io.out(&format!(
-                "[anti-design] swept orphaned Svelte component sessions: {}\n",
+                "[anti-ai-design] swept orphaned Svelte component sessions: {}\n",
                 serde_json::to_string(&sweep).unwrap_or_default()
             ));
         }
@@ -256,7 +256,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
                     continue;
                 }
                 let file = jsp::join(&[&receipts, &name]);
-                let mtime = anti_design_context::util::mtime_ms(&file);
+                let mtime = anti_ai_design_context::util::mtime_ms(&file);
                 match mtime {
                     Some(m) if m >= cutoff => continue,
                     None => continue,
@@ -268,7 +268,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             }
             if removed > 0 {
                 io.out(&format!(
-                    "[anti-design] removed {} accept receipt(s) older than 14 days\n",
+                    "[anti-ai-design] removed {} accept receipt(s) older than 14 days\n",
                     removed
                 ));
             }
@@ -282,7 +282,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
     let listener = match port_arg {
         Some(a) => {
             let raw = a.splitn(2, '=').nth(1).unwrap_or("");
-            let p = anti_design_core::js::parse_int(raw, 10);
+            let p = anti_ai_design_core::js::parse_int(raw, 10);
             let port = if p.is_nan() { 0u16 } else { p as u16 };
             match TcpListener::bind(("127.0.0.1", port)) {
                 Ok(l) => l,
@@ -332,11 +332,11 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
         &json!({ "pid": std::process::id(), "port": port, "token": token }),
     );
     let url = format!("http://localhost:{}", port);
-    io.out(&format!("\nAntiDesign live server running on {}\n", url));
+    io.out(&format!("\nAntiAiDesign live server running on {}\n", url));
     io.out(&format!("Token: {}\n\n", token));
     io.out(&format!("Script: {}/live.js\n", url));
-    io.out("Inject: managed by anti-design live-inject; Astro source tags use is:inline automatically.\n");
-    io.out("Stop:   anti-design live-server stop\n");
+    io.out("Inject: managed by anti-ai-design live-inject; Astro source tags use is:inline automatically.\n");
+    io.out("Stop:   anti-ai-design live-server stop\n");
     let _ = std::io::Write::flush(&mut io.stdout);
 
     // Accept loop. Tickets are issued here, in accept order, so handlers can
@@ -410,7 +410,7 @@ fn js_display(v: &Value) -> String {
         Value::Bool(b) => b.to_string(),
         Value::Number(n) => n
             .as_f64()
-            .map(anti_design_context::util::js_number_to_string)
+            .map(anti_ai_design_context::util::js_number_to_string)
             .unwrap_or_default(),
         other => other.to_string(),
     }
@@ -503,7 +503,7 @@ fn stop(argv: &[String], cwd: &str, io: &mut Io) -> i32 {
             } else if !out.trim().is_empty() {
                 out.trim().to_string()
             } else {
-                format!("Command failed: anti-design live-inject --remove")
+                format!("Command failed: anti-ai-design live-inject --remove")
             };
             let first = detail.split('\n').next().unwrap_or("");
             io.err(&format!(
@@ -695,7 +695,7 @@ fn handle_connection(shared: Shared, mut stream: TcpStream, mut ticket: Ticket) 
                     return;
                 }
             };
-            let prefix = anti_design_context::provider::detect(&env, &cwd).command_prefix;
+            let prefix = anti_ai_design_context::provider::detect(&env, &cwd).command_prefix;
             // JS: projectIgnores from live/project-ignores.mjs (issue #639),
             // read per request so waiver edits land on the next tab reload.
             let project_ignores = crate::project_ignores::collect_project_detector_ignores(
@@ -804,12 +804,12 @@ fn handle_connection(shared: Shared, mut stream: TcpStream, mut ticket: Ticket) 
             let ctx = resolve_project_context(&cwd, &env, roots.as_ref());
             let md_path = ctx.resolved_design_path.clone();
             let project_root =
-                anti_design_context::context::resolve_project_root(&cwd, &Default::default(), &env);
+                anti_ai_design_context::context::resolve_project_root(&cwd, &Default::default(), &env);
             let context_dir = ctx
                 .design_context_dir
                 .clone()
                 .unwrap_or_else(|| ctx.context_dir.clone());
-            let candidates = anti_design_context::staleness::design_sidecar_candidates_for(
+            let candidates = anti_ai_design_context::staleness::design_sidecar_candidates_for(
                 &project_root,
                 Some(&context_dir),
             );
@@ -817,11 +817,11 @@ fn handle_connection(shared: Shared, mut stream: TcpStream, mut ticket: Ticket) 
                 .iter()
                 .find(|c| exists(c))
                 .cloned()
-                .unwrap_or_else(|| jsp::join(&[&project_root, ".anti-design", "design.json"]));
+                .unwrap_or_else(|| jsp::join(&[&project_root, ".anti-ai-design", "design.json"]));
             let md_stat = md_path
                 .as_deref()
-                .and_then(anti_design_context::util::mtime_ms);
-            let json_stat = anti_design_context::util::mtime_ms(&json_path);
+                .and_then(anti_ai_design_context::util::mtime_ms);
+            let json_stat = anti_ai_design_context::util::mtime_ms(&json_path);
             if p == "/design-system/raw" {
                 let Some(md) = md_path
                     .as_deref()
@@ -876,7 +876,7 @@ fn handle_connection(shared: Shared, mut stream: TcpStream, mut ticket: Ticket) 
                             .unwrap_or_else(|| "Unexpected token".to_string());
                         response.insert(
                             "sidecarError".into(),
-                            json!(format!("Failed to parse .anti-design/design.json: {}", msg)),
+                            json!(format!("Failed to parse .anti-ai-design/design.json: {}", msg)),
                         );
                     }
                 }
@@ -961,7 +961,7 @@ fn handle_connection(shared: Shared, mut stream: TcpStream, mut ticket: Ticket) 
             // JS: shutdown() ends in `process.exit(0)`. Without this the
             // accept loop never sees a reason to stop, so a stopped server
             // keeps the port and keeps answering while its `server.json` is
-            // already gone: the next `anti-design live` boots a second server
+            // already gone: the next `anti-ai-design live` boots a second server
             // on another port and a tab can reattach to the zombie. Set the
             // flag after the response is written so `stop` still reads
             // `stopping` rather than a reset connection.
@@ -1332,7 +1332,7 @@ fn handle_events_post(
 fn parse_int_or(v: Option<&str>, default: i64) -> i64 {
     match v {
         Some(s) if !s.is_empty() => {
-            let n = anti_design_core::js::parse_int(s, 10);
+            let n = anti_ai_design_core::js::parse_int(s, 10);
             if n.is_nan() {
                 // JS: setTimeout(NaN) fires immediately; NaN lease means never leased.
                 i64::MIN
@@ -1461,10 +1461,10 @@ fn session_file_metadata_from_poll_reply(file: Option<&Value>, cwd: &str) -> Map
     if !normalized.ends_with("/manifest.json") && normalized != "manifest.json" {
         return base;
     }
-    if !normalized.contains(".anti-design/live/previews/")
-        && !normalized.contains("node_modules/.anti-design-live/")
-        && !normalized.contains("src/lib/anti-design/")
-        && !normalized.contains("/.anti-design-live/")
+    if !normalized.contains(".anti-ai-design/live/previews/")
+        && !normalized.contains("node_modules/.anti-ai-design-live/")
+        && !normalized.contains("src/lib/anti-ai-design/")
+        && !normalized.contains("/.anti-ai-design-live/")
     {
         return base;
     }
@@ -2491,7 +2491,7 @@ fn handle_manual_edit_commit(
         commit_batch = Some(transaction_batch);
     }
     let requested_mode = env
-        .get("ANTI_DESIGN_LIVE_COPY_AGENT")
+        .get("ANTI_AI_DESIGN_LIVE_COPY_AGENT")
         .cloned()
         .unwrap_or_else(|| "auto".to_string())
         .trim()
@@ -2500,10 +2500,10 @@ fn handle_manual_edit_commit(
     let use_chat = requested_mode == "chat" || (requested_mode == "auto" && chat_active());
     let timeout_ms = {
         let raw = env
-            .get("ANTI_DESIGN_LIVE_COPY_AGENT_TIMEOUT_MS")
+            .get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_TIMEOUT_MS")
             .filter(|v| !v.is_empty());
         match raw {
-            Some(v) => anti_design_core::js::string_to_number(v),
+            Some(v) => anti_ai_design_core::js::string_to_number(v),
             None => 120000.0,
         }
     };
@@ -2934,7 +2934,7 @@ fn handle_agent_target_result_post(
 }
 
 /// `POST /live-bar` `{token, hidden}`: the helper-wide bar preference, set
-/// by `anti-design live --no-live-bar` at boot so the bar never appears, and
+/// by `anti-ai-design live --no-live-bar` at boot so the bar never appears, and
 /// by an agent target carrying `hideLiveBar` (see handle_agent_target_post).
 fn handle_live_bar_post(
     shared: &Shared,
@@ -3067,7 +3067,7 @@ mod background_tests {
     // app. The child must land on the parent's root.
     #[test]
     fn background_child_re_enters_the_parents_root() {
-        let ws = std::env::temp_dir().join(format!("anti-design-bg-roots-{}", std::process::id()));
+        let ws = std::env::temp_dir().join(format!("anti-ai-design-bg-roots-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&ws);
         for (rel, body) in [
             ("package.json", "{ \"name\": \"repro-root\", \"private\": true }\n"),

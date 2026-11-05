@@ -8,7 +8,7 @@
 
 use std::io::Read;
 
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use sha2::{Digest, Sha256};
@@ -57,7 +57,7 @@ const CONNECT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
 const IDLE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(60);
 
 fn download_agent(connect: std::time::Duration, idle: std::time::Duration) -> ureq::AgentBuilder {
-    anti_design_context::http::agent_builder()
+    anti_ai_design_context::http::agent_builder()
         .timeout_connect(connect)
         .timeout_read(idle)
         .timeout_write(idle)
@@ -333,7 +333,7 @@ fn extract_zip_from<R: Read + std::io::Seek>(reader: R, target_dir: &str, cwd: &
         // Preserve the zip's unix mode (std::fs::write drops it), and make
         // the launcher and staged engine binaries executable even when the
         // zip carries no unix modes (a zip built on Windows): a 0644
-        // `scripts/anti-design` fails every hook and Setup call with
+        // `scripts/anti-ai-design` fails every hook and Setup call with
         // "Permission denied".
         #[cfg(unix)]
         {
@@ -341,7 +341,7 @@ fn extract_zip_from<R: Read + std::io::Seek>(reader: R, target_dir: &str, cwd: &
             let mode = entry.unix_mode().unwrap_or(0) & 0o7777;
             if mode != 0 {
                 let _ = std::fs::set_permissions(&dest, std::fs::Permissions::from_mode(mode));
-            } else if entry_path.ends_with("scripts/anti-design") || entry_path.contains("scripts/bin/") {
+            } else if entry_path.ends_with("scripts/anti-ai-design") || entry_path.contains("scripts/bin/") {
                 let _ = std::fs::set_permissions(&dest, std::fs::Permissions::from_mode(0o755));
             }
         }
@@ -357,7 +357,7 @@ pub fn download_and_extract_bundle(sys: &Sys) -> Result<String, BundleError> {
     if let Some(forced) = test_seam::take() {
         return forced;
     }
-    if let Some(local) = sys.env.get("ANTI_DESIGN_BUNDLE_PATH").filter(|v| !v.is_empty()) {
+    if let Some(local) = sys.env.get("ANTI_AI_DESIGN_BUNDLE_PATH").filter(|v| !v.is_empty()) {
         return copy_or_extract_local_bundle(sys, local).map_err(BundleError::Local);
     }
     download_remote_bundle(sys, &mut ureq_fetch, bundle_signature::trusted_keys())
@@ -395,7 +395,7 @@ pub enum BundleError {
     /// Staging, saving, reading back or extracting the bundle on this machine failed
     /// (disk space, permissions, an entry the extractor refuses).
     Unpack(String),
-    /// An `ANTI_DESIGN_BUNDLE_PATH` bundle could not be read.
+    /// An `ANTI_AI_DESIGN_BUNDLE_PATH` bundle could not be read.
     Local(String),
 }
 
@@ -428,7 +428,7 @@ impl BundleError {
 
 impl std::fmt::Display for BundleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        const RETRY: &str = ". Nothing was installed; retry or update the CLI. If this persists, report it at https://github.com/OWNER/anti-design/issues/new";
+        const RETRY: &str = ". Nothing was installed; retry or update the CLI. If this persists, report it at https://github.com/Choxie77/anti-ai-design/issues/new";
         match self {
             BundleError::Download(e) => write!(f, "Could not download skill bundle: {e}{RETRY}"),
             BundleError::Verify(e) => write!(f, "{}{e}{RETRY}", bundle_signature::ERROR_PREFIX),
@@ -459,7 +459,7 @@ fn download_and_extract_signed_bundle(
 ) -> Result<String, BundleError> {
     use BundleError::{Download, Unpack, Verify};
     let tmp = util::tmpdir(&sys.env);
-    let staging = util::mkdtemp(&jsp::join(&[&tmp, "anti-design-update-"])).map_err(Unpack)?;
+    let staging = util::mkdtemp(&jsp::join(&[&tmp, "anti-ai-design-update-"])).map_err(Unpack)?;
     let tmp_zip = jsp::join(&[&staging, "bundle.zip"]);
     let tmp_signature = jsp::join(&[&staging, "bundle.sig.json"]);
     let result = (|| -> Result<(), BundleError> {
@@ -505,7 +505,7 @@ fn copy_or_extract_local_bundle(sys: &Sys, source_value: &str) -> Result<String,
         return Err(format!("Local bundle not found: {source}"));
     }
     let tmp = util::tmpdir(&sys.env);
-    let staging = util::mkdtemp(&jsp::join(&[&tmp, "anti-design-local-bundle-"]))?;
+    let staging = util::mkdtemp(&jsp::join(&[&tmp, "anti-ai-design-local-bundle-"]))?;
     let result = (|| -> Result<(), String> {
         if util::is_dir(&source) {
             util::copy_dir(&source, &staging)
@@ -611,7 +611,7 @@ pub fn is_up_to_date(sys: &Sys, root: &str, providers: &[&str], bundle_dir: &str
                 }
             }
         }
-        // Provider command artifacts (OpenCode's `commands/anti-design.md`) are
+        // Provider command artifacts (OpenCode's `commands/anti-ai-design.md`) are
         // part of "current" too: an install whose skills match but whose
         // bridge is missing or drifted must refresh, otherwise
         // reinstall/update report success while the slash command stays
@@ -819,7 +819,7 @@ struct AgentArtifact {
 
 fn agent_artifact(provider: &str) -> Option<AgentArtifact> {
     match provider {
-        // Claude Code's agents live at `.claude/agents/anti-design-*.md`;
+        // Claude Code's agents live at `.claude/agents/anti-ai-design-*.md`;
         // project agents take precedence over user agents (upstream 7b945856).
         ".claude" => Some(AgentArtifact {
             ext: ".md",
@@ -924,7 +924,7 @@ pub fn report_provider_agents(sys: &Sys, io: &mut Io, results: &[AgentResult]) {
                 sys.format_path_for_display(&result.user_dir),
                 result.shadowed.join(", ")
             ));
-            io.err("Run `npx anti-design update --user` to refresh them, or remove them so the project agents apply.\n");
+            io.err("Run `npx anti-ai-design update --user` to refresh them, or remove them so the project agents apply.\n");
         }
     }
 }
@@ -936,7 +936,7 @@ pub struct LinkSource {
 
 /// JS: resolveLinkSource(sourceValue, root)
 pub fn resolve_link_source(source_value: Option<&str>, root: &str) -> Result<LinkSource, String> {
-    let source_path = source_value.unwrap_or(".anti-design");
+    let source_path = source_value.unwrap_or(".anti-ai-design");
     let checkout_root = if jsp::is_absolute(source_path) {
         source_path.to_string()
     } else {
@@ -1071,7 +1071,7 @@ mod tests {
     fn tmp_dir(tag: &str) -> String {
         static SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let dir = std::env::temp_dir().join(format!(
-            "anti-design-bundle-{tag}-{}-{}",
+            "anti-ai-design-bundle-{tag}-{}-{}",
             std::process::id(),
             SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ));
@@ -1178,7 +1178,7 @@ mod tests {
 
     #[test]
     fn transport_and_staging_failures_name_their_step() {
-        let release = "https://github.com/OWNER/anti-design/releases/download/skill-v4.2.0/universal.zip";
+        let release = "https://github.com/Choxie77/anti-ai-design/releases/download/skill-v4.2.0/universal.zip";
         struct Stalled;
         impl Read for Stalled {
             fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
@@ -1201,14 +1201,14 @@ mod tests {
             assert!(error.to_string().starts_with("Could not download skill bundle: "), "{case}: {error}");
             util::rm_rf(&root);
         }
-        let unwritable = Sys::new([("TMPDIR".into(), "/nonexistent/anti-design".into()), ("TEMP".into(), "/nonexistent/anti-design".into())].into(), "/".into());
+        let unwritable = Sys::new([("TMPDIR".into(), "/nonexistent/anti-ai-design".into()), ("TEMP".into(), "/nonexistent/anti-ai-design".into())].into(), "/".into());
         let mut fetch = |_: &str| -> Result<FetchResponse, String> { panic!("staging fails before any request") };
         let error = download_remote_bundle(&unwritable, &mut fetch, Ok(Default::default())).unwrap_err();
         assert!(matches!(error, BundleError::Unpack(_)), "{error}");
         let mut fetch = |_: &str| -> Result<FetchResponse, String> {
             Ok(FetchResponse { status: 200, location: None, body: Box::new(std::io::Cursor::new(b"zip".to_vec())) })
         };
-        let error = download_file_capped("https://example.com/b.zip", "/nonexistent/anti-design/b.zip", &mut fetch, MAX_DOWNLOAD_BYTES).unwrap_err();
+        let error = download_file_capped("https://example.com/b.zip", "/nonexistent/anti-ai-design/b.zip", &mut fetch, MAX_DOWNLOAD_BYTES).unwrap_err();
         assert!(matches!(error, BundleError::Unpack(_)), "a failed save is not a download failure: {error}");
         assert!(!BundleError::Local("Local bundle not found: x".into()).is_fatal_over_existing_install());
         assert!(!BundleError::Download("connection refused".into()).is_fatal_over_existing_install());
@@ -1227,7 +1227,7 @@ mod tests {
                 if requests > 1 { return Err("reached signature download".into()); }
                 Ok(FetchResponse {
                     status,
-                    location: Some("https://github.com/OWNER/anti-design/releases/download/skill-v4.2.0/universal.zip".into()),
+                    location: Some("https://github.com/Choxie77/anti-ai-design/releases/download/skill-v4.2.0/universal.zip".into()),
                     body: Box::new(std::io::empty()),
                 })
             };
@@ -1255,14 +1255,14 @@ mod tests {
         let key = Ed25519KeyPair::from_seed_unchecked(&[7; 32]).unwrap();
         let hex = |bytes: &[u8]| bytes.iter().map(|b| format!("{b:02x}")).collect::<String>();
         let keys = [("test-only".into(), hex(key.public_key().as_ref()))].into();
-        let zip = zip_bytes(&[(".claude/skills/anti-design/SKILL.md", b"verified skill")]);
+        let zip = zip_bytes(&[(".claude/skills/anti-ai-design/SKILL.md", b"verified skill")]);
         let digest = format!("{:x}", Sha256::digest(&zip));
-        let payload = format!("anti-design-skill-bundle-v1\ntest-only\nskill-v4.2.0\nuniversal.zip\n{}\n{digest}\n", zip.len());
+        let payload = format!("anti-ai-design-skill-bundle-v1\ntest-only\nskill-v4.2.0\nuniversal.zip\n{}\n{digest}\n", zip.len());
         let signature = serde_json::to_vec(&serde_json::json!({
             "schema": 1, "keyId": "test-only", "version": "4.2.0", "artifact": "universal.zip",
             "size": zip.len(), "sha256": digest, "signature": hex(key.sign(payload.as_bytes()).as_ref()),
         })).unwrap();
-        let release = "https://github.com/OWNER/anti-design/releases/download/skill-v4.2.0/universal.zip";
+        let release = "https://github.com/Choxie77/anti-ai-design/releases/download/skill-v4.2.0/universal.zip";
         for case in ["valid", "tampered", "missing", "oversized", "downgrade", "malformed-zip", "invalid-signature"] {
             let root = tmp_dir(case);
             let temp = format!("{root}/temp");
@@ -1297,7 +1297,7 @@ mod tests {
             let result = download_and_extract_signed_bundle(&sys, &mut fetch, &keys);
             if case == "valid" {
                 let staging = result.unwrap();
-                assert_eq!(std::fs::read_to_string(format!("{staging}/.claude/skills/anti-design/SKILL.md")).unwrap(), "verified skill");
+                assert_eq!(std::fs::read_to_string(format!("{staging}/.claude/skills/anti-ai-design/SKILL.md")).unwrap(), "verified skill");
                 assert!(!util::exists(&format!("{staging}/bundle.zip")));
                 assert!(!util::exists(&format!("{staging}/bundle.sig.json")));
                 util::rm_rf(&staging);

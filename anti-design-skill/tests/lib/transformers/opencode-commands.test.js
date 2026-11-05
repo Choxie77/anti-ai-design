@@ -10,13 +10,13 @@ const transform = createTransformer(config);
 const TEST_DIR = path.join(process.cwd(), 'test-tmp-opencode-commands');
 const COMMAND_PATH = path.join(
   TEST_DIR,
-  `${config.provider}/${config.configDir}/commands/anti-design.md`,
+  `${config.provider}/${config.configDir}/commands/anti-ai-design.md`,
 );
 
 const SAMPLE_SKILL = {
-  name: 'anti-design',
+  name: 'anti-ai-design',
   description: 'Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface.',
-  body: '# Anti-Design\n\nSkill body here.',
+  body: '# Anti-AI Design\n\nSkill body here.',
   references: [],
   scripts: [],
   agents: [],
@@ -35,7 +35,7 @@ afterEach(() => {
 });
 
 describe('opencode commands bridge', () => {
-  test('emits .opencode/commands/anti-design.md alongside the skill', () => {
+  test('emits .opencode/commands/anti-ai-design.md alongside the skill', () => {
     transform([SAMPLE_SKILL], TEST_DIR);
     expect(fs.existsSync(COMMAND_PATH)).toBe(true);
   });
@@ -64,12 +64,12 @@ describe('opencode commands bridge', () => {
     expect(value).toBe(SAMPLE_SKILL.description);
   });
 
-  test('command body delegates to the anti-design skill', () => {
+  test('command body delegates to the anti-ai-design skill', () => {
     transform([SAMPLE_SKILL], TEST_DIR);
     const content = fs.readFileSync(COMMAND_PATH, 'utf-8');
     const body = content.replace(/^---\n[\s\S]*?\n---\n/, '');
     expect(body).toContain('skill({');
-    expect(body).toContain("name: \"anti-design\"");
+    expect(body).toContain("name: \"anti-ai-design\"");
     expect(body).toContain('Setup');
     expect(body).toContain('Commands');
     expect(body).toContain('$ARGUMENTS');
@@ -101,7 +101,7 @@ describe('opencode commands bridge', () => {
     transform([SAMPLE_SKILL], TEST_DIR);
     const skillPath = path.join(
       TEST_DIR,
-      `${config.provider}/${config.configDir}/skills/anti-design/SKILL.md`,
+      `${config.provider}/${config.configDir}/skills/anti-ai-design/SKILL.md`,
     );
     expect(fs.existsSync(skillPath)).toBe(true);
     expect(fs.existsSync(COMMAND_PATH)).toBe(true);

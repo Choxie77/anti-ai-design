@@ -26,14 +26,14 @@ const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : n
 const verbose = args.includes('--verbose');
 const here = path.dirname(fileURLToPath(import.meta.url));
 const engineRoot = path.resolve(here, '../../..');
-const publicRepo = path.resolve(flag('--public') || process.env.ANTI_DESIGN_PUBLIC_REPO || engineRoot);
+const publicRepo = path.resolve(flag('--public') || process.env.ANTI_AI_DESIGN_PUBLIC_REPO || engineRoot);
 const require = createRequire(path.join(publicRepo, 'package.json'));
 const puppeteer = require('puppeteer');
 
 const BUNDLE = fs.readFileSync(path.join(engineRoot, 'dist/detect-antipatterns-browser.js'), 'utf8');
 
 // The JSON-safe payload shape the extension panel and the URL engine inject as
-// __ANTI_DESIGN_CONFIG__.designSystem, for the DESIGN.md the design-system.html
+// __ANTI_AI_DESIGN_CONFIG__.designSystem, for the DESIGN.md the design-system.html
 // fixture is written against.
 const designSystem = {
   present: true,
@@ -76,27 +76,27 @@ try {
   await page.setViewport({ width: 1280, height: 800 });
   await page.goto(`http://127.0.0.1:${port}/design-system.html`, { waitUntil: 'load' });
   await page.evaluate(() => {
-    document.documentElement.dataset.antiDesignExtension = 'true';
-    window.__antiDesignMessages = [];
+    document.documentElement.dataset.antiAiDesignExtension = 'true';
+    window.__antiAiDesignMessages = [];
     window.addEventListener('message', event => {
-      if (event.source !== window || !event.data?.source?.startsWith('anti-design-')) return;
-      window.__antiDesignMessages.push(event.data);
+      if (event.source !== window || !event.data?.source?.startsWith('anti-ai-design-')) return;
+      window.__antiAiDesignMessages.push(event.data);
     });
   });
   await page.evaluate(BUNDLE);
 
   const scan = (scanId, disabledValues, extraConfig = {}) => page.evaluate(async (config) => {
-    window.postMessage({ source: 'anti-design-command', action: 'scan', config }, '*');
+    window.postMessage({ source: 'anti-ai-design-command', action: 'scan', config }, '*');
     const deadline = Date.now() + 5000;
     while (
       Date.now() < deadline &&
-      !window.__antiDesignMessages.some(message =>
-        message.source === 'anti-design-results' && message.scanId === config.scanId)
+      !window.__antiAiDesignMessages.some(message =>
+        message.source === 'anti-ai-design-results' && message.scanId === config.scanId)
     ) {
       await new Promise(resolve => setTimeout(resolve, 25));
     }
-    const resultMessage = window.__antiDesignMessages.find(message =>
-      message.source === 'anti-design-results' && message.scanId === config.scanId);
+    const resultMessage = window.__antiAiDesignMessages.find(message =>
+      message.source === 'anti-ai-design-results' && message.scanId === config.scanId);
     const flat = (resultMessage?.findings || []).flatMap(group => group.findings || []);
     return {
       total: flat.length,

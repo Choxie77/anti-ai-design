@@ -1,6 +1,6 @@
 //! After a skill directory is written, make it self-contained: when its
 //! `scripts/VERSION` names an engine release and no
-//! `scripts/bin/<os>-<arch>/anti-design[.exe]` is present, download that
+//! `scripts/bin/<os>-<arch>/anti-ai-design[.exe]` is present, download that
 //! release's binary for this platform from this repo's `engine-v<version>`
 //! GitHub Release (the same asset naming the launcher uses), verify it against
 //! the digest the skill dir's own `scripts/engine-checksums.txt` records, and
@@ -8,14 +8,14 @@
 
 use std::collections::HashMap;
 
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use sha2::{Digest, Sha256};
 
 use crate::bundle::{download, hex};
 use crate::providers::Sys;
 use crate::util::{self, jsp};
 
-pub const DEFAULT_DOWNLOAD_BASE: &str = "https://github.com/OWNER/anti-design/releases/download";
+pub const DEFAULT_DOWNLOAD_BASE: &str = "https://github.com/Choxie77/anti-ai-design/releases/download";
 
 /// The `<os>-<arch>` tag the launcher computes (`darwin|linux|windows` x
 /// `arm64|x64`); `None` on a platform without a release asset.
@@ -41,7 +41,7 @@ pub fn platform_tag() -> Option<(&'static str, &'static str)> {
 
 /// Where the binary for `(os, arch)` lives inside a skill directory.
 pub fn binary_path(skill_dir: &str, os: &str, arch: &str) -> String {
-    let name = if os == "windows" { "anti-design.exe" } else { "anti-design" };
+    let name = if os == "windows" { "anti-ai-design.exe" } else { "anti-ai-design" };
     jsp::join(&[skill_dir, "scripts", "bin", &format!("{os}-{arch}"), name])
 }
 
@@ -54,7 +54,7 @@ pub fn asset_url(base: &str, version: &str, os: &str, arch: &str) -> String {
 
 fn asset_name(os: &str, arch: &str) -> String {
     let ext = if os == "windows" { ".exe" } else { "" };
-    format!("anti-design-{os}-{arch}{ext}")
+    format!("anti-ai-design-{os}-{arch}{ext}")
 }
 
 /// The digest `engine-checksums.txt` records for `version` and `asset`. Lines
@@ -81,14 +81,14 @@ fn fetch_binary(url: &str, expected: &str) -> Result<Vec<u8>, String> {
 }
 
 /// Belt and suspenders for the executable bit: chmod +x the launcher
-/// (`scripts/anti-design`) and every staged engine binary
-/// (`scripts/bin/**/anti-design*`) inside a skill dir. Zip extraction and the
+/// (`scripts/anti-ai-design`) and every staged engine binary
+/// (`scripts/bin/**/anti-ai-design*`) inside a skill dir. Zip extraction and the
 /// dir copy preserve modes themselves, but any channel that loses them (a
 /// zip with no unix modes, a mode-dropping copier) would otherwise turn every
 /// hook and Setup call into "Permission denied". No-op off unix and for
 /// missing paths.
 pub fn ensure_executable_scripts(skill_dir: &str) {
-    let launcher = jsp::join(&[skill_dir, "scripts", "anti-design"]);
+    let launcher = jsp::join(&[skill_dir, "scripts", "anti-ai-design"]);
     if util::exists(&launcher) {
         let _ = util::set_executable(&launcher);
     }
@@ -99,7 +99,7 @@ pub fn ensure_executable_scripts(skill_dir: &str) {
             continue;
         }
         for name in util::read_dir_names(&dir).unwrap_or_default() {
-            if name.starts_with("anti-design") {
+            if name.starts_with("anti-ai-design") {
                 let _ = util::set_executable(&jsp::join(&[&dir, &name]));
             }
         }
@@ -118,7 +118,7 @@ pub fn install_engine_binaries(sys: &Sys, io: &mut Io, skill_dirs: &[String]) {
     let Some((os, arch)) = platform_tag() else { return };
     let base = sys
         .env
-        .get("ANTI_DESIGN_DOWNLOAD_BASE")
+        .get("ANTI_AI_DESIGN_DOWNLOAD_BASE")
         .filter(|v| !v.is_empty())
         .cloned()
         .unwrap_or_else(|| DEFAULT_DOWNLOAD_BASE.to_string());
@@ -157,11 +157,11 @@ pub fn install_engine_binaries(sys: &Sys, io: &mut Io, skill_dirs: &[String]) {
                     .and_then(|_| util::set_executable(&dest));
                 match written {
                     Ok(()) => io.out(&format!(
-                        "Installed anti-design engine v{version} ({os}-{arch}) into: {}\n",
+                        "Installed anti-ai-design engine v{version} ({os}-{arch}) into: {}\n",
                         sys.format_path_for_display(&dest)
                     )),
                     Err(e) => io.err(&format!(
-                        "Could not write the anti-design engine v{version} ({os}-{arch}) into {}: {e}\n",
+                        "Could not write the anti-ai-design engine v{version} ({os}-{arch}) into {}: {e}\n",
                         sys.format_path_for_display(&dest)
                     )),
                 }
@@ -169,7 +169,7 @@ pub fn install_engine_binaries(sys: &Sys, io: &mut Io, skill_dirs: &[String]) {
             Err(e) => {
                 if !e.is_empty() {
                     io.err(&format!(
-                        "Could not download the anti-design engine v{version} for {os}-{arch} ({url}): {e}. The launcher fetches it on first run.\n"
+                        "Could not download the anti-ai-design engine v{version} for {os}-{arch} ({url}): {e}. The launcher fetches it on first run.\n"
                     ));
                     // Report once per version, then stay quiet for its siblings.
                     cache.insert(version.to_string(), Err(String::new()));
@@ -187,31 +187,31 @@ mod tests {
     fn asset_naming_matches_launcher() {
         assert_eq!(
             asset_url(DEFAULT_DOWNLOAD_BASE, "1.2.3", "darwin", "arm64"),
-            "https://github.com/OWNER/anti-design/releases/download/engine-v1.2.3/anti-design-darwin-arm64"
+            "https://github.com/Choxie77/anti-ai-design/releases/download/engine-v1.2.3/anti-ai-design-darwin-arm64"
         );
-        assert_eq!(asset_url("http://x/", "1", "windows", "x64"), "http://x/engine-v1/anti-design-windows-x64.exe");
+        assert_eq!(asset_url("http://x/", "1", "windows", "x64"), "http://x/engine-v1/anti-ai-design-windows-x64.exe");
         // The sibling binary path is joined with the host's path semantics
         // (backslashes on Windows); only the asset name is platform-keyed.
         assert_eq!(
             binary_path("/s", "linux", "x64"),
-            jsp::join(&["/s", "scripts", "bin", "linux-x64", "anti-design"])
+            jsp::join(&["/s", "scripts", "bin", "linux-x64", "anti-ai-design"])
         );
         assert_eq!(
             binary_path("/s", "windows", "arm64"),
-            jsp::join(&["/s", "scripts", "bin", "windows-arm64", "anti-design.exe"])
+            jsp::join(&["/s", "scripts", "bin", "windows-arm64", "anti-ai-design.exe"])
         );
     }
 
     #[test]
     fn install_refuses_a_version_with_no_manifest_line() {
         let Some((os, arch)) = platform_tag() else { return };
-        let dir = std::env::temp_dir().join(format!("anti-design-no-manifest-line-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-no-manifest-line-{}", std::process::id()));
         let skill_dir = dir.to_string_lossy().into_owned();
         std::fs::create_dir_all(dir.join("scripts")).unwrap();
         std::fs::write(dir.join("scripts/VERSION"), "9.9.9\n").unwrap();
-        std::fs::write(dir.join("scripts/engine-checksums.txt"), "1.0.0 anti-design-linux-x64 abc\n").unwrap();
+        std::fs::write(dir.join("scripts/engine-checksums.txt"), "1.0.0 anti-ai-design-linux-x64 abc\n").unwrap();
         // A refused port: reaching the network would fail with a different error.
-        let env: util::Env = [("ANTI_DESIGN_DOWNLOAD_BASE".to_string(), "http://127.0.0.1:9".to_string())].into();
+        let env: util::Env = [("ANTI_AI_DESIGN_DOWNLOAD_BASE".to_string(), "http://127.0.0.1:9".to_string())].into();
         let (mut io, captured) = Io::captured("", dir.clone(), env.clone());
         install_engine_binaries(&Sys::new(env, skill_dir.clone()), &mut io, &[skill_dir.clone()]);
         let stderr = String::from_utf8_lossy(&captured.stderr.borrow()).into_owned();
@@ -222,16 +222,16 @@ mod tests {
 
     #[test]
     fn manifest_digest_matches_version_and_asset() {
-        let manifest = "# header: 1.2.3 anti-design-linux-x64 ffff\n\n\
-            1.2.3 anti-design-linux-x64 ABC123\n\
-            1.2.3 anti-design-windows-x64.exe def456\n\
-            1.2.2 anti-design-linux-x64 old\n";
-        assert_eq!(manifest_digest(manifest, "1.2.3", "anti-design-linux-x64").as_deref(), Some("abc123"));
-        assert_eq!(manifest_digest(manifest, "1.2.3", "anti-design-windows-x64.exe").as_deref(), Some("def456"));
-        assert_eq!(manifest_digest(manifest, "1.2.2", "anti-design-linux-x64").as_deref(), Some("old"));
-        assert_eq!(manifest_digest(manifest, "1.2.3", "anti-design-darwin-arm64"), None);
-        assert_eq!(manifest_digest(manifest, "9.9.9", "anti-design-linux-x64"), None);
-        assert_eq!(manifest_digest("# only 1.2.3 anti-design-linux-x64 ffff\n", "1.2.3", "anti-design-linux-x64"), None);
-        assert_eq!(manifest_digest("", "1.2.3", "anti-design-linux-x64"), None);
+        let manifest = "# header: 1.2.3 anti-ai-design-linux-x64 ffff\n\n\
+            1.2.3 anti-ai-design-linux-x64 ABC123\n\
+            1.2.3 anti-ai-design-windows-x64.exe def456\n\
+            1.2.2 anti-ai-design-linux-x64 old\n";
+        assert_eq!(manifest_digest(manifest, "1.2.3", "anti-ai-design-linux-x64").as_deref(), Some("abc123"));
+        assert_eq!(manifest_digest(manifest, "1.2.3", "anti-ai-design-windows-x64.exe").as_deref(), Some("def456"));
+        assert_eq!(manifest_digest(manifest, "1.2.2", "anti-ai-design-linux-x64").as_deref(), Some("old"));
+        assert_eq!(manifest_digest(manifest, "1.2.3", "anti-ai-design-darwin-arm64"), None);
+        assert_eq!(manifest_digest(manifest, "9.9.9", "anti-ai-design-linux-x64"), None);
+        assert_eq!(manifest_digest("# only 1.2.3 anti-ai-design-linux-x64 ffff\n", "1.2.3", "anti-ai-design-linux-x64"), None);
+        assert_eq!(manifest_digest("", "1.2.3", "anti-ai-design-linux-x64"), None);
     }
 }

@@ -68,14 +68,14 @@ import { armLiveServerReaper } from ${JSON.stringify(join(REPO_ROOT, 'tests/lib/
 
 armLiveServerReaper();
 
-// Detached, exactly the shape \`anti-design live-server --background\` uses: the
+// Detached, exactly the shape \`anti-ai-design live-server --background\` uses: the
 // server is orphaned to pid 1 from birth and nothing but an explicit stop, or
 // the reaper, ever ends it.
 const child = spawn(${JSON.stringify('__BIN__')}, ['live-server', '--port=${PORT}'], {
   detached: true,
   stdio: 'ignore',
   cwd: process.cwd(),
-  env: { ...process.env, ANTI_DESIGN_SKILL_DIR: ${JSON.stringify(join(REPO_ROOT, 'skill'))}, ANTI_DESIGN_SELF: ${JSON.stringify('__BIN__')} },
+  env: { ...process.env, ANTI_AI_DESIGN_SKILL_DIR: ${JSON.stringify(join(REPO_ROOT, 'skill'))}, ANTI_AI_DESIGN_SELF: ${JSON.stringify('__BIN__')} },
 });
 child.unref();
 
@@ -132,7 +132,7 @@ describe('live server leak guard', () => {
       ? 'the reaper is POSIX-only; armLiveServerReaper() does not arm it on win32'
       : NO_ENGINE,
   }, async () => {
-    const cwd = mkdtempSync(join(tmpdir(), 'anti-design-leak-'));
+    const cwd = mkdtempSync(join(tmpdir(), 'anti-ai-design-leak-'));
     let victim;
     let serverPid;
     try {
@@ -158,9 +158,9 @@ describe('live server leak guard', () => {
     // Node's shutdown() finished with process.exit(0). The engine's did not,
     // and nothing set `shutting_down`, so a stopped server kept the port and
     // kept answering while its server.json was already gone: the next
-    // `anti-design live` booted a second server elsewhere and a tab could
+    // `anti-ai-design live` booted a second server elsewhere and a tab could
     // reattach to the zombie and never hear another broadcast (issue #719).
-    const cwd = mkdtempSync(join(tmpdir(), 'anti-design-stop-'));
+    const cwd = mkdtempSync(join(tmpdir(), 'anti-ai-design-stop-'));
     let server;
     try {
       writeFileSync(join(cwd, 'package.json'), '{"name":"stop-fixture"}\n');
@@ -169,8 +169,8 @@ describe('live server leak guard', () => {
         stdio: ['ignore', 'pipe', 'pipe'],
         env: {
           ...process.env,
-          ANTI_DESIGN_SKILL_DIR: join(REPO_ROOT, 'skill'),
-          ANTI_DESIGN_SELF: ENGINE_BIN,
+          ANTI_AI_DESIGN_SKILL_DIR: join(REPO_ROOT, 'skill'),
+          ANTI_AI_DESIGN_SELF: ENGINE_BIN,
         },
       });
       const up = await waitUntil(async () => {
@@ -186,8 +186,8 @@ describe('live server leak guard', () => {
         stdio: ['ignore', 'pipe', 'pipe'],
         env: {
           ...process.env,
-          ANTI_DESIGN_SKILL_DIR: join(REPO_ROOT, 'skill'),
-          ANTI_DESIGN_SELF: ENGINE_BIN,
+          ANTI_AI_DESIGN_SKILL_DIR: join(REPO_ROOT, 'skill'),
+          ANTI_AI_DESIGN_SELF: ENGINE_BIN,
         },
       });
       await new Promise((resolve) => stop.on('exit', resolve));
@@ -218,7 +218,7 @@ describe('envLineHasEntry', () => {
   // checkout so two adjacent checkouts get unrelated values, and the run and
   // process ids are random hex. Nothing a marker can hold contains whitespace,
   // which is the invariant this matcher rests on.
-  const hash = repoMarker('/work/anti-design');
+  const hash = repoMarker('/work/anti-ai-design');
   const marker = `${REPO_ENV}=${hash}`;
 
   it('matches the entry at the end of the line and between other entries', () => {
@@ -236,17 +236,17 @@ describe('envLineHasEntry', () => {
   });
 
   it('gives adjacent checkouts unrelated markers', () => {
-    // The bug this all exists for: /work/anti-design is a substring of
-    // /work/anti-design-copy. Hashing means the two markers no longer share a
+    // The bug this all exists for: /work/anti-ai-design is a substring of
+    // /work/anti-ai-design-copy. Hashing means the two markers no longer share a
     // prefix at all, so a substring can never arise in the first place.
-    const neighbour = repoMarker('/work/anti-design-copy');
+    const neighbour = repoMarker('/work/anti-ai-design-copy');
     assert.notEqual(neighbour, hash);
     assert.equal(neighbour.startsWith(hash), false);
     assert.equal(envLineHasEntry(`node x ${REPO_ENV}=${neighbour} PATH=/usr/bin`, marker), false);
   });
 
   it('resolves one checkout to one marker through trailing slashes and dot segments', () => {
-    const real = mkdtempSync(join(tmpdir(), 'anti-design-marker-'));
+    const real = mkdtempSync(join(tmpdir(), 'anti-ai-design-marker-'));
     try {
       const expected = repoMarker(real);
       for (const spelling of [`${real}/`, `${real}/.`, join(real, 'sub', '..')]) {
@@ -258,8 +258,8 @@ describe('envLineHasEntry', () => {
   });
 
   it('resolves a symlinked checkout to the same marker as its target', () => {
-    const real = mkdtempSync(join(tmpdir(), 'anti-design-marker-'));
-    const link = join(mkdtempSync(join(tmpdir(), 'anti-design-link-')), 'checkout');
+    const real = mkdtempSync(join(tmpdir(), 'anti-ai-design-marker-'));
+    const link = join(mkdtempSync(join(tmpdir(), 'anti-ai-design-link-')), 'checkout');
     try {
       // Windows refuses a directory symlink without Developer Mode; a junction
       // is the equivalent it does allow. Same call shape as concept-seed's.
@@ -286,7 +286,7 @@ describe('envLineHasEntry', () => {
 
 describe('marker values', () => {
   it('generates run and process ids from a whitespace-free alphabet', () => {
-    for (const value of [makeRunId('/work/anti-design'), makeProcId(), repoMarker('/work/anti-design')]) {
+    for (const value of [makeRunId('/work/anti-ai-design'), makeProcId(), repoMarker('/work/anti-ai-design')]) {
       assert.match(value, /^[A-Za-z0-9_-]+$/, `marker value "${value}" must not need quoting`);
     }
   });

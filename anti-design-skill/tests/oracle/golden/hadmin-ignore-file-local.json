@@ -1,9 +1,9 @@
 {
-  "stdout": "Added \"src/legacy/**\" to local detector.ignoreFiles (.anti-design/config.local.json). Current: src/legacy/**\n",
+  "stdout": "Added \"src/legacy/**\" to local detector.ignoreFiles (.anti-ai-design/config.local.json). Current: src/legacy/**\n",
   "stderr": "",
   "exit": 0,
   "signal": null,
   "files": {
-    ".anti-design/config.local.json": "{\n  \"detector\": {\n    \"ignoreRules\": [],\n    \"ignoreFiles\": [\n      \"src/legacy/**\"\n    ],\n    \"ignoreValues\": []\n  }\n}\n"
+    ".anti-ai-design/config.local.json": "{\n  \"detector\": {\n    \"ignoreRules\": [],\n    \"ignoreFiles\": [\n      \"src/legacy/**\"\n    ],\n    \"ignoreValues\": []\n  }\n}\n"
   }
 }

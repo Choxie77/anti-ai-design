@@ -13,16 +13,16 @@ Built 2026-11-05 on macOS (Darwin 24.1.0, Apple silicon).
 ```bash
 cd anti-design-skill
 . "$HOME/.cargo/env"
-cargo build --release -p anti-design
+cargo build --release -p anti-ai-design
 ```
 
-Result: `anti-design-skill/target/release/anti-design`, 18 MB, built in 2m 34s from a clean target dir.
+Result: `anti-design-skill/target/release/anti-ai-design`, 18 MB, built in 2m 34s from a clean target dir.
 `--version` prints `0.1.18+engine`.
 
 Use it locally without the (placeholder) download location:
 
 ```bash
-export ANTI_DESIGN_BIN="$PWD/anti-design-skill/target/release/anti-design"
+export ANTI_AI_DESIGN_BIN="$PWD/anti-design-skill/target/release/anti-ai-design"
 ```
 
 ## Smoke test
@@ -34,7 +34,7 @@ full checks need a parsed `.html` file or a running URL.
 
 ## Notes
 
-- The pinned-binary download (`ENGINE_VERSION` 0.1.18) points at the placeholder `OWNER/anti-design`, so
+- The pinned-binary download (`ENGINE_VERSION` 0.1.18) points at the placeholder `Choxie77/anti-ai-design`, so
   installs from the launcher cannot fetch a binary until task-42 sets a real release location. Local builds
   do not need it.
 - Running tests and the Bun build scripts is task-44.

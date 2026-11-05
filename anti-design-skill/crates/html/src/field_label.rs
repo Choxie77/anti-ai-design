@@ -1,6 +1,6 @@
 //! The static engine's reading of whether a form field has a visible label
 //! (taste call r5-p30; the browser engines' reading and the decision's
-//! wording are in `anti_design_core::browser::field_label`).
+//! wording are in `anti_ai_design_core::browser::field_label`).
 //!
 //! There is no layout here, so "visible" is what the cascade can say: the
 //! label and its ancestors are not `display: none`, `hidden`,
@@ -12,8 +12,8 @@
 use crate::background::sv;
 use crate::dom::StaticElement;
 use crate::quality::is_visually_hidden;
-use anti_design_core::browser::field_label::TEXT_LABEL_MAX_CHARS;
-use anti_design_core::js;
+use anti_ai_design_core::browser::field_label::TEXT_LABEL_MAX_CHARS;
+use anti_ai_design_core::js;
 
 const NOT_LABEL_TEXT_TAGS: &[&str] =
     &["input", "select", "textarea", "button", "option", "script", "style", "template", "noscript"];

@@ -1,6 +1,6 @@
 //! JS: live/sveltekit-adapter.mjs + live/frameworks/sveltekit.mjs. Mounts a
 //! dev-only shadow host from `+layout.svelte` via a generated
-//! `src/lib/anti-design/AntiDesignLiveRoot.svelte`; `src/app.html` stays
+//! `src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte`; `src/app.html` stays
 //! untouched.
 
 use crate::config::LiveConfig;
@@ -12,20 +12,20 @@ use once_cell::sync::Lazy;
 use regex::{Regex, RegexBuilder};
 use serde_json::{json, Value};
 
-pub const SVELTE_LIVE_ROOT_COMPONENT: &str = "src/lib/anti-design/AntiDesignLiveRoot.svelte";
-pub const SVELTE_LAYOUT_MARKER_OPEN: &str = "<!-- anti-design-live-svelte-start -->";
-pub const SVELTE_LAYOUT_MARKER_CLOSE: &str = "<!-- anti-design-live-svelte-end -->";
+pub const SVELTE_LIVE_ROOT_COMPONENT: &str = "src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte";
+pub const SVELTE_LAYOUT_MARKER_OPEN: &str = "<!-- anti-ai-design-live-svelte-start -->";
+pub const SVELTE_LAYOUT_MARKER_CLOSE: &str = "<!-- anti-ai-design-live-svelte-end -->";
 pub const SVELTE_ROOT_IMPORT: &str =
-    "import AntiDesignLiveRoot from '$lib/anti-design/AntiDesignLiveRoot.svelte';";
+    "import AntiAiDesignLiveRoot from '$lib/anti-ai-design/AntiAiDesignLiveRoot.svelte';";
 
 static SVELTE_ROOT_IMPORT_LINE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"(?m)^[ \t]*import AntiDesignLiveRoot from '\$lib/anti-design/AntiDesignLiveRoot\.svelte(?:\?[^']*)?';[ \t]*\r?\n?").unwrap()
+    Regex::new(r"(?m)^[ \t]*import AntiAiDesignLiveRoot from '\$lib/anti-ai-design/AntiAiDesignLiveRoot\.svelte(?:\?[^']*)?';[ \t]*\r?\n?").unwrap()
 });
 
 /// JS: svelteRootImportLine(rev)
 pub fn svelte_root_import_line(rev: Option<&str>) -> String {
     match rev {
-        Some(r) if !r.is_empty() => format!("import AntiDesignLiveRoot from '$lib/anti-design/AntiDesignLiveRoot.svelte?anti-design-live={}';", r),
+        Some(r) if !r.is_empty() => format!("import AntiAiDesignLiveRoot from '$lib/anti-ai-design/AntiAiDesignLiveRoot.svelte?anti-ai-design-live={}';", r),
         _ => SVELTE_ROOT_IMPORT.to_string(),
     }
 }
@@ -190,7 +190,7 @@ pub fn patch_svelte_layout(content: &str, rev: Option<&str>) -> String {
     }
     if !out.contains(SVELTE_LAYOUT_MARKER_OPEN) {
         let block = format!(
-            "{}\n<AntiDesignLiveRoot />\n{}\n",
+            "{}\n<AntiAiDesignLiveRoot />\n{}\n",
             SVELTE_LAYOUT_MARKER_OPEN, SVELTE_LAYOUT_MARKER_CLOSE
         );
         let m = RENDER_RE.find(&out).or_else(|| SLOT_RE.find(&out));
@@ -209,7 +209,7 @@ pub fn patch_svelte_layout(content: &str, rev: Option<&str>) -> String {
 /// JS: unpatchSvelteLayout(content)
 pub fn unpatch_svelte_layout(content: &str) -> String {
     let block_re = Regex::new(&format!(
-        "([ \\t]*){}\\n<AntiDesignLiveRoot\\s*/>\\n{}\\n?",
+        "([ \\t]*){}\\n<AntiAiDesignLiveRoot\\s*/>\\n{}\\n?",
         crate::util::escape_regex(SVELTE_LAYOUT_MARKER_OPEN),
         crate::util::escape_regex(SVELTE_LAYOUT_MARKER_CLOSE)
     ))
@@ -244,17 +244,17 @@ pub fn build_svelte_live_root_component(port: i64, token: Option<&str>) -> Strin
   import {{ onMount }} from 'svelte';
 
   const LIVE_URL = '{live_url}';
-  const HOST_ID = 'anti-design-live-root';
+  const HOST_ID = 'anti-ai-design-live-root';
 
   onMount(() => {{
-    let host = document.querySelector('anti-design-live-root#' + HOST_ID) || document.getElementById(HOST_ID);
+    let host = document.querySelector('anti-ai-design-live-root#' + HOST_ID) || document.getElementById(HOST_ID);
     if (!host) {{
-      host = document.createElement('anti-design-live-root');
+      host = document.createElement('anti-ai-design-live-root');
       host.id = HOST_ID;
       document.body.appendChild(host);
     }}
 
-    host.dataset.antiDesignLiveAdapter = 'sveltekit';
+    host.dataset.antiAiDesignLiveAdapter = 'sveltekit';
     host.style.setProperty('all', 'initial', 'important');
     host.style.setProperty('display', 'block', 'important');
     host.style.setProperty('position', 'fixed', 'important');
@@ -267,16 +267,16 @@ pub fn build_svelte_live_root_component(port: i64, token: Option<&str>) -> Strin
     host.style.setProperty('pointer-events', 'none', 'important');
 
     const root = host.shadowRoot || host.attachShadow({{ mode: 'open' }});
-    if (!root.querySelector('style[data-anti-design-live-reset]')) {{
+    if (!root.querySelector('style[data-anti-ai-design-live-reset]')) {{
       const reset = document.createElement('style');
-      reset.dataset.antiDesignLiveReset = 'true';
+      reset.dataset.antiAiDesignLiveReset = 'true';
       reset.textContent = ':host, :host *, * {{ box-sizing: border-box; }}';
       root.appendChild(reset);
     }}
 
-    window.__ANTI_DESIGN_LIVE_ADAPTER__ = 'sveltekit';
-    window.__ANTI_DESIGN_LIVE_UI_ROOT__ = root;
-    window.__ANTI_DESIGN_LIVE_CHROME_MOUNT__ = {{
+    window.__ANTI_AI_DESIGN_LIVE_ADAPTER__ = 'sveltekit';
+    window.__ANTI_AI_DESIGN_LIVE_UI_ROOT__ = root;
+    window.__ANTI_AI_DESIGN_LIVE_CHROME_MOUNT__ = {{
       adapter: 'sveltekit',
       version: 1,
       host,
@@ -286,9 +286,9 @@ pub fn build_svelte_live_root_component(port: i64, token: Option<&str>) -> Strin
     const script = document.createElement('script');
     script.src = LIVE_URL;
     script.async = true;
-    script.dataset.antiDesignLiveScript = 'true';
+    script.dataset.antiAiDesignLiveScript = 'true';
     script.onerror = () => console.error(
-      '[anti-design] live.js failed to load from ' + LIVE_URL
+      '[anti-ai-design] live.js failed to load from ' + LIVE_URL
       + ' (helper down, or the token rotated while a stale adapter module was cached).'
       + ' Re-run the live boot, then reload this page.'
     );
@@ -296,9 +296,9 @@ pub fn build_svelte_live_root_component(port: i64, token: Option<&str>) -> Strin
 
     return () => {{
       script.remove();
-      if (window.__ANTI_DESIGN_LIVE_UI_ROOT__ === root) delete window.__ANTI_DESIGN_LIVE_UI_ROOT__;
-      if (window.__ANTI_DESIGN_LIVE_CHROME_MOUNT__?.root === root) delete window.__ANTI_DESIGN_LIVE_CHROME_MOUNT__;
-      if (window.__ANTI_DESIGN_LIVE_ADAPTER__ === 'sveltekit') delete window.__ANTI_DESIGN_LIVE_ADAPTER__;
+      if (window.__ANTI_AI_DESIGN_LIVE_UI_ROOT__ === root) delete window.__ANTI_AI_DESIGN_LIVE_UI_ROOT__;
+      if (window.__ANTI_AI_DESIGN_LIVE_CHROME_MOUNT__?.root === root) delete window.__ANTI_AI_DESIGN_LIVE_CHROME_MOUNT__;
+      if (window.__ANTI_AI_DESIGN_LIVE_ADAPTER__ === 'sveltekit') delete window.__ANTI_AI_DESIGN_LIVE_ADAPTER__;
     }};
   }});
 </script>
@@ -389,7 +389,7 @@ pub fn prune_empty_dir(dir: &str, stop_dir: &str) {
 /// JS: sveltekit.inject.artifacts({ project })
 pub fn sveltekit_artifacts(project: &SvelteKitProject) -> Vec<Value> {
     vec![
-        json!({ "kind": "created", "path": SVELTE_LIVE_ROOT_COMPONENT, "marker": "anti-design-live-root", "pruneTo": "src" }),
+        json!({ "kind": "created", "path": SVELTE_LIVE_ROOT_COMPONENT, "marker": "anti-ai-design-live-root", "pruneTo": "src" }),
         json!({ "kind": "patched", "path": project.layout_file, "patch": "sveltekit-layout", "markers": [SVELTE_LAYOUT_MARKER_OPEN] }),
     ]
 }

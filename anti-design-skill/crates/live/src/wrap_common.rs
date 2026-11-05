@@ -9,7 +9,7 @@ use crate::source_search::{
     NEVER_SOURCE_DIRS,
 };
 use crate::util::{jsp, safe_read};
-use anti_design_core::js::{is_js_whitespace, trim, WS};
+use anti_ai_design_core::js::{is_js_whitespace, trim, WS};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{json, Value};
@@ -163,7 +163,7 @@ pub fn find_element(lines: &[String], query: &str, tag: Option<&str>) -> Option<
         if skip_line(line) {
             continue;
         }
-        if line.contains("data-anti-design-variant") {
+        if line.contains("data-anti-ai-design-variant") {
             continue;
         }
         let Some(opener) = find_opener_line(lines, i, tag) else {
@@ -188,7 +188,7 @@ pub fn find_all_elements(lines: &[String], query: &str, tag: Option<&str>) -> Ve
         if skip_line(line) {
             continue;
         }
-        if line.contains("data-anti-design-variant") {
+        if line.contains("data-anti-ai-design-variant") {
             continue;
         }
         let Some(opener) = find_opener_line(lines, i, tag) else {
@@ -405,7 +405,7 @@ pub fn build_css_selector_prefix_examples(style_mode: &str, count: i64) -> Vec<S
         return Vec::new();
     }
     (1..=count.max(0))
-        .map(|i| format!("[data-anti-design-variant=\"{}\"]", i))
+        .map(|i| format!("[data-anti-ai-design-variant=\"{}\"]", i))
         .collect()
 }
 
@@ -419,12 +419,12 @@ pub fn build_css_authoring(traits: &SourceTraits, count: i64) -> Value {
             "styleTag": style_tag,
             "styleClose": style_close,
             "strategy": "global-prefixed",
-            "rulePattern": "[data-anti-design-variant=\"N\"] > .variant-class { ... }",
-            "selectorExamples": numbers.iter().map(|n| format!("[data-anti-design-variant=\"{}\"] > .variant-class", n)).collect::<Vec<_>>(),
+            "rulePattern": "[data-anti-ai-design-variant=\"N\"] > .variant-class { ... }",
+            "selectorExamples": numbers.iter().map(|n| format!("[data-anti-ai-design-variant=\"{}\"] > .variant-class", n)).collect::<Vec<_>>(),
             "requirements": [
                 "Use the styleTag exactly; the is:inline attribute is required for this file.",
                 "Put raw CSS directly between the styleTag opening and a plain </style> close.",
-                "Prefix every preview selector with the matching [data-anti-design-variant=\"N\"] selector.",
+                "Prefix every preview selector with the matching [data-anti-ai-design-variant=\"N\"] selector.",
                 "Keep selectors anchored to the generated variant wrapper; do not rely on component CSS scoping for preview rules.",
             ],
             "forbidden": [
@@ -439,15 +439,15 @@ pub fn build_css_authoring(traits: &SourceTraits, count: i64) -> Value {
         "styleTag": style_tag,
         "styleClose": style_close,
         "strategy": "scope-rule",
-        "rulePattern": "@scope ([data-anti-design-variant=\"N\"]) { :scope > .variant-class { ... } }",
-        "selectorExamples": numbers.iter().map(|n| format!("@scope ([data-anti-design-variant=\"{}\"]) {{ :scope > .variant-class {{ ... }} }}", n)).collect::<Vec<_>>(),
+        "rulePattern": "@scope ([data-anti-ai-design-variant=\"N\"]) { :scope > .variant-class { ... } }",
+        "selectorExamples": numbers.iter().map(|n| format!("@scope ([data-anti-ai-design-variant=\"{}\"]) {{ :scope > .variant-class {{ ... }} }}", n)).collect::<Vec<_>>(),
         "requirements": [
-            "Use @scope blocks keyed to each [data-anti-design-variant=\"N\"] wrapper.",
+            "Use @scope blocks keyed to each [data-anti-ai-design-variant=\"N\"] wrapper.",
             "Inside each @scope block, make :scope rules step into the replacement element with a descendant combinator.",
             "Use the styleTag exactly; do not add framework-specific style attributes unless this object says to.",
         ],
         "forbidden": [
-            "Do not use global [data-anti-design-variant=\"N\"] selector prefixes for this styleMode.",
+            "Do not use global [data-anti-ai-design-variant=\"N\"] selector prefixes for this styleMode.",
             "Do not add is:inline to the style tag for this styleMode.",
         ],
     })
@@ -629,7 +629,7 @@ pub fn parse_count(v: Option<&str>) -> i64 {
         Some(s) if !s.is_empty() => s,
         _ => "3",
     };
-    let n = anti_design_core::js::parse_int(raw, 10);
+    let n = anti_ai_design_core::js::parse_int(raw, 10);
     if n.is_nan() {
         // JS: NaN interpolates as "NaN" and Array.from({length: NaN}) is [].
         i64::MIN

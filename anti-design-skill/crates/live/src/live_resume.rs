@@ -1,11 +1,11 @@
-//! JS: live-resume.mjs -> `anti-design live-resume`. The active durable
+//! JS: live-resume.mjs -> `anti-ai-design live-resume`. The active durable
 //! session checkpoint and the next safe agent action; also the hint helpers
 //! `live-status` shares.
 
 use crate::roots::enter_live_root;
 use crate::session::create_live_session_store;
 use crate::util::{json_pretty, println};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{json, Map, Value};
 
 fn manual_apply_reply_command(self_cmd: &str, id: Option<&str>) -> String {
@@ -16,11 +16,11 @@ fn manual_apply_reply_command(self_cmd: &str, id: Option<&str>) -> String {
     )
 }
 
-/// How this binary is spelled in printed agent commands (ANTI_DESIGN_SELF or
-/// the plain `anti-design` verb).
+/// How this binary is spelled in printed agent commands (ANTI_AI_DESIGN_SELF or
+/// the plain `anti-ai-design` verb).
 pub fn self_cmd(io: &Io) -> String {
     let cwd = io.cwd.to_string_lossy().into_owned();
-    anti_design_context::provider::detect(&io.env, &cwd).self_cmd
+    anti_ai_design_context::provider::detect(&io.env, &cwd).self_cmd
 }
 
 fn truthy(v: Option<&Value>) -> bool {
@@ -56,13 +56,13 @@ pub fn manual_apply_resume_hint(event: Option<&Map<String, Value>>, self_cmd: &s
     if let Some(n) = finite(summary.get("opCount")) {
         parts.push(format!(
             "{} op(s)",
-            anti_design_core::js::number_to_string(n)
+            anti_ai_design_core::js::number_to_string(n)
         ));
     }
     if let Some(n) = finite(summary.get("entryCount")) {
         parts.push(format!(
             "{} entr{}",
-            anti_design_core::js::number_to_string(n),
+            anti_ai_design_core::js::number_to_string(n),
             if n == 1.0 { "y" } else { "ies" }
         ));
     }
@@ -91,7 +91,7 @@ fn str_of(v: Option<&Value>) -> String {
         Some(Value::String(s)) => s.clone(),
         Some(Value::Number(n)) => n
             .as_f64()
-            .map(anti_design_core::js::number_to_string)
+            .map(anti_ai_design_core::js::number_to_string)
             .unwrap_or_else(|| n.to_string()),
         Some(Value::Bool(b)) => b.to_string(),
         Some(Value::Array(a)) => a
@@ -268,7 +268,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
 fn resume_cli(argv: &[String], io: &mut Io) -> i32 {
     let args = parse_args(argv);
     if args.help {
-        println(io, "Usage: anti-design live-resume [--id SESSION_ID]\n\nPrint the active durable session checkpoint and the next safe agent action.");
+        println(io, "Usage: anti-ai-design live-resume [--id SESSION_ID]\n\nPrint the active durable session checkpoint and the next safe agent action.");
         return 0;
     }
     let cwd = io.cwd.to_string_lossy().into_owned();

@@ -1,5 +1,5 @@
 [package]
-name = "anti-design-html"
+name = "anti-ai-design-html"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
@@ -9,12 +9,12 @@ publish.workspace = true
 default = []
 # Vector dispatcher used by tests/vectors.rs to replay the recorded JS call
 # vectors through the Rust port.
-vectors = ["anti-design-core/vectors"]
+vectors = ["anti-ai-design-core/vectors"]
 
 [dependencies]
-anti-design-common = { workspace = true }
-anti-design-core = { workspace = true }
-anti-design-detect = { workspace = true }
+anti-ai-design-common = { workspace = true }
+anti-ai-design-core = { workspace = true }
+anti-ai-design-detect = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true, features = ["float_roundtrip"] }
 regex = { workspace = true }
@@ -28,5 +28,5 @@ cssparser = "0.37"
 thiserror = { workspace = true }
 
 [dev-dependencies]
-anti-design-core = { workspace = true, features = ["vectors"] }
-anti-design-html = { path = ".", features = ["vectors"] }
+anti-ai-design-core = { workspace = true, features = ["vectors"] }
+anti-ai-design-html = { path = ".", features = ["vectors"] }

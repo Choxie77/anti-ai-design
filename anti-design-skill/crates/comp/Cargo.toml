@@ -1,5 +1,5 @@
 [package]
-name = "anti-design-comp"
+name = "anti-ai-design-comp"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

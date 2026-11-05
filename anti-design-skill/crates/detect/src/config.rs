@@ -1,11 +1,11 @@
-//! Port of `cli/lib/anti-design-config.mjs`: the CLI-side reader/writer for
-//! the unified `.anti-design` config (`config.json` shared, `config.local.json`
+//! Port of `cli/lib/anti-ai-design-config.mjs`: the CLI-side reader/writer for
+//! the unified `.anti-ai-design` config (`config.json` shared, `config.local.json`
 //! per developer), detector ignore semantics, glob matching, and the
 //! `.git/info/exclude` handling.
 
-use anti_design_core::findings::Finding;
-use anti_design_core::js::{self, math_round, number_to_string, parse_float, parse_int};
-use anti_design_core::js_ext_b::utf16_len;
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_core::js::{self, math_round, number_to_string, parse_float, parse_int};
+use anti_ai_design_core::js_ext_b::utf16_len;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{Map, Value};
@@ -13,14 +13,14 @@ use serde_json::{Map, Value};
 use crate::jsp;
 use crate::util::{as_plain_object, js_string, re, read_json, D, DOT, WS};
 
-/// JS: anti-design-config.mjs#getConfigPath
+/// JS: anti-ai-design-config.mjs#getConfigPath
 pub fn get_config_path(root: &str) -> String {
-    jsp::join(&[root, ".anti-design", "config.json"])
+    jsp::join(&[root, ".anti-ai-design", "config.json"])
 }
 
-/// JS: anti-design-config.mjs#getLocalConfigPath
+/// JS: anti-ai-design-config.mjs#getLocalConfigPath
 pub fn get_local_config_path(root: &str) -> String {
-    jsp::join(&[root, ".anti-design", "config.local.json"])
+    jsp::join(&[root, ".anti-ai-design", "config.local.json"])
 }
 
 /// JS `safeReadJson`: a JSON object, or None for a missing / invalid / non-object file.
@@ -230,7 +230,7 @@ fn unique_strings(values: Vec<String>) -> Vec<String> {
     out
 }
 
-/// JS: anti-design-config.mjs#readDetectionConfig
+/// JS: anti-ai-design-config.mjs#readDetectionConfig
 pub fn read_detection_config(root: &str) -> DetectionConfig {
     let mut config = DetectionConfig::with_defaults();
     for file_path in [get_config_path(root), get_local_config_path(root)] {
@@ -241,7 +241,7 @@ pub fn read_detection_config(root: &str) -> DetectionConfig {
     config
 }
 
-/// JS: anti-design-config.mjs#readRawDetectionConfig
+/// JS: anti-ai-design-config.mjs#readRawDetectionConfig
 pub fn read_raw_detection_config(root: &str, local: bool) -> DetectionConfig {
     let raw = safe_read_json(&if local {
         get_local_config_path(root)
@@ -254,7 +254,7 @@ pub fn read_raw_detection_config(root: &str, local: bool) -> DetectionConfig {
     config
 }
 
-/// JS: anti-design-config.mjs#writeDetectionConfig. Returns the written path.
+/// JS: anti-ai-design-config.mjs#writeDetectionConfig. Returns the written path.
 pub fn write_detection_config(
     root: &str,
     detector_config: &DetectionConfig,
@@ -365,7 +365,7 @@ fn strip_detector_keys(raw: Option<&Map<String, Value>>) -> Option<Map<String, V
 re!(EDGE_QUOTE_RE, r#"^["']|["']$"#);
 re!(WS_RUN_RE, format!("{WS}+"));
 
-/// JS: anti-design-config.mjs#normalizeIgnoreValue
+/// JS: anti-ai-design-config.mjs#normalizeIgnoreValue
 pub fn normalize_ignore_value(value: &str) -> String {
     let t = js::trim(value);
     let t = EDGE_QUOTE_RE.replace_all(t, "");
@@ -614,7 +614,7 @@ fn ignore_value_matches(rule: &str, entry_value: &str, finding_value: &str) -> b
     !entry_color.is_empty() && entry_color == color_ignore_key(finding_value)
 }
 
-/// JS: anti-design-config.mjs#normalizeIgnoreValueEntries over raw JSON entries.
+/// JS: anti-ai-design-config.mjs#normalizeIgnoreValueEntries over raw JSON entries.
 pub fn normalize_ignore_value_entries(entries: &[Value]) -> Vec<IgnoreValueEntry> {
     let mut out = Vec::new();
     for entry in entries {
@@ -806,7 +806,7 @@ fn glob_to_regex(glob: &str) -> Option<Regex> {
     Regex::new(&re).ok()
 }
 
-/// JS: anti-design-config.mjs#matchesAnyGlob
+/// JS: anti-ai-design-config.mjs#matchesAnyGlob
 pub fn matches_any_glob(file_path: &str, globs: &[String]) -> bool {
     if globs.is_empty() {
         return false;
@@ -827,7 +827,7 @@ pub fn matches_any_glob(file_path: &str, globs: &[String]) -> bool {
     false
 }
 
-/// JS: anti-design-config.mjs#shouldIgnoreDetectionFile
+/// JS: anti-ai-design-config.mjs#shouldIgnoreDetectionFile
 pub fn should_ignore_detection_file(file_path: &str, root: &str, config: &DetectionConfig) -> bool {
     let globs = &config.ignore_files;
     if globs.is_empty() {
@@ -855,7 +855,7 @@ pub fn should_ignore_detection_file(file_path: &str, root: &str, config: &Detect
     false
 }
 
-/// JS: anti-design-config.mjs#filterDetectionFindings
+/// JS: anti-ai-design-config.mjs#filterDetectionFindings
 pub fn filter_detection_findings(findings: Vec<Finding>, config: &DetectionConfig) -> Vec<Finding> {
     if findings.is_empty() {
         return vec![];
@@ -929,7 +929,7 @@ const DIRECT_VALUE_RULES: &[&str] = &[
     "design-system-font-size",
 ];
 
-/// JS: anti-design-config.mjs#extractFindingIgnoreValue
+/// JS: anti-ai-design-config.mjs#extractFindingIgnoreValue
 pub fn extract_finding_ignore_value(finding: &Finding) -> String {
     let rule = normalize_ignore_rule(&finding.antipattern);
     if !DIRECT_VALUE_RULES.contains(&rule.as_str()) {
@@ -1029,7 +1029,7 @@ fn extract_finding_ignore_value_raw(finding: &Finding, rule: &str) -> String {
 
 /// JS `decodeURIComponent` with the source's `try { } catch { raw }` fallback.
 pub fn decode_uri_component(s: &str) -> String {
-    anti_design_core::browser::driver::decode_uri_component(s).unwrap_or_else(|| s.to_string())
+    anti_ai_design_core::browser::driver::decode_uri_component(s).unwrap_or_else(|| s.to_string())
 }
 
 re!(
@@ -1043,7 +1043,7 @@ re!(
 );
 re!(MOTION_TOKEN_RE, "(?i:bounce|elastic|wobble|jiggle|spring)");
 static COMMA_WS_SPLIT_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(&format!("[,{}]+", anti_design_core::js::WS_CHARS)).unwrap());
+    Lazy::new(|| Regex::new(&format!("[,{}]+", anti_ai_design_core::js::WS_CHARS)).unwrap());
 
 fn extract_motion_ignore_value(text: &str) -> String {
     if let Some(m) = ANIMATE_BOUNCE_RE.find(text) {
@@ -1070,7 +1070,7 @@ fn clean_ignore_value_display(value: &str) -> String {
     WS_RUN_RE.replace_all(&t, " ").into_owned()
 }
 
-/// JS: anti-design-config.mjs#getHookConsent
+/// JS: anti-ai-design-config.mjs#getHookConsent
 pub fn get_hook_consent(root: &str) -> Option<String> {
     let mut consent = None;
     for file_path in [get_config_path(root), get_local_config_path(root)] {
@@ -1086,17 +1086,17 @@ pub fn get_hook_consent(root: &str) -> Option<String> {
     consent
 }
 
-const EXCLUDE_OPEN: &str = "# anti-design-config-ignore-start";
-const EXCLUDE_CLOSE: &str = "# anti-design-config-ignore-end";
-const EXCLUDE_PATTERNS: &[&str] = &[".anti-design/config.local.json"];
+const EXCLUDE_OPEN: &str = "# anti-ai-design-config-ignore-start";
+const EXCLUDE_CLOSE: &str = "# anti-ai-design-config-ignore-end";
+const EXCLUDE_PATTERNS: &[&str] = &[".anti-ai-design/config.local.json"];
 
-/// JS: anti-design-config.mjs#ensureConfigGitExclude. Best effort; false when
+/// JS: anti-ai-design-config.mjs#ensureConfigGitExclude. Best effort; false when
 /// there is no resolvable git dir.
 pub fn ensure_config_git_exclude(root: &str) -> bool {
     let Some(git_dir) = resolve_git_dir(root) else {
         return false;
     };
-    let target = anti_design_common::git::info_exclude(&git_dir);
+    let target = anti_ai_design_common::git::info_exclude(&git_dir);
     let existing = crate::util::read_text(&target).unwrap_or_default();
     let mut block_lines = vec![EXCLUDE_OPEN];
     block_lines.extend(EXCLUDE_PATTERNS);
@@ -1208,13 +1208,13 @@ mod tests {
     #[test]
     fn detection_extensions() {
         let dir = std::env::temp_dir().join(format!(
-            "anti-design-detect-ext-{}",
+            "anti-ai-design-detect-ext-{}",
             std::process::id()
         ));
-        let anti_design = dir.join(".anti-design");
-        std::fs::create_dir_all(&anti_design).unwrap();
+        let anti_ai_design = dir.join(".anti-ai-design");
+        std::fs::create_dir_all(&anti_ai_design).unwrap();
         std::fs::write(
-            anti_design.join("config.json"),
+            anti_ai_design.join("config.json"),
             r#"{"detector":{"extensions":[{"ext":".html.erb","engine":"html"},"blade.php"]}}"#,
         )
         .unwrap();
@@ -1228,7 +1228,7 @@ mod tests {
             vec![entry(".html.erb", "html"), entry(".blade.php", "html")]
         );
         std::fs::write(
-            anti_design.join("config.local.json"),
+            anti_ai_design.join("config.local.json"),
             r#"{"detector":{"extensions":[{"ext":".html.erb","engine":"text"}]}}"#,
         )
         .unwrap();

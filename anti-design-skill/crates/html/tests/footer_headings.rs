@@ -4,7 +4,7 @@
 //! that heading itself skipped in (a column title, not a closing call to
 //! action).
 
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::Path;
 
 fn skips(body: &str) -> Vec<String> {

@@ -20,12 +20,12 @@ import {
 const REPO_ROOT = path.resolve(import.meta.dir, '..');
 
 const GOOD_MANIFEST = {
-  name: 'anti-design',
+  name: 'anti-ai-design',
   description: 'Test plugin',
   version: '4.0.4',
   author: { name: 'Paul Bakaus' },
-  homepage: 'https://anti-design.example',
-  repository: 'https://github.com/OWNER/anti-design',
+  homepage: 'https://github.com/Choxie77/anti-ai-design',
+  repository: 'https://github.com/Choxie77/anti-ai-design',
   skills: './skills/',
 };
 
@@ -54,7 +54,7 @@ function writeFixture(root, { manifest = GOOD_MANIFEST, sourceAgents = [], shipp
 describe('collectPluginManifestFindings', () => {
   let root;
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-manifest-'));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-manifest-'));
   });
   afterEach(() => {
     fs.rmSync(root, { recursive: true, force: true });
@@ -112,20 +112,20 @@ describe('collectPluginManifestFindings', () => {
 
   test('a claude-name rename expects the emitted filename, not the source basename', () => {
     writeFixture(root, {
-      sourceAgents: [{ file: 'reviewer.md', frontmatter: 'claude-name: anti-design-reviewer' }],
-      shippedAgents: ['anti-design-reviewer.md'],
+      sourceAgents: [{ file: 'reviewer.md', frontmatter: 'claude-name: anti-ai-design-reviewer' }],
+      shippedAgents: ['anti-ai-design-reviewer.md'],
     });
     expect(collectPluginManifestFindings(root)).toEqual([]);
   });
 
   test('a claude-name rename that is not shipped is reported under the emitted filename', () => {
     writeFixture(root, {
-      sourceAgents: [{ file: 'reviewer.md', frontmatter: 'claude-name: anti-design-reviewer' }],
+      sourceAgents: [{ file: 'reviewer.md', frontmatter: 'claude-name: anti-ai-design-reviewer' }],
       shippedAgents: [],
     });
     const findings = collectPluginManifestFindings(root);
     expect(findings).toHaveLength(1);
-    expect(findings[0].relPath).toBe('plugin/agents/anti-design-reviewer.md');
+    expect(findings[0].relPath).toBe('plugin/agents/anti-ai-design-reviewer.md');
     expect(findings[0].reason).toMatch(/skill\/agents\/reviewer\.md/);
   });
 
@@ -170,7 +170,7 @@ describe('collectPluginManifestFindings', () => {
   });
 
   test('valid JSON that is not an object is a finding, not a thrown stack', () => {
-    for (const raw of ['null', '"anti-design"', '42', '["./agents/reviewer.md"]']) {
+    for (const raw of ['null', '"anti-ai-design"', '42', '["./agents/reviewer.md"]']) {
       writeFixture(root, { manifest: raw });
       const findings = collectPluginManifestFindings(root);
       expect(findings).toHaveLength(1);

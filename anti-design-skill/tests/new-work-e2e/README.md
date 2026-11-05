@@ -33,19 +33,19 @@ The concept-seed direction roll (challengers, `ASSIGNED INDEX`, the no
 PRODUCT.md gate) is pinned by the oracle corpus (`tests/oracle`, the `seed-*`
 cases) and is not repeated here.
 
-Both verbs run through the engine binary (`anti-design serve-question`,
-`anti-design generate-image`) resolved by `tests/lib/engine-bin.mjs`:
-`ANTI_DESIGN_BIN` or `skill/scripts/bin/<os>-<arch>/` (`bun run fetch:engine`).
+Both verbs run through the engine binary (`anti-ai-design serve-question`,
+`anti-ai-design generate-image`) resolved by `tests/lib/engine-bin.mjs`:
+`ANTI_AI_DESIGN_BIN` or `skill/scripts/bin/<os>-<arch>/` (`bun run fetch:engine`).
 
 ## Pieces
 
 - `user-bot.mjs` is a module plus CLI. Given a workspace dir it resolves the
-  running daemon from `.anti-design/questions/<key>.state.json`, opens the page,
+  running daemon from `.anti-ai-design/questions/<key>.state.json`, opens the page,
   and runs a JSON policy of real clicks: `{"pick":"assigned"}`,
   `{"reroll":true,"steer":"warmer"}`, `{"pick":"challenger-*"}`,
   `{"canon":true}`, `{"close":true}`. The deterministic tier passes an
   already-launched browser in; the CLI launches its own Chromium.
-- `ANTI_DESIGN_IMAGE_GEN_FAKE=1` switches `anti-design generate-image` to
+- `ANTI_AI_DESIGN_IMAGE_GEN_FAKE=1` switches `anti-ai-design generate-image` to
   the offline stand-in: no OpenAI call, no key, a `$0.00` cost line, and a
   deterministic image (SVG for `.svg` out with the wrapped prompt text and a
   `SYNTHETIC COMP` label; a valid palette-stripe PNG otherwise, with the prompt
@@ -58,7 +58,7 @@ pattern in `tests/live-e2e`:
 
 - A real model plays the user through the same scripted `user-bot.mjs` policy,
   choosing and steering instead of following canned actions.
-- `ANTI_DESIGN_IMAGE_GEN_FAKE` still stands in for image spend, so a full
+- `ANTI_AI_DESIGN_IMAGE_GEN_FAKE` still stands in for image spend, so a full
   concept-to-card cycle runs without paying per render.
 - Assertions run against the tool-call trace via the skill-behavior harness,
   the same way `tests/skill-behavior` keys on the trace rather than free-form

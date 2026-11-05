@@ -1,12 +1,12 @@
-//! JS: embed-prompt.mjs -> `anti-design embed-prompt`
+//! JS: embed-prompt.mjs -> `anti-ai-design embed-prompt`
 
 use crate::jsp;
 use crate::util::{exists, iso_now, json_pretty, read_dir_names, utf16_len};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{Map, Value};
 use std::io::Read;
 
-const KEYWORD: &[u8] = b"anti-design:prompt";
+const KEYWORD: &[u8] = b"anti-ai-design:prompt";
 
 fn crc32(data: &[u8]) -> u32 {
     let mut table = [0u32; 256];

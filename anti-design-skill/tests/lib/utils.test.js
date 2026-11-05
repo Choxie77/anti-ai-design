@@ -189,7 +189,7 @@ describe('generateYamlFrontmatter', () => {
 
   test('should quote strings containing colon-space (breaks plain scalars)', () => {
     const data = {
-      name: 'anti-design',
+      name: 'anti-ai-design',
       description: 'Design fluency. Also handles: critique, audit. Commands: craft, polish.'
     };
 
@@ -447,11 +447,11 @@ Audit the code.`;
 
   test('should read skill with reference files', () => {
     const skillContent = `---
-name: anti-design
-description: Anti-Design design skill
+name: anti-ai-design
+description: Anti-AI Design design skill
 ---
 
-Anti-Design design instructions.`;
+Anti-AI Design design instructions.`;
 
     const skillDir = path.join(testRootDir, 'skill');
     ensureDir(skillDir);
@@ -471,7 +471,7 @@ Anti-Design design instructions.`;
     expect(refNames).toEqual(['color', 'typography']);
   });
 
-  test('should fall back to "anti-design" when frontmatter has no name', () => {
+  test('should fall back to "anti-ai-design" when frontmatter has no name', () => {
     const skillDir = path.join(testRootDir, 'skill');
     ensureDir(skillDir);
     fs.writeFileSync(path.join(skillDir, 'SKILL.src.md'), 'Just body, no frontmatter.');
@@ -479,7 +479,7 @@ Anti-Design design instructions.`;
     const { skills } = readSourceFiles(testRootDir);
 
     expect(skills).toHaveLength(1);
-    expect(skills[0].name).toBe('anti-design');
+    expect(skills[0].name).toBe('anti-ai-design');
   });
 
   test('should ignore non-md files in skill/reference', () => {
@@ -631,23 +631,23 @@ describe('replacePlaceholders', () => {
     expect(result).toBe('Commands: /audit, /polish, /optimize');
   });
 
-  test('should exclude anti-design from {{available_commands}}', () => {
-    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'anti-design', 'polish']);
+  test('should exclude anti-ai-design from {{available_commands}}', () => {
+    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'anti-ai-design', 'polish']);
     expect(result).toBe('Commands: /audit, /polish');
   });
 
-  test('should exclude legacy teach-anti-design from {{available_commands}}', () => {
-    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'teach-anti-design', 'polish']);
+  test('should exclude legacy teach-anti-ai-design from {{available_commands}}', () => {
+    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'teach-anti-ai-design', 'polish']);
     expect(result).toBe('Commands: /audit, /polish');
   });
 
-  test('lists /anti-design sub-commands for {{available_commands}} when no command names are passed', () => {
+  test('lists /anti-ai-design sub-commands for {{available_commands}} when no command names are passed', () => {
     // v3.0 single-skill architecture: with no command names, the list falls back
-    // to the ANTI_DESIGN_SUB_COMMANDS sub-commands rendered as `/anti-design <sub>`.
+    // to the ANTI_AI_DESIGN_SUB_COMMANDS sub-commands rendered as `/anti-ai-design <sub>`.
     const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', []);
-    expect(result.startsWith('Commands: /anti-design ')).toBe(true);
-    expect(result).toContain('/anti-design audit');
-    expect(result).toContain('/anti-design polish');
+    expect(result.startsWith('Commands: /anti-ai-design ')).toBe(true);
+    expect(result).toContain('/anti-ai-design audit');
+    expect(result).toContain('/anti-ai-design polish');
   });
 
   test('should replace multiple placeholders in the same string', () => {
@@ -667,39 +667,39 @@ describe('replacePlaceholders', () => {
 
   test('should replace Codex command invocations without rewriting paths', () => {
     const source = [
-      'Run /anti-design audit.',
-      'Use `/anti-design polish` next.',
-      '.github/hooks/anti-design.json',
-      '.codex/skills/anti-design/scripts/context.mjs',
-      'https://example.com/anti-design',
+      'Run /anti-ai-design audit.',
+      'Use `/anti-ai-design polish` next.',
+      '.github/hooks/anti-ai-design.json',
+      '.codex/skills/anti-ai-design/scripts/context.mjs',
+      'https://example.com/anti-ai-design',
     ].join('\n');
 
-    const result = replacePlaceholders(source, 'codex', [], ['anti-design']);
+    const result = replacePlaceholders(source, 'codex', [], ['anti-ai-design']);
 
-    expect(result).toContain('Run $anti-design audit.');
-    expect(result).toContain('Use `$anti-design polish` next.');
-    expect(result).toContain('.github/hooks/anti-design.json');
-    expect(result).toContain('.codex/skills/anti-design/scripts/context.mjs');
-    expect(result).toContain('https://example.com/anti-design');
+    expect(result).toContain('Run $anti-ai-design audit.');
+    expect(result).toContain('Use `$anti-ai-design polish` next.');
+    expect(result).toContain('.github/hooks/anti-ai-design.json');
+    expect(result).toContain('.codex/skills/anti-ai-design/scripts/context.mjs');
+    expect(result).toContain('https://example.com/anti-ai-design');
   });
 });
 
 describe('replaceScriptProviderMarker', () => {
   test('renders only the explicit provider declarations', () => {
     const source = [
-      "export const ANTI_DESIGN_COMMAND_PREFIX = '/'; // @anti-design-provider-command-prefix",
-      "export const ANTI_DESIGN_PROVIDER_ID = 'source'; // @anti-design-provider-id",
-      'const regex = /anti-design\\b/gi;',
-      "const runtime = '/src/lib/anti-design/__runtime.js';",
-      "const text = 'Run /anti-design audit';",
+      "export const ANTI_AI_DESIGN_COMMAND_PREFIX = '/'; // @anti-ai-design-provider-command-prefix",
+      "export const ANTI_AI_DESIGN_PROVIDER_ID = 'source'; // @anti-ai-design-provider-id",
+      'const regex = /anti-ai-design\\b/gi;',
+      "const runtime = '/src/lib/anti-ai-design/__runtime.js';",
+      "const text = 'Run /anti-ai-design audit';",
     ].join('\n');
 
     const result = replaceScriptProviderMarker(source, 'codex', 'agents');
 
-    expect(result).toContain('export const ANTI_DESIGN_COMMAND_PREFIX = "$";');
-    expect(result).toContain('export const ANTI_DESIGN_PROVIDER_ID = "agents";');
-    expect(result).toContain('const regex = /anti-design\\b/gi;');
-    expect(result).toContain("const runtime = '/src/lib/anti-design/__runtime.js';");
-    expect(result).toContain("const text = 'Run /anti-design audit';");
+    expect(result).toContain('export const ANTI_AI_DESIGN_COMMAND_PREFIX = "$";');
+    expect(result).toContain('export const ANTI_AI_DESIGN_PROVIDER_ID = "agents";');
+    expect(result).toContain('const regex = /anti-ai-design\\b/gi;');
+    expect(result).toContain("const runtime = '/src/lib/anti-ai-design/__runtime.js';");
+    expect(result).toContain("const text = 'Run /anti-ai-design audit';");
   });
 });

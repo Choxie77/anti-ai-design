@@ -2,11 +2,11 @@
 //! tolerance under it (taste call r3-19), and text in a link keeps the 11px
 //! interactive floor whatever class it carries (taste call r3-07, kept).
 
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::{Path, PathBuf};
 
 fn repo_root() -> PathBuf {
-    std::env::var("ANTI_DESIGN_PUBLIC_REPO")
+    std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO")
         .map(PathBuf::from)
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."))
 }

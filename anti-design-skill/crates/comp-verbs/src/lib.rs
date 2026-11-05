@@ -1,4 +1,4 @@
-//! anti-design-comp-verbs: the four comp-fidelity verb orchestrators
+//! anti-ai-design-comp-verbs: the four comp-fidelity verb orchestrators
 //! (`comp-spec`, `comp-diff`, `font-match`, `build-phase`), ported from the
 //! skill's JS scripts of the same name.
 //!
@@ -11,7 +11,7 @@
 //!     a [`build_phase::OrganicScan`] closure.
 //!
 //! The font-index catalog is resolved at run time the way concept-seed resolves
-//! its catalog (`ANTI_DESIGN_CATALOG_DIR`, then the skill's shipped copy); it is
+//! its catalog (`ANTI_AI_DESIGN_CATALOG_DIR`, then the skill's shipped copy); it is
 //! never committed to the engine repo. See [`font_match`].
 
 pub mod approved_comp;
@@ -24,26 +24,26 @@ mod map_inspection;
 pub mod font_match;
 mod util;
 
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 
-/// `anti-design comp-spec ...`
+/// `anti-ai-design comp-spec ...`
 pub fn run_comp_spec(argv: &[String], io: &mut Io) -> i32 {
     comp_spec::run(argv, io)
 }
 
-/// `anti-design comp-diff ...`
+/// `anti-ai-design comp-diff ...`
 pub fn run_comp_diff(argv: &[String], io: &mut Io) -> i32 {
     comp_diff::run(argv, io)
 }
 
-/// `anti-design font-match ...`. `renderer` supplies the headless-browser
+/// `anti-ai-design font-match ...`. `renderer` supplies the headless-browser
 /// specimen rendering; pass [`font_match::NoRenderer`] where no browser is
 /// available (the catalog/shortlist path owns the ranking then).
 pub fn run_font_match(argv: &[String], io: &mut Io, renderer: &mut dyn font_match::FontRenderer) -> i32 {
     font_match::run(argv, io, renderer)
 }
 
-/// `anti-design build-phase ...`. `organic_scan` is the injected CSS
+/// `anti-ai-design build-phase ...`. `organic_scan` is the injected CSS
 /// organic-clip-path scanner (pass [`build_phase::no_organic_scan`] to skip it,
 /// matching the JS degraded path).
 pub fn run_build_phase(argv: &[String], io: &mut Io, organic_scan: build_phase::OrganicScan) -> i32 {

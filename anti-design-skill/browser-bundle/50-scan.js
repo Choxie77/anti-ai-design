@@ -2,7 +2,7 @@
 // The in-page scan/detect API, the WASM core bridge (group-map
 // marshalling), and the extension-mode message loop of the standalone
 // bundle. Ported from cli/engine/browser/injected/index.mjs Section 7; every
-// rule decision is a call into the WASM core (`__anti_design.*`), the DOM
+// rule decision is a call into the WASM core (`__anti_ai_design.*`), the DOM
 // reads it needs go through the probe, the overlay UI is 40-overlay.js and
 // the visual-contrast sampling 35-visual.js.
 
@@ -10,52 +10,52 @@ const IS_BROWSER = typeof window !== 'undefined';
 
 // ─── Section 7: Browser UI (IS_BROWSER only) ────────────────────────────────
 
-if (IS_BROWSER && !__anti_design) {
+if (IS_BROWSER && !__anti_ai_design) {
   // The core could not start (in practice: a Content-Security-Policy whose
   // script-src lacks 'wasm-unsafe-eval'). Keep the API surface so callers get
-  // one clear error instead of "antiDesignDetect is not a function".
-  const reason = __antiDesignInitError && __antiDesignInitError.message
-    ? __antiDesignInitError.message
-    : String(__antiDesignInitError);
-  const message = `[anti-design] detector core unavailable: ${reason} (a Content-Security-Policy without 'wasm-unsafe-eval' blocks WebAssembly)`;
+  // one clear error instead of "antiAiDesignDetect is not a function".
+  const reason = __antiAiDesignInitError && __antiAiDesignInitError.message
+    ? __antiAiDesignInitError.message
+    : String(__antiAiDesignInitError);
+  const message = `[anti-ai-design] detector core unavailable: ${reason} (a Content-Security-Policy without 'wasm-unsafe-eval' blocks WebAssembly)`;
   const fail = () => { throw new Error(message); };
   const _myScript = document.currentScript;
-  const EXTENSION_MODE = (_myScript && _myScript.dataset.antiDesignExtension === 'true')
-    || document.documentElement.dataset.antiDesignExtension === 'true';
+  const EXTENSION_MODE = (_myScript && _myScript.dataset.antiAiDesignExtension === 'true')
+    || document.documentElement.dataset.antiAiDesignExtension === 'true';
   console.warn(message);
-  window.antiDesignDetect = fail;
-  window.antiDesignDetectAsync = async () => fail();
-  window.antiDesignScan = fail;
-  window.antiDesignScanAsync = async () => fail();
-  window.antiDesignMeasureHiddenText = fail;
-  window.antiDesignCollectVisualContrastCandidates = fail;
-  window.antiDesignAnalyzeVisualContrast = async () => fail();
-  window.antiDesignGetLastVisualContrastAnalyses = () => [];
-  window.__antiDesignCoreError = message;
+  window.antiAiDesignDetect = fail;
+  window.antiAiDesignDetectAsync = async () => fail();
+  window.antiAiDesignScan = fail;
+  window.antiAiDesignScanAsync = async () => fail();
+  window.antiAiDesignMeasureHiddenText = fail;
+  window.antiAiDesignCollectVisualContrastCandidates = fail;
+  window.antiAiDesignAnalyzeVisualContrast = async () => fail();
+  window.antiAiDesignGetLastVisualContrastAnalyses = () => [];
+  window.__antiAiDesignCoreError = message;
   if (EXTENSION_MODE) {
     window.addEventListener('message', (e) => {
-      if (e.source !== window || !e.data || e.data.source !== 'anti-design-command') return;
-      if (e.data.action === 'scan') window.postMessage({ source: 'anti-design-error', message }, '*');
+      if (e.source !== window || !e.data || e.data.source !== 'anti-ai-design-command') return;
+      if (e.data.action === 'scan') window.postMessage({ source: 'anti-ai-design-error', message }, '*');
     });
-    window.postMessage({ source: 'anti-design-ready' }, '*');
+    window.postMessage({ source: 'anti-ai-design-ready' }, '*');
   }
 } else if (IS_BROWSER) {
   // Detect extension mode via the script tag's data attribute or the document element fallback.
   // currentScript is reliable for synchronously-executing scripts (which our IIFE is).
   const _myScript = document.currentScript;
-  const EXTENSION_MODE = (_myScript && _myScript.dataset.antiDesignExtension === 'true')
-    || document.documentElement.dataset.antiDesignExtension === 'true';
+  const EXTENSION_MODE = (_myScript && _myScript.dataset.antiAiDesignExtension === 'true')
+    || document.documentElement.dataset.antiAiDesignExtension === 'true';
 
-  const ui = createAntiDesignOverlay({
+  const ui = createAntiAiDesignOverlay({
     extensionMode: EXTENSION_MODE,
-    antipatterns: JSON.parse(__anti_design.antipatterns_json()),
+    antipatterns: JSON.parse(__anti_ai_design.antipatterns_json()),
   });
   const {
     collectVisualContrastCandidates,
     analyzeVisualContrastCandidate,
     analyzeVisualContrast,
     waitForVisualPaint,
-  } = createVisualContrast(createInPageVisualIO(__anti_design));
+  } = createVisualContrast(createInPageVisualIO(__anti_ai_design));
 
   // ── WASM core bridge ──────────────────────────────────────────────────────
   // The rule core runs collectBrowserFindings in WASM and hands back element
@@ -64,7 +64,7 @@ if (IS_BROWSER && !__anti_design) {
   // core so selectors/labels/severities come from one place.
 
   function collectConfigJson() {
-    const config = window.__ANTI_DESIGN_CONFIG__ || {};
+    const config = window.__ANTI_AI_DESIGN_CONFIG__ || {};
     return JSON.stringify({
       extensionMode: EXTENSION_MODE,
       disabledRules: Array.isArray(config.disabledRules) ? config.disabledRules : [],
@@ -81,26 +81,26 @@ if (IS_BROWSER && !__anti_design) {
 
   // A page matched by detector.ignoreFiles is waived wholesale: every scan
   // stage answers empty so the badge and toast read zero. Mirrors
-  // shouldIgnoreDetectionFile in cli/lib/anti-design-config.mjs; the live
+  // shouldIgnoreDetectionFile in cli/lib/anti-ai-design-config.mjs; the live
   // overlay resolves the globs per page (live-browser-ignores.js) and
   // forwards the verdict as config.skipScan. The core repeats this guard on
   // the parsed config so the snapshot route answers empty too.
   function skipScanActive() {
-    return EXTENSION_MODE && window.__ANTI_DESIGN_CONFIG__?.skipScan === true;
+    return EXTENSION_MODE && window.__ANTI_AI_DESIGN_CONFIG__?.skipScan === true;
   }
 
   function serializeFindings(allFindings) {
     const groups = allFindings.map(({ el, findings }) => ({ el: __intern(el), findings }));
-    return JSON.parse(__anti_design.serialize_findings(JSON.stringify(groups)));
+    return JSON.parse(__anti_ai_design.serialize_findings(JSON.stringify(groups)));
   }
 
   const printSummary = function(allFindings) {
     if (allFindings.length === 0) {
-      console.log('%c[anti-design] No anti-patterns found.', 'color: #22c55e; font-weight: bold');
+      console.log('%c[anti-ai-design] No anti-patterns found.', 'color: #22c55e; font-weight: bold');
       return;
     }
     console.group(
-      `%c[anti-design] ${allFindings.length} anti-pattern${allFindings.length === 1 ? '' : 's'} found`,
+      `%c[anti-ai-design] ${allFindings.length} anti-pattern${allFindings.length === 1 ? '' : 's'} found`,
       'color: oklch(84% 0.19 80.46); font-weight: bold'
     );
     for (const { el, findings } of allFindings) {
@@ -121,7 +121,7 @@ if (IS_BROWSER && !__anti_design) {
       return { groupMap: new Map(), allFindings: [], pageLevelFindings: [] };
     }
     __resetRegistry();
-    const collected = JSON.parse(__anti_design.collect_browser_findings(collectConfigJson()));
+    const collected = JSON.parse(__anti_ai_design.collect_browser_findings(collectConfigJson()));
     const groupMap = new Map();
     for (const g of collected.groups) {
       // Handle 0 is the JS `document.body` null key (a bare document).
@@ -138,8 +138,8 @@ if (IS_BROWSER && !__anti_design) {
   }
 
   // Config plumbing shared with the extension's offscreen document lives in
-  // 30-scan-common.js; here the config is the page's __ANTI_DESIGN_CONFIG__.
-  const pageConfig = () => window.__ANTI_DESIGN_CONFIG__ || {};
+  // 30-scan-common.js; here the config is the page's __ANTI_AI_DESIGN_CONFIG__.
+  const pageConfig = () => window.__ANTI_AI_DESIGN_CONFIG__ || {};
   const visualContrastMode = (options = {}) => __visualContrastMode(options, pageConfig());
   const shouldRunVisualContrast = (options = {}) => visualContrastMode(options) !== false;
   const visualContrastOptions = (options = {}) => __visualContrastOptions(options, pageConfig());
@@ -170,12 +170,12 @@ if (IS_BROWSER && !__anti_design) {
   }
 
   function addVisualContrastResult(groupMap, result, options = {}) {
-    const elId = __anti_design.visual_contrast_result_el(JSON.stringify(result));
+    const elId = __anti_ai_design.visual_contrast_result_el(JSON.stringify(result));
     const el = __el(elId);
     if (!el) return false;
     if (groupMap.collapsed && groupMap.collapsed.has(el)) return false;
     const existing = groupMap.get(el) || [];
-    const finding = JSON.parse(__anti_design.visual_contrast_result_finding(elId, JSON.stringify(existing), JSON.stringify(result)));
+    const finding = JSON.parse(__anti_ai_design.visual_contrast_result_finding(elId, JSON.stringify(existing), JSON.stringify(result)));
     if (!finding) return false;
     if (groupMap.has(el)) groupMap.get(el).push(finding);
     else groupMap.set(el, [finding]);
@@ -190,7 +190,7 @@ if (IS_BROWSER && !__anti_design) {
     if (!EXTENSION_MODE) return;
     const allFindings = browserFindingsFromMap(groupMap);
     window.postMessage({
-      source: 'anti-design-results',
+      source: 'anti-ai-design-results',
       findings: serializeFindings(allFindings),
       count: allFindings.length,
       ...scanResultMeta(options),
@@ -200,13 +200,13 @@ if (IS_BROWSER && !__anti_design) {
   function postExtensionError(err) {
     if (!EXTENSION_MODE) return;
     window.postMessage({
-      source: 'anti-design-error',
+      source: 'anti-ai-design-error',
       message: err?.message || String(err),
     }, '*');
   }
 
   function reportVisualContrastError(err, detail = {}) {
-    window.dispatchEvent(new CustomEvent('anti-design-visual-contrast-error', {
+    window.dispatchEvent(new CustomEvent('anti-ai-design-visual-contrast-error', {
       detail: {
         ...detail,
         message: err?.message || String(err),
@@ -215,7 +215,7 @@ if (IS_BROWSER && !__anti_design) {
     if (EXTENSION_MODE) {
       postExtensionError(err);
     } else {
-      console.warn('[anti-design] visual contrast scan failed', err);
+      console.warn('[anti-ai-design] visual contrast scan failed', err);
     }
   }
 
@@ -244,7 +244,7 @@ if (IS_BROWSER && !__anti_design) {
             const added = addVisualContrastResult(groupMap, result, { decorate: true });
             if (added) {
               postSerializedFindings(groupMap, options);
-              window.dispatchEvent(new CustomEvent('anti-design-visual-contrast-resolved', {
+              window.dispatchEvent(new CustomEvent('anti-ai-design-visual-contrast-resolved', {
                 detail: {
                   selector: result.selector,
                   status: result.status,
@@ -332,7 +332,7 @@ if (IS_BROWSER && !__anti_design) {
     // In extension mode, post serialized results for the DevTools panel
     if (EXTENSION_MODE) {
       window.postMessage({
-        source: 'anti-design-results',
+        source: 'anti-ai-design-results',
         findings: serializeFindings(allFindings),
         count: allFindings.length,
         ...scanResultMeta(options),
@@ -393,9 +393,9 @@ if (IS_BROWSER && !__anti_design) {
   if (EXTENSION_MODE) {
     // Extension mode: listen for commands, don't auto-scan
     window.addEventListener('message', (e) => {
-      if (e.source !== window || !e.data || e.data.source !== 'anti-design-command') return;
+      if (e.source !== window || !e.data || e.data.source !== 'anti-ai-design-command') return;
       if (e.data.action === 'scan') {
-        if (e.data.config) window.__ANTI_DESIGN_CONFIG__ = e.data.config;
+        if (e.data.config) window.__ANTI_AI_DESIGN_CONFIG__ = e.data.config;
         try {
           scan(e.data.config || {});
         } catch (err) {
@@ -404,7 +404,7 @@ if (IS_BROWSER && !__anti_design) {
       }
       if (e.data.action === 'toggle-overlays') {
         const visible = ui.toggleOverlays();
-        window.postMessage({ source: 'anti-design-overlays-toggled', visible }, '*');
+        window.postMessage({ source: 'anti-ai-design-overlays-toggled', visible }, '*');
       }
       if (e.data.action === 'remove') {
         clearOverlays();
@@ -417,14 +417,14 @@ if (IS_BROWSER && !__anti_design) {
         ui.unspotlight();
       }
     });
-    window.postMessage({ source: 'anti-design-ready' }, '*');
+    window.postMessage({ source: 'anti-ai-design-ready' }, '*');
   } else {
-    if (window.__ANTI_DESIGN_CONFIG__?.autoScan !== false) {
+    if (window.__ANTI_AI_DESIGN_CONFIG__?.autoScan !== false) {
       const runAutoScan = () => {
         try {
           scan();
         } catch (err) {
-          console.warn('[anti-design] scan failed', err);
+          console.warn('[anti-ai-design] scan failed', err);
         }
       };
       if (document.readyState === 'loading') {
@@ -435,16 +435,16 @@ if (IS_BROWSER && !__anti_design) {
     }
   }
 
-  window.antiDesignDetect = detect;
-  window.antiDesignDetectAsync = detectAsync;
-  window.antiDesignScan = scan;
-  window.antiDesignScanAsync = scanAsync;
+  window.antiAiDesignDetect = detect;
+  window.antiAiDesignDetectAsync = detectAsync;
+  window.antiAiDesignScan = scan;
+  window.antiAiDesignScanAsync = scanAsync;
   // Raw measurement for the URL engine's content-hidden-at-rest pass: it
   // drives a reveal sweep from Node and thresholds the result itself.
-  window.antiDesignMeasureHiddenText = () => JSON.parse(__anti_design.measure_hidden_text());
-  window.antiDesignCollectVisualContrastCandidates = collectVisualContrastCandidates;
-  window.antiDesignAnalyzeVisualContrast = analyzeVisualContrast;
-  window.antiDesignGetLastVisualContrastAnalyses = () => lastVisualContrastAnalyses.slice();
+  window.antiAiDesignMeasureHiddenText = () => JSON.parse(__anti_ai_design.measure_hidden_text());
+  window.antiAiDesignCollectVisualContrastCandidates = collectVisualContrastCandidates;
+  window.antiAiDesignAnalyzeVisualContrast = analyzeVisualContrast;
+  window.antiAiDesignGetLastVisualContrastAnalyses = () => lastVisualContrastAnalyses.slice();
 
   // The snapshot route (what the extension runs when the page's CSP keeps
   // WebAssembly out of every world it can reach), exposed here so the two
@@ -452,23 +452,23 @@ if (IS_BROWSER && !__anti_design) {
   // the snapshot (answering its hit-test needs from the live page), and
   // serialize through it. Deterministic findings only; the visual-contrast
   // pass over a snapshot is the extension's (see 60-offscreen.js).
-  window.antiDesignSnapshotCapture = (options) => __antiDesignSnapshot.capture(options);
-  window.antiDesignDetectFromSnapshot = function (options = {}) {
+  window.antiAiDesignSnapshotCapture = (options) => __antiAiDesignSnapshot.capture(options);
+  window.antiAiDesignDetectFromSnapshot = function (options = {}) {
     const t0 = performance.now();
-    const cap = __antiDesignSnapshot.capture(options);
+    const cap = __antiAiDesignSnapshot.capture(options);
     if (cap.error) throw new Error(cap.error);
     const t1 = performance.now();
-    let out = JSON.parse(__anti_design.collect_findings_from_snapshot(cap.json, collectConfigJson()));
+    let out = JSON.parse(__anti_ai_design.collect_findings_from_snapshot(cap.json, collectConfigJson()));
     let rounds = 1;
     while (out.needs) {
-      __anti_design.snapshot_add_facts(JSON.stringify(__antiDesignSnapshot.answer(out.needs, cap)));
-      out = JSON.parse(__anti_design.collect_browser_findings(collectConfigJson()));
-      if (__anti_design.snapshot_has_needs()) out = { needs: JSON.parse(__anti_design.snapshot_take_needs()) };
+      __anti_ai_design.snapshot_add_facts(JSON.stringify(__antiAiDesignSnapshot.answer(out.needs, cap)));
+      out = JSON.parse(__anti_ai_design.collect_browser_findings(collectConfigJson()));
+      if (__anti_ai_design.snapshot_has_needs()) out = { needs: JSON.parse(__anti_ai_design.snapshot_take_needs()) };
       rounds++;
     }
-    const serialized = JSON.parse(__anti_design.serialize_findings(JSON.stringify(out.groups)));
-    const unknownStyleProps = JSON.parse(__anti_design.snapshot_unknown_style_props());
-    __anti_design.snapshot_clear();
+    const serialized = JSON.parse(__anti_ai_design.serialize_findings(JSON.stringify(out.groups)));
+    const unknownStyleProps = JSON.parse(__anti_ai_design.snapshot_unknown_style_props());
+    __anti_ai_design.snapshot_clear();
     return {
       findings: serialized,
       pageLevel: out.pageLevel,

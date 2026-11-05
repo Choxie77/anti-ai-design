@@ -6,8 +6,8 @@
 //! same code over either probe.
 
 use crate::js_dom::JsDom;
-use anti_design_core::browser::snapshot::{Facts, SnapshotDom};
-use anti_design_core::browser::Dom;
+use anti_ai_design_core::browser::snapshot::{Facts, SnapshotDom};
+use anti_ai_design_core::browser::Dom;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
@@ -113,11 +113,11 @@ pub fn collect_findings_from_snapshot(snapshot_json: &str, config_json: &str) ->
     if snapshot_load(snapshot_json) == u32::MAX {
         return "{\"error\":\"snapshot did not parse\"}".into();
     }
-    let config: anti_design_core::browser::BrowserConfig = serde_json::from_str(config_json).unwrap_or_default();
+    let config: anti_ai_design_core::browser::BrowserConfig = serde_json::from_str(config_json).unwrap_or_default();
     SNAPSHOT.with(|s| {
         let guard = s.borrow();
         let d = guard.as_ref().expect("loaded");
-        match anti_design_core::browser::snapshot::collect_findings_from_snapshot(d, &config) {
+        match anti_ai_design_core::browser::snapshot::collect_findings_from_snapshot(d, &config) {
             Ok(out) => serde_json::to_string(&out).unwrap_or_else(|_| "{\"groups\":[],\"pageLevel\":[]}".into()),
             Err(needs) => serde_json::json!({ "needs": needs }).to_string(),
         }

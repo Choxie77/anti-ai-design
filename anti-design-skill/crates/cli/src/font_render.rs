@@ -1,6 +1,6 @@
-//! The headless-browser side of `anti-design font-match`, wired over
+//! The headless-browser side of `anti-ai-design font-match`, wired over
 //! `crates/browser`'s CDP client. This is the one piece the open
-//! `anti-design-comp-verbs` crate cannot do on its own; it is injected as a
+//! `anti-ai-design-comp-verbs` crate cannot do on its own; it is injected as a
 //! `FontRenderer` so the browser (and its `core` dependency) stays out of that
 //! crate. Ported from `font-match.mjs` `renderCandidates` / `renderProofSheet`,
 //! which drove Playwright/Puppeteer; here the same steps run over CDP against a
@@ -10,12 +10,12 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use base64::Engine as _;
-use anti_design_browser::cdp::{default_chrome_args, Browser, EvalOutcome, Page, Viewport};
-use anti_design_browser::discovery;
-use anti_design_comp::font_fingerprint::{fingerprint, FpOpts};
-use anti_design_comp::png_io;
-use anti_design_comp::raster::Image;
-use anti_design_comp_verbs::font_match::{FontRenderer, RankCandidate, RenderedCandidate};
+use anti_ai_design_browser::cdp::{default_chrome_args, Browser, EvalOutcome, Page, Viewport};
+use anti_ai_design_browser::discovery;
+use anti_ai_design_comp::font_fingerprint::{fingerprint, FpOpts};
+use anti_ai_design_comp::png_io;
+use anti_ai_design_comp::raster::Image;
+use anti_ai_design_comp_verbs::font_match::{FontRenderer, RankCandidate, RenderedCandidate};
 
 const NAV_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -26,7 +26,7 @@ pub struct CdpFontRenderer {
 
 impl CdpFontRenderer {
     pub fn from_process_env() -> Self {
-        CdpFontRenderer { env: anti_design_common::process_env() }
+        CdpFontRenderer { env: anti_ai_design_common::process_env() }
     }
 
     fn launch(&self) -> Option<Browser> {

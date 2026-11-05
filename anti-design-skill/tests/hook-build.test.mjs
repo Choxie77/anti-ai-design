@@ -31,18 +31,18 @@ function readJson(rel) {
 }
 
 // Every hook command is the launcher shipped in the skill's scripts dir,
-// invoked as `<scripts>/anti-design <verb>` behind an existence guard: a
+// invoked as `<scripts>/anti-ai-design <verb>` behind an existence guard: a
 // missing launcher exits 0 (issue #399: user-level manifests fire in every
 // project) and a present one keeps its own exit code, so Claude's exit-2
 // blocking signal still reaches the agent. No runtime probe: the launcher
 // runs a self-contained binary, so there is no Node on the path to check.
 function expectCommand(command, expectedScriptsDir, verb = 'hook') {
   assert.equal(typeof command, 'string');
-  const launcher = `${expectedScriptsDir}/anti-design`;
+  const launcher = `${expectedScriptsDir}/anti-ai-design`;
   assert.ok(command.includes(launcher), `missing ${launcher} in ${command}`);
   assert.match(
     command,
-    new RegExp(`^\\[ ! -f "[^"]*/anti-design" \\] \\|\\| "[^"]*/anti-design" ${verb}$`),
+    new RegExp(`^\\[ ! -f "[^"]*/anti-ai-design" \\] \\|\\| "[^"]*/anti-ai-design" ${verb}$`),
     `missing existence guard around the launcher in ${command}`,
   );
   assert.ok(!command.includes('node '), `hook command must not depend on node: ${command}`);
@@ -51,7 +51,7 @@ function expectCommand(command, expectedScriptsDir, verb = 'hook') {
 
 function expectWindowsCommand(command, expectedScriptsDir, verb = 'hook') {
   assert.equal(typeof command, 'string');
-  const launcher = `"${expectedScriptsDir.replaceAll('/', '\\')}\\anti-design.cmd"`;
+  const launcher = `"${expectedScriptsDir.replaceAll('/', '\\')}\\anti-ai-design.cmd"`;
   assert.equal(command, `cmd /c if exist ${launcher} ${launcher} ${verb}`);
 }
 
@@ -78,7 +78,7 @@ describe('hook manifest builders', () => {
     assert.equal(manifest.hooks.AfterAgent[0].hooks[0].timeout, 30000);
     // Gemini substitutes $GEMINI_PROJECT_DIR with a shell-escaped path before
     // bash runs the command, so the token is bare, not double-quoted.
-    const launcher = '$GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design';
+    const launcher = '$GEMINI_PROJECT_DIR/.gemini/skills/anti-ai-design/scripts/anti-ai-design';
     for (const event of ['BeforeTool', 'AfterAgent']) {
       assert.equal(manifest.hooks[event][0].hooks[0].command, `[ ! -f ${launcher} ] || ${launcher} hook`);
     }
@@ -93,10 +93,10 @@ describe('hook manifest builders', () => {
     assert.equal(handler.type, 'command');
     assert.equal(handler.timeout, 5);
     assert.equal(handler.statusMessage, 'Checking UI changes');
-    expectCommand(handler.command, '.claude/skills/anti-design/scripts');
+    expectCommand(handler.command, '.claude/skills/anti-ai-design/scripts');
     assert.ok(handler.command.includes('${CLAUDE_PROJECT_DIR}'));
     assert.equal(handler.args, undefined);
-    expectCommand(manifest.hooks.SessionStart[0].hooks[0].command, '.claude/skills/anti-design/scripts');
+    expectCommand(manifest.hooks.SessionStart[0].hooks[0].command, '.claude/skills/anti-ai-design/scripts');
     assert.equal(manifest.hooks.SessionStart[0].hooks[0].timeout, 5);
 
     // Stop deep pass: same script, no matcher, longer budget.
@@ -104,7 +104,7 @@ describe('hook manifest builders', () => {
     assert.equal(manifest.hooks.Stop[0].matcher, undefined);
     assert.equal(stop.timeout, 30);
     assert.equal(stop.statusMessage, 'Design deep pass');
-    expectCommand(stop.command, '.claude/skills/anti-design/scripts');
+    expectCommand(stop.command, '.claude/skills/anti-ai-design/scripts');
   });
 
   it('builds Codex project-local hooks for the real detector hook', () => {
@@ -120,7 +120,7 @@ describe('hook manifest builders', () => {
     assert.equal(handler.type, 'command');
     assert.equal(handler.timeout, 5);
     assert.equal(handler.statusMessage, 'Checking UI changes');
-    expectCommand(handler.command, '.codex/skills/anti-design/scripts');
+    expectCommand(handler.command, '.codex/skills/anti-ai-design/scripts');
     assert.ok(!handler.command.includes('git rev-parse --show-toplevel'));
     assert.ok(!handler.command.includes('${PLUGIN_ROOT}'));
     assert.equal(manifest.hooks.SessionStart, undefined);
@@ -129,12 +129,12 @@ describe('hook manifest builders', () => {
     // pass too.
     const stop = manifest.hooks.Stop[0].hooks[0];
     assert.equal(stop.timeout, 30);
-    expectCommand(stop.command, '.codex/skills/anti-design/scripts');
+    expectCommand(stop.command, '.codex/skills/anti-ai-design/scripts');
 
     // Codex 0.146.0+ selects `commandWindows` on Windows (issue #452), where
-    // the POSIX guard is not a command; that form calls anti-design.cmd.
-    expectWindowsCommand(handler.commandWindows, '.codex/skills/anti-design/scripts');
-    expectWindowsCommand(stop.commandWindows, '.codex/skills/anti-design/scripts');
+    // the POSIX guard is not a command; that form calls anti-ai-design.cmd.
+    expectWindowsCommand(handler.commandWindows, '.codex/skills/anti-ai-design/scripts');
+    expectWindowsCommand(stop.commandWindows, '.codex/skills/anti-ai-design/scripts');
   });
 
   it('derives the Codex hook payload path from the install dir', () => {
@@ -142,22 +142,22 @@ describe('hook manifest builders', () => {
     // `.codex`-directory install at `.codex/skills`, a `.agents` (Codex repo
     // skills) install at `.agents/skills`.
     const codexDir = buildCodexHooksManifest('.codex');
-    expectCommand(codexDir.hooks.PostToolUse[0].hooks[0].command, '.codex/skills/anti-design/scripts');
-    expectCommand(codexDir.hooks.Stop[0].hooks[0].command, '.codex/skills/anti-design/scripts');
+    expectCommand(codexDir.hooks.PostToolUse[0].hooks[0].command, '.codex/skills/anti-ai-design/scripts');
+    expectCommand(codexDir.hooks.Stop[0].hooks[0].command, '.codex/skills/anti-ai-design/scripts');
 
     const agentsDir = buildCodexHooksManifest('.agents');
-    expectCommand(agentsDir.hooks.PostToolUse[0].hooks[0].command, '.agents/skills/anti-design/scripts');
-    expectCommand(agentsDir.hooks.Stop[0].hooks[0].command, '.agents/skills/anti-design/scripts');
+    expectCommand(agentsDir.hooks.PostToolUse[0].hooks[0].command, '.agents/skills/anti-ai-design/scripts');
+    expectCommand(agentsDir.hooks.Stop[0].hooks[0].command, '.agents/skills/anti-ai-design/scripts');
     assert.ok(!agentsDir.hooks.PostToolUse[0].hooks[0].command.includes('.codex/skills'));
 
     // hooksJsonFor threads the provider's configDir through to the builder.
     expectCommand(
       hooksJsonFor('codex', { configDir: '.agents' }).hooks.PostToolUse[0].hooks[0].command,
-      '.agents/skills/anti-design/scripts',
+      '.agents/skills/anti-ai-design/scripts',
     );
     expectCommand(
       hooksJsonFor('codex').hooks.PostToolUse[0].hooks[0].command,
-      '.codex/skills/anti-design/scripts',
+      '.codex/skills/anti-ai-design/scripts',
     );
   });
 
@@ -174,7 +174,7 @@ describe('hook manifest builders', () => {
     assert.equal(manifest.hooks.stop, undefined);
     assert.equal(manifest.hooks.sessionStart, undefined);
     assert.equal(afterEdit.matcher, '^Write$');
-    expectCommand(afterEdit.command, '.cursor/skills/anti-design/scripts');
+    expectCommand(afterEdit.command, '.cursor/skills/anti-ai-design/scripts');
     assert.equal(afterEdit.timeout, 5);
   });
 
@@ -191,7 +191,7 @@ describe('hook manifest builders', () => {
     assert.equal(entry.timeoutSec, 5);
     assert.equal(entry.timeout, undefined);
     assert.equal(entry.command, undefined);
-    expectCommand(entry.bash, '.github/skills/anti-design/scripts');
+    expectCommand(entry.bash, '.github/skills/anti-ai-design/scripts');
     assert.ok(entry.bash.includes('git rev-parse --show-toplevel'));
     assert.equal(manifest.hooks.PostToolUse, undefined);
     assert.equal(manifest.hooks.preToolUse, undefined);
@@ -207,7 +207,7 @@ describe('hook manifest builders', () => {
     assert.equal(handler.type, 'command');
     assert.equal(handler.timeout, 5);
     assert.equal(handler.statusMessage, 'Checking UI changes');
-    expectCommand(handler.command, '.grok/skills/anti-design/scripts');
+    expectCommand(handler.command, '.grok/skills/anti-ai-design/scripts');
     assert.ok(!handler.command.includes('${CLAUDE_PROJECT_DIR}'));
     assert.ok(!handler.command.includes('${GROK_PLUGIN_ROOT}'));
     assert.equal(manifest.hooks.SessionStart, undefined);
@@ -215,22 +215,22 @@ describe('hook manifest builders', () => {
     const stop = manifest.hooks.Stop[0].hooks[0];
     assert.equal(stop.timeout, 30);
     assert.equal(stop.statusMessage, 'Design deep pass');
-    expectCommand(stop.command, '.grok/skills/anti-design/scripts');
+    expectCommand(stop.command, '.grok/skills/anti-ai-design/scripts');
   });
 
   it('gives the Claude plugin manifest what VS Code needs on every handler (#1249)', () => {
     const manifest = buildClaudePluginHooksManifest();
     // Through `sh`: VS Code's agent host syncs the launcher without its executable bit.
-    const launcher = '${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design';
+    const launcher = '${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design';
     // VS Code takes `windows` over `command` on Windows, where the POSIX guard cannot
     // parse. Unquoted for a runner that spawns `cmd.exe /c` and escapes double quotes.
-    const windowsForm = 'cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd '
-      + '${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook';
+    const windowsForm = 'cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd '
+      + '${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd hook';
     for (const event of ['SessionStart', 'PostToolUse', 'Stop']) {
       const handler = manifest.hooks[event][0].hooks[0];
       assert.equal(handler.command, `[ ! -f "${launcher}" ] || sh "${launcher}" hook`, `${event} command`);
       assert.equal(handler.windows, windowsForm, `${event} windows`);
-      assert.deepEqual(handler.env, { ANTI_DESIGN_HOOK_HARNESS: 'vscode' }, `${event} env`);
+      assert.deepEqual(handler.env, { ANTI_AI_DESIGN_HOOK_HARNESS: 'vscode' }, `${event} env`);
     }
   });
 
@@ -261,7 +261,7 @@ describe('hook manifest builders', () => {
     for (const manifest of withWindows) {
       for (const entry of entries(manifest)) {
         assert.equal(typeof entry.commandWindows, 'string', `missing commandWindows in ${JSON.stringify(entry)}`);
-        assert.ok(entry.commandWindows.includes('anti-design.cmd'));
+        assert.ok(entry.commandWindows.includes('anti-ai-design.cmd'));
       }
     }
     for (const manifest of without) {
@@ -293,10 +293,10 @@ describe('hook manifest builders', () => {
   // Built into a temp dist because this suite runs before `bun run build` in CI.
   it('emits the Hermes design-hook plugin verbatim under .hermes/plugins/', () => {
     assert.equal(PROVIDERS.hermes.emitHooks, undefined);
-    const distDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-hermes-dist-'));
+    const distDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-hermes-dist-'));
     try {
       createTransformer(PROVIDERS.hermes)(readSourceFiles(REPO_ROOT).skills, distDir);
-      const pluginDir = path.join(distDir, 'hermes/.hermes/plugins/anti-design-design-hook');
+      const pluginDir = path.join(distDir, 'hermes/.hermes/plugins/anti-ai-design-design-hook');
       assert.deepEqual(fs.readdirSync(pluginDir).sort(), ['__init__.py', 'plugin.yaml']);
       for (const name of ['__init__.py', 'plugin.yaml']) {
         assert.equal(
@@ -305,7 +305,7 @@ describe('hook manifest builders', () => {
         );
       }
       const manifest = fs.readFileSync(path.join(pluginDir, 'plugin.yaml'), 'utf8');
-      assert.match(manifest, /^name: anti-design-design-hook$/m);
+      assert.match(manifest, /^name: anti-ai-design-design-hook$/m);
       assert.match(manifest, /^provides_hooks:\n  - transform_tool_result\n  - pre_verify$/m);
     } finally {
       fs.rmSync(distDir, { recursive: true, force: true });
@@ -318,14 +318,14 @@ describe('hook manifest builders', () => {
 // the launcher swap, the tracked manifests still describe the Node scripts;
 // gate these assertions on the synced launcher so a source-first branch is
 // not red for output it is not allowed to stage.
-const SYNCED = fs.existsSync(path.join(REPO_ROOT, '.claude/skills/anti-design/scripts/anti-design'));
+const SYNCED = fs.existsSync(path.join(REPO_ROOT, '.claude/skills/anti-ai-design/scripts/anti-ai-design'));
 
 describe('generated hook artifacts in repo', { skip: SYNCED ? false : 'generated provider output not yet synced (bun run build:release on main)' }, () => {
   for (const rel of [
     '.claude/settings.json',
     '.cursor/hooks.json',
     '.codex/hooks.json',
-    '.github/hooks/anti-design.json',
+    '.github/hooks/anti-ai-design.json',
   ]) {
     it(`${rel} exists and is valid JSON`, () => {
       const abs = path.join(REPO_ROOT, rel);
@@ -342,15 +342,15 @@ describe('generated hook artifacts in repo', { skip: SYNCED ? false : 'generated
     const cursor = readJson('.cursor/hooks.json');
     if (!cursor.hooks?.preToolUse) assert.deepEqual(cursor, buildCursorHooksManifest());
     assert.deepEqual(readJson('.codex/hooks.json'), buildCodexHooksManifest());
-    assert.deepEqual(readJson('.github/hooks/anti-design.json'), buildGitHubHooksManifest());
+    assert.deepEqual(readJson('.github/hooks/anti-ai-design.json'), buildGitHubHooksManifest());
   });
 
   it('Claude project settings reference the launcher in .claude/skills', () => {
     const manifest = readJson('.claude/settings.json');
     const handler = manifest.hooks.PostToolUse[0].hooks[0];
 
-    expectCommand(handler.command, '.claude/skills/anti-design/scripts');
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.claude/skills/anti-design/scripts')));
+    expectCommand(handler.command, '.claude/skills/anti-ai-design/scripts');
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.claude/skills/anti-ai-design/scripts')));
   });
 
   it('Cursor project hooks reference the launcher in .cursor/skills', () => {
@@ -363,11 +363,11 @@ describe('generated hook artifacts in repo', { skip: SYNCED ? false : 'generated
     assert.ok(['postToolUse', 'preToolUse'].includes(event), event);
     expectCommand(
       manifest.hooks[event][0].command,
-      '.cursor/skills/anti-design/scripts',
+      '.cursor/skills/anti-ai-design/scripts',
       event === 'postToolUse' ? 'hook' : 'hook-before-edit',
     );
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.cursor/skills/anti-design/scripts/anti-design')));
-    assert.equal(fs.existsSync(path.join(REPO_ROOT, '.cursor/skills/anti-design/scripts/hook-before-edit.mjs')), false);
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.cursor/skills/anti-ai-design/scripts/anti-ai-design')));
+    assert.equal(fs.existsSync(path.join(REPO_ROOT, '.cursor/skills/anti-ai-design/scripts/hook-before-edit.mjs')), false);
   });
 
   it('Codex project hooks reference the launcher in the .codex skill payload', () => {
@@ -379,7 +379,7 @@ describe('generated hook artifacts in repo', { skip: SYNCED ? false : 'generated
     const manifest = readJson('.codex/hooks.json');
     const handler = manifest.hooks.PostToolUse[0].hooks[0];
 
-    expectCommand(handler.command, '.codex/skills/anti-design/scripts');
+    expectCommand(handler.command, '.codex/skills/anti-ai-design/scripts');
     assert.ok(!handler.command.includes('.agents/skills'));
 
     // The self-consistent Codex bundle at `dist/codex/.codex/skills/` is a build
@@ -389,23 +389,23 @@ describe('generated hook artifacts in repo', { skip: SYNCED ? false : 'generated
 
     // The repo ships the Codex skill payload at `.agents/skills` (the
     // layout CLI installs use, and where the rewritten command resolves).
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.agents/skills/anti-design/SKILL.md')));
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.agents/skills/anti-design/scripts')));
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.agents/skills/anti-ai-design/SKILL.md')));
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.agents/skills/anti-ai-design/scripts')));
   });
 
   it('GitHub Copilot repo hooks reference the launcher in the .github skill payload', () => {
-    const manifest = readJson('.github/hooks/anti-design.json');
+    const manifest = readJson('.github/hooks/anti-ai-design.json');
     const entry = manifest.hooks.postToolUse[0];
 
     assert.equal(entry.matcher, 'edit|create|apply_patch');
-    expectCommand(entry.bash, '.github/skills/anti-design/scripts');
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.github/skills/anti-design/SKILL.md')));
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.github/skills/anti-design/scripts')));
+    expectCommand(entry.bash, '.github/skills/anti-ai-design/scripts');
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.github/skills/anti-ai-design/SKILL.md')));
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, '.github/skills/anti-ai-design/scripts')));
   });
 
   it('does not generate probe scripts into provider skill payloads', () => {
     for (const providerDir of ['.claude', '.cursor', '.agents', 'plugin']) {
-      const probe = path.join(REPO_ROOT, providerDir, 'skills', 'anti-design', 'scripts', 'hook-probe.mjs');
+      const probe = path.join(REPO_ROOT, providerDir, 'skills', 'anti-ai-design', 'scripts', 'hook-probe.mjs');
       assert.equal(fs.existsSync(probe), false, `${providerDir} still has hook-probe.mjs`);
     }
   });
@@ -447,25 +447,25 @@ describe('generated hook artifacts in repo', { skip: SYNCED ? false : 'generated
     assert.equal(stop.command, handler.command);
 
     // The script the plugin hook points at must ship inside the plugin payload.
-    assert.ok(fs.existsSync(path.join(REPO_ROOT, 'plugin/skills/anti-design/scripts')));
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, 'plugin/skills/anti-ai-design/scripts')));
   });
 
   it('generated skill payloads ship the executable launcher and no Node scripts', () => {
     for (const scriptDir of [
-      '.claude/skills/anti-design/scripts',
-      '.cursor/skills/anti-design/scripts',
-      '.agents/skills/anti-design/scripts',
-      'plugin/skills/anti-design/scripts',
+      '.claude/skills/anti-ai-design/scripts',
+      '.cursor/skills/anti-ai-design/scripts',
+      '.agents/skills/anti-ai-design/scripts',
+      'plugin/skills/anti-ai-design/scripts',
     ]) {
       const abs = path.join(REPO_ROOT, scriptDir);
-      const launcher = path.join(abs, 'anti-design');
+      const launcher = path.join(abs, 'anti-ai-design');
       assert.ok(fs.existsSync(launcher), `launcher missing in ${scriptDir}`);
       if (process.platform !== 'win32') {
         assert.ok(fs.statSync(launcher).mode & 0o111, `launcher not executable in ${scriptDir}`);
       }
-      assert.ok(fs.existsSync(path.join(abs, 'anti-design.cmd')), `anti-design.cmd missing in ${scriptDir}`);
+      assert.ok(fs.existsSync(path.join(abs, 'anti-ai-design.cmd')), `anti-ai-design.cmd missing in ${scriptDir}`);
       assert.ok(fs.existsSync(path.join(abs, 'VERSION')), `VERSION missing in ${scriptDir}`);
-      assert.equal(fs.existsSync(path.join(abs, 'bin')), false, `${scriptDir} must stay launcher-only in git; binaries ship only in ANTI_DESIGN_BUNDLE_ENGINE=1 release zips`);
+      assert.equal(fs.existsSync(path.join(abs, 'bin')), false, `${scriptDir} must stay launcher-only in git; binaries ship only in ANTI_AI_DESIGN_BUNDLE_ENGINE=1 release zips`);
       const stray = fs.readdirSync(abs).filter((f) => f.endsWith('.mjs') || f === 'detector' || f === 'lib');
       assert.deepEqual(stray, [], `Node-era files still in ${scriptDir}`);
     }

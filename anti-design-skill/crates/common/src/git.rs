@@ -42,7 +42,7 @@ pub fn linked_worktree_checkout(dir: &str) -> Option<String> {
 
 /// The header line of every `.gitignore` the engine writes into a runtime
 /// directory of the user's project.
-pub const RUNTIME_IGNORE_HEADER: &str = "# Written by Anti-Design: local runtime state, never committed.";
+pub const RUNTIME_IGNORE_HEADER: &str = "# Written by Anti-AI Design: local runtime state, never committed.";
 
 /// Makes sure `<dir>/.gitignore` ignores each of `patterns`, creating the
 /// directory and the file when missing and appending only the patterns it
@@ -74,11 +74,11 @@ pub fn ensure_dir_ignored(dir: &str, patterns: &[&str]) {
     let _ = std::fs::create_dir_all(dir).and_then(|_| std::fs::write(&file, next));
 }
 
-/// The comps (`.anti-design/mocks/`) and captures (`.anti-design/review/`) of
+/// The comps (`.anti-ai-design/mocks/`) and captures (`.anti-ai-design/review/`) of
 /// a design round are runtime output the agent writes with its own tools, so
 /// every engine verb that precedes those writes makes both ignore themselves.
 pub fn ignore_runtime_output(root: &str) {
-    for dir in [".anti-design/mocks", ".anti-design/review"] {
+    for dir in [".anti-ai-design/mocks", ".anti-ai-design/review"] {
         ensure_dir_ignored(&jsp::join(&[root, dir]), &["*"]);
     }
 }
@@ -89,7 +89,7 @@ mod tests {
 
     #[test]
     fn info_exclude_follows_a_linked_worktrees_commondir() {
-        let base = std::env::temp_dir().join(format!("anti-design-common-git-{}", std::process::id()));
+        let base = std::env::temp_dir().join(format!("anti-ai-design-common-git-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&base);
         let tmp = base.to_string_lossy().into_owned();
 
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn linked_worktree_checkout_needs_a_git_file_whose_gitdir_has_commondir() {
-        let base = std::env::temp_dir().join(format!("anti-design-common-wt-{}", std::process::id()));
+        let base = std::env::temp_dir().join(format!("anti-ai-design-common-wt-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&base);
         let tmp = base.to_string_lossy().into_owned();
         let at = |parts: &[&str]| jsp::join(&[&[tmp.as_str()], parts].concat());
@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn ensure_dir_ignored_writes_once_and_keeps_user_lines() {
-        let dir = std::env::temp_dir().join(format!("anti-design-ignore-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-ignore-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let d = dir.join("q").to_string_lossy().into_owned();
         ensure_dir_ignored(&d, &["*"]);
@@ -172,11 +172,11 @@ mod tests {
 
     #[test]
     fn ignore_runtime_output_covers_mocks_and_review() {
-        let dir = std::env::temp_dir().join(format!("anti-design-runtime-ignore-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-runtime-ignore-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         ignore_runtime_output(&dir.to_string_lossy());
         for runtime in ["mocks", "review"] {
-            let file = dir.join(".anti-design").join(runtime).join(".gitignore");
+            let file = dir.join(".anti-ai-design").join(runtime).join(".gitignore");
             assert_eq!(std::fs::read_to_string(file).unwrap(), format!("{}\n*\n", RUNTIME_IGNORE_HEADER));
         }
         let _ = std::fs::remove_dir_all(&dir);

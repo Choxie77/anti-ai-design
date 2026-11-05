@@ -1,8 +1,8 @@
-//! Thin adapters over `anti_design_core::checks::measures` (`resolveVarRefs`,
+//! Thin adapters over `anti_ai_design_core::checks::measures` (`resolveVarRefs`,
 //! `resolveLengthPx`) for the cascade's ordered custom-property map. The
 //! pure logic lives in core; this module only bridges the map type.
 
-use anti_design_core::checks::measures;
+use anti_ai_design_core::checks::measures;
 
 /// An ordered `--name -> value` map (JS `Map<string,string>`).
 pub type CustomProps = indexmap::IndexMap<String, String>;

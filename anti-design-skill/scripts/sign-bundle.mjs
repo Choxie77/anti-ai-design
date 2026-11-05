@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Release signing. The private key comes from one of three places, tried in
 // this order:
-//   1. ANTI_DESIGN_SIGNING_KEY_FILE  path to a PKCS#8 PEM (a local 0600 file)
-//   2. ANTI_DESIGN_SIGNING_KEY       the PEM itself (the GitHub Actions secret)
-//   3. 1Password via `op read` (ANTI_DESIGN_SIGNING_KEY_REF)
+//   1. ANTI_AI_DESIGN_SIGNING_KEY_FILE  path to a PKCS#8 PEM (a local 0600 file)
+//   2. ANTI_AI_DESIGN_SIGNING_KEY       the PEM itself (the GitHub Actions secret)
+//   3. 1Password via `op read` (ANTI_AI_DESIGN_SIGNING_KEY_REF)
 // Key material is never put on a command line, logged or written to a
 // temporary file, and failures never echo it.
 import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
@@ -33,7 +33,7 @@ export function publicKeyHex(key) {
 // Shared wire format with crates/skills/src/bundle_signature.rs. UTF-8, LF,
 // trailing LF. Sign fields explicitly so JSON whitespace/order is irrelevant.
 export function signaturePayload({ keyId, version, artifact, size, sha256 }) {
-  return Buffer.from(`anti-design-skill-bundle-v1\n${keyId}\nskill-v${version}\n${artifact}\n${size}\n${sha256}\n`);
+  return Buffer.from(`anti-ai-design-skill-bundle-v1\n${keyId}\nskill-v${version}\n${artifact}\n${size}\n${sha256}\n`);
 }
 
 export function readTrustedKeys() {
@@ -73,16 +73,16 @@ function readFromFile(file) {
 }
 
 export function signReleaseBundle({ zipPath, version, trustedKeys = readTrustedKeys(),
-  keyFile = process.env.ANTI_DESIGN_SIGNING_KEY_FILE, keyEnv = process.env.ANTI_DESIGN_SIGNING_KEY,
-  secretReference = process.env.ANTI_DESIGN_SIGNING_KEY_REF ?? localSetting('anti-design.signingKeyRef'),
-  account = process.env.OP_ACCOUNT ?? localSetting('anti-design.signingAccount'), readSecret }) {
+  keyFile = process.env.ANTI_AI_DESIGN_SIGNING_KEY_FILE, keyEnv = process.env.ANTI_AI_DESIGN_SIGNING_KEY,
+  secretReference = process.env.ANTI_AI_DESIGN_SIGNING_KEY_REF ?? localSetting('anti-ai-design.signingKeyRef'),
+  account = process.env.OP_ACCOUNT ?? localSetting('anti-ai-design.signingAccount'), readSecret }) {
   if (!readSecret) {
     if (keyFile) readSecret = () => readFromFile(keyFile);
     else if (keyEnv) readSecret = () => Buffer.from(keyEnv.replace(/\\n/g, '\n'));
     else readSecret = readFrom1Password;
   }
   if (readSecret === readFrom1Password && !secretReference?.startsWith('op://')) {
-    throw new Error('Set ANTI_DESIGN_SIGNING_KEY_REF to the 1Password private-key reference (op://vault/item/field), or set ANTI_DESIGN_SIGNING_KEY_FILE (a PKCS#8 PEM path) or ANTI_DESIGN_SIGNING_KEY (the PEM).');
+    throw new Error('Set ANTI_AI_DESIGN_SIGNING_KEY_REF to the 1Password private-key reference (op://vault/item/field), or set ANTI_AI_DESIGN_SIGNING_KEY_FILE (a PKCS#8 PEM path) or ANTI_AI_DESIGN_SIGNING_KEY (the PEM).');
   }
   if (typeof version !== 'string' || version.length > 128 || !VERSION_PATTERN.test(version)) throw new Error('Invalid skill version for signing.');
   if (statSync(zipPath).size > MAX_BUNDLE_BYTES) throw new Error('Invalid bundle size for signing.');
@@ -93,7 +93,7 @@ export function signReleaseBundle({ zipPath, version, trustedKeys = readTrustedK
     pem = Buffer.isBuffer(secret) ? secret : Buffer.from(secret);
   } catch {
     // Child-process exceptions can contain stdout/stderr. Never propagate them.
-    throw new Error('Could not read the signing key (key file, ANTI_DESIGN_SIGNING_KEY, or 1Password). Check the setting and, for 1Password, CLI integration and vault unlock.');
+    throw new Error('Could not read the signing key (key file, ANTI_AI_DESIGN_SIGNING_KEY, or 1Password). Check the setting and, for 1Password, CLI integration and vault unlock.');
   }
   let privateKey;
   try {

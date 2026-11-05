@@ -1,10 +1,10 @@
-//! `anti-design detect --cdp`: attach to a browser someone else runs, scan one
+//! `anti-ai-design detect --cdp`: attach to a browser someone else runs, scan one
 //! of its pages as it stands, and leave everything as found.
 //!
 //! Each test launches the engine's own headless Chrome (which listens on a
 //! DevTools port, as a desktop app started with `--remote-debugging-port`
 //! does), opens the fixture app in it as an outside client would, seeds some
-//! state, then attaches through [`anti_design_browser::attach::detect_cdp`]
+//! state, then attaches through [`anti_ai_design_browser::attach::detect_cdp`]
 //! like the CLI. The checks read the page back over a raw CDP connection, in
 //! the page's own world: same document (no navigation, no reload), same
 //! scroll positions, no node or global the scan added, no user activation
@@ -24,9 +24,9 @@ use std::collections::HashMap;
 use std::net::TcpStream;
 use std::time::{Duration, Instant};
 
-use anti_design_browser::{attach, cdp::Browser, discovery};
-use anti_design_detect::cdp_endpoint::CdpEndpoint;
-use anti_design_detect::engines::ScanOptions;
+use anti_ai_design_browser::{attach, cdp::Browser, discovery};
+use anti_ai_design_detect::cdp_endpoint::CdpEndpoint;
+use anti_ai_design_detect::engines::ScanOptions;
 use serde_json::{json, Value};
 use tungstenite::stream::MaybeTlsStream;
 use tungstenite::{Message, WebSocket};
@@ -71,7 +71,7 @@ main { padding: 24px; }
 const JS: &str = "sessionStorage.loads = String(Number(sessionStorage.loads || 0) + 1);
 new MutationObserver((records) => {
   for (const r of records) for (const n of r.addedNodes) {
-    if (n.id === 'anti-design-visual-contrast-hide-style') document.documentElement.dataset.sawHideStyle = 'yes';
+    if (n.id === 'anti-ai-design-visual-contrast-hide-style') document.documentElement.dataset.sawHideStyle = 'yes';
   }
 }).observe(document.documentElement, { childList: true, subtree: true });
 window.Map = function BrokenMap() { throw new Error('page Map'); };
@@ -224,7 +224,7 @@ const STATE_JS: &str = r#"(() => {
     scroll: [window.scrollX, window.scrollY],
     list: list.scrollTop,
     nodes: document.getElementsByTagName('*').length,
-    injected: document.querySelectorAll('#anti-design-visual-contrast-hide-style, [data-anti-design-visual-contrast-target], [data-anti-design-bgclip-text], style:not([data-app])').length,
+    injected: document.querySelectorAll('#anti-ai-design-visual-contrast-hide-style, [data-anti-ai-design-visual-contrast-target], [data-anti-ai-design-bgclip-text], style:not([data-app])').length,
     globals: Object.getOwnPropertyNames(window).filter(k => /^__imp/i.test(k)),
     activated: navigator.userActivation ? navigator.userActivation.hasBeenActive : false,
     width: window.innerWidth,
@@ -262,7 +262,7 @@ const MEDIA_JS: &str = r#"(async () => {
 const MEDIA_STATE_JS: &str =
     "[document.getElementById('app-paused').paused, document.getElementById('playing').paused]";
 
-fn ids(findings: &[anti_design_core::findings::Finding]) -> Vec<&str> {
+fn ids(findings: &[anti_ai_design_core::findings::Finding]) -> Vec<&str> {
     findings.iter().map(|f| f.antipattern.as_str()).collect()
 }
 
@@ -335,9 +335,9 @@ fn an_attached_scan_reports_what_a_url_scan_reports() {
     raw.open(&url, false);
     let attached = attach::detect_cdp(&endpoint(port), Some(&origin), &ScanOptions::default()).unwrap();
     browser.close();
-    let engine = anti_design_browser::BrowserEngine::from_process_env();
+    let engine = anti_ai_design_browser::BrowserEngine::from_process_env();
     let options = ScanOptions { viewport: None, ..ScanOptions::default() };
-    let loaded = anti_design_detect::engines::UrlEngine::detect_url_scan(&engine, &url, &options).unwrap();
+    let loaded = anti_ai_design_detect::engines::UrlEngine::detect_url_scan(&engine, &url, &options).unwrap();
     // The launch's headless window is smaller than a URL scan's 1280x800,
     // so compare the rules, not the geometry each one quotes.
     let mut a = ids(&attached.findings);

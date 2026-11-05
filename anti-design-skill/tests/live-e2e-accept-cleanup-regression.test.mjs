@@ -3,7 +3,7 @@
  *
  * This is intentionally opt-in and provider-backed: it narrows the failure
  * where the accepted source has been carbonized cleanly but the browser still
- * exposes the accepted element under stale data-anti-design runtime wrappers.
+ * exposes the accepted element under stale data-anti-ai-design runtime wrappers.
  *
  * Run with:
  *   set -a; source .env.local; set +a
@@ -50,7 +50,7 @@ describe('live-e2e accept cleanup regression', () => {
   it('cleans accepted LLM DOM wrappers after carbonize cleanup', async (t) => {
     const fixture = readFixture(FIXTURE_NAME);
     const llmConfig = resolveLlmAgentConfig({
-      provider: process.env.ANTI_DESIGN_E2E_LLM_PROVIDER || 'deepseek',
+      provider: process.env.ANTI_AI_DESIGN_E2E_LLM_PROVIDER || 'deepseek',
     });
     const agent = await createLlmAgent({
       config: llmConfig,
@@ -96,7 +96,7 @@ describe('live-e2e accept cleanup regression', () => {
       const sourceFile = await locateSessionFile(tmp);
       assert.match(
         readFileSync(sourceFile, 'utf-8'),
-        /data-anti-design-variants="/,
+        /data-anti-ai-design-variants="/,
         'variant wrapper should be present before accept',
       );
 
@@ -104,19 +104,19 @@ describe('live-e2e accept cleanup regression', () => {
       await clickNext(page);
       assert.equal(await getVisibleVariant(page), 2, 'variant 2 visible after one Next');
 
-      const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('anti-design-live-session') || 'null'));
+      const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('anti-ai-design-live-session') || 'null'));
       assert.ok(saved?.id && /^[a-zA-Z0-9_-]+$/.test(saved.id), 'cycling session has a safe durable id');
-      const snapshotPath = join(appRoot, '.anti-design/live/sessions', `${saved.id}.snapshot.json`);
+      const snapshotPath = join(appRoot, '.anti-ai-design/live/sessions', `${saved.id}.snapshot.json`);
 
       t.diagnostic('Accepting variant 2');
       await clickAccept(page, { expectedVariant: 2 });
 
       t.diagnostic('Waiting for accept + carbonize cleanup to land in source');
       const finalSource = await waitForSourceClean(sourceFile, 30_000);
-      assert.doesNotMatch(finalSource, /data-anti-design-variants="/, 'source variants wrapper removed');
-      assert.doesNotMatch(finalSource, /anti-design-variants-start/, 'source variants markers removed');
-      assert.doesNotMatch(finalSource, /anti-design-carbonize-start/, 'source carbonize markers removed');
-      assert.doesNotMatch(finalSource, /data-anti-design-variant="/, 'source variant wrapper removed');
+      assert.doesNotMatch(finalSource, /data-anti-ai-design-variants="/, 'source variants wrapper removed');
+      assert.doesNotMatch(finalSource, /anti-ai-design-variants-start/, 'source variants markers removed');
+      assert.doesNotMatch(finalSource, /anti-ai-design-carbonize-start/, 'source carbonize markers removed');
+      assert.doesNotMatch(finalSource, /data-anti-ai-design-variant="/, 'source variant wrapper removed');
       assert.match(finalSource, /<h1[^>]*(class|className)="[^"]*\bhero-title\b[^"]*"/);
 
       await waitForAcceptedDomClean(page, PICK_SELECTOR, {
@@ -135,7 +135,7 @@ describe('live-e2e accept cleanup regression', () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
       } while (Date.now() < deadline);
       assert.equal(snapshot.phase, 'completed', 'accept must reach durable completed phase without forcing completion');
-      assert.doesNotMatch(readFileSync(sourceFile, 'utf8'), /data-anti-design-[\w-]+\s*=/, 'accepted source contains no reserved runtime attributes');
+      assert.doesNotMatch(readFileSync(sourceFile, 'utf8'), /data-anti-ai-design-[\w-]+\s*=/, 'accepted source contains no reserved runtime attributes');
       t.diagnostic(`Durable completion verified for ${saved.id}`);
     } finally {
       await teardown();
@@ -201,7 +201,7 @@ async function waitForAcceptedDomClean(page, selector, { timeoutMs, sourceFile, 
       (sel) => {
         const matches = [...document.querySelectorAll(sel)];
         return matches.length > 0
-          && matches.every((el) => !el.closest('[data-anti-design-variants],[data-anti-design-variant],[data-anti-design-carbonize]'));
+          && matches.every((el) => !el.closest('[data-anti-ai-design-variants],[data-anti-ai-design-variant],[data-anti-ai-design-carbonize]'));
       },
       selector,
       { timeout: timeoutMs },
@@ -221,26 +221,26 @@ async function waitForAcceptedDomClean(page, selector, { timeoutMs, sourceFile, 
 async function collectAcceptedDomDiagnostic(page, selector) {
   return page.evaluate((sel) => {
     const matches = [...document.querySelectorAll(sel)];
-    const clean = matches.filter((el) => !el.closest('[data-anti-design-variants],[data-anti-design-variant],[data-anti-design-carbonize]'));
-    const stale = matches.filter((el) => el.closest('[data-anti-design-variants],[data-anti-design-variant],[data-anti-design-carbonize]'));
+    const clean = matches.filter((el) => !el.closest('[data-anti-ai-design-variants],[data-anti-ai-design-variant],[data-anti-ai-design-carbonize]'));
+    const stale = matches.filter((el) => el.closest('[data-anti-ai-design-variants],[data-anti-ai-design-variant],[data-anti-ai-design-carbonize]'));
     const local = {};
     for (const key of [
-      'anti-design-live-session',
-      'anti-design-live-session-handled',
-      'anti-design-live-session-scroll',
+      'anti-ai-design-live-session',
+      'anti-ai-design-live-session-handled',
+      'anti-ai-design-live-session-scroll',
     ]) {
       local[key] = localStorage.getItem(key);
     }
     return {
       cleanMatchCount: clean.length,
       staleMatchCount: stale.length,
-      remainingVariantsWrapperCount: document.querySelectorAll('[data-anti-design-variants]').length,
-      remainingVariantWrapperCount: document.querySelectorAll('[data-anti-design-variant]').length,
-      liveBarText: document.querySelector('#anti-design-live-bar')?.textContent || '',
+      remainingVariantsWrapperCount: document.querySelectorAll('[data-anti-ai-design-variants]').length,
+      remainingVariantWrapperCount: document.querySelectorAll('[data-anti-ai-design-variant]').length,
+      liveBarText: document.querySelector('#anti-ai-design-live-bar')?.textContent || '',
       localStorage: local,
       heroHtml: matches.map((el) => el.outerHTML.slice(0, 500)),
       staleAncestorHtml: stale.map((el) => {
-        const ancestor = el.closest('[data-anti-design-variants],[data-anti-design-variant]');
+        const ancestor = el.closest('[data-anti-ai-design-variants],[data-anti-ai-design-variant]');
         return ancestor ? ancestor.outerHTML.slice(0, 700) : '';
       }),
     };
@@ -248,10 +248,10 @@ async function collectAcceptedDomDiagnostic(page, selector) {
 }
 
 function isSourceClean(source) {
-  return !source.includes('data-anti-design-variants=')
-    && !source.includes('anti-design-variants-start')
-    && !source.includes('anti-design-carbonize-start')
-    && !source.includes('data-anti-design-variant=');
+  return !source.includes('data-anti-ai-design-variants=')
+    && !source.includes('anti-ai-design-variants-start')
+    && !source.includes('anti-ai-design-carbonize-start')
+    && !source.includes('data-anti-ai-design-variant=');
 }
 
 async function waitForSourceClean(filePath, timeoutMs) {
@@ -269,9 +269,9 @@ async function locateSessionFile(tmp) {
   for (const file of walkSources(tmp)) {
     const body = readFileSync(file, 'utf-8');
     if (
-      body.includes('data-anti-design-variants=')
-      || body.includes('anti-design-carbonize-start')
-      || body.includes('anti-design-variants-start')
+      body.includes('data-anti-ai-design-variants=')
+      || body.includes('anti-ai-design-carbonize-start')
+      || body.includes('anti-ai-design-variants-start')
     ) {
       return file;
     }

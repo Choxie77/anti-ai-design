@@ -1,10 +1,10 @@
-//! JS: live-commit-manual-edits.mjs `main()` -> `anti-design
+//! JS: live-commit-manual-edits.mjs `main()` -> `anti-ai-design
 //! live-commit-manual-edits`. Applies pending live copy edits as one AI-owned
 //! batch and prints the commit result as JSON.
 
 use crate::manual_edits::commit::{commit_manual_edits_value, CommitOptions};
 use crate::util::{eprintln, json_compact, println};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{json, Value};
 
 /// JS: argVal(args, name). A bare flag yields the boolean `true`.
@@ -25,7 +25,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
     if args.iter().any(|a| a == "--help" || a == "-h") {
         println(
             io,
-            "Usage: anti-design live-commit-manual-edits [--page-url=<url>] [--provider=auto|codex|claude|mock]",
+            "Usage: anti-ai-design live-commit-manual-edits [--page-url=<url>] [--provider=auto|codex|claude|mock]",
         );
         return 0;
     }
@@ -42,8 +42,8 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
         Value::String(s) if !s.is_empty() => Some(s),
         _ => None,
     };
-    let timeout_ms = match env.get("ANTI_DESIGN_LIVE_COPY_AGENT_TIMEOUT_MS") {
-        Some(v) if !v.is_empty() => anti_design_core::js::string_to_number(v),
+    let timeout_ms = match env.get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_TIMEOUT_MS") {
+        Some(v) if !v.is_empty() => anti_ai_design_core::js::string_to_number(v),
         _ => 120_000.0,
     };
 

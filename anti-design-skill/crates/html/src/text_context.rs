@@ -1,5 +1,5 @@
 //! The static engine's [`ContextNode`]: how the context predicates of
-//! [`anti_design_core::checks::text_context`] read a parsed document.
+//! [`anti_ai_design_core::checks::text_context`] read a parsed document.
 //!
 //! There is no layout here, so there is no `rect`: every test that needs one
 //! (a label drawn over a plot, labels lined up along an axis, a title bar's
@@ -14,9 +14,9 @@ use std::hash::{Hash, Hasher};
 use crate::background::sv;
 use crate::dom::StaticElement;
 use crate::quality::resolve_font_size_px;
-use anti_design_core::checks::decorative_text::{classify_decorative_text, DecorativeShape};
-use anti_design_core::checks::text_context::{self, ContextNode};
-use anti_design_core::js;
+use anti_ai_design_core::checks::decorative_text::{classify_decorative_text, DecorativeShape};
+use anti_ai_design_core::checks::text_context::{self, ContextNode};
+use anti_ai_design_core::js;
 
 #[derive(Clone, Copy)]
 pub struct StaticNode<'a>(pub StaticElement<'a>);

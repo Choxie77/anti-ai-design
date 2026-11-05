@@ -10,4 +10,4 @@ name = "xtask"
 path = "src/main.rs"
 
 [dependencies]
-anti-design-bundle = { workspace = true }
+anti-ai-design-bundle = { workspace = true }

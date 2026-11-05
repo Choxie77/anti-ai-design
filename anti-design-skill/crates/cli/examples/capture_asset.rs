@@ -1,7 +1,7 @@
 //! Offline diagnostic driver; not a production CLI verb or approval authority.
-//! cargo run -p anti-design --example capture_asset -- request.json new-output-dir
-use anti_design::asset_capture::CdpAssetRenderer;
-use anti_design_comp_verbs::asset_capture::{AssetCaptureRequest, AssetRenderer};
+//! cargo run -p anti-ai-design --example capture_asset -- request.json new-output-dir
+use anti_ai_design::asset_capture::CdpAssetRenderer;
+use anti_ai_design_comp_verbs::asset_capture::{AssetCaptureRequest, AssetRenderer};
 use serde_json::Value;
 use std::{fs, path::Path};
 fn main() -> Result<(), Box<dyn std::error::Error>> {

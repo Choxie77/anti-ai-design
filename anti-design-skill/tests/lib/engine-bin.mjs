@@ -1,9 +1,9 @@
 /**
- * Locate the anti-design engine binary for tests that drive verbs end to end.
+ * Locate the anti-ai-design engine binary for tests that drive verbs end to end.
  *
- * Order: $ANTI_DESIGN_BIN, then skill/scripts/bin/<os>-<arch>/anti-design[.exe]
- * (what `bun run fetch:engine` writes), then target/release/anti-design[.exe]
- * (what `cargo build --release -p anti-design` writes, so a local source build
+ * Order: $ANTI_AI_DESIGN_BIN, then skill/scripts/bin/<os>-<arch>/anti-ai-design[.exe]
+ * (what `bun run fetch:engine` writes), then target/release/anti-ai-design[.exe]
+ * (what `cargo build --release -p anti-ai-design` writes, so a local source build
  * is picked up without any extra step). Returns null when none exists so a
  * suite can skip cleanly instead of failing on a machine without the engine.
  */
@@ -21,10 +21,10 @@ export function engineTarget() {
 }
 
 export function findEngineBinary() {
-  const fromEnv = process.env.ANTI_DESIGN_BIN;
+  const fromEnv = process.env.ANTI_AI_DESIGN_BIN;
   if (fromEnv && fs.existsSync(fromEnv)) return path.resolve(fromEnv);
   const target = engineTarget();
-  const exe = target.startsWith('windows-') ? 'anti-design.exe' : 'anti-design';
+  const exe = target.startsWith('windows-') ? 'anti-ai-design.exe' : 'anti-ai-design';
   const candidates = [
     path.join(REPO_ROOT, 'skill', 'scripts', 'bin', target, exe),
     path.join(REPO_ROOT, 'target', 'release', exe),
@@ -33,17 +33,17 @@ export function findEngineBinary() {
 }
 
 export const ENGINE_MISSING_MESSAGE =
-  'engine binary not found: run `cargo build --release -p anti-design` or `bun run fetch:engine`, or set ANTI_DESIGN_BIN';
+  'engine binary not found: run `cargo build --release -p anti-ai-design` or `bun run fetch:engine`, or set ANTI_AI_DESIGN_BIN';
 
 /** Environment the launcher would export for the binary when run from this repo's skill dir. */
 export function engineEnv(bin, extra = {}) {
   return {
     ...process.env,
-    ANTI_DESIGN_SKILL_DIR: path.join(REPO_ROOT, 'skill'),
-    ANTI_DESIGN_SELF: bin,
+    ANTI_AI_DESIGN_SKILL_DIR: path.join(REPO_ROOT, 'skill'),
+    ANTI_AI_DESIGN_SELF: bin,
     ...extra,
     // Any roll API request a test makes is tagged as test traffic. Set last,
     // so neither the shell nor a test's extras can untag it.
-    ANTI_DESIGN_TELEMETRY_CHANNEL: 'test',
+    ANTI_AI_DESIGN_TELEMETRY_CHANNEL: 'test',
   };
 }

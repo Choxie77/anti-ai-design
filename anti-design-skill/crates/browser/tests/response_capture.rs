@@ -1,5 +1,5 @@
 //! Native transport evidence: read the response that was rendered, never refetch.
-use anti_design_browser::{cdp::Browser, discovery};
+use anti_ai_design_browser::{cdp::Browser, discovery};
 use std::collections::HashMap;
 use std::sync::{
     Arc,

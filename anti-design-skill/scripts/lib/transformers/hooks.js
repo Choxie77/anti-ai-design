@@ -1,13 +1,13 @@
 /**
- * Build-pipeline emitters for the Anti-Design design hook.
+ * Build-pipeline emitters for the Anti-AI Design design hook.
  *
  * Two emission targets exist:
  *
- * 1. Project-local install (the `npx anti-design skills install` CLI path):
+ * 1. Project-local install (the `npx anti-ai-design skills install` CLI path):
  *      - Claude Code: `.claude/settings.json`   (${CLAUDE_PROJECT_DIR}-relative)
  *      - Codex:       `.codex/hooks.json`
  *      - Cursor:      `.cursor/hooks.json`
- *      - Grok Build:  `.grok/hooks/anti-design.json`
+ *      - Grok Build:  `.grok/hooks/anti-ai-design.json`
  *
  * 2. Claude Code plugin package (the marketplace / `/plugin install` path):
  *      - `plugin/hooks/hooks.json`              (${CLAUDE_PLUGIN_ROOT}-relative)
@@ -18,11 +18,11 @@
  *      - `hooks/hooks.json`                     (${PLUGIN_ROOT}-relative)
  *
  * The plugin variant resolves the hook script relative to the installed plugin
- * root rather than assuming a `.claude/skills/anti-design/` layout, so it stays
+ * root rather than assuming a `.claude/skills/anti-ai-design/` layout, so it stays
  * correct wherever Claude Code unpacks the plugin.
  */
 
-export const ANTI_DESIGN_HOOK_COMMAND_MARKER = 'skills/anti-design/scripts/anti-design';
+export const ANTI_AI_DESIGN_HOOK_COMMAND_MARKER = 'skills/anti-ai-design/scripts/anti-ai-design';
 
 const TIMEOUT_SECONDS = 5;
 const STATUS_MESSAGE = 'Checking UI changes';
@@ -35,13 +35,13 @@ const STATUS_MESSAGE = 'Checking UI changes';
 const STOP_TIMEOUT_SECONDS = 30;
 const STOP_STATUS_MESSAGE = 'Design deep pass';
 
-// The hook is a verb of the anti-design launcher that ships in the skill's
-// scripts dir: `<scripts>/anti-design hook` (per-edit and Stop passes; Cursor's
+// The hook is a verb of the anti-ai-design launcher that ships in the skill's
+// scripts dir: `<scripts>/anti-ai-design hook` (per-edit and Stop passes; Cursor's
 // retired preToolUse gate ran `hook-before-edit`, which still works). The launcher
 // runs the platform binary next to it, or downloads it once; no runtime probe
 // is needed and there is no Node on the path to check.
-export const LAUNCHER_NAME = 'anti-design';
-export const LAUNCHER_NAME_WINDOWS = 'anti-design.cmd';
+export const LAUNCHER_NAME = 'anti-ai-design';
+export const LAUNCHER_NAME_WINDOWS = 'anti-ai-design.cmd';
 
 // A hook manifest can be copied into a user-level settings file (issue #399:
 // user-level hooks fire in every project, where a project-relative path may
@@ -99,21 +99,21 @@ function stopEntry(command, handlerFields) {
 const launcherIn = (scriptsDir) => `${scriptsDir}/${LAUNCHER_NAME}`;
 const launcherCmdIn = (scriptsDir) => `${scriptsDir}/${LAUNCHER_NAME_WINDOWS}`;
 
-const CLAUDE_PROJECT_SCRIPTS = '${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts';
-const CLAUDE_PLUGIN_SCRIPTS = '${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts';
-const CODEX_PLUGIN_SCRIPTS = '${PLUGIN_ROOT}/skills/anti-design/scripts';
+const CLAUDE_PROJECT_SCRIPTS = '${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts';
+const CLAUDE_PLUGIN_SCRIPTS = '${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts';
+const CODEX_PLUGIN_SCRIPTS = '${PLUGIN_ROOT}/skills/anti-ai-design/scripts';
 // Codex reads project hooks from `.codex/hooks.json`, but the skill payload the
 // hook invokes lives under the install's own skills dir: a `.codex`-directory
 // install keeps it at `.codex/skills/...`, while a `.agents` (Codex repo-skills)
 // install keeps it at `.agents/skills/...`. Derive the path from the install dir
 // so each generated manifest points at its own payload rather than a hardcoded
 // `.agents`; otherwise the guarded hook silently no-ops on `.codex` installs.
-const codexProjectScripts = (skillDir) => `${skillDir}/skills/anti-design/scripts`;
-const CURSOR_SCRIPTS = '.cursor/skills/anti-design/scripts';
-const GITHUB_PROJECT_SCRIPTS = '$(git rev-parse --show-toplevel)/.github/skills/anti-design/scripts';
+const codexProjectScripts = (skillDir) => `${skillDir}/skills/anti-ai-design/scripts`;
+const CURSOR_SCRIPTS = '.cursor/skills/anti-ai-design/scripts';
+const GITHUB_PROJECT_SCRIPTS = '$(git rev-parse --show-toplevel)/.github/skills/anti-ai-design/scripts';
 // Grok project hooks are relative to the git/workspace root. Claude tool names
 // in the matcher (Edit|Write|MultiEdit) alias to Grok's search_replace family.
-const GROK_PROJECT_SCRIPTS = '.grok/skills/anti-design/scripts';
+const GROK_PROJECT_SCRIPTS = '.grok/skills/anti-ai-design/scripts';
 
 // `windowsKey` names the per-OS field the consuming harness reads its Windows
 // command from (`commandWindows` for Codex, `windows` for VS Code Copilot
@@ -148,7 +148,7 @@ function buildClaudeCompatibleHooks(matcher, scriptsDir, { windowsKey, sessionId
 
 export function buildClaudeSettingsManifest() {
   return {
-    description: 'Anti-Design design detector: immediate-tier checks after Edit/Write on UI files, full-rule deep pass on Stop.',
+    description: 'Anti-AI Design design detector: immediate-tier checks after Edit/Write on UI files, full-rule deep pass on Stop.',
     hooks: buildClaudeCompatibleHooks('Edit|Write', CLAUDE_PROJECT_SCRIPTS, { sessionIdentity: true }),
   };
 }
@@ -170,7 +170,7 @@ export function buildClaudePluginHooksManifest() {
       sessionIdentity: true,
       windowsKey: 'windows',
       guard: guardedLauncherViaSh,
-      env: { ANTI_DESIGN_HOOK_HARNESS: 'vscode' },
+      env: { ANTI_AI_DESIGN_HOOK_HARNESS: 'vscode' },
     }),
   };
 }
@@ -265,14 +265,14 @@ export function buildGrokHooksManifest() {
 // There is no per-OS command field; a Windows install rewrites this to a
 // PowerShell form (crates/skills hook_manifest.rs).
 export function buildGeminiHooksManifest() {
-  const launcher = '$GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design';
+  const launcher = '$GEMINI_PROJECT_DIR/.gemini/skills/anti-ai-design/scripts/anti-ai-design';
   const command = `[ ! -f ${launcher} ] || ${launcher} hook`;
   return { hooks: {
     BeforeTool: [{ matcher: '^run_shell_command$', hooks: [{
-      name: 'anti-design-session', type: 'command', command, timeout: 5000,
+      name: 'anti-ai-design-session', type: 'command', command, timeout: 5000,
     }] }],
     AfterAgent: [{ hooks: [{
-      name: 'anti-design-completion', type: 'command', command, timeout: 30000,
+      name: 'anti-ai-design-completion', type: 'command', command, timeout: 30000,
     }] }],
   } };
 }

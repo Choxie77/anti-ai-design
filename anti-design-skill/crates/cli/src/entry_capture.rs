@@ -4,9 +4,9 @@ use crate::{
     capture_snapshot::{HtmlSnapshot, SnapshotSelection},
     component_capture::render_page,
 };
-use anti_design_browser::{cdp::Browser, discovery, html_snapshot::HtmlSnapshot as PageSnapshot};
-use anti_design_comp_verbs::asset_capture::capture_sha256;
-use anti_design_comp_verbs::entry_capture::{
+use anti_ai_design_browser::{cdp::Browser, discovery, html_snapshot::HtmlSnapshot as PageSnapshot};
+use anti_ai_design_comp_verbs::asset_capture::capture_sha256;
+use anti_ai_design_comp_verbs::entry_capture::{
     CapturedEntry, EntryEvidence, EntryRenderer, EntryRequest, EntryStage, FrameEvidence,
 };
 use serde_json::{Value, json};
@@ -40,7 +40,7 @@ impl CapturedEntry for FrozenEntry {
         self.snapshot.verify_current()?;
         if let Some((path, bytes)) = &self.manifest {
             if fs::read(path).ok().as_ref() != Some(bytes) {
-                return Err("capture input changed: .anti-design/review/hero.json".into());
+                return Err("capture input changed: .anti-ai-design/review/hero.json".into());
             }
         }
         Ok(())
@@ -330,7 +330,7 @@ fn capture_text_only(
         files.insert(name, bytes.to_vec());
     }
     let page = Arc::new(PageSnapshot::from_pinned(request.artifact.clone(), files)?);
-    let env = anti_design_common::process_env();
+    let env = anti_ai_design_common::process_env();
     let exe = discovery::find_browser(&env).map_err(|e| format!("browser unavailable: {e:?}"))?;
     let mut browser = Browser::launch(&exe, &[], false).map_err(|e| e.message)?;
     let result = (|| -> Result<EntryEvidence, String> {
@@ -402,7 +402,7 @@ fn declared_dependencies(
     root: &Path,
     artifact: &str,
 ) -> Result<(Option<Vec<String>>, Option<(PathBuf, Vec<u8>)>), String> {
-    let path = root.join(".anti-design").join("review").join("hero.json");
+    let path = root.join(".anti-ai-design").join("review").join("hero.json");
     let Ok(bytes) = fs::read(&path) else {
         return Ok((None, None));
     };

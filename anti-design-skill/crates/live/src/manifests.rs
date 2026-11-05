@@ -1,6 +1,6 @@
-//! The persisted live manifests: `<appRoot>/.anti-design/live/roots.json`
+//! The persisted live manifests: `<appRoot>/.anti-ai-design/live/roots.json`
 //! (`RootsManifest`) and the repo pointer
-//! `<repoRoot>/.anti-design/live/app-root.json`. JS: live/roots.mjs (the
+//! `<repoRoot>/.anti-ai-design/live/app-root.json`. JS: live/roots.mjs (the
 //! read/write half).
 
 use crate::util::{iso_now, json_pretty, jsp, read_json, write_file};
@@ -40,12 +40,12 @@ impl RootsManifest {
 
 /// JS: rootsFilePath(appRoot)
 pub fn roots_file_path(app_root: &str) -> String {
-    jsp::join(&[app_root, ".anti-design", "live", ROOTS_FILE])
+    jsp::join(&[app_root, ".anti-ai-design", "live", ROOTS_FILE])
 }
 
 /// JS: pointerFilePath(repoRoot)
 pub fn pointer_file_path(repo_root: &str) -> String {
-    jsp::join(&[repo_root, ".anti-design", "live", POINTER_FILE])
+    jsp::join(&[repo_root, ".anti-ai-design", "live", POINTER_FILE])
 }
 
 /// One entry of the v2 pointer file.
@@ -130,7 +130,7 @@ pub fn manifest_from_value(raw: &Value) -> Option<RootsManifest> {
         repo_root: s("repoRoot").unwrap_or_else(|| app_root.clone()),
         context_root: s("contextRoot"),
         session_root: s("sessionRoot")
-            .unwrap_or_else(|| jsp::join(&[&app_root, ".anti-design", "live"])),
+            .unwrap_or_else(|| jsp::join(&[&app_root, ".anti-ai-design", "live"])),
         product_path: s("productPath"),
         design_path: s("designPath"),
         resolved_from: s("resolvedFrom"),

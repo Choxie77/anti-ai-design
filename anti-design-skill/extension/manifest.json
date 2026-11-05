@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Anti-Design",
+  "name": "Anti-AI Design",
   "description": "Detect common UI anti-patterns in any web page",
   "version": "1.4.0",
   "permissions": [

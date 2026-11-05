@@ -1,10 +1,10 @@
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 
 /// Rule ids the static engine reports for a page linking `vendor/lib.css`,
 /// with that sheet waived or not.
 fn ids(waive_sheet: bool) -> Vec<String> {
     let dir = std::env::temp_dir().join(format!(
-        "anti-design-ignored-sheet-{}-{waive_sheet}",
+        "anti-ai-design-ignored-sheet-{}-{waive_sheet}",
         std::process::id()
     ));
     std::fs::create_dir_all(dir.join("vendor")).unwrap();

@@ -73,7 +73,7 @@ pub fn spawn_detached_with_args(cwd: &str, env: &Env, child_args: &[String]) -> 
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
-    anti_design_common::proc::detach(&mut cmd);
+    anti_ai_design_common::proc::detach(&mut cmd);
     let mut child = cmd.spawn().ok()?;
     let own_pid = std::process::id() as i64;
     let deadline = Instant::now() + Duration::from_secs(10);

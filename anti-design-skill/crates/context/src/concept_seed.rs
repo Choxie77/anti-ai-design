@@ -1,4 +1,4 @@
-//! JS: concept-seed.mjs -> `anti-design concept-seed`
+//! JS: concept-seed.mjs -> `anti-ai-design concept-seed`
 
 use crate::catalog::*;
 use crate::context::load_context;
@@ -8,7 +8,7 @@ use crate::seed_text as t;
 use crate::target_args::TargetOptions;
 use crate::telemetry;
 use crate::util::Env;
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::time::{Duration, Instant};
@@ -125,7 +125,7 @@ fn api_base(env: &Env) -> String {
 }
 
 pub(crate) fn card_base(env: &Env) -> String {
-    env.get("ANTI_DESIGN_CARD_BASE").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| "https://anti-design.example/worlds/cards".to_string())
+    env.get("ANTI_AI_DESIGN_CARD_BASE").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| "https://github.com/Choxie77/anti-ai-design/worlds/cards".to_string())
 }
 
 /// URLSearchParams serialization (application/x-www-form-urlencoded).
@@ -397,7 +397,7 @@ pub struct SeedArgs {
     /// The recorded build-path default and its file (`recorded_build_path`).
     pub build_path: Option<(String, String)>,
     /// The engine generated `key` itself this run (no `--from`, no
-    /// `ANTI_DESIGN_CONCEPT_SEED`), so it has no ledger to look for.
+    /// `ANTI_AI_DESIGN_CONCEPT_SEED`), so it has no ledger to look for.
     pub fresh_key: bool,
 }
 
@@ -499,7 +499,7 @@ fn render_roll(env: &Env, cwd: &str, budget: &mut ApiBudget, a: &SeedArgs) -> Re
     let dealt_str = dealt.iter().map(|d| d.to_string()).collect::<Vec<_>>().join(", ");
 
     // data resolution
-    let catalog_dir = env.get("ANTI_DESIGN_CATALOG_DIR").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| {
+    let catalog_dir = env.get("ANTI_AI_DESIGN_CATALOG_DIR").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| {
         crate::provider::detect(env, cwd).skill_dir.map(|d| jsp::join(&[&d, "scripts"])).unwrap_or_else(|| ".".to_string())
     });
     let data: Option<RollData> = if let Some(local) = load_local(&catalog_dir) {
@@ -589,7 +589,7 @@ fn render_roll(env: &Env, cwd: &str, budget: &mut ApiBudget, a: &SeedArgs) -> Re
         return Ok((scope, reroll, fill(t::DEGRADED_BODY, &pairs), true, RollMeta { worlds: vec![], api: false, pool_revision: None, hand_id: None }));
     };
 
-    let compositions_enabled = env.get("ANTI_DESIGN_COMPOSITIONS").map(|v| v == "1").unwrap_or(false);
+    let compositions_enabled = env.get("ANTI_AI_DESIGN_COMPOSITIONS").map(|v| v == "1").unwrap_or(false);
     let compositions: Vec<Value> = if compositions_enabled { data.compositions.clone() } else { vec![] };
     let grain_note = match &data.composition_match {
         Some(m) if m.grain.is_some() => {
@@ -697,7 +697,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             io.out(if available { "SEED NONE: this machine can make seed references, so a brief written here records one; `none` means the roll was skipped.\n" } else { "SEED NONE ACCEPTED: this machine has no seed salt, so no reference can exist and the brief rightly records none.\n" });
             return if available { 1 } else { 0 };
         }
-        if anti_design_common::seed::parse_reference(&v).is_none() {
+        if anti_ai_design_common::seed::parse_reference(&v).is_none() {
             io.out("SEED UNKNOWN: not a seed reference (`seed:` and 16 hex). A raw key never belongs in a brief.\n");
             return 1;
         }
@@ -748,17 +748,17 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
     let supplied = match val("--from") {
         Some(Some(k)) => Some(k),
         Some(None) => Some("undefined".to_string()),
-        None => env.get("ANTI_DESIGN_CONCEPT_SEED").filter(|v| !v.is_empty()).cloned(),
+        None => env.get("ANTI_AI_DESIGN_CONCEPT_SEED").filter(|v| !v.is_empty()).cloned(),
     };
     let fresh_key = supplied.is_none();
-    let given = supplied.unwrap_or_else(anti_design_common::seed::new_key);
+    let given = supplied.unwrap_or_else(anti_ai_design_common::seed::new_key);
     // A seed reference (what the surface brief records) stands for the key
     // this machine rolled it from; the deal depends on the key itself.
     let ledger = telemetry::Ledger::new(&env, &cwd).for_fresh_key(&given, fresh_key);
     let key = match ledger.resolve(&given) {
         Ok(k) => k,
         Err(r) => {
-            io.err(&format!("concept-seed: {} is a seed reference this machine has no record of. A reference resolves only where its roll was made (in .anti-design/questions/seeds/, which is never committed). To reproduce that deal here, pass the original key with --from; otherwise roll anew without --from.\n", r));
+            io.err(&format!("concept-seed: {} is a seed reference this machine has no record of. A reference resolves only where its roll was made (in .anti-ai-design/questions/seeds/, which is never committed). To reproduce that deal here, pass the original key with --from; otherwise roll anew without --from.\n", r));
             return 1;
         }
     };
@@ -820,11 +820,11 @@ mod tests {
 
     /// The ledger the test runs see: the same pinned salt.
     fn tl(p: &std::path::Path) -> telemetry::Ledger {
-        telemetry::Ledger::new(&Env::from([("ANTI_DESIGN_SEED_SALT".into(), "test-salt".into())]), &p.to_string_lossy())
+        telemetry::Ledger::new(&Env::from([("ANTI_AI_DESIGN_SEED_SALT".into(), "test-salt".into())]), &p.to_string_lossy())
     }
 
     fn temp_dir(name: &str) -> std::path::PathBuf {
-        let dir = std::env::temp_dir().join(format!("anti-design-seed-{}-{}", name, std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-seed-{}-{}", name, std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir
@@ -851,14 +851,14 @@ mod tests {
             proj.join("no-such-catalog")
         };
         let env = Env::from([
-            ("ANTI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_CATALOG_DIR".into(), catalog_dir.to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_API_URL".into(), "http://127.0.0.1:9/api".into()),
-            ("ANTI_DESIGN_API_TIMEOUT".into(), "300".into()),
-            ("ANTI_DESIGN_NO_TELEMETRY".into(), "1".into()),
-            ("ANTI_DESIGN_SEED_SALT".into(), "test-salt".into()),
-            ("ANTI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
-            ("ANTI_DESIGN_SELF".into(), "anti-design".into()),
+            ("ANTI_AI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_CATALOG_DIR".into(), catalog_dir.to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_API_URL".into(), "http://127.0.0.1:9/api".into()),
+            ("ANTI_AI_DESIGN_API_TIMEOUT".into(), "300".into()),
+            ("ANTI_AI_DESIGN_NO_TELEMETRY".into(), "1".into()),
+            ("ANTI_AI_DESIGN_SEED_SALT".into(), "test-salt".into()),
+            ("ANTI_AI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
+            ("ANTI_AI_DESIGN_SELF".into(), "anti-ai-design".into()),
         ]);
         let (mut io, cap) = Io::captured("", proj.to_path_buf(), env);
         let argv: Vec<String> = args.iter().map(|s| s.to_string()).collect();
@@ -961,7 +961,7 @@ mod tests {
         &out[at..]
     }
 
-    const PRESENT_FIRST_LINE: &str = "- Present this hand on the decision page: write the options payload (`anti-design serve-question --schema` prints its shape), run `anti-design serve-question --start --payload <file>`, and open the URL it prints for the user.";
+    const PRESENT_FIRST_LINE: &str = "- Present this hand on the decision page: write the options payload (`anti-ai-design serve-question --schema` prints its shape), run `anti-ai-design serve-question --start --payload <file>`, and open the URL it prints for the user.";
 
     #[test]
     fn direction_roll_ends_with_the_presentation_block() {
@@ -974,10 +974,10 @@ mod tests {
         let lines: Vec<&str> = block.trim_end().split('\n').collect();
         assert_eq!(lines.len(), 6, "{block}");
         assert_eq!(lines[1], PRESENT_FIRST_LINE);
-        assert!(lines[2].starts_with("- With image generation, every card declares a comp under .anti-design/mocks/decision/, canon included, declined challengers excepted. Serve first"), "{block}");
+        assert!(lines[2].starts_with("- With image generation, every card declares a comp under .anti-ai-design/mocks/decision/, canon included, declined challengers excepted. Serve first"), "{block}");
         assert!(lines[2].contains("(a.png gets a.png.json)"), "{block}");
         // The wait follows comp generation, never precedes it.
-        assert!(lines[3].starts_with("- After the last comp or sketch lands (at once when this round makes none), hold `anti-design serve-question --wait --key <key>`. If your shell hands back a session before --wait exits, keep polling that session until it exits; rerun --wait only after it exits 3"), "{block}");
+        assert!(lines[3].starts_with("- After the last comp or sketch lands (at once when this round makes none), hold `anti-ai-design serve-question --wait --key <key>`. If your shell hands back a session before --wait exits, keep polling that session until it exits; rerun --wait only after it exits 3"), "{block}");
         assert!(lines[4].starts_with("- Build path: none recorded"), "{block}");
         assert!(lines[4].contains("\"buildPath\": {\"value\": \"comp\", \"toggle\": true}"), "{block}");
         assert!(lines[5].starts_with("- The structured question tool is the fallback, never the first channel: take it when --start exits 2, when --wait exits 4"), "{block}");
@@ -996,7 +996,7 @@ mod tests {
         assert_eq!(code, 0, "{out}");
         let block = presentation(&out);
         assert!(block.contains(PRESENT_FIRST_LINE), "{block}");
-        assert!(block.contains("- With image generation, each dealt card declares a comp under .anti-design/mocks/decision/; serve first"), "{block}");
+        assert!(block.contains("- With image generation, each dealt card declares a comp under .anti-ai-design/mocks/decision/; serve first"), "{block}");
         assert!(block.contains("Without image generation, each card carries an HTML sketch: one self-contained file of the first viewport only"), "{block}");
         assert!(!block.contains("canon included"), "{block}");
     }
@@ -1013,7 +1013,7 @@ mod tests {
             let (code, out) = seed(&proj, &skill, true, args);
             assert_eq!(code, 0, "{out}");
             let block = presentation(&out);
-            assert!(block.contains("- Re-roll round: while the page is open on a key, deliver this hand to it with `anti-design serve-question --update --key <same key> --payload <file>` and never --start a second server. A re-roll made before any page opened starts one with `anti-design serve-question --start --payload <file>`;"), "{args:?}: {block}");
+            assert!(block.contains("- Re-roll round: while the page is open on a key, deliver this hand to it with `anti-ai-design serve-question --update --key <same key> --payload <file>` and never --start a second server. A re-roll made before any page opened starts one with `anti-ai-design serve-question --start --payload <file>`;"), "{args:?}: {block}");
             assert!(!block.contains("- Present this hand"), "{args:?}: {block}");
         }
     }
@@ -1026,7 +1026,7 @@ mod tests {
         let block = presentation(&out);
         assert!(block.contains(PRESENT_FIRST_LINE), "{block}");
         assert!(block.contains("- This degraded hand goes on the page as a single text-only card with re-roll; it declares no comp."), "{block}");
-        assert!(block.contains("- Right after serving, with no comp to generate first, hold `anti-design serve-question --wait --key <key>`."), "{block}");
+        assert!(block.contains("- Right after serving, with no comp to generate first, hold `anti-ai-design serve-question --wait --key <key>`."), "{block}");
         // Degraded safer keeps its lineup: the full-hand comp line, not one card.
         let (_, out) = seed(&proj, &skill, false, &["--scope", "direction", "--from", "k1", "--reroll", "1", "--register", "safer"]);
         let block = presentation(&out);
@@ -1042,7 +1042,7 @@ mod tests {
     #[test]
     fn operate_and_read_surfaces_are_code_led_whatever_is_recorded() {
         let (proj, skill) = fixture("present-mode-code-led", &[("mode-operate", MODE_FILE), ("mode-read", MODE_FILE), ("mode-persuade", MODE_FILE)]);
-        let dir = proj.join(".anti-design");
+        let dir = proj.join(".anti-ai-design");
         std::fs::create_dir_all(&dir).unwrap();
         let roll = |scope: &str, mode: &str| seed(&proj, &skill, true, &["--scope", scope, "--mode", mode, "--from", "k1"]).1;
 
@@ -1053,7 +1053,7 @@ mod tests {
             assert!(block.contains(&format!("- Build path: code-led. A surface in {mode} mode builds in code whatever the project records. With image generation, put \"buildPath\": {{\"value\": \"code\", \"toggle\": true}} in the payload")), "{block}");
             assert!(block.contains("never offer to record a flip made on this surface"), "{block}");
             assert!(block.contains("- Code-led round: every card but the declined challengers carries an HTML sketch"), "{block}");
-            assert!(block.contains("- After the last sketch lands, hold `anti-design serve-question --wait --key <key>`."), "{block}");
+            assert!(block.contains("- After the last sketch lands, hold `anti-ai-design serve-question --wait --key <key>`."), "{block}");
             assert!(presentation(&roll("surface", mode)).contains("- Code-led round: each dealt card carries an HTML sketch"), "{mode}");
         }
         for mode in ["persuade", "experience"] {
@@ -1064,10 +1064,10 @@ mod tests {
         std::fs::write(dir.join("config.json"), r#"{"buildPath": "comp"}"#).unwrap();
         let out = roll("direction", "operate");
         let block = presentation(&out);
-        assert!(block.contains("- Build path: code-led. A surface in operate mode builds in code whatever the project records (the recorded default comp from .anti-design/config.json governs Persuade and Experience surfaces)."), "{block}");
+        assert!(block.contains("- Build path: code-led. A surface in operate mode builds in code whatever the project records (the recorded default comp from .anti-ai-design/config.json governs Persuade and Experience surfaces)."), "{block}");
         assert!(block.contains("\"buildPath\": {\"value\": \"code\", \"toggle\": true}"), "{block}");
         assert!(!block.contains("Serve first, then generate each comp in reading order"), "{block}");
-        assert!(presentation(&roll("direction", "persuade")).contains("- Build path: recorded default comp (from .anti-design/config.json)."));
+        assert!(presentation(&roll("direction", "persuade")).contains("- Build path: recorded default comp (from .anti-ai-design/config.json)."));
 
         // A recorded code default reads the same on Operate, with nothing extra to name.
         std::fs::write(dir.join("config.json"), r#"{"buildPath": "code"}"#).unwrap();
@@ -1077,17 +1077,17 @@ mod tests {
     #[test]
     fn build_path_line_names_the_recorded_default() {
         let (proj, skill) = fixture("present-build-path", &[("mode-persuade", MODE_FILE)]);
-        let dir = proj.join(".anti-design");
+        let dir = proj.join(".anti-ai-design");
         std::fs::create_dir_all(&dir).unwrap();
         let roll = |scope: &str| seed(&proj, &skill, true, &["--scope", scope, "--mode", "persuade", "--from", "k1"]).1;
 
         std::fs::write(dir.join("config.json"), r#"{"buildPath": "code"}"#).unwrap();
         let out = roll("direction");
         let block = presentation(&out);
-        assert!(block.contains("- Build path: recorded default code (from .anti-design/config.json). With image generation, put \"buildPath\": {\"value\": \"code\", \"toggle\": true} in the payload; without it there is no toggle and the build is code-led. Never ask the user about the build path."), "{block}");
+        assert!(block.contains("- Build path: recorded default code (from .anti-ai-design/config.json). With image generation, put \"buildPath\": {\"value\": \"code\", \"toggle\": true} in the payload; without it there is no toggle and the build is code-led. Never ask the user about the build path."), "{block}");
         assert!(block.contains("- Code-led round: every card but the declined challengers carries an HTML sketch"), "{block}");
         assert!(block.contains("only when --wait prints BUILD PATH FLIPPED"), "{block}");
-        assert!(block.contains("- After the last sketch lands, hold `anti-design serve-question --wait --key <key>`."), "{block}");
+        assert!(block.contains("- After the last sketch lands, hold `anti-ai-design serve-question --wait --key <key>`."), "{block}");
         let out = roll("surface");
         assert!(presentation(&out).contains("- Code-led round: each dealt card carries an HTML sketch"), "{out}");
 
@@ -1095,7 +1095,7 @@ mod tests {
         std::fs::write(dir.join("config.local.json"), r#"{"buildPath": "comp"}"#).unwrap();
         let out = roll("direction");
         let block = presentation(&out);
-        assert!(block.contains("- Build path: recorded default comp (from .anti-design/config.local.json)."), "{block}");
+        assert!(block.contains("- Build path: recorded default comp (from .anti-ai-design/config.local.json)."), "{block}");
         assert!(block.contains("\"buildPath\": {\"value\": \"comp\", \"toggle\": true}"), "{block}");
         assert!(block.contains("Serve first, then generate each comp in reading order"), "{block}");
 
@@ -1116,7 +1116,7 @@ mod tests {
     #[test]
     fn every_roll_records_its_scope_for_serve_question() {
         let (proj, skill) = fixture("roll-record", &[]);
-        let record = proj.join(".anti-design/questions/roll.json");
+        let record = proj.join(".anti-ai-design/questions/roll.json");
         let read = || serde_json::from_str::<Value>(&std::fs::read_to_string(&record).unwrap()).unwrap();
         // Invalid arguments and telemetry pings are not rolls.
         let (code, _) = seed(&proj, &skill, true, &["--scope", "world", "--from", "k1"]);
@@ -1156,7 +1156,7 @@ mod tests {
 
     /// A stand-in roll API on loopback: answers `GET /api/roll` with two
     /// dealt worlds and `POST /api/chosen` with 200, and records every
-    /// request as (method, url, X-Anti-Design-Client, body).
+    /// request as (method, url, X-Anti-AI Design-Client, body).
     type Seen = std::sync::Arc<std::sync::Mutex<Vec<(String, String, String, String, String)>>>;
     fn roll_api() -> (String, Seen) {
         let server = tiny_http::Server::http("127.0.0.1:0").unwrap();
@@ -1165,10 +1165,10 @@ mod tests {
         let log = seen.clone();
         std::thread::spawn(move || {
             for mut req in server.incoming_requests() {
-                let header = req.headers().iter().find(|h| h.field.equiv("X-Anti-Design-Client")).map(|h| h.value.as_str().to_string()).unwrap_or_default();
+                let header = req.headers().iter().find(|h| h.field.equiv("X-Anti-AI Design-Client")).map(|h| h.value.as_str().to_string()).unwrap_or_default();
                 let mut body = String::new();
                 let _ = std::io::Read::read_to_string(req.as_reader(), &mut body);
-                let off = req.headers().iter().find(|h| h.field.equiv("X-Anti-Design-Telemetry")).map(|h| h.value.as_str().to_string()).unwrap_or_default();
+                let off = req.headers().iter().find(|h| h.field.equiv("X-Anti-AI Design-Telemetry")).map(|h| h.value.as_str().to_string()).unwrap_or_default();
                 log.lock().unwrap().push((req.method().as_str().to_string(), req.url().to_string(), header, body, off));
                 let roll = serde_json::json!({
                     "poolRevision": "0123456789ab", "handId": "00112233445566778899aabbccddeeff", "approvedCount": 2, "catalogCount": 3,
@@ -1186,16 +1186,16 @@ mod tests {
 
     fn seed_api(proj: &std::path::Path, skill: &std::path::Path, base: &str, args: &[&str]) -> String {
         let env = Env::from([
-            ("ANTI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_CATALOG_DIR".into(), proj.join("no-such-catalog").to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_API_URL".into(), base.to_string()),
-            ("ANTI_DESIGN_API_TIMEOUT".into(), "3000".into()),
-            ("ANTI_DESIGN_TELEMETRY_CHANNEL".into(), "test".into()),
+            ("ANTI_AI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_CATALOG_DIR".into(), proj.join("no-such-catalog").to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_API_URL".into(), base.to_string()),
+            ("ANTI_AI_DESIGN_API_TIMEOUT".into(), "3000".into()),
+            ("ANTI_AI_DESIGN_TELEMETRY_CHANNEL".into(), "test".into()),
             ("HOME".into(), proj.join("home").to_string_lossy().into_owned()),
             ("USERPROFILE".into(), proj.join("home").to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_SEED_SALT".into(), "test-salt".into()),
-            ("ANTI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
-            ("ANTI_DESIGN_SELF".into(), "anti-design".into()),
+            ("ANTI_AI_DESIGN_SEED_SALT".into(), "test-salt".into()),
+            ("ANTI_AI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
+            ("ANTI_AI_DESIGN_SELF".into(), "anti-ai-design".into()),
         ]);
         let (mut io, cap) = Io::captured("", proj.to_path_buf(), env);
         let argv: Vec<String> = args.iter().map(|s| s.to_string()).collect();
@@ -1214,13 +1214,13 @@ mod tests {
     fn api_rolls_send_the_client_header_and_record_the_pool_revision() {
         let (proj, skill) = fixture("api-roll", &[("mode-persuade", MODE_FILE)]);
         let (base, seen) = roll_api();
-        let engine = format!("anti-design/{}+engine test", env!("CARGO_PKG_VERSION"));
+        let engine = format!("anti-ai-design/{}+engine test", env!("CARGO_PKG_VERSION"));
         let out = seed_api(&proj, &skill, &base, &["--scope", "direction", "--mode", "persuade", "--from", "k1"]);
         assert!(out.contains("source: api; approved pool: 0123456789ab"), "{out}");
         assert!(out.contains("--from k1 --scope direction --mode persuade plus what the user did:\n"), "round 0 carries no --reroll: {out}");
         let roll = seen.lock().unwrap()[0].clone();
         assert_eq!((roll.0.as_str(), roll.2.as_str(), roll.4.as_str()), ("GET", engine.as_str(), ""));
-        let record: Value = serde_json::from_str(&std::fs::read_to_string(proj.join(".anti-design/questions/roll.json")).unwrap()).unwrap();
+        let record: Value = serde_json::from_str(&std::fs::read_to_string(proj.join(".anti-ai-design/questions/roll.json")).unwrap()).unwrap();
         assert_eq!(record["poolRevision"], "0123456789ab");
         assert_eq!(record["source"], "api");
         assert_eq!(record["mode"], "persuade");
@@ -1244,7 +1244,7 @@ mod tests {
         assert_eq!(out, "choice recorded\n");
         assert_eq!(chosen_bodies(&seen).last().unwrap(), r#"{"key":"k1","scope":"direction","mode":"persuade","kind":"challenger","reroll":1,"poolRevision":"0123456789ab","handId":"00112233445566778899aabbccddeeff","pingId":"<PING>","source":"agent"}"#);
         let post = seen.lock().unwrap().iter().rfind(|r| r.0 == "POST").cloned().unwrap();
-        assert_eq!((post.1.as_str(), post.2.as_str()), ("/api/chosen", format!("anti-design/{}+engine test", env!("CARGO_PKG_VERSION")).as_str()));
+        assert_eq!((post.1.as_str(), post.2.as_str()), ("/api/chosen", format!("anti-ai-design/{}+engine test", env!("CARGO_PKG_VERSION")).as_str()));
         // The same round again: already sent.
         let out = seed_api(&proj, &skill, &base, &["--kind", "assigned", "--from", "k1", "--scope", "direction", "--reroll", "1"]);
         assert_eq!(out, "choice already recorded\n");
@@ -1299,9 +1299,9 @@ mod tests {
         assert!(chosen_bodies(&seen).last().unwrap().contains(r#""key":"3f9a1c2e""#));
         // A reference rolled elsewhere is refused with the way out, never rolled as a key.
         let env = Env::from([
-            ("ANTI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
-            ("ANTI_DESIGN_SEED_SALT".into(), "test-salt".into()),
+            ("ANTI_AI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
+            ("ANTI_AI_DESIGN_SEED_SALT".into(), "test-salt".into()),
             ("HOME".into(), proj.join("home").to_string_lossy().into_owned()),
         ]);
         let (mut io, cap) = Io::captured("", proj.clone(), env);
@@ -1320,22 +1320,22 @@ mod tests {
         let (proj, skill) = fixture("opt-out", &[("mode-persuade", MODE_FILE)]);
         let (base, seen) = roll_api();
         let home = proj.join("home");
-        std::fs::create_dir_all(home.join(".anti-design")).unwrap();
-        std::fs::write(home.join(".anti-design/config.json"), r#"{"telemetry": false}"#).unwrap();
+        std::fs::create_dir_all(home.join(".anti-ai-design")).unwrap();
+        std::fs::write(home.join(".anti-ai-design/config.json"), r#"{"telemetry": false}"#).unwrap();
         let out = seed_api(&proj, &skill, &base, &["--scope", "direction", "--from", "k1"]);
         assert!(out.contains("source: api;"), "the roll still happens: {out}");
         let roll = seen.lock().unwrap()[0].clone();
         assert_eq!(roll.0, "GET");
         assert_eq!(roll.4, "off", "the server is told not to record it");
         // No telemetry fields are written, only the key behind the reference.
-        let record: Value = serde_json::from_str(&std::fs::read_to_string(proj.join(".anti-design/questions/roll.json")).unwrap()).unwrap();
+        let record: Value = serde_json::from_str(&std::fs::read_to_string(proj.join(".anti-ai-design/questions/roll.json")).unwrap()).unwrap();
         assert!(record.get("poolRevision").is_none() && record.get("source").is_none(), "{record}");
         assert_eq!(tl(&proj).round("k1", None), None);
         assert_eq!(tl(&proj).resolve(&tl(&proj).reference("k1").unwrap()).unwrap(), "k1");
         assert_eq!(seed_api(&proj, &skill, &base, &["--kind", "assigned", "--from", "k1", "--scope", "direction"]), "choice ping skipped\n");
         assert!(chosen_bodies(&seen).is_empty());
         // DO_NOT_TRACK=0 is not an opt-out.
-        std::fs::remove_file(home.join(".anti-design/config.json")).unwrap();
+        std::fs::remove_file(home.join(".anti-ai-design/config.json")).unwrap();
         assert!(!telemetry::telemetry_disabled(&Env::from([("DO_NOT_TRACK".into(), "0".into()), ("HOME".into(), home.to_string_lossy().into_owned())]), &proj.to_string_lossy()));
     }
 
@@ -1343,14 +1343,14 @@ mod tests {
     fn without_a_salt_the_roll_offers_no_reference_and_records_no_seed() {
         let (proj, skill) = fixture("no-salt", &[("mode-persuade", MODE_FILE)]);
         let home = proj.join("home");
-        std::fs::create_dir_all(home.join(".anti-design")).unwrap();
-        std::fs::write(home.join(".anti-design/seed-salt"), "corrupt\n").unwrap();
+        std::fs::create_dir_all(home.join(".anti-ai-design")).unwrap();
+        std::fs::write(home.join(".anti-ai-design/seed-salt"), "corrupt\n").unwrap();
         let env = Env::from([
-            ("ANTI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_CATALOG_DIR".into(), std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/concept-catalog").to_string_lossy().into_owned()),
-            ("ANTI_DESIGN_API_URL".into(), "http://127.0.0.1:9/api".into()),
-            ("ANTI_DESIGN_NO_TELEMETRY".into(), "1".into()),
-            ("ANTI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
+            ("ANTI_AI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_CATALOG_DIR".into(), std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/concept-catalog").to_string_lossy().into_owned()),
+            ("ANTI_AI_DESIGN_API_URL".into(), "http://127.0.0.1:9/api".into()),
+            ("ANTI_AI_DESIGN_NO_TELEMETRY".into(), "1".into()),
+            ("ANTI_AI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
             ("HOME".into(), home.to_string_lossy().into_owned()),
             ("USERPROFILE".into(), home.to_string_lossy().into_owned()),
         ]);
@@ -1359,7 +1359,7 @@ mod tests {
         assert_eq!(run(&argv, &mut io), 0);
         let out = String::from_utf8(cap.stdout.borrow().clone()).unwrap();
         assert!(out.contains("SEED REFERENCE: unavailable on this machine") && out.contains("`seed: none (unavailable)`") && !out.contains("SEED REFERENCE: seed:"), "{out}");
-        let record: Value = serde_json::from_str(&std::fs::read_to_string(proj.join(".anti-design/questions/roll.json")).unwrap()).unwrap();
+        let record: Value = serde_json::from_str(&std::fs::read_to_string(proj.join(".anti-ai-design/questions/roll.json")).unwrap()).unwrap();
         assert!(record.get("seed").is_none() && record.get("key").is_none(), "{record}");
     }
 
@@ -1367,7 +1367,7 @@ mod tests {
     fn check_seed_corroborates_a_reference_against_this_machine() {
         let (proj, skill) = fixture("check-seed", &[("mode-persuade", MODE_FILE)]);
         let check = |v: &str| {
-            let env = Env::from([("ANTI_DESIGN_SEED_SALT".into(), "test-salt".into()), ("HOME".into(), proj.join("home").to_string_lossy().into_owned())]);
+            let env = Env::from([("ANTI_AI_DESIGN_SEED_SALT".into(), "test-salt".into()), ("HOME".into(), proj.join("home").to_string_lossy().into_owned())]);
             let (mut io, cap) = Io::captured("", proj.clone(), env);
             let code = run(&["--check-seed".to_string(), v.to_string()], &mut io);
             let out = String::from_utf8(cap.stdout.borrow().clone()).unwrap();
@@ -1418,12 +1418,12 @@ mod tests {
             let env_for = |h: Home| {
                 let h = home_of(h).to_string_lossy().into_owned();
                 Env::from([
-                    ("ANTI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
-                    ("ANTI_DESIGN_CATALOG_DIR".into(), proj.join("no-such-catalog").to_string_lossy().into_owned()),
-                    ("ANTI_DESIGN_API_URL".into(), base.clone()),
-                    ("ANTI_DESIGN_API_TIMEOUT".into(), "3000".into()),
-                    ("ANTI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
-                    ("ANTI_DESIGN_SELF".into(), "anti-design".into()),
+                    ("ANTI_AI_DESIGN_SKILL_DIR".into(), skill.to_string_lossy().into_owned()),
+                    ("ANTI_AI_DESIGN_CATALOG_DIR".into(), proj.join("no-such-catalog").to_string_lossy().into_owned()),
+                    ("ANTI_AI_DESIGN_API_URL".into(), base.clone()),
+                    ("ANTI_AI_DESIGN_API_TIMEOUT".into(), "3000".into()),
+                    ("ANTI_AI_DESIGN_NO_STALENESS_CHECK".into(), "1".into()),
+                    ("ANTI_AI_DESIGN_SELF".into(), "anti-ai-design".into()),
                     ("HOME".into(), h.clone()),
                     ("USERPROFILE".into(), h),
                 ])
@@ -1446,17 +1446,17 @@ mod tests {
             match switch {
                 Switch::Nothing => {}
                 Switch::HomeSaltAppears => {
-                    std::fs::create_dir_all(writable.join(".anti-design")).unwrap();
-                    std::fs::write(writable.join(".anti-design/seed-salt"), "0123456789abcdef0123456789abcdef\n").unwrap();
+                    std::fs::create_dir_all(writable.join(".anti-ai-design")).unwrap();
+                    std::fs::write(writable.join(".anti-ai-design/seed-salt"), "0123456789abcdef0123456789abcdef\n").unwrap();
                 }
                 Switch::StrayProjectSalt => {
-                    std::fs::write(proj.join(".anti-design/questions/seed-salt"), "fedcba9876543210fedcba9876543210\n").unwrap();
+                    std::fs::write(proj.join(".anti-ai-design/questions/seed-salt"), "fedcba9876543210fedcba9876543210\n").unwrap();
                 }
             }
             let (code, out1) = call(after, &["--scope", "direction", "--from", "k1", "--reroll", "1"]);
             assert_eq!(code, 0, "{name}");
             assert_eq!(reference_in(&out1), ref0, "{name}: one reference per key");
-            let ledgers: Vec<String> = std::fs::read_dir(proj.join(".anti-design/questions/seeds")).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).filter(|n| n.ends_with(".json")).collect();
+            let ledgers: Vec<String> = std::fs::read_dir(proj.join(".anti-ai-design/questions/seeds")).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).filter(|n| n.ends_with(".json")).collect();
             assert_eq!(ledgers, vec![format!("{}.json", ref0.trim_start_matches("seed:"))], "{name}: one ledger, named by the reference");
             // The reference resolves: --check-seed, and --from reproduces round 1.
             let (code, out) = call(after, &["--check-seed", &ref0]);
@@ -1482,7 +1482,7 @@ mod tests {
         let (code, out) = seed(&proj, &skill, true, &["--scope", "direction"]);
         assert_eq!(code, 0, "{out}");
         let reference = out.lines().find_map(|l| l.strip_prefix("SEED REFERENCE: ")).unwrap().split('.').next().unwrap().to_string();
-        let ledgers: Vec<String> = std::fs::read_dir(proj.join(".anti-design/questions/seeds")).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).filter(|n| n.ends_with(".json")).collect();
+        let ledgers: Vec<String> = std::fs::read_dir(proj.join(".anti-ai-design/questions/seeds")).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).filter(|n| n.ends_with(".json")).collect();
         assert_eq!(ledgers, vec![format!("{}.json", reference.trim_start_matches("seed:"))]);
         let key = tl(&proj).resolve(&reference).unwrap();
         assert!(key.len() == 32 && key.bytes().all(|b| b.is_ascii_hexdigit()), "{key}");

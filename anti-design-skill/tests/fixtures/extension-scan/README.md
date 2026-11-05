@@ -53,7 +53,7 @@ separately; the shared detector bundle does not make their hosting APIs identica
   available to copy before a fresh scan completes.
 - Try a blocked page such as `chrome://extensions` or `about:debugging`. A failed
   scan must not enable copying or retain a report from an earlier page.
-- Open Anti-Design in DevTools. Use **Copy all findings** and a finding's copy
+- Open Anti-AI Design in DevTools. Use **Copy all findings** and a finding's copy
   button. Compare the report with the popup report and confirm that selectors,
   categories, details, and suggested skills remain present.
 - Scan `../antipatterns/hard-offset-shadow.html` from the same fixture server
