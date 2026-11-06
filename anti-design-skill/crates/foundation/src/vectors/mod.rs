@@ -294,7 +294,7 @@ pub const INLINE_IGNORE_FNS: &[&str] = &[
 ];
 
 /// Every (module, fn) pair the open dispatcher knows, so a test can report
-/// which of them have no recorded vectors. `anti_design_core` re-exports this
+/// which of them have no recorded vectors. `anti_ai_design_core` re-exports this
 /// and adds the detector's own tables.
 pub const KNOWN_FUNCTIONS: &[(&str, &[&str])] = &[
     ("shared.color", COLOR_FNS),

@@ -1,9 +1,9 @@
 {
-  "stdout": "{\n  \"liveServer\": null,\n  \"activeSessions\": [],\n  \"render\": [],\n  \"recoveryHint\": \"Start <ANTI_DESIGN> live-server to requeue pending durable events, then run <ANTI_DESIGN> live-poll.\"\n}\n",
+  "stdout": "{\n  \"liveServer\": null,\n  \"activeSessions\": [],\n  \"render\": [],\n  \"recoveryHint\": \"Start <ANTI_AI_DESIGN> live-server to requeue pending durable events, then run <ANTI_AI_DESIGN> live-poll.\"\n}\n",
   "stderr": "",
   "exit": 0,
   "signal": null,
   "files": {
-    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
+    ".anti-ai-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
   }
 }

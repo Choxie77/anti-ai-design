@@ -1,4 +1,4 @@
-// VENDORED from anti-design-site/site/scripts/instrument-strip.js (the source of truth).
+// VENDORED from anti-ai-design-site/site/scripts/instrument-strip.js (the source of truth).
 // Do not edit here: change the site, then run node scripts/sync-kinpaku-kit.mjs.
 // Instrument strip: the sliding thumb.
 //

@@ -1,6 +1,6 @@
 # Rule gap analysis: the fork's detector versus our catalog
 
-Generated 2026-11-05 from `anti-design detect --list-rules --json` (engine 0.1.18, **62 rules**) and the 51 candidate rules in `docs/research/slop-catalog.md`. Mapping was done by hand from rule names and descriptions, then checked by script: every upstream rule and every catalog entry appears exactly where listed below. Upstream rule IDs are the fork's own; our additions keep the `AAD-` IDs.
+Generated 2026-11-05 from `anti-ai-design detect --list-rules --json` (engine 0.1.18, **62 rules**) and the 51 candidate rules in `docs/research/slop-catalog.md`. Mapping was done by hand from rule names and descriptions, then checked by script: every upstream rule and every catalog entry appears exactly where listed below. Upstream rule IDs are the fork's own; our additions keep the `AAD-` IDs.
 
 Upstream vocabulary: category `slop` or `quality`; severity `error`, `warning` or `advisory`; optional scope `type` or `layout`.
 
@@ -109,7 +109,7 @@ Deferred: AAD-W05 (needs a synonym model), AAD-L01/L04/L05 (layout heuristics ne
 
 - Names and descriptions were compared, not rule source code. A fork rule that looks equivalent may have a narrower trigger than our idea; check the Rust before relying on a "both" row.
 - The catalog's `render`-only rules map to fork rules that also need a browser (URL scans); the engine says plainly when a `.css` scan skipped them.
-- Counts are for engine 0.1.18 as built here. Re-run `anti-design detect --list-rules --json` after any upstream sync.
+- Counts are for engine 0.1.18 as built here. Re-run `anti-ai-design detect --list-rules --json` after any upstream sync.
 
 ## Status after task-46 (2026-11-05)
 

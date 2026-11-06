@@ -14,7 +14,7 @@ carry it.
 as `[{ id, name, category, description }]`, the same slice
 `cargo xtask bundle` vendors into the extension's `extension/detector/`. It
 is tracked because `extension/detector/` is not: a consumer working from a
-source checkout or a repo tarball (anti-design.example counts and renders the
+source checkout or a repo tarball (github.com/Choxie77/anti-ai-design counts and renders the
 rules from it) has no other way to read the registry without a Rust
 toolchain.
 

@@ -1,11 +1,11 @@
 //! Provider (harness) directories, aliases, global-skill layouts, harness
 //! detection, and the install-tree scans. JS: skills.mjs top section plus
-//! `findProjectRoot` / `findInstalledProviders` / `findAntiDesignProviders` /
+//! `findProjectRoot` / `findInstalledProviders` / `findAntiAiDesignProviders` /
 //! `findLinkedProviders` / `resolveUpdateTarget` / `getSkillsVersion`.
 
 use crate::util::{self, jsp, Env};
 
-pub const API_BASE: &str = "https://anti-design.example";
+pub const API_BASE: &str = "https://github.com/Choxie77/anti-ai-design";
 
 pub const PROVIDER_DIRS: &[&str] = &[
     ".claude", ".cursor", ".devin", ".dsh", ".gemini", ".agents", ".agent", ".github", ".grok", ".hermes", ".kiro",
@@ -106,7 +106,7 @@ pub fn devin_global_config_dir(env: &Env, _cwd: &str, home: &str) -> String {
     jsp::join(&[home, ".config", "devin"])
 }
 
-pub use anti_design_context::hermes::hermes_global_home;
+pub use anti_ai_design_context::hermes::hermes_global_home;
 
 /// JS: dshGlobalHome(home): honor $DSH_HOME only when it sits under `home`
 /// (resolved against cwd like `path.resolve`), mirroring hermesGlobalHome.
@@ -218,7 +218,7 @@ impl Sys {
     pub fn get_skills_version(&self, root: &str, scope: Option<Scope>) -> Option<String> {
         for d in PROVIDER_DIRS {
             for skills_dir in self.provider_skills_dir_candidates(root, d, scope) {
-                let skill_md = jsp::join(&[&skills_dir, "anti-design", "SKILL.md"]);
+                let skill_md = jsp::join(&[&skills_dir, "anti-ai-design", "SKILL.md"]);
                 if !util::exists(&skill_md) {
                     continue;
                 }
@@ -232,12 +232,12 @@ impl Sys {
     }
 
     /// JS: isAlreadyInstalled(root, scope): the first provider dir holding an
-    /// anti-design skill (canonical, prefixed, or legacy `teach-`).
+    /// anti-ai-design skill (canonical, prefixed, or legacy `teach-`).
     pub fn is_already_installed(&self, root: &str, scope: Option<Scope>) -> Option<&'static str> {
         for d in PROVIDER_DIRS {
             for skills_dir in self.existing_skills_dirs(root, d, scope) {
                 if let Some(entries) = util::read_dir_names(&skills_dir) {
-                    if entries.iter().any(|e| is_anti_design_skill_name(e)) {
+                    if entries.iter().any(|e| is_anti_ai_design_skill_name(e)) {
                         return Some(d);
                     }
                 }
@@ -246,23 +246,23 @@ impl Sys {
         None
     }
 
-    /// JS: migrateUnprefixAntiDesign(root, scope)
-    pub fn migrate_unprefix_anti_design(&self, root: &str, scope: Option<Scope>) -> usize {
+    /// JS: migrateUnprefixAntiAiDesign(root, scope)
+    pub fn migrate_unprefix_anti_ai_design(&self, root: &str, scope: Option<Scope>) -> usize {
         let mut migrated = 0;
         for d in PROVIDER_DIRS {
             for skills_dir in self.existing_skills_dirs(root, d, scope) {
                 let Some(entries) = util::read_dir_names(&skills_dir) else { continue };
                 for name in entries {
-                    if name == "anti-design" || name == "teach-anti-design" {
+                    if name == "anti-ai-design" || name == "teach-anti-ai-design" {
                         continue;
                     }
-                    if !name.ends_with("-anti-design") {
+                    if !name.ends_with("-anti-ai-design") {
                         continue;
                     }
                     if !is_real_skill_dir(&skills_dir, &name) {
                         continue;
                     }
-                    let dest = jsp::join(&[&skills_dir, "anti-design"]);
+                    let dest = jsp::join(&[&skills_dir, "anti-ai-design"]);
                     util::rm_rf(&dest);
                     if util::rename(&jsp::join(&[&skills_dir, &name]), &dest).is_ok() {
                         migrated += 1;
@@ -289,13 +289,13 @@ impl Sys {
         found
     }
 
-    /// JS: findAntiDesignProviders(root, scope)
-    pub fn find_anti_design_providers(&self, root: &str, scope: Option<Scope>) -> Vec<&'static str> {
+    /// JS: findAntiAiDesignProviders(root, scope)
+    pub fn find_anti_ai_design_providers(&self, root: &str, scope: Option<Scope>) -> Vec<&'static str> {
         let mut found = Vec::new();
         for d in PROVIDER_DIRS {
             for skills_dir in self.existing_skills_dirs(root, d, scope) {
                 let Some(entries) = util::read_dir_names(&skills_dir) else { continue };
-                if entries.iter().any(|e| is_anti_design_skill_name(e)) {
+                if entries.iter().any(|e| is_anti_ai_design_skill_name(e)) {
                     found.push(*d);
                     break;
                 }
@@ -312,7 +312,7 @@ impl Sys {
             .filter(|provider| {
                 self.provider_skills_dir_candidates(root, provider, scope)
                     .iter()
-                    .any(|skills_dir| util::is_symlink(&jsp::join(&[skills_dir, "anti-design"])))
+                    .any(|skills_dir| util::is_symlink(&jsp::join(&[skills_dir, "anti-ai-design"])))
             })
             .collect()
     }
@@ -431,9 +431,9 @@ impl Sys {
         let project_providers = if home_rooted {
             Vec::new()
         } else {
-            self.find_anti_design_providers(project_root, Some(Scope::Project))
+            self.find_anti_ai_design_providers(project_root, Some(Scope::Project))
         };
-        let user_providers = self.find_anti_design_providers(&home, Some(Scope::User));
+        let user_providers = self.find_anti_ai_design_providers(&home, Some(Scope::User));
         match explicit_scope {
             Some(Scope::User) => {
                 return if user_providers.is_empty() {
@@ -568,9 +568,9 @@ fn unique_paths(paths: Vec<String>) -> Vec<String> {
     out
 }
 
-/// `e === 'anti-design' || e.endsWith('-anti-design') || e === 'teach-anti-design' || e.endsWith('-teach-anti-design')`
-fn is_anti_design_skill_name(e: &str) -> bool {
-    e == "anti-design" || e.ends_with("-anti-design") || e == "teach-anti-design" || e.ends_with("-teach-anti-design")
+/// `e === 'anti-ai-design' || e.endsWith('-anti-ai-design') || e === 'teach-anti-ai-design' || e.endsWith('-teach-anti-ai-design')`
+fn is_anti_ai_design_skill_name(e: &str) -> bool {
+    e == "anti-ai-design" || e.ends_with("-anti-ai-design") || e == "teach-anti-ai-design" || e.ends_with("-teach-anti-ai-design")
 }
 
 /// JS: isSkillDir(skillsDir, name)

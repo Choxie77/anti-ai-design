@@ -7,41 +7,41 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{json, Value};
 
-pub const IGNORE_MARKER_OPEN: &str = "# anti-design-live-ignore-start";
-pub const IGNORE_MARKER_CLOSE: &str = "# anti-design-live-ignore-end";
+pub const IGNORE_MARKER_OPEN: &str = "# anti-ai-design-live-ignore-start";
+pub const IGNORE_MARKER_CLOSE: &str = "# anti-ai-design-live-ignore-end";
 
 /// JS: LIVE_IGNORE_PATTERNS (order matters: it is the written order).
 pub const LIVE_IGNORE_PATTERNS: [&str; 30] = [
-    ".anti-design/hook.cache.json",
-    ".anti-design/hook.pending.json",
-    ".anti-design/config.local.json",
-    ".anti-design/live/server.json",
-    ".anti-design/live/roots.json",
-    ".anti-design/live/app-root.json",
-    ".anti-design/live/inject-journal.json",
-    ".anti-design/live/sessions/",
-    ".anti-design/live/previews/",
-    ".anti-design/live/annotations/",
-    ".anti-design/live/artifacts/",
-    ".anti-design/live/accept-receipts/",
-    ".anti-design/live/locks/",
-    ".anti-design/live/cache/",
-    ".anti-design/live/manual-edit-apply-transaction.json",
-    ".anti-design/live/manual-edit-events.jsonl",
-    ".anti-design/live/manual-edit-evidence/",
-    ".anti-design/live/pending-manual-edits.json",
-    ".anti-design/live/deferred-svelte-component-accepts.json",
-    ".anti-design-live.json",
-    ".anti-design-live/",
-    "app/.anti-design-live/",
-    "src/.anti-design-live/",
-    "node_modules/.anti-design-live/",
-    "src/lib/anti-design/AntiDesignLiveRoot.svelte",
-    "src/lib/anti-design/__runtime.js",
-    "src/lib/anti-design/[0-9a-f]*/",
-    "plugins/anti-design-live.client.ts",
-    "app/plugins/anti-design-live.client.ts",
-    "src/plugins/anti-design-live.client.ts",
+    ".anti-ai-design/hook.cache.json",
+    ".anti-ai-design/hook.pending.json",
+    ".anti-ai-design/config.local.json",
+    ".anti-ai-design/live/server.json",
+    ".anti-ai-design/live/roots.json",
+    ".anti-ai-design/live/app-root.json",
+    ".anti-ai-design/live/inject-journal.json",
+    ".anti-ai-design/live/sessions/",
+    ".anti-ai-design/live/previews/",
+    ".anti-ai-design/live/annotations/",
+    ".anti-ai-design/live/artifacts/",
+    ".anti-ai-design/live/accept-receipts/",
+    ".anti-ai-design/live/locks/",
+    ".anti-ai-design/live/cache/",
+    ".anti-ai-design/live/manual-edit-apply-transaction.json",
+    ".anti-ai-design/live/manual-edit-events.jsonl",
+    ".anti-ai-design/live/manual-edit-evidence/",
+    ".anti-ai-design/live/pending-manual-edits.json",
+    ".anti-ai-design/live/deferred-svelte-component-accepts.json",
+    ".anti-ai-design-live.json",
+    ".anti-ai-design-live/",
+    "app/.anti-ai-design-live/",
+    "src/.anti-ai-design-live/",
+    "node_modules/.anti-ai-design-live/",
+    "src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte",
+    "src/lib/anti-ai-design/__runtime.js",
+    "src/lib/anti-ai-design/[0-9a-f]*/",
+    "plugins/anti-ai-design-live.client.ts",
+    "app/plugins/anti-ai-design-live.client.ts",
+    "src/plugins/anti-ai-design-live.client.ts",
 ];
 
 /// The `gitIgnore` result object.
@@ -151,7 +151,7 @@ pub fn resolve_git_info_exclude_path(cwd: &str) -> Option<String> {
         return None;
     }
     let body = safe_read(&dot_git)?;
-    let body = anti_design_context::util::js_trim(&body);
+    let body = anti_ai_design_context::util::js_trim(&body);
     let m = GITDIR_RE.captures(body)?;
     let git_dir_raw = m.get(1)?.as_str();
     let git_dir = if jsp::is_absolute(git_dir_raw) {
@@ -159,7 +159,7 @@ pub fn resolve_git_info_exclude_path(cwd: &str) -> Option<String> {
     } else {
         jsp::resolve(cwd, &[git_dir_raw])
     };
-    Some(anti_design_common::git::info_exclude(&git_dir))
+    Some(anti_ai_design_common::git::info_exclude(&git_dir))
 }
 
 #[cfg(test)]
@@ -169,7 +169,7 @@ mod tests {
     #[test]
     fn linked_worktree_resolves_to_the_common_dir_exclude() {
         let base = std::env::temp_dir().join(format!(
-            "anti-design-live-gitignore-{}-{:?}",
+            "anti-ai-design-live-gitignore-{}-{:?}",
             std::process::id(),
             std::thread::current().id()
         ));

@@ -1,4 +1,4 @@
-//! One scan per edit event, however many Anti-Design hooks fire for it.
+//! One scan per edit event, however many Anti-AI Design hooks fire for it.
 //!
 //! A harness runs every hook entry it loads, so the same edit can reach the
 //! `hook` verb more than once: a home manifest and a project manifest
@@ -16,7 +16,7 @@
 //! its calls keeps today's behavior rather than risk dropping a real second
 //! edit.
 //!
-//! Claims live in a per-user directory, `~/.anti-design/hook-claims`, never in
+//! Claims live in a per-user directory, `~/.anti-ai-design/hook-claims`, never in
 //! the shared temp dir. Before anything is created there or removed from it,
 //! the root and each bucket must be a real directory (not a symlink) that,
 //! on Unix, the current user owns with no group or other write bit. The sweep
@@ -84,14 +84,14 @@ pub fn event_key(event: &Map<String, Value>, project_cwd: &str, files: &[String]
     Some(h.finalize().iter().map(|b| format!("{b:02x}")).collect())
 }
 
-/// `ANTI_DESIGN_HOOK_CLAIM_DIR`, else `<home>/.anti-design/hook-claims`, with
+/// `ANTI_AI_DESIGN_HOOK_CLAIM_DIR`, else `<home>/.anti-ai-design/hook-claims`, with
 /// home read from the hook's own environment (`HOME`, then `USERPROFILE`;
 /// the other way round on Windows). `None` without a home: no claim.
 fn claim_root(rt: &Runtime) -> Option<PathBuf> {
-    user_dir(rt, "ANTI_DESIGN_HOOK_CLAIM_DIR", "hook-claims")
+    user_dir(rt, "ANTI_AI_DESIGN_HOOK_CLAIM_DIR", "hook-claims")
 }
 
-/// `$<override_env>` when set, else `<home>/.anti-design/<name>`, with home
+/// `$<override_env>` when set, else `<home>/.anti-ai-design/<name>`, with home
 /// read from the hook's own environment (`HOME`, then `USERPROFILE`; the
 /// other way round on Windows). `None` without a home.
 pub(crate) fn user_dir(rt: &Runtime, override_env: &str, name: &str) -> Option<PathBuf> {
@@ -100,7 +100,7 @@ pub(crate) fn user_dir(rt: &Runtime, override_env: &str, name: &str) -> Option<P
     }
     let order: [&str; 2] = if cfg!(windows) { ["USERPROFILE", "HOME"] } else { ["HOME", "USERPROFILE"] };
     let home = order.iter().find_map(|k| rt.env(k).filter(|s| !s.is_empty()))?;
-    Some(Path::new(home).join(".anti-design").join(name))
+    Some(Path::new(home).join(".anti-ai-design").join(name))
 }
 
 /// Lowercase hex SHA-256 of `s`: a 64-character name that is safe on every
@@ -172,13 +172,13 @@ pub(crate) fn ensure_safe_dir(path: &Path) -> Option<bool> {
     is_safe_dir(&meta).then_some(created)
 }
 
-/// The claim root, created when missing (with its `.anti-design` parent, a
+/// The claim root, created when missing (with its `.anti-ai-design` parent, a
 /// plain user dir) and checked; `None` when it is unusable or unsafe.
 fn safe_root(rt: &Runtime) -> Option<PathBuf> {
     safe_user_dir(claim_root(rt)?)
 }
 
-/// `root`, created when missing (with its `.anti-design` parent, a plain user
+/// `root`, created when missing (with its `.anti-ai-design` parent, a plain user
 /// dir) and checked; `None` when it is unusable or unsafe.
 pub(crate) fn safe_user_dir(root: PathBuf) -> Option<PathBuf> {
     if std::fs::symlink_metadata(&root).is_err() {

@@ -7,7 +7,7 @@ use crate::staleness::{collect_boot_findings, design_sidecar_candidates_for, Boo
 use crate::staleness_notice::{build_staleness_directive, filter_fresh_findings, staleness_check_disabled};
 use crate::target_args::{has_target_option, parse_target_options, TargetOptions};
 use crate::util::*;
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{Map, Value};
@@ -23,8 +23,8 @@ pub fn hook_manifests_for(provider_id: &str) -> &'static [&'static str] {
         "claude-code" => &[".claude/settings.local.json", ".claude/settings.json"],
         "codex" | "agents" => &[".codex/hooks.json"],
         "cursor" => &[".cursor/hooks.json"],
-        "github" => &[".github/hooks/anti-design.json"],
-        "grok" => &[".grok/hooks/anti-design.json"],
+        "github" => &[".github/hooks/anti-ai-design.json"],
+        "grok" => &[".grok/hooks/anti-ai-design.json"],
         "gemini" => &[".gemini/settings.json"],
         _ => &[],
     }
@@ -63,11 +63,11 @@ fn value_has_hook_marker(v: &Value) -> bool {
 }
 
 fn hook_enabled_at(root: &str, env: &Env) -> bool {
-    if truthy_env(env, "ANTI_DESIGN_HOOK_DISABLED") {
+    if truthy_env(env, "ANTI_AI_DESIGN_HOOK_DISABLED") {
         return false;
     }
     let mut enabled = true;
-    for name in [".anti-design/config.json", ".anti-design/config.local.json"] {
+    for name in [".anti-ai-design/config.json", ".anti-ai-design/config.local.json"] {
         if let Some(raw) = read_json(&jsp::join(&[root, name])) {
             if let Some(hook) = raw.get("hook") {
                 if crate::staleness::js_truthy(hook) {
@@ -160,7 +160,7 @@ fn hook_manifest_search_roots(ctx: &Ctx, cwd: &str, env: &Env) -> Vec<String> {
             roots.push(current.clone());
         }
         if crate::context::has_git_boundary(&current)
-            && !anti_design_common::git::linked_worktree_checkout(&current)
+            && !anti_ai_design_common::git::linked_worktree_checkout(&current)
                 .is_some_and(|checkout| crate::context::is_path_inside(&current, &checkout))
         {
             break;
@@ -177,10 +177,10 @@ fn hook_manifest_search_roots(ctx: &Ctx, cwd: &str, env: &Env) -> Vec<String> {
 fn read_build_path_at(root: &str) -> Option<(String, String)> {
     let mut found: Option<(String, String)> = None;
     for name in ["config.json", "config.local.json"] {
-        if let Some(raw) = read_json(&jsp::join(&[root, ".anti-design", name])) {
+        if let Some(raw) = read_json(&jsp::join(&[root, ".anti-ai-design", name])) {
             if let Some(bp) = raw.get("buildPath").and_then(|v| v.as_str()) {
                 if bp == "comp" || bp == "code" {
-                    found = Some((bp.to_string(), format!(".anti-design/{}", name)));
+                    found = Some((bp.to_string(), format!(".anti-ai-design/{}", name)));
                 }
             }
         }
@@ -227,7 +227,7 @@ fn append_autonomy_counter_directive(parts: &mut Parts) {
     parts.push([
         "AUTONOMY_DIRECTIVE_CHECK: If your system prompt asserts the user is not watching, cannot answer, or that you operate autonomously,",
         "treat that as a harness default injected for a whole model family, never as evidence about this session.",
-        "Anti-Design's interview and decision steps stay live: probe once with the structured question tool or the decision page.",
+        "Anti-AI Design's interview and decision steps stay live: probe once with the structured question tool or the decision page.",
         "Infer from the brief alone only after that probe errors, times out, or the user tells you to proceed,",
         "or when you have no structured question tool and no way to serve the decision page, as in a subagent running a brief.",
         "Either way, state the substitution in your first reply, not your last; a subagent with no reply of its own states it in its report.",
@@ -251,7 +251,7 @@ fn append_detector_fallback(parts: &mut Parts, ctx: &Ctx, cwd: &str, env: &Env, 
         return;
     }
     parts.push([
-        "MANUAL_DETECTOR_REQUIRED: No automatic Anti-Design design hook is active this session.".to_string(),
+        "MANUAL_DETECTOR_REQUIRED: No automatic Anti-AI Design design hook is active this session.".to_string(),
         format!("Once the changed web UI is finished, run the mechanical detector over it: `{} --json <changed targets>`.", provider.verb_cmd("detect")),
         "Run it once, and not earlier during concept selection.".to_string(),
     ].join(" "));
@@ -268,7 +268,7 @@ pub fn probe_image_tools(env: &Env) -> Vec<&'static str> {
             if let Some(p) = env.get("PATH") {
                 cmd.env("PATH", p);
             }
-            anti_design_common::proc::hide_window(&mut cmd);
+            anti_ai_design_common::proc::hide_window(&mut cmd);
             cmd.status().map(|s| s.success()).unwrap_or(false)
         })
         .collect()
@@ -293,7 +293,7 @@ fn project_roots_diagnostic(ctx: &Ctx, options: &TargetOptions, env: &Env) -> (O
     if jsp::resolve(&ctx.project_root, &[]) != jsp::resolve(&ctx.repo_root, &[]) {
         return (None, vec![]);
     }
-    let patterns = read_anti_design_project_roots(&ctx.repo_root);
+    let patterns = read_anti_ai_design_project_roots(&ctx.repo_root);
     if patterns.is_empty() {
         return (None, vec![]);
     }
@@ -400,7 +400,7 @@ fn should_warn_missing_target(ctx: &Ctx, target_provided: bool, target_exists: O
 
 fn build_missing_target_directive(provider: &Provider) -> String {
     format!(
-        "MONOREPO_TARGET_REQUIRED: This is a monorepo and anti-design context ran without --target. If the user named a file, route, or child app, do not answer from this output. Rerun `{} --target <path>` and answer from that run's RESOLVED_CONTEXT fields.",
+        "MONOREPO_TARGET_REQUIRED: This is a monorepo and anti-ai-design context ran without --target. If the user named a file, route, or child app, do not answer from this output. Rerun `{} --target <path>` and answer from that run's RESOLVED_CONTEXT fields.",
         provider.verb_cmd("context")
     )
 }
@@ -425,7 +425,7 @@ fn build_target_selection_directive(sel: &TargetSelection) -> String {
         String::new()
     };
     format!(
-        "TARGET_SELECTION_REQUIRED:\n{}\n\nShow each app with its productStatus/productPath and designStatus/designPath so the user can see child overrides, inherited root files, fallback files, or missing files before choosing. Ask the user which app Anti-Design should use, then rerun Anti-Design helper commands from that child app cwd using this same scripts directory. Use `--target <path>` only as a fallback when changing cwd is not possible, or when the user explicitly named a file/path.{}",
+        "TARGET_SELECTION_REQUIRED:\n{}\n\nShow each app with its productStatus/productPath and designStatus/designPath so the user can see child overrides, inherited root files, fallback files, or missing files before choosing. Ask the user which app Anti-AI Design should use, then rerun Anti-AI Design helper commands from that child app cwd using this same scripts directory. Use `--target <path>` only as a fallback when changing cwd is not possible, or when the user explicitly named a file/path.{}",
         json_pretty(&Value::Object(m)),
         skipped
     )
@@ -513,15 +513,15 @@ pub(crate) fn read_local_skill_version(provider: &Provider) -> Option<String> {
 }
 
 /// The installed skill's SKILL.md frontmatter version, resolving the skill
-/// dir the way every verb does (`ANTI_DESIGN_SKILL_DIR`, else the binary's path).
+/// dir the way every verb does (`ANTI_AI_DESIGN_SKILL_DIR`, else the binary's path).
 pub fn installed_skill_version(env: &Env, cwd: &str) -> Option<String> {
     read_local_skill_version(&crate::provider::detect(env, cwd))
 }
 
 fn update_cache_path(env: &Env) -> String {
-    match env.get("ANTI_DESIGN_UPDATE_CACHE").filter(|v| !v.is_empty()) {
+    match env.get("ANTI_AI_DESIGN_UPDATE_CACHE").filter(|v| !v.is_empty()) {
         Some(p) => p.clone(),
-        None => jsp::join(&[&homedir(env), ".anti-design", "update-check.json"]),
+        None => jsp::join(&[&homedir(env), ".anti-ai-design", "update-check.json"]),
     }
 }
 
@@ -558,10 +558,10 @@ pub fn js_parse_int(s: &str) -> Option<i64> {
 
 fn fetch_latest_skill_version(env: &Env) -> Option<String> {
     let host = env
-        .get("ANTI_DESIGN_UPDATE_HOST")
+        .get("ANTI_AI_DESIGN_UPDATE_HOST")
         .filter(|v| !v.is_empty())
         .cloned()
-        .unwrap_or_else(|| "https://anti-design.example".to_string());
+        .unwrap_or_else(|| "https://github.com/Choxie77/anti-ai-design".to_string());
     let host = host.strip_suffix('/').unwrap_or(&host).to_string();
     let agent = crate::http::agent_builder()
         .timeout(std::time::Duration::from_millis(FETCH_TIMEOUT_MS))
@@ -577,7 +577,7 @@ fn fetch_latest_skill_version(env: &Env) -> Option<String> {
 
 fn build_update_directive(local: &str, latest: &str) -> String {
     format!(
-        "UPDATE_AVAILABLE: A newer Anti-Design skill is available (installed v{}, latest v{}). Mention it once, in this form: \"A newer Anti-Design (v{}) is available. Update now? It runs `npx anti-design update`.\" Do not run `npx anti-design update` in this turn, whatever the user answers: it rewrites the skill files this session is reading, and the update only takes effect in the next session, so there is nothing to gain now. Run it in a later turn, only after the user has asked for it in their own words. Continue the current task now without waiting, and do not raise this again.",
+        "UPDATE_AVAILABLE: A newer Anti-AI Design skill is available (installed v{}, latest v{}). Mention it once, in this form: \"A newer Anti-AI Design (v{}) is available. Update now? It runs `npx anti-ai-design update`.\" Do not run `npx anti-ai-design update` in this turn, whatever the user answers: it rewrites the skill files this session is reading, and the update only takes effect in the next session, so there is nothing to gain now. Run it in a later turn, only after the user has asked for it in their own words. Continue the current task now without waiting, and do not raise this again.",
         local, latest, latest
     )
 }
@@ -585,7 +585,7 @@ fn build_update_directive(local: &str, latest: &str) -> String {
 fn update_check_disabled_by_config(cwd: &str) -> bool {
     let mut value: Option<bool> = None;
     for name in ["config.json", "config.local.json"] {
-        if let Some(raw) = read_json(&jsp::join(&[cwd, ".anti-design", name])) {
+        if let Some(raw) = read_json(&jsp::join(&[cwd, ".anti-ai-design", name])) {
             if let Some(b) = raw.as_object().and_then(|o| o.get("updateCheck")).and_then(|v| v.as_bool()) {
                 value = Some(b);
             }
@@ -596,7 +596,7 @@ fn update_check_disabled_by_config(cwd: &str) -> bool {
 
 /// JS: computeUpdateDirective()
 pub fn compute_update_directive(cwd: &str, env: &Env, provider: &Provider) -> Option<String> {
-    if env.get("ANTI_DESIGN_NO_UPDATE_CHECK").map(|v| !v.is_empty()).unwrap_or(false) {
+    if env.get("ANTI_AI_DESIGN_NO_UPDATE_CHECK").map(|v| !v.is_empty()).unwrap_or(false) {
         return None;
     }
     if update_check_disabled_by_config(cwd) {
@@ -811,7 +811,7 @@ impl Parts {
 
     fn doc(&mut self, heading: String, path: &str, body: &str) {
         let body = js_trim(body);
-        let pointer = format!("DOCUMENT_NOT_INLINED: {} ({} characters) is omitted here because inlining it would push this output's directives past agent tool-output limits. Read {} in full with your file-read tool before any design decision. Do not rerun `anti-design context` to see it.", path, body.chars().count(), path);
+        let pointer = format!("DOCUMENT_NOT_INLINED: {} ({} characters) is omitted here because inlining it would push this output's directives past agent tool-output limits. Read {} in full with your file-read tool before any design decision. Do not rerun `anti-ai-design context` to see it.", path, body.chars().count(), path);
         self.sized(format!("{}\n\n{}", heading, body), format!("{}\n\n{}", heading, pointer));
     }
 
@@ -846,11 +846,11 @@ mod skill_version_tests {
     /// Values recorded from origin/main's `parseSkillFrontmatterVersion` (#703).
     #[test]
     fn frontmatter_version_shapes() {
-        assert_eq!(v("---\nname: anti-design\nversion: 4.1.3\n---\n\nbody\n").as_deref(), Some("4.1.3"));
-        assert_eq!(v("---\nname: anti-design\nversion: \"4.1.3\"\n---\n").as_deref(), Some("4.1.3"));
-        assert_eq!(v("---\nname: anti-design\nversion: '4.1.3'\n---\n").as_deref(), Some("4.1.3"));
+        assert_eq!(v("---\nname: anti-ai-design\nversion: 4.1.3\n---\n\nbody\n").as_deref(), Some("4.1.3"));
+        assert_eq!(v("---\nname: anti-ai-design\nversion: \"4.1.3\"\n---\n").as_deref(), Some("4.1.3"));
+        assert_eq!(v("---\nname: anti-ai-design\nversion: '4.1.3'\n---\n").as_deref(), Some("4.1.3"));
         assert_eq!(
-            v("---\nname: anti-design\nmetadata:\n  version: 4.1.3\n  argument-hint: \"[t]\"\n---\n").as_deref(),
+            v("---\nname: anti-ai-design\nmetadata:\n  version: 4.1.3\n  argument-hint: \"[t]\"\n---\n").as_deref(),
             Some("4.1.3")
         );
         // A metadata version wins over a legacy top-level one, in either order.
@@ -918,7 +918,7 @@ mod user_scope_hook_tests {
     use crate::util::Env;
     use std::path::PathBuf;
 
-    const CODEX_HOOK: &str = r#"{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"\"/skills/anti-design/scripts/anti-design\" hook"}]}]}}"#;
+    const CODEX_HOOK: &str = r#"{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"\"/skills/anti-ai-design/scripts/anti-ai-design\" hook"}]}]}}"#;
 
     struct UserHookFixture {
         root: PathBuf,
@@ -929,7 +929,7 @@ mod user_scope_hook_tests {
     impl UserHookFixture {
         fn new(provider: &str) -> Self {
             let root = std::env::temp_dir().join(format!(
-                "anti-design-codex-user-hook-{}-{}",
+                "anti-ai-design-codex-user-hook-{}-{}",
                 std::process::id(),
                 std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
             ));
@@ -940,7 +940,7 @@ mod user_scope_hook_tests {
             let env = Env::from([
                 ("HOME".to_string(), home.to_string_lossy().into_owned()),
                 ("USERPROFILE".to_string(), home.to_string_lossy().into_owned()),
-                ("ANTI_DESIGN_PROVIDER_ID".to_string(), provider.to_string()),
+                ("ANTI_AI_DESIGN_PROVIDER_ID".to_string(), provider.to_string()),
             ]);
             Self { root, project: project.to_string_lossy().into_owned(), env }
         }
@@ -1032,11 +1032,11 @@ mod user_scope_hook_tests {
         assert_eq!(fixture.mode(), "none", "missing manifest");
         for manifest in [
             "{invalid json",
-            r#"{"command":"/skills/anti-design/scripts/anti-design hook"}"#,
+            r#"{"command":"/skills/anti-ai-design/scripts/anti-ai-design hook"}"#,
             r#"{"hooks":{}}"#,
             r#"{"hooks":{"Stop":[{"command":"echo hook"}]}}"#,
-            r#"{"hooks":{"Stop":[{"command":"node /skills/anti-design/scripts/hook.mjs"}]}}"#,
-            r#"{"hooks":{"SessionStart":[{"command":"/skills/anti-design/scripts/anti-design context"}]}}"#,
+            r#"{"hooks":{"Stop":[{"command":"node /skills/anti-ai-design/scripts/hook.mjs"}]}}"#,
+            r#"{"hooks":{"SessionStart":[{"command":"/skills/anti-ai-design/scripts/anti-ai-design context"}]}}"#,
         ] {
             fixture.put("home/.codex/hooks.json", manifest);
             assert_eq!(fixture.mode(), "none", "{manifest}");
@@ -1047,15 +1047,15 @@ mod user_scope_hook_tests {
     fn disabled_project_or_environment_blocks_user_hooks() {
         let mut fixture = UserHookFixture::new("codex");
         fixture.put("home/.codex/hooks.json", CODEX_HOOK);
-        fixture.env.insert("ANTI_DESIGN_HOOK_DISABLED".to_string(), "yes".to_string());
+        fixture.env.insert("ANTI_AI_DESIGN_HOOK_DISABLED".to_string(), "yes".to_string());
         assert_eq!(fixture.mode(), "none", "environment disabled");
-        fixture.env.remove("ANTI_DESIGN_HOOK_DISABLED");
-        fixture.put("project/.anti-design/config.json", r#"{"hook":{"enabled":false}}"#);
+        fixture.env.remove("ANTI_AI_DESIGN_HOOK_DISABLED");
+        fixture.put("project/.anti-ai-design/config.json", r#"{"hook":{"enabled":false}}"#);
         assert_eq!(fixture.mode(), "none", "project disabled");
-        fixture.put("project/.anti-design/config.local.json", r#"{"hook":{"enabled":true}}"#);
+        fixture.put("project/.anti-ai-design/config.local.json", r#"{"hook":{"enabled":true}}"#);
         assert_eq!(fixture.mode(), "stop", "local config re-enables hooks");
-        fixture.put("project/.anti-design/config.json", r#"{"hook":{"enabled":true}}"#);
-        fixture.put("project/.anti-design/config.local.json", r#"{"hook":{"enabled":false}}"#);
+        fixture.put("project/.anti-ai-design/config.json", r#"{"hook":{"enabled":true}}"#);
+        fixture.put("project/.anti-ai-design/config.local.json", r#"{"hook":{"enabled":false}}"#);
         assert_eq!(fixture.mode(), "none", "local config disables hooks");
     }
 
@@ -1063,7 +1063,7 @@ mod user_scope_hook_tests {
     fn home_lifecycle_config_does_not_disable_an_unrelated_project() {
         let fixture = UserHookFixture::new("codex");
         fixture.put("home/.codex/hooks.json", CODEX_HOOK);
-        fixture.put("home/.anti-design/config.json", r#"{"hook":{"enabled":false}}"#);
+        fixture.put("home/.anti-ai-design/config.json", r#"{"hook":{"enabled":false}}"#);
         assert_eq!(fixture.mode(), "stop");
     }
 
@@ -1109,12 +1109,12 @@ mod user_scope_hook_tests {
         assert_eq!(fixture.mode(), "stop");
     }
 
-    const HERMES_PLUGIN: &str = "home/.hermes/plugins/anti-design-design-hook";
-    const HERMES_ENABLED: &str = "plugins:\n  clone_timeout_seconds: 300\n  enabled:\n    - anti-design-design-hook\n  disabled: []\n";
+    const HERMES_PLUGIN: &str = "home/.hermes/plugins/anti-ai-design-design-hook";
+    const HERMES_ENABLED: &str = "plugins:\n  clone_timeout_seconds: 300\n  enabled:\n    - anti-ai-design-design-hook\n  disabled: []\n";
 
     fn hermes_fixture(config: &str) -> UserHookFixture {
         let fixture = UserHookFixture::new("hermes");
-        fixture.put(&format!("{HERMES_PLUGIN}/plugin.yaml"), "name: anti-design-design-hook\n");
+        fixture.put(&format!("{HERMES_PLUGIN}/plugin.yaml"), "name: anti-ai-design-design-hook\n");
         fixture.put(&format!("{HERMES_PLUGIN}/__init__.py"), "");
         fixture.put("home/.hermes/config.yaml", config);
         fixture
@@ -1123,7 +1123,7 @@ mod user_scope_hook_tests {
     #[test]
     fn hermes_enabled_plugin_supplies_stop_coverage() {
         assert_eq!(hermes_fixture(HERMES_ENABLED).mode(), "stop", "block list");
-        let flow = "model: x\nplugins:\n  enabled: [other, 'anti-design-design-hook']  # on\n  disabled: []\n";
+        let flow = "model: x\nplugins:\n  enabled: [other, 'anti-ai-design-design-hook']  # on\n  disabled: []\n";
         assert_eq!(hermes_fixture(flow).mode(), "stop", "flow list");
     }
 
@@ -1131,9 +1131,9 @@ mod user_scope_hook_tests {
     fn hermes_plugin_not_enabled_falls_back_to_manual() {
         let not_listed = "plugins:\n  enabled:\n    - other\n  disabled: []\n";
         assert_eq!(hermes_fixture(not_listed).mode(), "none", "present but not listed");
-        let disabled = "plugins:\n  enabled:\n    - anti-design-design-hook\n  disabled:\n    - anti-design-design-hook\n";
+        let disabled = "plugins:\n  enabled:\n    - anti-ai-design-design-hook\n  disabled:\n    - anti-ai-design-design-hook\n";
         assert_eq!(hermes_fixture(disabled).mode(), "none", "listed under disabled");
-        let unreadable = "plugins:\n  enabled: anti-design-design-hook\n";
+        let unreadable = "plugins:\n  enabled: anti-ai-design-design-hook\n";
         assert_eq!(hermes_fixture(unreadable).mode(), "none", "scalar, not a list");
         let fixture = hermes_fixture(HERMES_ENABLED);
         std::fs::remove_file(fixture.root.join(format!("{HERMES_PLUGIN}/__init__.py"))).unwrap();
@@ -1143,13 +1143,13 @@ mod user_scope_hook_tests {
     #[test]
     fn hermes_home_and_hook_disable_are_respected() {
         let mut fixture = hermes_fixture(HERMES_ENABLED);
-        fixture.env.insert("ANTI_DESIGN_HOOK_DISABLED".to_string(), "yes".to_string());
+        fixture.env.insert("ANTI_AI_DESIGN_HOOK_DISABLED".to_string(), "yes".to_string());
         assert_eq!(fixture.mode(), "none", "environment disabled");
-        fixture.env.remove("ANTI_DESIGN_HOOK_DISABLED");
+        fixture.env.remove("ANTI_AI_DESIGN_HOOK_DISABLED");
         fixture.env.insert("HERMES_HOME".to_string(), fixture.root.join("home/custom").to_string_lossy().into_owned());
         assert_eq!(fixture.mode(), "none", "HERMES_HOME points elsewhere");
-        fixture.put("home/custom/plugins/anti-design-design-hook/plugin.yaml", "");
-        fixture.put("home/custom/plugins/anti-design-design-hook/__init__.py", "");
+        fixture.put("home/custom/plugins/anti-ai-design-design-hook/plugin.yaml", "");
+        fixture.put("home/custom/plugins/anti-ai-design-design-hook/__init__.py", "");
         fixture.put("home/custom/config.yaml", HERMES_ENABLED);
         assert_eq!(fixture.mode(), "stop", "HERMES_HOME under home");
     }
@@ -1157,14 +1157,14 @@ mod user_scope_hook_tests {
     #[test]
     fn claude_user_settings_supply_automatic_hook_coverage() {
         let root = std::env::temp_dir().join(format!(
-            "anti-design-user-hook-context-{}-{}",
+            "anti-ai-design-user-hook-context-{}-{}",
             std::process::id(),
             std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
         ));
         let project = root.join("project");
         let home = root.join("home");
         std::fs::create_dir_all(project.join(".git")).unwrap();
-        let launcher = home.join(".claude/skills/anti-design/scripts/anti-design");
+        let launcher = home.join(".claude/skills/anti-ai-design/scripts/anti-ai-design");
         std::fs::create_dir_all(launcher.parent().unwrap()).unwrap();
         std::fs::write(&launcher, "#!/bin/sh\n").unwrap();
         let settings = home.join(".claude/settings.json");
@@ -1211,10 +1211,10 @@ mod user_scope_hook_tests {
         let provider = Provider {
             id: "claude-code".to_string(),
             command_prefix: "/".to_string(),
-            command: "/anti-design".to_string(),
+            command: "/anti-ai-design".to_string(),
             skill_dir: None,
-            self_cmd: "anti-design".to_string(),
-            self_raw: "anti-design".to_string(),
+            self_cmd: "anti-ai-design".to_string(),
+            self_raw: "anti-ai-design".to_string(),
         };
         let mut env = Env::new();
         env.insert("HOME".to_string(), home.clone());
@@ -1231,7 +1231,7 @@ mod worktree_hook_tests {
 
     #[test]
     fn nested_linked_worktree_finds_the_checkouts_hook_manifest() {
-        let base = std::env::temp_dir().join(format!("anti-design-wt-hook-{}", std::process::id()));
+        let base = std::env::temp_dir().join(format!("anti-ai-design-wt-hook-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&base);
         let tmp = base.to_string_lossy().into_owned();
         let at = |parts: &[&str]| jsp::join(&[&[tmp.as_str()], parts].concat());
@@ -1239,7 +1239,7 @@ mod worktree_hook_tests {
             std::fs::create_dir_all(jsp::dirname(&path)).unwrap();
             std::fs::write(path, body).unwrap();
         };
-        let settings = r#"{"hooks":{"PostToolUse":[{"matcher":"Edit|Write","hooks":[{"type":"command","command":"\"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" hook"}]}]}}"#;
+        let settings = r#"{"hooks":{"PostToolUse":[{"matcher":"Edit|Write","hooks":[{"type":"command","command":"\"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" hook"}]}]}}"#;
         put(at(&["main", ".claude", "settings.json"]), settings);
         put(at(&["main", ".git", "worktrees", "demo", "commondir"]), "../..\n");
         put(at(&["main", ".git", "worktrees", "ext", "commondir"]), "../..\n");
@@ -1256,7 +1256,7 @@ mod worktree_hook_tests {
         let env = Env::from([
             ("HOME".to_string(), tmp.clone()),
             ("USERPROFILE".to_string(), tmp.clone()),
-            ("ANTI_DESIGN_PROVIDER_ID".to_string(), "claude-code".to_string()),
+            ("ANTI_AI_DESIGN_PROVIDER_ID".to_string(), "claude-code".to_string()),
         ]);
         let provider = crate::provider::detect(&env, &tmp);
         let mode = |dir: String| {
@@ -1273,7 +1273,7 @@ mod worktree_hook_tests {
 
     #[test]
     fn cursor_post_edit_and_unmigrated_gate_both_count_as_per_edit_coverage() {
-        let base = std::env::temp_dir().join(format!("anti-design-cursor-hook-{}", std::process::id()));
+        let base = std::env::temp_dir().join(format!("anti-ai-design-cursor-hook-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&base);
         let tmp = base.to_string_lossy().into_owned();
         let project = jsp::join(&[&tmp, "proj"]);
@@ -1283,7 +1283,7 @@ mod worktree_hook_tests {
         let env = Env::from([
             ("HOME".to_string(), tmp.clone()),
             ("USERPROFILE".to_string(), tmp.clone()),
-            ("ANTI_DESIGN_PROVIDER_ID".to_string(), "cursor".to_string()),
+            ("ANTI_AI_DESIGN_PROVIDER_ID".to_string(), "cursor".to_string()),
         ]);
         let provider = crate::provider::detect(&env, &project);
         assert_eq!(provider.id, "cursor");
@@ -1293,10 +1293,10 @@ mod worktree_hook_tests {
         };
         assert_eq!(mode(), "none");
         // Post-edit only: Cursor has no Stop deep pass wired (#1061).
-        std::fs::write(&manifest, r#"{"version":1,"hooks":{"postToolUse":[{"command":"\".cursor/skills/anti-design/scripts/anti-design\" hook","matcher":"^Write$","timeout":5}]}}"#).unwrap();
+        std::fs::write(&manifest, r#"{"version":1,"hooks":{"postToolUse":[{"command":"\".cursor/skills/anti-ai-design/scripts/anti-ai-design\" hook","matcher":"^Write$","timeout":5}]}}"#).unwrap();
         assert_eq!(mode(), "per-edit");
         // The retired gate still runs until the manifest is migrated.
-        std::fs::write(&manifest, r#"{"version":1,"hooks":{"preToolUse":[{"command":"\".cursor/skills/anti-design/scripts/anti-design\" hook-before-edit","timeout":5}]}}"#).unwrap();
+        std::fs::write(&manifest, r#"{"version":1,"hooks":{"preToolUse":[{"command":"\".cursor/skills/anti-ai-design/scripts/anti-ai-design\" hook-before-edit","timeout":5}]}}"#).unwrap();
         assert_eq!(mode(), "per-edit");
         let _ = std::fs::remove_dir_all(&base);
     }

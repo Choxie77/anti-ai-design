@@ -1,6 +1,6 @@
 # Developer Guide
 
-Documentation for contributors to Anti-Design.
+Documentation for contributors to Anti-AI Design.
 
 ## Architecture
 
@@ -177,14 +177,14 @@ The skill-behavior suite runs three providers (claude-haiku-4-5, gpt-5.4-mini, g
 ## Repository Structure
 
 ```
-anti-design/
+anti-ai-design/
   skill/                           # Edit these! Source of truth
     SKILL.src.md                   # Frontmatter, shared design laws, command router
     reference/                     # One <command>.md per command + domain references
     scripts/                       # Skill runtime scripts (hooks, context.mjs, etc.)
     agents/                        # Nested subagent definitions
-  cli/                             # Standalone `anti-design` CLI (npm package)
-  site/                            # anti-design.example (Astro)
+  cli/                             # Standalone `anti-ai-design` CLI (npm package)
+  site/                            # github.com/Choxie77/anti-ai-design (Astro)
   extension/                       # Chrome extension
   functions/                       # Cloudflare Pages Functions
   plugin/                          # Committed Claude Code plugin build output

@@ -77,7 +77,7 @@
 use super::csstree::{self, Important, Node};
 use super::shorthand::{expand_static_box_values, expand_static_declaration, Expanded};
 use super::values::split_css_tokens;
-use anti_design_core::js;
+use anti_ai_design_core::js;
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;

@@ -3,9 +3,9 @@ import path from 'node:path';
 
 import { quoteLauncher, rewritePluginMarkdownTree } from './plugin-paths.js';
 
-const PROJECT_SCRIPTS = '.github/skills/anti-design/scripts';
+const PROJECT_SCRIPTS = '.github/skills/anti-ai-design/scripts';
 const PROJECT_FALLBACK =
-  `That base directory resolves every \`${PROJECT_SCRIPTS}/anti-design <verb>\` command in this skill and its references, ` +
+  `That base directory resolves every \`${PROJECT_SCRIPTS}/anti-ai-design <verb>\` command in this skill and its references, ` +
   `and \`${PROJECT_SCRIPTS}\` is the fallback only when the runtime reports no base directory.`;
 
 // VS Code provides the loaded skill's URI, not Claude's substitution variables.
@@ -17,34 +17,34 @@ export function rewriteVSCodeMarkdown(content, { isSkillEntrypoint = false } = {
       throw new Error('VS Code skill path rewrite drift: Setup fallback changed.');
     }
     content = content.replace(PROJECT_FALLBACK,
-      'Resolve the installed directory from this skill’s [launcher](scripts/anti-design). ' +
+      'Resolve the installed directory from this skill’s [launcher](scripts/anti-ai-design). ' +
       'Replace `<skill-base-dir>` with that absolute directory before running commands; it is not a shell variable.');
   }
   return content.replaceAll(PROJECT_SCRIPTS, '<skill-base-dir>/scripts')
-    .replace(/(?<!["\w/])<skill-base-dir>\/scripts\/anti-design(\.cmd)?(?=[\s`])/g,
+    .replace(/(?<!["\w/])<skill-base-dir>\/scripts\/anti-ai-design(\.cmd)?(?=[\s`])/g,
       (_, cmd) => quoteLauncher('<skill-base-dir>', Boolean(cmd)));
 }
 
 /** Stage a declarative skill extension, independently of repo-install sidecars. */
 export function stageVSCodeExtension(rootDir, distDir) {
-  const source = path.join(distDir, 'github', '.github', 'skills', 'anti-design');
+  const source = path.join(distDir, 'github', '.github', 'skills', 'anti-ai-design');
   const version = JSON.parse(fs.readFileSync(path.join(rootDir, '.claude-plugin/plugin.json'), 'utf8')).version;
   const extensionRoot = path.join(distDir, 'vscode');
   // Only this generated artifact is replaced. Never touch the user's editor.
   fs.rmSync(extensionRoot, { recursive: true, force: true });
   fs.mkdirSync(extensionRoot, { recursive: true });
-  const skillDir = path.join(extensionRoot, 'skills', 'anti-design');
+  const skillDir = path.join(extensionRoot, 'skills', 'anti-ai-design');
   fs.cpSync(source, skillDir, { recursive: true });
   rewritePluginMarkdownTree(skillDir, rewriteVSCodeMarkdown);
 
   const manifest = {
-    name: 'anti-design',
-    displayName: 'Anti-Design',
+    name: 'anti-ai-design',
+    displayName: 'Anti-AI Design',
     description: 'Design skills for GitHub Copilot: build, critique, audit, and refine interfaces.',
     version,
     publisher: 'renaissance-geek',
     license: 'Apache-2.0',
-    homepage: 'https://anti-design.example',
+    homepage: 'https://github.com/Choxie77/anti-ai-design',
     repository: { type: 'git', url: 'https://github.com/Choxie77/anti-ai-design.git' },
     bugs: { url: 'https://github.com/Choxie77/anti-ai-design/issues' },
     icon: 'icon.png',
@@ -54,7 +54,7 @@ export function stageVSCodeExtension(rootDir, distDir) {
     extensionKind: ['workspace'],
     extensionDependencies: ['GitHub.copilot-chat'],
     capabilities: { untrustedWorkspaces: { supported: false }, virtualWorkspaces: false },
-    contributes: { chatSkills: [{ path: './skills/anti-design/SKILL.md' }] },
+    contributes: { chatSkills: [{ path: './skills/anti-ai-design/SKILL.md' }] },
   };
   fs.writeFileSync(path.join(extensionRoot, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   fs.copyFileSync(path.join(rootDir, 'scripts/lib/assets/plugin-icon.png'), path.join(extensionRoot, 'icon.png'));

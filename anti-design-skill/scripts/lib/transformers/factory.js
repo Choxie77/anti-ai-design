@@ -64,7 +64,12 @@ const FIELD_SPECS = {
 // installed -- so no separate .codex/agents/ sidecar copy is needed.
 const CODEX_SKILL_PROVIDERS = new Set(['agents', 'codex']);
 
+// Modified by Anti-AI Design contributors, 2026-11-05: title-casing the skill name would
+// print "Anti Ai Design", so the product's own display name is spelled out.
+const DISPLAY_NAMES = { 'anti-ai-design': 'Anti-AI Design' };
+
 function humanizeSkillName(name) {
+  if (DISPLAY_NAMES[name]) return DISPLAY_NAMES[name];
   return name
     .split('-')
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -351,7 +356,7 @@ export function createTransformer(config) {
       // Generate degraded-mode fallback reference files from the shipped
       // subagent definitions. Single-sourced from skill/agents/ so a harness
       // with no subagent capability runs each role inline from the same
-      // specialized text. Role name = agent name minus the `anti-design-`
+      // specialized text. Role name = agent name minus the `anti-ai-design-`
       // prefix. These pass through the same provider-block compilation and
       // placeholder replacement as ordinary reference files, so <codex> blocks
       // and {{placeholders}} resolve identically.
@@ -359,7 +364,7 @@ export function createTransformer(config) {
         const degradedDir = path.join(skillDir, 'reference', 'degraded');
         ensureDir(degradedDir);
         for (const agent of skill.agents) {
-          const role = agent.name.replace(/^anti-design-/, '');
+          const role = agent.name.replace(/^anti-ai-design-/, '');
           const body = renderAgentBody(agent, { providerTags, placeholderKey, allSkillNames, scriptsPath, emitDir: degradedDir, skillDir });
           const content = `${DEGRADED_PREAMBLE}\n\n${body.replace(/^\s+/, '')}`;
           writeFile(path.join(degradedDir, `${role}.md`), content);
@@ -376,7 +381,7 @@ export function createTransformer(config) {
           const outPath = path.join(scriptsOutDir, script.name);
           writeFile(outPath, scriptContent);
           // The launcher must stay executable in every provider copy; a
-          // plain write would drop the bit and `anti-design context` would
+          // plain write would drop the bit and `anti-ai-design context` would
           // fail with EACCES on the first session.
           if (script.mode) fs.chmodSync(outPath, script.mode);
           scriptCount++;
@@ -452,7 +457,7 @@ export function createTransformer(config) {
     }
 
     // Emit a provider plugin verbatim from the skill's payloads (Hermes:
-    // skill/hermes-plugin/ -> .hermes/plugins/anti-design-design-hook/). A
+    // skill/hermes-plugin/ -> .hermes/plugins/anti-ai-design-design-hook/). A
     // skill without the payload emits none; tests/hook-build.test.mjs pins
     // that the real source carries it.
     let pluginInfo = '';

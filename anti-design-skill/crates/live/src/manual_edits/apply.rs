@@ -25,7 +25,7 @@ fn env_number(env: &Env, key: &str, default: f64) -> f64 {
     // JS: Number(process.env.X || default)
     match env.get(key).filter(|v| !v.is_empty()) {
         Some(v) => {
-            let n = anti_design_core::js::string_to_number(v);
+            let n = anti_ai_design_core::js::string_to_number(v);
             if n.is_nan() {
                 f64::NAN
             } else {
@@ -39,7 +39,7 @@ fn env_number(env: &Env, key: &str, default: f64) -> f64 {
 pub fn apply_event_hard_timeout_ms(env: &Env) -> f64 {
     env_number(
         env,
-        "ANTI_DESIGN_LIVE_APPLY_EVENT_HARD_TIMEOUT_MS",
+        "ANTI_AI_DESIGN_LIVE_APPLY_EVENT_HARD_TIMEOUT_MS",
         150_000.0,
     )
 }
@@ -47,7 +47,7 @@ pub fn apply_event_hard_timeout_ms(env: &Env) -> f64 {
 pub fn apply_event_soft_deadline_ms(env: &Env) -> Value {
     let n = env_number(
         env,
-        "ANTI_DESIGN_LIVE_APPLY_EVENT_SOFT_DEADLINE_MS",
+        "ANTI_AI_DESIGN_LIVE_APPLY_EVENT_SOFT_DEADLINE_MS",
         120_000.0,
     );
     if n.is_nan() {
@@ -59,8 +59,8 @@ pub fn apply_event_soft_deadline_ms(env: &Env) -> Value {
 
 /// JS: manualEditApplyChunkSize(env)
 pub fn manual_edit_apply_chunk_size(env: &Env) -> i64 {
-    let raw = match env.get("ANTI_DESIGN_LIVE_MANUAL_EDIT_CHUNK_SIZE") {
-        Some(v) => anti_design_core::js::string_to_number(v),
+    let raw = match env.get("ANTI_AI_DESIGN_LIVE_MANUAL_EDIT_CHUNK_SIZE") {
+        Some(v) => anti_ai_design_core::js::string_to_number(v),
         None => f64::NAN,
     };
     if !raw.is_finite() {

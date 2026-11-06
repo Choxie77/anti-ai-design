@@ -7,7 +7,7 @@
 //!
 //! The probe trait itself, its snapshot implementation, the selector engine,
 //! the test fake and the plain-data types live in
-//! `anti_design_foundation::browser`; they are re-exported here under the
+//! `anti_ai_design_foundation::browser`; they are re-exported here under the
 //! paths callers already use.
 //!
 //! Module map (one JS region each, so parallel work does not collide):
@@ -80,11 +80,11 @@
 //! bugs ported, `// JS-PARITY:` where it looks odd. Every function carries a
 //! `/// JS: <file>#<name>` doc comment.
 
-pub use anti_design_foundation::browser::dom;
-pub use anti_design_foundation::browser::selector;
+pub use anti_ai_design_foundation::browser::dom;
+pub use anti_ai_design_foundation::browser::selector;
 
 #[cfg(any(test, feature = "fake-dom"))]
-pub use anti_design_foundation::browser::fake_dom;
+pub use anti_ai_design_foundation::browser::fake_dom;
 
 pub mod background;
 pub mod decorative_text;
@@ -104,6 +104,6 @@ pub mod text_layers;
 pub mod visual;
 
 pub use dom::{Dom, ElId, Rect};
-pub use anti_design_foundation::browser::{
+pub use anti_ai_design_foundation::browser::{
     BrowserConfig, BrowserFinding, DisabledValue, ElFinding, FindingGroup,
 };

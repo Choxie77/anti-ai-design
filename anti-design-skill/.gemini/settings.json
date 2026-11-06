@@ -5,9 +5,9 @@
         "matcher": "^run_shell_command$",
         "hooks": [
           {
-            "name": "anti-design-session",
+            "name": "anti-ai-design-session",
             "type": "command",
-            "command": "[ ! -f $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design ] || $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design hook",
+            "command": "[ ! -f $GEMINI_PROJECT_DIR/.gemini/skills/anti-ai-design/scripts/anti-ai-design ] || $GEMINI_PROJECT_DIR/.gemini/skills/anti-ai-design/scripts/anti-ai-design hook",
             "timeout": 5000
           }
         ]
@@ -17,9 +17,9 @@
       {
         "hooks": [
           {
-            "name": "anti-design-completion",
+            "name": "anti-ai-design-completion",
             "type": "command",
-            "command": "[ ! -f $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design ] || $GEMINI_PROJECT_DIR/.gemini/skills/anti-design/scripts/anti-design hook",
+            "command": "[ ! -f $GEMINI_PROJECT_DIR/.gemini/skills/anti-ai-design/scripts/anti-ai-design ] || $GEMINI_PROJECT_DIR/.gemini/skills/anti-ai-design/scripts/anti-ai-design hook",
             "timeout": 30000
           }
         ]

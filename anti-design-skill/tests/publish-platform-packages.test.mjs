@@ -33,8 +33,8 @@ describe('platform package templates', () => {
   });
 
   it('refuses a template whose bin does not match the binary name', () => {
-    const bad = { ...template('darwin-arm64'), bin: { 'anti-design-darwin-arm64': 'bin/anti-design.exe' } };
-    assert.throws(() => stampTemplate(bad, 'darwin-arm64', VERSION), /must map its bin to bin\/anti-design /);
+    const bad = { ...template('darwin-arm64'), bin: { 'anti-ai-design-darwin-arm64': 'bin/anti-ai-design.exe' } };
+    assert.throws(() => stampTemplate(bad, 'darwin-arm64', VERSION), /must map its bin to bin\/anti-ai-design /);
   });
 
   it('stages package.json, an executable binary, and the LICENSE', () => {
@@ -85,12 +85,12 @@ describe('release asset verification and registry probe', () => {
 
   after(() => server.close());
 
-  const asset = `/engine-v${VERSION}/anti-design-linux-x64`;
+  const asset = `/engine-v${VERSION}/anti-ai-design-linux-x64`;
   const serve = (body) => (res) => { res.statusCode = 200; res.end(body); };
 
   it('publishes only a binary whose sidecar matches', async () => {
     routes.set(asset, serve(binary));
-    routes.set(`${asset}.sha256`, serve(`${goodSha}  anti-design-linux-x64\n`));
+    routes.set(`${asset}.sha256`, serve(`${goodSha}  anti-ai-design-linux-x64\n`));
     const got = await fetchVerifiedBinary('linux-x64', VERSION, base);
     assert.deepEqual(got, binary);
   });

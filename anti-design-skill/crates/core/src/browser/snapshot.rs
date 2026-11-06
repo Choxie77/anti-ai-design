@@ -1,9 +1,9 @@
 //! The snapshot DOM and its one-shot findings run. Everything except the
-//! run itself lives in `anti_design_foundation::browser::snapshot`; this
+//! run itself lives in `anti_ai_design_foundation::browser::snapshot`; this
 //! module re-exports it under the path callers already use and adds
 //! [`collect_findings_from_snapshot`], which drives the browser driver.
 
-pub use anti_design_foundation::browser::snapshot::*;
+pub use anti_ai_design_foundation::browser::snapshot::*;
 
 /// A one-shot findings run over a snapshot: parse, collect, serialize.
 /// `Err(needs)` when the run asked for hit tests the snapshot lacked; supply

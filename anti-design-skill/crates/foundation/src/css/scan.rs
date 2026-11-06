@@ -1,6 +1,6 @@
 //! Stylesheet-text helpers: the parsing, indexing and keyframe-collection
 //! utilities that read raw CSS (no DOM), plus the finding shapes the scanners
-//! return. The scanners themselves live in `anti-design-core`.
+//! return. The scanners themselves live in `anti-ai-design-core`.
 
 use crate::js::{self, ci, math_max, math_min, parse_float, WS, WS_CHARS};
 use crate::js_ext_a::{

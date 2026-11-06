@@ -1,5 +1,5 @@
 /**
- * Anti-Design DevTools Extension - Content Script
+ * Anti-AI Design DevTools Extension - Content Script
  *
  * Runs in the tab's isolated world with two generated companions injected
  * before it (detector/snapshot.js, detector/overlay.js). A scan is:
@@ -22,12 +22,12 @@
  *   - Duplicate event listeners accumulating over time
  */
 (function () {
-  if (window.__ANTI_DESIGN_CS_LOADED__) return;
-  window.__ANTI_DESIGN_CS_LOADED__ = true;
+  if (window.__ANTI_AI_DESIGN_CS_LOADED__) return;
+  window.__ANTI_AI_DESIGN_CS_LOADED__ = true;
 
-  const OFFSCREEN = 'anti-design-offscreen';
-  const snapshot = window.__antiDesignSnapshot;
-  const createOverlay = window.__antiDesignCreateOverlay;
+  const OFFSCREEN = 'anti-ai-design-offscreen';
+  const snapshot = window.__antiAiDesignSnapshot;
+  const createOverlay = window.__antiAiDesignCreateOverlay;
   // A page prefix plus a unique ID per driver run keeps late continuations
   // from answering a replacement session. Cancellation releases the core queue.
   const sessionId = `tab-${Math.random().toString(36).slice(2)}`;
@@ -222,7 +222,7 @@
     scanId = id;
     await cancelScans();
     if (generation !== scanGeneration) return;
-    window.__ANTI_DESIGN_CONFIG__ = config || {};
+    window.__ANTI_AI_DESIGN_CONFIG__ = config || {};
     await ensureUI();
     if (generation !== scanGeneration) return;
     disconnectLazy();

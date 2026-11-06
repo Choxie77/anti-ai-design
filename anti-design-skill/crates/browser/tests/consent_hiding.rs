@@ -37,9 +37,9 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
 
-use anti_design_browser::{detect_url_evidence, BrowserEngine, EvidenceRequest};
-use anti_design_core::findings::Finding;
-use anti_design_detect::engines::{ScanOptions, UrlEngine};
+use anti_ai_design_browser::{detect_url_evidence, BrowserEngine, EvidenceRequest};
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_detect::engines::{ScanOptions, UrlEngine};
 
 fn fixtures_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/consent")
@@ -83,7 +83,7 @@ fn handle(mut stream: TcpStream) {
 
 fn engine() -> Option<BrowserEngine> {
     let env: HashMap<String, String> = std::env::vars().collect();
-    if anti_design_browser::discovery::find_browser(&env).is_err() {
+    if anti_ai_design_browser::discovery::find_browser(&env).is_err() {
         eprintln!("skip: no installed browser found");
         return None;
     }
@@ -182,7 +182,7 @@ fn a_late_cookiebot_modal_is_caught_and_its_scroll_lock_undone() {
     assert!(evidence.probe.as_ref().unwrap().consent.is_empty());
     // The capture every pass read has the dialog hidden, and the evidence
     // path leaves the findings untagged so they replay equal.
-    assert!(evidence.scan_snapshot.as_deref().unwrap().contains("anti-design-consent-hide"));
+    assert!(evidence.scan_snapshot.as_deref().unwrap().contains("anti-ai-design-consent-hide"));
     assert!(findings.iter().all(|f| f.extras.get("consentHidden").is_none()));
 
     let shown = flagged(&kept);

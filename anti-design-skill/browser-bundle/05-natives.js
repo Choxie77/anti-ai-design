@@ -7,7 +7,7 @@
 //
 // The URL engine runs this file once more, as a script on every new document
 // before any page script (`Page::initialize` in crates/browser), and that run
-// stashes what it built on `window.__antiDesignNatives`, read-only and
+// stashes what it built on `window.__antiAiDesignNatives`, read-only and
 // non-enumerable. Later runs take the stash. Without one (the live script
 // tag) the current globals are used as they are: live mode sees the user's
 // own app.
@@ -23,8 +23,8 @@
 // `performance.now` or patches `Performance.prototype` is not.
 //
 // The stash is page-visible: `Object.getOwnPropertyNames(window)` lists
-// `__antiDesignNatives` on every document the URL engine loads, and a page
-// that declares its own global `let __antiDesignNatives` fails to load that
+// `__antiAiDesignNatives` on every document the URL engine loads, and a page
+// that declares its own global `let __antiAiDesignNatives` fails to load that
 // script. Both are vanishingly rare.
 //
 // The `const` at the end shadows the globals for everything after it in the
@@ -38,7 +38,7 @@
 // The builder must reach every built-in through `g`, never by bare name:
 // while it runs, the bare names are the `const` below, not yet initialized.
 
-function __antiDesignBuildNatives(g) {
+function __antiAiDesignBuildNatives(g) {
   const O = g.Object;
   const R = g.Reflect;
   const freeze = O.freeze;
@@ -100,13 +100,13 @@ function __antiDesignBuildNatives(g) {
   });
 }
 
-const __antiDesignNatives = (() => {
+const __antiAiDesignNatives = (() => {
   const g = globalThis;
   try {
-    const stash = g.__antiDesignNatives;
+    const stash = g.__antiAiDesignNatives;
     if (stash && typeof stash === 'object') return stash;
   } catch { /* fall through */ }
-  try { return __antiDesignBuildNatives(g); } catch { /* fall through */ }
+  try { return __antiAiDesignBuildNatives(g); } catch { /* fall through */ }
   return {
     Map: g.Map, Set: g.Set, WeakMap: g.WeakMap, WeakSet: g.WeakSet,
     Error: g.Error, URL: g.URL, Image: g.Image, ResizeObserver: g.ResizeObserver,
@@ -124,4 +124,4 @@ const {
   Array, Object, Number, Promise, JSON, Math, Reflect, CSS, performance,
   getComputedStyle, matchMedia, setTimeout, clearTimeout, requestAnimationFrame,
   parseFloat,
-} = __antiDesignNatives;
+} = __antiAiDesignNatives;

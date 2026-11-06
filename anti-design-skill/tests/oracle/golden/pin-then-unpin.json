@@ -13,7 +13,7 @@
       "signal": null
     },
     {
-      "stdout": "  - <WS>/.claude/skills/critique\n  - <WS>/.cursor/skills/critique\n  - <WS>/.agents/skills/critique\n\nUnpinned 'critique' from 3 location(s).\nUse Anti-Design's 'critique' workflow directly to access it.\n",
+      "stdout": "  - <WS>/.claude/skills/critique\n  - <WS>/.cursor/skills/critique\n  - <WS>/.agents/skills/critique\n\nUnpinned 'critique' from 3 location(s).\nUse Anti-AI Design's 'critique' workflow directly to access it.\n",
       "stderr": "",
       "exit": 0,
       "signal": null
@@ -26,9 +26,9 @@
     }
   ],
   "files": {
-    ".agents/skills/anti-design/SKILL.md": "---\nname: anti-design\ndescription: fixture\n---\n",
+    ".agents/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\ndescription: fixture\n---\n",
     ".claude/skills/audit/SKILL.md": "---\nname: audit\ndescription: a user-authored audit skill\n---\nNot pinned.\n",
-    ".claude/skills/anti-design/SKILL.md": "---\nname: anti-design\ndescription: fixture\n---\n",
-    ".cursor/skills/anti-design/SKILL.md": "---\nname: anti-design\ndescription: fixture\n---\n"
+    ".claude/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\ndescription: fixture\n---\n",
+    ".cursor/skills/anti-ai-design/SKILL.md": "---\nname: anti-ai-design\ndescription: fixture\n---\n"
   }
 }

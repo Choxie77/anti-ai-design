@@ -1,23 +1,23 @@
 [package]
-name = "anti-design"
+name = "anti-ai-design"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [dependencies]
-anti-design-common = { path = "../common" }
-anti-design-context = { path = "../context" }
-anti-design-browser = { path = "../browser" }
-anti-design-detect = { path = "../detect" }
-anti-design-html = { path = "../html" }
-anti-design-hook = { path = "../hook" }
-anti-design-live = { path = "../live" }
-anti-design-skills = { path = "../skills" }
-anti-design-aad-rules = { path = "../aad-rules" }
-anti-design-core = { workspace = true }
-anti-design-comp = { workspace = true }
-anti-design-comp-verbs = { workspace = true }
+anti-ai-design-common = { path = "../common" }
+anti-ai-design-context = { path = "../context" }
+anti-ai-design-browser = { path = "../browser" }
+anti-ai-design-detect = { path = "../detect" }
+anti-ai-design-html = { path = "../html" }
+anti-ai-design-hook = { path = "../hook" }
+anti-ai-design-live = { path = "../live" }
+anti-ai-design-skills = { path = "../skills" }
+anti-ai-design-aad-rules = { path = "../aad-rules" }
+anti-ai-design-core = { workspace = true }
+anti-ai-design-comp = { workspace = true }
+anti-ai-design-comp-verbs = { workspace = true }
 serde_json = { workspace = true }
 base64 = "0.22"
 sha2 = "0.10"

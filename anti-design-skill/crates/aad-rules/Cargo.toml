@@ -1,5 +1,5 @@
 [package]
-name = "anti-design-aad-rules"
+name = "anti-ai-design-aad-rules"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -7,9 +7,9 @@ publish.workspace = true
 description = "Anti-AI Design first-party rules, shipped as a rule pack on top of the engine"
 
 [dependencies]
-anti-design-core = { workspace = true }
+anti-ai-design-core = { workspace = true }
 regex = { workspace = true }
 once_cell = { workspace = true }
 
 [dev-dependencies]
-anti-design-detect = { workspace = true }
+anti-ai-design-detect = { workspace = true }

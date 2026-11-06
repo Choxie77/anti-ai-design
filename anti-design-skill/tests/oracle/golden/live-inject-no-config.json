@@ -1,6 +1,6 @@
 {
   "stdout": "",
-  "stderr": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/.anti-design/live/config.json\"}\n",
+  "stderr": "{\"ok\":false,\"error\":\"config_missing\",\"path\":\"<WS>/.anti-ai-design/live/config.json\"}\n",
   "exit": 1,
   "signal": null,
   "files": {}

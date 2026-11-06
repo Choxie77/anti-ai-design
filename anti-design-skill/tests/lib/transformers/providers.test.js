@@ -83,7 +83,7 @@ for (const [key, config] of Object.entries(PROVIDERS)) {
           body: 'Ask {{model}}.',
           userInvocable: true,
           argumentHint: '[target]',
-          allowedTools: ['Bash(npx anti-design *)'],
+          allowedTools: ['Bash(npx anti-ai-design *)'],
         }], TEST_DIR);
         const content = fs.readFileSync(skillPath(config, 'test'), 'utf-8');
         expect(content).toContain('argument-hint: "[target]"');
@@ -96,20 +96,20 @@ for (const [key, config] of Object.entries(PROVIDERS)) {
     if (key === 'dsh') {
       test('uses DSH tools and resource paths without installing unsupported hooks or agents', () => {
         transform([{
-          name: 'anti-design',
+          name: 'anti-ai-design',
           description: 'Test',
           userInvocable: true,
           allowedTools: 'Bash',
-          body: '{{ask_instruction}} Run `{{scripts_path}}/anti-design context`.',
-          references: [{ name: 'polish', content: 'Run `{{scripts_path}}/anti-design detect`.', filePath: '/fake/polish.md' }],
+          body: '{{ask_instruction}} Run `{{scripts_path}}/anti-ai-design context`.',
+          references: [{ name: 'polish', content: 'Run `{{scripts_path}}/anti-ai-design detect`.', filePath: '/fake/polish.md' }],
         }], TEST_DIR);
-        const content = fs.readFileSync(skillPath(config, 'anti-design'), 'utf8');
+        const content = fs.readFileSync(skillPath(config, 'anti-ai-design'), 'utf8');
         expect(content).toContain('Ask with the ask_user_question tool');
-        expect(content).toContain('.dsh/skills/anti-design/scripts/anti-design context');
+        expect(content).toContain('.dsh/skills/anti-ai-design/scripts/anti-ai-design context');
         expect(parseFrontmatter(content).frontmatter['allowed-tools']).toBeUndefined();
         const root = path.join(TEST_DIR, 'dsh', '.dsh');
-        expect(fs.readFileSync(path.join(root, 'skills/anti-design/reference/polish.md'), 'utf8'))
-          .toContain('.dsh/skills/anti-design/scripts/anti-design detect');
+        expect(fs.readFileSync(path.join(root, 'skills/anti-ai-design/reference/polish.md'), 'utf8'))
+          .toContain('.dsh/skills/anti-ai-design/scripts/anti-ai-design detect');
         expect(fs.readdirSync(root)).toEqual(['skills']);
         expect(config.emitHooks).toBeUndefined();
         expect(config.agentFormat).toBeUndefined();

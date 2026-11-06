@@ -1,6 +1,6 @@
-//! `anti-design detect --list-rules`: every rule in the registry (`all_antipatterns()`, built-ins plus any installed rule pack), no scan.
+//! `anti-ai-design detect --list-rules`: every rule in the registry (`all_antipatterns()`, built-ins plus any installed rule pack), no scan.
 
-use anti_design_core::registry::{all_antipatterns, Antipattern};
+use anti_ai_design_core::registry::{all_antipatterns, Antipattern};
 use serde_json::{json, Value};
 
 /// Rules in registry order, optionally narrowed by `--scope` and

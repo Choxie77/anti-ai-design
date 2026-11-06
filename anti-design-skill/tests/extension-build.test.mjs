@@ -166,7 +166,7 @@ describe('extension DevTools packaging', () => {
 
     assert.match(
       source,
-      /chrome\.devtools\.panels\.create\(\s*['"]Anti-Design['"],\s*['"]\/icons\/icon-32\.png['"],\s*['"]\/devtools\/panel\.html['"]\s*\)/s,
+      /chrome\.devtools\.panels\.create\(\s*['"]Anti-AI Design['"],\s*['"]\/icons\/icon-32\.png['"],\s*['"]\/devtools\/panel\.html['"]\s*\)/s,
       'Firefox resolves DevTools URLs relative to devtools.html unless they start at the extension root',
     );
     assert.match(source, /sidebar\.setPage\(['"]\/devtools\/sidebar\.html['"]\)/);
@@ -294,11 +294,11 @@ function contentScanHarness({ visual = true, fail = false } = {}) {
   const overlay = { remove() {}, clearOverlays() {}, highlight() {}, setFirstScanDone() {}, showPageBanner() {} };
   const context = vm.createContext({
     window: {
-      __antiDesignSnapshot: {
+      __antiAiDesignSnapshot: {
         capture: () => ({ json: '{}', elements: {}, stats: { elements: 1, bytes: 2, ms: 0 } }),
         visualIO: () => ({ loadImage: () => image }),
       },
-      __antiDesignCreateOverlay: () => overlay,
+      __antiAiDesignCreateOverlay: () => overlay,
       addEventListener() {},
     },
     document: { body: {}, documentElement: {}, addEventListener() {} },
@@ -528,11 +528,11 @@ function restartHarness({ rejectImage = false, replacementWaits = false } = {}) 
   const overlay = { clearOverlays() {}, highlight() {}, setFirstScanDone() {}, showPageBanner() {} };
   const context = vm.createContext({
     window: {
-      __antiDesignSnapshot: {
+      __antiAiDesignSnapshot: {
         capture: () => ({ json: '{}', elements: {}, stats: { elements: 1, bytes: 2, ms: 0 } }),
         visualIO: () => ({ loadImage: src => src === 'old' ? oldImage : new Promise(() => {}) }),
       },
-      __antiDesignCreateOverlay: () => overlay, addEventListener() {},
+      __antiAiDesignCreateOverlay: () => overlay, addEventListener() {},
     },
     document: { body: {}, documentElement: {}, addEventListener() {} },
     location: { href: 'https://example.test/' }, performance, setTimeout() {},
@@ -588,14 +588,14 @@ for (const byTab of [false, true]) it(`canceling a parked lazy session releases 
   };
   const context = vm.createContext({
     performance,
-    __antiDesignLoadCore: async () => wasm,
+    __antiAiDesignLoadCore: async () => wasm,
     __visualContrastMode: () => false,
     createVisualContrast: io => ({ analyzeVisualContrastCandidate: async () => io.loadImage('/slow.png') }),
     chrome: { runtime: { onMessage: { addListener(fn) { listener = fn; } } } },
   });
   vm.runInContext(readFileSync(path.join(ROOT, 'browser-bundle/60-offscreen.js'), 'utf8'), context);
   const send = msg => new Promise(resolve => {
-    const pending = listener({ target: 'anti-design-offscreen', ...msg }, { tab: { id: msg.session === 'tab-two' ? 2 : 1 } }, resolve);
+    const pending = listener({ target: 'anti-ai-design-offscreen', ...msg }, { tab: { id: msg.session === 'tab-two' ? 2 : 1 } }, resolve);
     if (!pending) resolve(undefined);
   });
   const lazy = await send({ action: 'analyze-candidate', session: 'tab-one-lazy', snapshot: '{}' });
@@ -641,8 +641,8 @@ function lazyCandidatesHarness() {
     document: { body: {}, documentElement: {}, addEventListener() {}, querySelector: selector => elements[selector === '#a' ? 0 : 1] },
     window: {
       addEventListener: (name, fn) => { events[name] = fn; },
-      __antiDesignCreateOverlay: () => overlay,
-      __antiDesignSnapshot: {
+      __antiAiDesignCreateOverlay: () => overlay,
+      __antiAiDesignSnapshot: {
         capture() {
           const sequence = ++captureNumber;
           return { json: JSON.stringify({ sequence }), sequence, elements: { 1: elements[0], 2: elements[1] }, stats: { elements: 2, bytes: 2, ms: 0 } };

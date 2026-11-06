@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Anti-Design region map",
+  "title": "Anti-AI Design region map",
   "type": "object",
   "required": [
     "regions"

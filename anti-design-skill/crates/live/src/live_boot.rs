@@ -1,4 +1,4 @@
-//! JS: live.mjs -> `anti-design live` (boot). Resolve roots, gate on context,
+//! JS: live.mjs -> `anti-ai-design live` (boot). Resolve roots, gate on context,
 //! persist the roots manifest, check config, start/reuse the helper server,
 //! inject, scan for config drift, print the boot payload.
 
@@ -12,15 +12,15 @@ use crate::server;
 use crate::util::{
     exists, is_dir, json_compact, json_pretty, jsp, pid_reachable, println, read_dir_raw, safe_read,
 };
-use anti_design_common::Io;
-use anti_design_context::context::resolve_target_selection;
-use anti_design_context::surface_briefs::resolve_surface_brief;
+use anti_ai_design_common::Io;
+use anti_ai_design_context::context::resolve_target_selection;
+use anti_ai_design_context::surface_briefs::resolve_surface_brief;
 use serde_json::{json, Map, Value};
 
-const HELP: &str = "Usage: anti-design live
+const HELP: &str = "Usage: anti-ai-design live
 
 Prepare everything for live variant mode in a single command:
-  - Checks .anti-design/live/config.json (required, created once per project)
+  - Checks .anti-ai-design/live/config.json (required, created once per project)
   - Starts (or reuses) the live server in the background
   - Injects the browser script tag
   - Reads PRODUCT.md / DESIGN.md for project context
@@ -40,7 +40,7 @@ The agent should then:
   1. If target_selection_required, ask which app to use and rerun from that child cwd
   2. If config_missing, create the config and re-run this script
   3. Optionally open the project's dev/preview URL in the browser (see reference/live.md—not serverPort)
-  4. Enter the poll loop: anti-design live-poll";
+  4. Enter the poll loop: anti-ai-design live-poll";
 
 fn rel_or_null(base: &str, p: Option<&str>) -> Value {
     match p {
@@ -79,7 +79,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             "projectRoot": sel.project_root,
             "repoRoot": sel.repo_root,
             "targetCandidates": sel.target_candidates,
-            "hint": "Ask the user which app Anti-Design should use, then rerun live from that child app cwd. Use --target <path> only as a fallback or explicit path diagnostic.",
+            "hint": "Ask the user which app Anti-AI Design should use, then rerun live from that child app cwd. Use --target <path> only as a fallback or explicit path diagnostic.",
         });
         if sel.skipped_non_ui > 0 {
             payload["skippedNonUiWorkspaces"] = json!(sel.skipped_non_ui);
@@ -267,7 +267,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             .map(|p| jsp::relative("/", &live_target.original_cwd, p));
         break;
     }
-    let self_cmd = anti_design_context::provider::detect(&env, &cwd).self_cmd;
+    let self_cmd = anti_ai_design_context::provider::detect(&env, &cwd).self_cmd;
     // The generate lane's two opt-ins. Both are silent unless asked for, so
     // a plain boot's payload is unchanged: `--dev-url` probes which dev
     // server is serving this app right now (the page carrying our tag) and
@@ -292,7 +292,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
         None
     } else {
         crate::dev_url::probe(
-            &crate::dev_url::candidates(env.get("ANTI_DESIGN_DEV_URL_CANDIDATES").map(String::as_str)),
+            &crate::dev_url::candidates(env.get("ANTI_AI_DESIGN_DEV_URL_CANDIDATES").map(String::as_str)),
             &token_for_probe,
         )
     };

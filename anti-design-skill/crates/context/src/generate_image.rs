@@ -1,8 +1,8 @@
-//! JS: generate-image.mjs -> `anti-design generate-image`
+//! JS: generate-image.mjs -> `anti-ai-design generate-image`
 
 use crate::jsp;
 use crate::util::{iso_now, json_pretty, node_read_error, utf16_len, Env};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{Map, Value};
 use std::io::Write;
 
@@ -339,7 +339,7 @@ fn run_with_api_base(args: &[String], io: &mut Io, api_base: &str) -> i32 {
             }
         }
     };
-    if env.get("ANTI_DESIGN_IMAGE_GEN_FAKE").map(|v| !v.is_empty()).unwrap_or(false) {
+    if env.get("ANTI_AI_DESIGN_IMAGE_GEN_FAKE").map(|v| !v.is_empty()).unwrap_or(false) {
         let prompt = match arg(args, "prompt-file") {
             Some(pf) => match read_prompt_file(io, &pf) {
                 Ok(p) => Some(p),
@@ -399,7 +399,7 @@ fn run_with_api_base(args: &[String], io: &mut Io, api_base: &str) -> i32 {
     }
     let agent = crate::http::agent_builder().build();
     let response = if !refs.is_empty() {
-        let boundary = format!("----anti-design{:x}", crate::util::now_ms() as u64);
+        let boundary = format!("----anti-ai-design{:x}", crate::util::now_ms() as u64);
         let mut body: Vec<u8> = Vec::new();
         let mut field = |name: &str, value: &str| {
             body.extend_from_slice(format!("--{}\r\nContent-Disposition: form-data; name=\"{}\"\r\n\r\n{}\r\n", boundary, name, value).as_bytes());
@@ -510,7 +510,7 @@ fn run_with_api_base(args: &[String], io: &mut Io, api_base: &str) -> i32 {
         let mut m = Map::new();
         m.insert("prompt".into(), Value::String(prompt.clone()));
         m.insert("createdAt".into(), Value::String(iso_now()));
-        m.insert("tool".into(), Value::String("anti-design generate-image".into()));
+        m.insert("tool".into(), Value::String("anti-ai-design generate-image".into()));
         m.insert("model".into(), Value::String(model.clone()));
         if let Some(background) = &background {
             m.insert("background".into(), Value::String(background.clone()));
@@ -580,7 +580,7 @@ mod tests {
         let _proxy_lock = crate::http::PROXY_ENV_LOCK.lock().unwrap();
         let server = tiny_http::Server::http("127.0.0.1:0").unwrap();
         let api_base = format!("http://{}", server.server_addr());
-        let temp = std::env::temp_dir().join(format!("anti-design-image-{}-{}", std::process::id(), server.server_addr().to_ip().unwrap().port()));
+        let temp = std::env::temp_dir().join(format!("anti-ai-design-image-{}-{}", std::process::id(), server.server_addr().to_ip().unwrap().port()));
         std::fs::create_dir_all(&temp).unwrap();
         std::fs::write(temp.join("ref.png"), png_fake("reference", 16, 16)).unwrap();
         let handle = std::thread::spawn(move || {
@@ -684,7 +684,7 @@ mod tests {
     }
 
     fn temp(name: &str) -> std::path::PathBuf {
-        let dir = std::env::temp_dir().join(format!("anti-design-image-{}-{}", name, std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-image-{}-{}", name, std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir
@@ -780,7 +780,7 @@ mod tests {
         let server = tiny_http::Server::http("127.0.0.1:0").unwrap();
         let url = format!("http://{}/cards/world.webp", server.server_addr());
         let dir = temp("url-ref-fake");
-        let env = Env::from([("ANTI_DESIGN_IMAGE_GEN_FAKE".into(), "1".into()), ("OPENAI_API_KEY".into(), "test-key".into())]);
+        let env = Env::from([("ANTI_AI_DESIGN_IMAGE_GEN_FAKE".into(), "1".into()), ("OPENAI_API_KEY".into(), "test-key".into())]);
         let (mut io, captured) = Io::captured("", dir.clone(), env);
         let args: Vec<String> = ["--prompt", "p", "--out", "comp.png", "--ref", &url].iter().map(|s| s.to_string()).collect();
         assert_eq!(run(&args, &mut io), 0);

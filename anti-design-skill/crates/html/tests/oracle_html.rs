@@ -10,22 +10,22 @@
 //! reach `detectHtml` through the `text_content_analyzers` hook; the test
 //! wires the `detect` crate's port so the complete arrays are diffed.
 //!
-//! The goldens and fixtures live in this repo; `ANTI_DESIGN_PUBLIC_REPO`
+//! The goldens and fixtures live in this repo; `ANTI_AI_DESIGN_PUBLIC_REPO`
 //! overrides the root for an out-of-tree checkout.
 
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 
 fn run_text_content_analyzers(
     content: &str,
     file_path: &str,
-) -> Vec<anti_design_core::findings::Finding> {
-    anti_design_detect::detect_text::run_text_content_analyzers(content, file_path, None)
+) -> Vec<anti_ai_design_core::findings::Finding> {
+    anti_ai_design_detect::detect_text::run_text_content_analyzers(content, file_path, None)
 }
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 
 fn public_repo() -> Option<PathBuf> {
-    let p = match std::env::var("ANTI_DESIGN_PUBLIC_REPO") {
+    let p = match std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO") {
         Ok(p) => PathBuf::from(p),
         Err(_) => Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."),
     };

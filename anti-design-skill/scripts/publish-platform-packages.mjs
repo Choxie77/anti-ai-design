@@ -14,7 +14,7 @@
  * For each target it downloads the release binary and its .sha256 sidecar
  * (the sidecar is required here: nothing unverified is ever published),
  * stages a package from cli/platform-packages/<target>/package.json with the
- * version stamped, the binary at bin/anti-design[.exe] (executable) and the
+ * version stamped, the binary at bin/anti-ai-design[.exe] (executable) and the
  * repo LICENSE, then runs `npm publish --access public` from the staging dir
  * (`npm publish --dry-run` with --dry-run).
  * Targets already published at this version are skipped, so a re-run after a
@@ -25,7 +25,7 @@
  * skipped with --dry-run).
  *
  * Environment:
- *   ANTI_DESIGN_DOWNLOAD_BASE  release channel root (default: this repo's GitHub Releases)
+ *   ANTI_AI_DESIGN_DOWNLOAD_BASE  release channel root (default: this repo's GitHub Releases)
  *   NPM_REGISTRY              registry used for the published-already probe (default: npmjs)
  */
 
@@ -128,15 +128,7 @@ export async function isPublished(target, version, registry = NPM_REGISTRY) {
 function checkPins(version) {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8'));
   const deps = pkg.optionalDependencies || {};
-  // package.json keeps naming the legacy scope until the rename pass flips it
-  // together with cli/bin/cli.js, so match the pin by `/cli-<target>` and warn
-  // about the scope instead of failing on it.
-  const pinName = (t) => Object.keys(deps).find((n) => n.endsWith(`/cli-${t}`));
-  const pins = Object.fromEntries(ENGINE_TARGETS.map((t) => [packageName(t), deps[pinName(t)]]));
-  const offScope = ENGINE_TARGETS.filter((t) => pinName(t) && pinName(t) !== packageName(t));
-  if (offScope.length) {
-    console.warn(`⚠ package.json optionalDependencies still use another npm scope than ${NPM_SCOPE} (${offScope.map(pinName).join(', ')}); the rename pass must move them with cli/bin/cli.js.`);
-  }
+  const pins = Object.fromEntries(ENGINE_TARGETS.map((t) => [packageName(t), deps[packageName(t)]]));
   const bad = ENGINE_TARGETS.filter((t) => pins[packageName(t)] !== version);
   if (bad.length) {
     const listed = bad.map((t) => `${packageName(t)}@${pins[packageName(t)] || 'missing'}`).join(', ');
@@ -192,7 +184,7 @@ export async function main(argv = process.argv.slice(2)) {
   const user = opts.dryRun ? '(dry run)' : npmWhoami();
   console.log(`→ Publishing ${NPM_SCOPE}/cli-* platform packages for engine ${version} as ${user}`);
 
-  const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-platform-packages-'));
+  const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-platform-packages-'));
   const results = [];
   try {
     for (const target of targets) {
@@ -203,7 +195,7 @@ export async function main(argv = process.argv.slice(2)) {
         continue;
       }
       console.log(`  ${name}: downloading ${assetUrl(version, target)}`);
-      const binary = await fetchVerifiedBinary(target, version, process.env.ANTI_DESIGN_DOWNLOAD_BASE);
+      const binary = await fetchVerifiedBinary(target, version, process.env.ANTI_AI_DESIGN_DOWNLOAD_BASE);
       const template = JSON.parse(fs.readFileSync(path.join(ROOT, 'cli', 'platform-packages', target, 'package.json'), 'utf-8'));
       const dir = stagePackage({ target, version, binary, template, license, outDir });
       console.log(`  ${name}: staged ${dir} (${binary.length} bytes, checksum verified)`);

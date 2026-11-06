@@ -1,14 +1,14 @@
 //! Workspace tasks that need no Node.
 //!
 //! `cargo xtask bundle` builds the in-page detector bundle. The bundling
-//! itself lives in `anti-design-bundle` (`crates/bundle`), the library a
+//! itself lives in `anti-ai-design-bundle` (`crates/bundle`), the library a
 //! downstream rule pack reuses for its own wasm module; this task is the
 //! workspace's caller of it:
 //!   1. `wasm-pack build crates/wasm --target no-modules --release`
 //!      (opt-level z via `CARGO_PROFILE_RELEASE_OPT_LEVEL`, wasm-opt from
 //!      the crate metadata), into `target/wasm-bundle/`;
 //!   2. concatenates the page JS (`browser-bundle/*.js`, embedded in
-//!      `anti-design-bundle`) in a fixed order with the wasm-bindgen glue and
+//!      `anti-ai-design-bundle`) in a fixed order with the wasm-bindgen glue and
 //!      the .wasm embedded as base64;
 //!   3. writes `dist/detect-antipatterns-browser.js` (deterministic: same
 //!      sources, same bytes) and `dist/antipatterns.json` (the registry
@@ -63,23 +63,23 @@ fn bundle(check: bool, pure: bool) {
     let out_dir = root.join("target/wasm-bundle");
     let cargo_args: &[&str] = if pure { &["--features", "pure-exports"] } else { &[] };
     let (glue, wasm) =
-        anti_design_bundle::wasm_pack_build(&root.join("crates/wasm"), &out_dir, cargo_args)
+        anti_ai_design_bundle::wasm_pack_build(&root.join("crates/wasm"), &out_dir, cargo_args)
             .unwrap_or_else(|e| die(e));
 
-    if let Err(mismatch) = anti_design_bundle::check_capture_contract() {
+    if let Err(mismatch) = anti_ai_design_bundle::check_capture_contract() {
         die(mismatch);
     }
 
-    let out = anti_design_bundle::in_page_bundle(&glue, &wasm);
-    let registry = anti_design_bundle::registry_json();
-    let ext = anti_design_bundle::extension_pieces(&glue, &wasm, &registry);
+    let out = anti_ai_design_bundle::in_page_bundle(&glue, &wasm);
+    let registry = anti_ai_design_bundle::registry_json();
+    let ext = anti_ai_design_bundle::extension_pieces(&glue, &wasm, &registry);
 
     let dist = root.join("dist");
     // The two tracked generated files. live mode embeds the bundle
     // (include_str! in crates/live/src/browser_assets.rs) and serves it as
     // /detect.js, so the binary has to carry it; antipatterns.json is the
     // registry slice downstream consumers read out of a source checkout
-    // (anti-design.example counts and renders the rules from it).
+    // (github.com/Choxie77/anti-ai-design counts and renders the rules from it).
     let assets = root.join("crates/live/assets");
     let tracked: [(PathBuf, &[u8]); 2] = [
         (assets.join("detect-antipatterns-browser.js"), out.as_bytes()),

@@ -2,15 +2,15 @@
 // A/B differential of the in-page bundles: inject an older checkout's JS
 // bundle (cli/engine/detect-antipatterns-browser.js, --public) and this repo's WASM
 // bundle (dist/detect-antipatterns-browser.js) into the SAME page in the same
-// Chrome, and diff the raw `antiDesignDetect({ decorate: false, serialize:
-// true })` arrays (plus antiDesignMeasureHiddenText and, with --visual, the
-// antiDesignAnalyzeVisualContrast results). Verification tooling only: it
+// Chrome, and diff the raw `antiAiDesignDetect({ decorate: false, serialize:
+// true })` arrays (plus antiAiDesignMeasureHiddenText and, with --visual, the
+// antiAiDesignAnalyzeVisualContrast results). Verification tooling only: it
 // needs puppeteer and a pre-Rust checkout for the JS side, and is not part
 // of any build.
 //
 //   node crates/wasm/tools/ab-diff.mjs [--public <other checkout>]
 //        [--only fixture.html,...] [--rules side-tab,low-contrast]
-//        [--url https://anti-design.example] [--visual] [--verbose]
+//        [--url https://github.com/Choxie77/anti-ai-design] [--visual] [--verbose]
 //
 // Exit 0 when every page is identical, 1 otherwise. Prints per-page timing.
 import fs from 'node:fs';
@@ -26,7 +26,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const engineRoot = path.resolve(here, '../../..');
 // The fixtures and puppeteer live in this repo; --public points at another
 // checkout (an older one, for A/B against the pre-Rust engine).
-const publicRepo = path.resolve(flag('--public') || process.env.ANTI_DESIGN_PUBLIC_REPO || engineRoot);
+const publicRepo = path.resolve(flag('--public') || process.env.ANTI_AI_DESIGN_PUBLIC_REPO || engineRoot);
 const require = createRequire(path.join(publicRepo, 'package.json'));
 const puppeteer = require('puppeteer');
 
@@ -59,16 +59,16 @@ let failures = 0;
 const timing = [];
 async function runBundle(page, url, code) {
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
-  await page.evaluate(() => { window.__ANTI_DESIGN_CONFIG__ = { autoScan: false }; });
+  await page.evaluate(() => { window.__ANTI_AI_DESIGN_CONFIG__ = { autoScan: false }; });
   const t0 = performance.now();
   await page.evaluate(code);
   const tLoad = performance.now() - t0;
   const t1 = performance.now();
-  const results = await page.evaluate(() => window.antiDesignDetect({ decorate: false, serialize: true }));
+  const results = await page.evaluate(() => window.antiAiDesignDetect({ decorate: false, serialize: true }));
   const tScan = performance.now() - t1;
-  const hidden = await page.evaluate(() => window.antiDesignMeasureHiddenText());
+  const hidden = await page.evaluate(() => window.antiAiDesignMeasureHiddenText());
   let vis = null;
-  if (visual) vis = await page.evaluate(() => window.antiDesignAnalyzeVisualContrast({ maxCandidates: 12, scrollOffscreen: true }));
+  if (visual) vis = await page.evaluate(() => window.antiAiDesignAnalyzeVisualContrast({ maxCandidates: 12, scrollOffscreen: true }));
   return { results, hidden, vis, tLoad, tScan };
 }
 function project(results) {

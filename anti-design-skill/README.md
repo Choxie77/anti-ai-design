@@ -2,8 +2,6 @@
 
 A design skill for AI coding agents, plus a detector that catches the habits that make generated interfaces look alike.
 
-<!-- RENAME-PASS: commands in this file use the final name `anti-ai-design`. The code in this checkout still builds a binary called `anti-design`, and still uses the `anti-design` names for the skill folder, `.anti-design/` project folder, env vars and inline-ignore comments. Replace these once the rename lands, then delete this comment and the "Names" note below. -->
-
 ![Three steps: the agent edits a UI file, the detector scans it with fixed rules, the findings go back to the agent before it says it is done.](docs/images/overview.svg)
 
 Ask a model for a landing page and you tend to get the same one: Inter everywhere, a purple-to-blue gradient, cards inside cards, a colored stripe down the side of each card, gray text on a tinted panel. Anti-AI Design gives your agent two things to work against that:
@@ -16,8 +14,6 @@ Ask a model for a landing page and you tend to get the same one: Inter everywher
 Pre-release. Nothing is published yet: the npm package, the engine release downloads and the plugin listings do not exist, so `npx anti-ai-design` will not resolve until the first release. Until then, build the engine from source (see [Install](#install)).
 
 Some features call a hosted service that this fork does not have yet. The `help` subcommand fetches its command list from one, and so does the visual-direction catalog used when a new design starts. Those fail with a network message rather than working offline. The detector, `install`, `update`, `check`, `link` and `ignores` do not need it.
-
-> **Names.** This project is *Anti-AI Design*; the published command will be `anti-ai-design`. A local build is still named `anti-design` while the rename is pending. The subcommands and flags below are the same under either name.
 
 ## Fork notice
 
@@ -63,12 +59,12 @@ You need a Rust toolchain.
 ```bash
 git clone https://github.com/Choxie77/anti-ai-design
 cd anti-ai-design/anti-design-skill
-cargo build --release -p anti-design
-export ANTI_DESIGN_BIN="$PWD/target/release/anti-design"
-target/release/anti-design --version
+cargo build --release -p anti-ai-design
+export ANTI_AI_DESIGN_BIN="$PWD/target/release/anti-ai-design"
+target/release/anti-ai-design --version
 ```
 
-The binary is a single static executable. Setting `ANTI_DESIGN_BIN` tells the npm launcher and the installed skill to use your build instead of downloading one.
+The binary is a single static executable. Setting `ANTI_AI_DESIGN_BIN` tells the npm launcher and the installed skill to use your build instead of downloading one.
 
 ### Supported tools
 
@@ -108,8 +104,8 @@ Type the command name alone to see a context-aware menu. `pin <command>` creates
 
 Live mode is for a local checkout. Do not inject it into a deployed site or loosen a production Content-Security-Policy to make it work. Two behaviors to know before you use it in a repo you do not trust:
 
-- Applying copy edits runs the optional `anti-design:manual-edit-validate` script from your `package.json`, with your permissions.
-- If no chat agent has polled for a minute, Apply starts the `codex` CLI (or `claude` if codex is missing) with approvals and sandboxing turned off and your environment inherited. Set `ANTI_DESIGN_LIVE_COPY_AGENT=chat` to keep Apply in your chat session, or `off` to disable it.
+- Applying copy edits runs the optional `anti-ai-design:manual-edit-validate` script from your `package.json`, with your permissions.
+- If no chat agent has polled for a minute, Apply starts the `codex` CLI (with `--dangerously-bypass-approvals-and-sandbox`), or `claude` if codex is missing (with `--permission-mode bypassPermissions`), so approvals and sandboxing are off, and your environment is inherited. Set `ANTI_AI_DESIGN_LIVE_COPY_AGENT=chat` to keep Apply in your chat session, or `off` to disable it.
 
 ## Run the detector
 
@@ -135,39 +131,39 @@ npx anti-ai-design ignores add-file "src/legacy/**"
 npx anti-ai-design ignores list
 ```
 
-`ignores` also has `add-rule`, `remove-rule`, `remove-file`, `remove-value` and `clear`; `--local` writes to a per-developer file instead of the shared one. To silence one rule in one file, add a comment: `<!-- anti-design-disable overused-font: exported brand doc -->`. (That comment keeps the old name until the rename pass.)
+`ignores` also has `add-rule`, `remove-rule`, `remove-file`, `remove-value` and `clear`; `--local` writes to a per-developer file instead of the shared one. To silence one rule in one file, add a comment: `<!-- anti-ai-design-disable overused-font: exported brand doc -->`. (That comment keeps the old name until the rename pass.)
 
 ## Project files and git
 
-Working files live in `.anti-design/` (renamed with the rest). Keep `PRODUCT.md`, `DESIGN.md` and the shared `config.json`, `live/config.json`, `design.json`, `surfaces/*.md` and `critique/*.md` files in version control. Everything else there is per-developer or runtime state and belongs in `.gitignore`: `config.local.json`, `hook.cache.json`, `hook.pending.json`, screenshots, `review/`, `questions/`, and the rest of `live/` (sessions, previews, annotations, caches).
+Working files live in `.anti-ai-design/`. Keep `PRODUCT.md`, `DESIGN.md` and the shared `config.json`, `live/config.json`, `design.json`, `surfaces/*.md` and `critique/*.md` files in version control. Everything else there is per-developer or runtime state and belongs in `.gitignore`: `config.local.json`, `hook.cache.json`, `hook.pending.json`, screenshots, `review/`, `questions/`, and the rest of `live/` (sessions, previews, annotations, caches).
 
 Copy this block into your `.gitignore` (the `**/` prefix also covers nested workspaces):
 
 ```gitignore
-# anti-design-ignore-start
+# anti-ai-design-ignore-start
 # Per-developer and runtime files. Shared files (config.json, live/config.json,
 # design.json, surfaces/*.md, critique/*.md) stay tracked.
-**/.anti-design/config.local.json
-**/.anti-design/hook.cache.json
-**/.anti-design/hook.pending.json
-**/.anti-design/*.png
-**/.anti-design/review/
-**/.anti-design/questions/
-**/.anti-design/live/server.json
-**/.anti-design/live/sessions/
-**/.anti-design/live/previews/
-**/.anti-design/live/annotations/
-**/.anti-design/live/cache/
-**/.anti-design/live/manual-edit-apply-transaction.json
-**/.anti-design/live/manual-edit-events.jsonl
-**/.anti-design/live/manual-edit-evidence/
-**/.anti-design/live/pending-manual-edits.json
-**/.anti-design/live/deferred-svelte-component-accepts.json
-**/.anti-design/live/*.png
-# anti-design-ignore-end
+**/.anti-ai-design/config.local.json
+**/.anti-ai-design/hook.cache.json
+**/.anti-ai-design/hook.pending.json
+**/.anti-ai-design/*.png
+**/.anti-ai-design/review/
+**/.anti-ai-design/questions/
+**/.anti-ai-design/live/server.json
+**/.anti-ai-design/live/sessions/
+**/.anti-ai-design/live/previews/
+**/.anti-ai-design/live/annotations/
+**/.anti-ai-design/live/cache/
+**/.anti-ai-design/live/manual-edit-apply-transaction.json
+**/.anti-ai-design/live/manual-edit-events.jsonl
+**/.anti-ai-design/live/manual-edit-evidence/
+**/.anti-ai-design/live/pending-manual-edits.json
+**/.anti-ai-design/live/deferred-svelte-component-accepts.json
+**/.anti-ai-design/live/*.png
+# anti-ai-design-ignore-end
 ```
 
-A `.gitignore` cannot untrack files git already tracks; use `git rm --cached <path>` for those. (The folder name changes to `.anti-ai-design/` in the rename pass; this block and its test change with it.)
+A `.gitignore` cannot untrack files git already tracks; use `git rm --cached <path>` for those.
 
 ## Good to know
 
@@ -175,7 +171,7 @@ A `.gitignore` cannot untrack files git already tracks; use `git rm --cached <pa
 
 **Something broken?** Run `/anti-ai-design doctor`. It looks for stale context files, unused settings and broken hooks.
 
-**Telemetry is on by default.** When a design starts, the skill sends an anonymous record of which visual directions were shown and which one was chosen, together with the client version. It does not send your project name, files, code or `PRODUCT.md`. Turn it off with `npx anti-ai-design telemetry off`, with `DO_NOT_TRACK=1` or `ANTI_DESIGN_NO_TELEMETRY=1` in the environment, or with `"telemetry": false` in `.anti-design/config.json`. `telemetry status` shows the current state. The service it reports to does not exist in this fork yet, so today these requests have no receiver.
+**Telemetry is on by default.** When a design starts, the skill sends an anonymous record of which visual directions were shown and which one was chosen, together with the client version. It does not send your project name, files, code or `PRODUCT.md`. Turn it off with `npx anti-ai-design telemetry off`, with `DO_NOT_TRACK=1` or `ANTI_AI_DESIGN_NO_TELEMETRY=1` in the environment, or with `"telemetry": false` in `.anti-ai-design/config.json`. `telemetry status` shows the current state. The service it reports to does not exist in this fork yet, so today these requests have no receiver.
 
 ## Contributing
 

@@ -1,11 +1,11 @@
-//! JS: surface-brief.mjs -> `anti-design surface-brief`
+//! JS: surface-brief.mjs -> `anti-ai-design surface-brief`
 
 use crate::context::resolve_project_root;
 use crate::jsp;
 use crate::surface_briefs::*;
 use crate::target_args::TargetOptions;
 use crate::util::{json_pretty, node_read_error};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{Map, Value};
 
 fn summary(brief: &SurfaceBrief, project_root: &str) -> Value {
@@ -62,7 +62,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
         }
         Some("write") => {
             let (Some(t), Some(bf)) = (target, body_file) else {
-                io.err("usage: anti-design surface-brief write <primary-target> <body-file>\n");
+                io.err("usage: anti-ai-design surface-brief write <primary-target> <body-file>\n");
                 return 1;
             };
             let body = match std::fs::read(bf) {
@@ -75,7 +75,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             match write_surface_brief(&project_root, &cwd, t, &related, &body) {
                 Ok(fp) => {
                     // Every new surface records its brief before code, so its captures start ignored.
-                    anti_design_common::git::ignore_runtime_output(&cwd);
+                    anti_ai_design_common::git::ignore_runtime_output(&cwd);
                     io.out(&format!("{}\n", rel_out(&fp)));
                     0
                 }
@@ -86,7 +86,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             }
         }
         _ => {
-            io.err("usage: anti-design surface-brief <path|list|read|write> [target] [body-file] [related-target ...]\n");
+            io.err("usage: anti-ai-design surface-brief <path|list|read|write> [target] [body-file] [related-target ...]\n");
             1
         }
     }
@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn write_keeps_the_surface_captures_out_of_git() {
-        let dir = std::env::temp_dir().join(format!("anti-design-brief-ignore-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-brief-ignore-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("body.md"), "# Pricing\n").unwrap();
@@ -106,7 +106,7 @@ mod tests {
         let body = dir.join("body.md").to_string_lossy().into_owned();
         let args: Vec<String> = ["write", "src/pricing.html", &body].iter().map(|s| s.to_string()).collect();
         assert_eq!(run(&args, &mut io), 0);
-        assert!(dir.join(".anti-design/mocks/.gitignore").is_file() && dir.join(".anti-design/review/.gitignore").is_file());
+        assert!(dir.join(".anti-ai-design/mocks/.gitignore").is_file() && dir.join(".anti-ai-design/review/.gitignore").is_file());
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

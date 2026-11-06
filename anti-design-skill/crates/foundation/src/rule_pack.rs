@@ -17,7 +17,7 @@
 //!    category, and severity) resolve the pack's ids.
 //! 3. Pass the pack into the engine being run: `TextOptions.rule_pack` /
 //!    `ScanOptions.rule_pack` (text engine), `DetectHtmlOptions`
-//!    (`rule_pack` plus `anti_design_html::StaticRulePack`), or
+//!    (`rule_pack` plus `anti_ai_design_html::StaticRulePack`), or
 //!    `BrowserConfig.rule_pack` (the in-page / snapshot driver).
 //!
 //! The trait is object-safe and every hook has a default that answers empty,
@@ -74,14 +74,14 @@ pub fn install(pack: &'static dyn RulePack) {
     crate::registry::extend(pack.registry());
 }
 
-// Modified by Anti-Design contributors, 2026-11-05: the `anti-design` binary ships
+// Modified by Anti-AI Design contributors, 2026-11-05: the `anti-ai-design` binary ships
 // one first-party pack (crates/aad-rules). `install_default` registers its rows like
 // `install` and remembers the pack so the CLI can hand it to the text and static
 // engines; `default_pack` is what the CLI reads. A library caller that never calls
 // `install_default` sees `None`, so built-in output is unchanged for them.
 static DEFAULT_PACK: std::sync::OnceLock<&'static dyn RulePack> = std::sync::OnceLock::new();
 
-/// Register `pack` and make it the pack the `anti-design` CLI runs on every scan.
+/// Register `pack` and make it the pack the `anti-ai-design` CLI runs on every scan.
 /// Only the first call stores the pack; later calls only (idempotently) register rows.
 pub fn install_default(pack: &'static dyn RulePack) {
     install(pack);

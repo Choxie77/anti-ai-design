@@ -40,38 +40,38 @@ const selectedProviders = (legacySmokeArg(args.providers) || defaultProviders.jo
   .split(',')
   .map((provider) => provider.trim().toLowerCase())
   .filter(Boolean);
-const smokeDir = join(targetRepo, '.anti-design', 'provider-smoke');
+const smokeDir = join(targetRepo, '.anti-ai-design', 'provider-smoke');
 const summaryPath = join(smokeDir, 'summary.json');
-const directSmokeFile = 'src/__anti_design_provider_smoke_direct.html';
+const directSmokeFile = 'src/__anti_ai_design_provider_smoke_direct.html';
 const providerSmoke = {
   claude: {
-    fixture: 'src/__anti_design_provider_smoke_claude.html',
-    confirmedFixture: 'src/__anti_design_provider_smoke_confirmed_claude.html',
-    agentChoiceFixture: 'src/__anti_design_provider_smoke_font_choice_claude.html',
-    launcher: '.claude/skills/anti-design/scripts/anti-design',
+    fixture: 'src/__anti_ai_design_provider_smoke_claude.html',
+    confirmedFixture: 'src/__anti_ai_design_provider_smoke_confirmed_claude.html',
+    agentChoiceFixture: 'src/__anti_ai_design_provider_smoke_font_choice_claude.html',
+    launcher: '.claude/skills/anti-ai-design/scripts/anti-ai-design',
     hookVerb: 'hook',
     event: (file) => postToolUseEvent('confirmed-claude', file, 'Edit'),
   },
   codex: {
-    fixture: 'src/__anti_design_provider_smoke_codex.html',
-    confirmedFixture: 'src/__anti_design_provider_smoke_confirmed_codex.html',
-    agentChoiceFixture: 'src/__anti_design_provider_smoke_font_choice_codex.html',
-    launcher: '.agents/skills/anti-design/scripts/anti-design',
+    fixture: 'src/__anti_ai_design_provider_smoke_codex.html',
+    confirmedFixture: 'src/__anti_ai_design_provider_smoke_confirmed_codex.html',
+    agentChoiceFixture: 'src/__anti_ai_design_provider_smoke_font_choice_codex.html',
+    launcher: '.agents/skills/anti-ai-design/scripts/anti-ai-design',
     hookVerb: 'hook',
     event: (file) => postToolUseEvent('confirmed-codex', file, 'apply_patch'),
   },
   cursor: {
-    fixture: 'src/__anti_design_provider_smoke_cursor.html',
-    confirmedFixture: 'src/__anti_design_provider_smoke_confirmed_cursor.html',
-    agentChoiceFixture: 'src/__anti_design_provider_smoke_font_choice_cursor.html',
-    launcher: '.cursor/skills/anti-design/scripts/anti-design',
+    fixture: 'src/__anti_ai_design_provider_smoke_cursor.html',
+    confirmedFixture: 'src/__anti_ai_design_provider_smoke_confirmed_cursor.html',
+    agentChoiceFixture: 'src/__anti_ai_design_provider_smoke_font_choice_cursor.html',
+    launcher: '.cursor/skills/anti-ai-design/scripts/anti-ai-design',
     hookVerb: 'hook',
     event: (file) => cursorPostToolUseEvent('confirmed-cursor', file),
   },
 };
 
 const results = [];
-const hookConfigFiles = ['.anti-design/config.json', '.anti-design/config.local.json'];
+const hookConfigFiles = ['.anti-ai-design/config.json', '.anti-ai-design/config.local.json'];
 const originalHookConfigFiles = new Map();
 
 function legacySmokeArg(value) {
@@ -200,8 +200,8 @@ function shellQuote(value) {
 }
 
 async function reinstallFresh() {
-  cleanInstalledAntiDesign();
-  const packDir = makeTempDir('anti-design-provider-smoke-pack-');
+  cleanInstalledAntiAiDesign();
+  const packDir = makeTempDir('anti-ai-design-provider-smoke-pack-');
   const pack = run('npm', ['pack', '--pack-destination', packDir], {
     cwd: prRoot,
     logName: 'npm-pack.log',
@@ -211,20 +211,20 @@ async function reinstallFresh() {
   const tarball = join(packDir, packName);
   assertPath(tarball, 'local npm tarball');
 
-  const env = { ANTI_DESIGN_BUNDLE_PATH: bundlePath };
-  run('npx', ['--yes', '--package', tarball, 'anti-design', 'skills', 'install', '-y', '--force', '--providers=claude,cursor,codex'], {
+  const env = { ANTI_AI_DESIGN_BUNDLE_PATH: bundlePath };
+  run('npx', ['--yes', '--package', tarball, 'anti-ai-design', 'skills', 'install', '-y', '--force', '--providers=claude,cursor,codex'], {
     cwd: targetRepo,
     env,
     logName: 'skills-install.log',
     timeoutMs: 5 * 60 * 1000,
   });
-  run('npx', ['--yes', '--package', tarball, 'anti-design', 'skills', 'update', '-y'], {
+  run('npx', ['--yes', '--package', tarball, 'anti-ai-design', 'skills', 'update', '-y'], {
     cwd: targetRepo,
     env,
     logName: 'skills-update.log',
     timeoutMs: 5 * 60 * 1000,
   });
-  record('fresh install/update', true, 'installed through local npx + ANTI_DESIGN_BUNDLE_PATH');
+  record('fresh install/update', true, 'installed through local npx + ANTI_AI_DESIGN_BUNDLE_PATH');
 }
 
 function makeTempDir(prefix) {
@@ -233,19 +233,19 @@ function makeTempDir(prefix) {
   return dir;
 }
 
-function cleanInstalledAntiDesign() {
+function cleanInstalledAntiAiDesign() {
   clearRuntimeState();
   cleanSmokeFiles();
 
   for (const rel of [
-    '.claude/skills/anti-design',
-    '.cursor/skills/anti-design',
-    '.agents/skills/anti-design',
+    '.claude/skills/anti-ai-design',
+    '.cursor/skills/anti-ai-design',
+    '.agents/skills/anti-ai-design',
     '.claude/hooks/hooks.json',
     '.agents/hooks',
     '.agents/plugins/marketplace.json',
     '.cursor/pre-log.mjs',
-    '.cursor/rules/anti-design-design-hook.mdc',
+    '.cursor/rules/anti-ai-design-design-hook.mdc',
     'plugin-codex',
   ]) {
     rmSync(join(targetRepo, rel), { recursive: true, force: true });
@@ -255,25 +255,25 @@ function cleanInstalledAntiDesign() {
     stripManifest(rel);
   }
 
-  run('claude', ['plugin', 'uninstall', 'anti-design@anti-design', '--scope', 'user'], {
+  run('claude', ['plugin', 'uninstall', 'anti-ai-design@anti-ai-design', '--scope', 'user'], {
     cwd: targetRepo,
     logName: 'claude-plugin-uninstall.log',
     allowFailure: true,
     timeoutMs: 60 * 1000,
   });
-  run('claude', ['plugin', 'marketplace', 'remove', 'anti-design', '--scope', 'user'], {
+  run('claude', ['plugin', 'marketplace', 'remove', 'anti-ai-design', '--scope', 'user'], {
     cwd: targetRepo,
     logName: 'claude-marketplace-remove.log',
     allowFailure: true,
     timeoutMs: 60 * 1000,
   });
-  run('codex', ['plugin', 'remove', 'anti-design@anti-design'], {
+  run('codex', ['plugin', 'remove', 'anti-ai-design@anti-ai-design'], {
     cwd: targetRepo,
     logName: 'codex-plugin-remove.log',
     allowFailure: true,
     timeoutMs: 60 * 1000,
   });
-  run('codex', ['plugin', 'marketplace', 'remove', 'anti-design'], {
+  run('codex', ['plugin', 'marketplace', 'remove', 'anti-ai-design'], {
     cwd: targetRepo,
     logName: 'codex-marketplace-remove.log',
     allowFailure: true,
@@ -281,10 +281,10 @@ function cleanInstalledAntiDesign() {
   });
 
   for (const abs of [
-    join(homedir(), '.claude/plugins/cache/anti-design'),
-    join(homedir(), '.claude/plugins/data/anti-design-anti-design'),
-    join(homedir(), '.codex/plugins/cache/anti-design'),
-    join(homedir(), '.codex/plugins/data/anti-design-anti-design'),
+    join(homedir(), '.claude/plugins/cache/anti-ai-design'),
+    join(homedir(), '.claude/plugins/data/anti-ai-design-anti-ai-design'),
+    join(homedir(), '.codex/plugins/cache/anti-ai-design'),
+    join(homedir(), '.codex/plugins/data/anti-ai-design-anti-ai-design'),
   ]) {
     rmSync(abs, { recursive: true, force: true });
   }
@@ -294,14 +294,14 @@ function ensureTargetGitExclude() {
   const excludePath = join(targetRepo, '.git', 'info', 'exclude');
   if (!existsSync(dirname(excludePath))) return;
   const block = [
-    '# anti-design-provider-smoke-start',
-    '.anti-design/provider-smoke/',
-    'src/__anti_design_provider_smoke_*.html',
-    '# anti-design-provider-smoke-end',
+    '# anti-ai-design-provider-smoke-start',
+    '.anti-ai-design/provider-smoke/',
+    'src/__anti_ai_design_provider_smoke_*.html',
+    '# anti-ai-design-provider-smoke-end',
   ].join('\n');
   const current = readMaybe(excludePath);
-  const next = current.includes('# anti-design-provider-smoke-start')
-    ? current.replace(/# anti-design-provider-smoke-start[\s\S]*?# anti-design-provider-smoke-end/g, block)
+  const next = current.includes('# anti-ai-design-provider-smoke-start')
+    ? current.replace(/# anti-ai-design-provider-smoke-start[\s\S]*?# anti-ai-design-provider-smoke-end/g, block)
     : `${current.replace(/\s*$/, '')}\n${block}\n`;
   if (next !== current) writeFileSync(excludePath, next);
 }
@@ -320,7 +320,7 @@ function stripManifest(rel) {
   const nextHooks = {};
   for (const [event, entries] of Object.entries(hooks)) {
     const preserved = Array.isArray(entries)
-      ? entries.map(stripAntiDesignHookEntry).filter(Boolean)
+      ? entries.map(stripAntiAiDesignHookEntry).filter(Boolean)
       : entries;
     if (Array.isArray(preserved) ? preserved.length > 0 : Boolean(preserved)) nextHooks[event] = preserved;
   }
@@ -373,21 +373,21 @@ function resetHookConfigForSmoke() {
   }
 }
 
-function stripAntiDesignHookEntry(entry) {
+function stripAntiAiDesignHookEntry(entry) {
   if (!entry || typeof entry !== 'object') return entry;
-  if (containsAntiDesignHook(entry)) return null;
+  if (containsAntiAiDesignHook(entry)) return null;
   if (Array.isArray(entry.hooks)) {
-    const hooks = entry.hooks.map(stripAntiDesignHookEntry).filter(Boolean);
-    if (hooks.length === 0 && entry.hooks.some(containsAntiDesignHook)) return null;
+    const hooks = entry.hooks.map(stripAntiAiDesignHookEntry).filter(Boolean);
+    if (hooks.length === 0 && entry.hooks.some(containsAntiAiDesignHook)) return null;
     return { ...entry, hooks };
   }
   return entry;
 }
 
-function containsAntiDesignHook(value) {
-  if (typeof value === 'string') return value.includes('skills/anti-design/scripts/anti-design') || value.includes('.cursor/pre-log.mjs');
-  if (Array.isArray(value)) return value.some(containsAntiDesignHook);
-  if (value && typeof value === 'object') return Object.values(value).some(containsAntiDesignHook);
+function containsAntiAiDesignHook(value) {
+  if (typeof value === 'string') return value.includes('skills/anti-ai-design/scripts/anti-ai-design') || value.includes('.cursor/pre-log.mjs');
+  if (Array.isArray(value)) return value.some(containsAntiAiDesignHook);
+  if (value && typeof value === 'object') return Object.values(value).some(containsAntiAiDesignHook);
   return false;
 }
 
@@ -395,9 +395,9 @@ function verifyInstallShape() {
   const claude = readText('.claude/settings.local.json');
   const codex = readText('.codex/hooks.json');
   const cursor = readText('.cursor/hooks.json');
-  assertCount(claude, '.claude/skills/anti-design/scripts/anti-design" hook', 1, 'Claude hook');
-  assertCount(codex, '.agents/skills/anti-design/scripts/anti-design" hook', 1, 'Codex hook');
-  assertCount(cursor, '.cursor/skills/anti-design/scripts/anti-design" hook', 1, 'Cursor postToolUse');
+  assertCount(claude, '.claude/skills/anti-ai-design/scripts/anti-ai-design" hook', 1, 'Claude hook');
+  assertCount(codex, '.agents/skills/anti-ai-design/scripts/anti-ai-design" hook', 1, 'Codex hook');
+  assertCount(cursor, '.cursor/skills/anti-ai-design/scripts/anti-ai-design" hook', 1, 'Cursor postToolUse');
   if (cursor.includes('hook-before-edit') || cursor.includes('"preToolUse"')) {
     throw new Error('Cursor manifest still runs the retired preToolUse gate');
   }
@@ -405,18 +405,18 @@ function verifyInstallShape() {
     if (text.includes('.mjs')) throw new Error('a Node hook script still appears in hook manifests');
   }
   for (const rel of [
-    '.claude/skills/anti-design/scripts/anti-design',
-    '.claude/skills/anti-design/scripts/VERSION',
-    '.agents/skills/anti-design/scripts/anti-design',
-    '.agents/skills/anti-design/scripts/VERSION',
-    '.cursor/skills/anti-design/scripts/anti-design',
-    '.cursor/skills/anti-design/scripts/VERSION',
+    '.claude/skills/anti-ai-design/scripts/anti-ai-design',
+    '.claude/skills/anti-ai-design/scripts/VERSION',
+    '.agents/skills/anti-ai-design/scripts/anti-ai-design',
+    '.agents/skills/anti-ai-design/scripts/VERSION',
+    '.cursor/skills/anti-ai-design/scripts/anti-ai-design',
+    '.cursor/skills/anti-ai-design/scripts/VERSION',
   ]) {
     assertPath(join(targetRepo, rel), rel);
   }
   for (const rel of [
-    '.cursor/skills/anti-design/scripts/hook-after-edit.mjs',
-    '.cursor/skills/anti-design/scripts/hook-stop.mjs',
+    '.cursor/skills/anti-ai-design/scripts/hook-after-edit.mjs',
+    '.cursor/skills/anti-ai-design/scripts/hook-stop.mjs',
   ]) {
     if (existsSync(join(targetRepo, rel))) throw new Error(`${rel} should not exist in Cursor payload`);
   }
@@ -464,8 +464,8 @@ function assertNoPluginInstall() {
     ['Codex plugin list', `${codex.stdout}\n${codex.stderr}`],
     ['Codex marketplace list', `${codexMarket.stdout}\n${codexMarket.stderr}`],
   ]) {
-    if (/anti-design@anti-design|Marketplace `anti-design`|anti-design-design-hook-impl/.test(text)) {
-      throw new Error(`${name} still contains Anti-Design plugin install`);
+    if (/anti-ai-design@anti-ai-design|Marketplace `anti-ai-design`|anti-ai-design-design-hook-impl/.test(text)) {
+      throw new Error(`${name} still contains Anti-AI Design plugin install`);
     }
   }
 }
@@ -473,8 +473,8 @@ function assertNoPluginInstall() {
 function runDirectContractChecks() {
   clearRuntimeState();
   const file = writeBadFixture(directSmokeFile);
-  const env = { ANTI_DESIGN_HOOK_LOG: join(smokeDir, 'direct.ndjson') };
-  const claude = run('.claude/skills/anti-design/scripts/anti-design', ['hook'], {
+  const env = { ANTI_AI_DESIGN_HOOK_LOG: join(smokeDir, 'direct.ndjson') };
+  const claude = run('.claude/skills/anti-ai-design/scripts/anti-ai-design', ['hook'], {
     cwd: targetRepo,
     env,
     logName: 'direct-claude.log',
@@ -483,7 +483,7 @@ function runDirectContractChecks() {
   requireFinding('direct Claude hook', `${claude.stdout}\n${readMaybe(join(smokeDir, 'direct.ndjson'))}`);
 
   clearRuntimeState();
-  const codex = run('.agents/skills/anti-design/scripts/anti-design', ['hook'], {
+  const codex = run('.agents/skills/anti-ai-design/scripts/anti-ai-design', ['hook'], {
     cwd: targetRepo,
     env,
     logName: 'direct-codex.log',
@@ -492,7 +492,7 @@ function runDirectContractChecks() {
   requireFinding('direct Codex hook', `${codex.stdout}\n${readMaybe(join(smokeDir, 'direct.ndjson'))}`);
 
   clearRuntimeState();
-  const cursor = run('.cursor/skills/anti-design/scripts/anti-design', ['hook'], {
+  const cursor = run('.cursor/skills/anti-ai-design/scripts/anti-ai-design', ['hook'], {
     cwd: targetRepo,
     env,
     logName: 'direct-cursor.log',
@@ -694,7 +694,7 @@ function assertSpecificFontIgnoreConfig(provider, config) {
 }
 
 function assertNoSpecificFontIgnoreConfig(provider) {
-  const file = join(targetRepo, '.anti-design', 'config.json');
+  const file = join(targetRepo, '.anti-ai-design', 'config.json');
   if (!existsSync(file)) return;
   const raw = readJson(file);
   const config = raw && typeof raw === 'object' && !Array.isArray(raw) && raw.hook && typeof raw.hook === 'object'
@@ -710,16 +710,16 @@ function assertNoSpecificFontIgnoreConfig(provider) {
 }
 
 function readSharedHookConfig() {
-  const raw = readJson(join(targetRepo, '.anti-design', 'config.json'));
+  const raw = readJson(join(targetRepo, '.anti-ai-design', 'config.json'));
   if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !raw.hook || typeof raw.hook !== 'object') {
-    throw new Error('Missing .anti-design/config.json hook config');
+    throw new Error('Missing .anti-ai-design/config.json hook config');
   }
   return raw.hook;
 }
 
 function runInstalledProviderHook(provider, file, logName) {
   const smoke = providerSmoke[provider];
-  const env = { ANTI_DESIGN_HOOK_LOG: join(smokeDir, logName) };
+  const env = { ANTI_AI_DESIGN_HOOK_LOG: join(smokeDir, logName) };
   return run(smoke.launcher, [smoke.hookVerb], {
     cwd: targetRepo,
     env,
@@ -730,7 +730,7 @@ function runInstalledProviderHook(provider, file, logName) {
 
 function runClaudeProviderSmoke() {
   clearRuntimeState();
-  const env = { ANTI_DESIGN_HOOK_LOG: join(smokeDir, 'claude.ndjson') };
+  const env = { ANTI_AI_DESIGN_HOOK_LOG: join(smokeDir, 'claude.ndjson') };
   const prompt = providerPrompt(providerSmoke.claude.fixture);
   const res = runProviderAgent('claude', prompt, {
     env,
@@ -748,14 +748,14 @@ function runClaudeProviderSmoke() {
 
 function runCodexProviderSmoke() {
   clearRuntimeState();
-  const env = { ANTI_DESIGN_HOOK_LOG: join(smokeDir, 'codex.ndjson') };
+  const env = { ANTI_AI_DESIGN_HOOK_LOG: join(smokeDir, 'codex.ndjson') };
   const prompt = `Use apply_patch to ${providerPrompt(providerSmoke.codex.fixture)}`;
   const res = runProviderAgent('codex', prompt, {
     env,
     logName: 'codex-provider.log',
   });
   const evidence = `${res.stdout}\n${res.stderr}\n${readMaybe(join(smokeDir, 'codex.ndjson'))}`;
-  const cacheEvidence = `${readMaybe(join(targetRepo, '.anti-design', 'hook.cache.json'))}\n${readMaybe(join(targetRepo, '.anti-design', 'hook.pending.json'))}`;
+  const cacheEvidence = `${readMaybe(join(targetRepo, '.anti-ai-design', 'hook.cache.json'))}\n${readMaybe(join(targetRepo, '.anti-ai-design', 'hook.pending.json'))}`;
   requireFile(providerSmoke.codex.fixture, 'Codex provider fixture');
   requireFinding('Codex provider hook', `${evidence}\n${cacheEvidence}`);
   record('codex provider', true, 'Codex apply_patch triggered project hook and side-tab detection');
@@ -764,14 +764,14 @@ function runCodexProviderSmoke() {
 function runCursorProviderSmoke() {
   ensureCursorAgent();
   clearRuntimeState();
-  const env = { ANTI_DESIGN_HOOK_LOG: join(smokeDir, 'cursor.ndjson') };
+  const env = { ANTI_AI_DESIGN_HOOK_LOG: join(smokeDir, 'cursor.ndjson') };
   const prompt = providerPrompt(providerSmoke.cursor.fixture);
   const res = runProviderAgent('cursor', prompt, {
     env,
     logName: 'cursor-provider.log',
     cursorReady: true,
   });
-  const evidence = `${res.stdout}\n${res.stderr}\n${readMaybe(join(smokeDir, 'cursor.ndjson'))}\n${readMaybe(join(targetRepo, '.anti-design', 'hook.cache.json'))}`;
+  const evidence = `${res.stdout}\n${res.stderr}\n${readMaybe(join(smokeDir, 'cursor.ndjson'))}\n${readMaybe(join(targetRepo, '.anti-ai-design', 'hook.cache.json'))}`;
   requireFile(providerSmoke.cursor.fixture, 'Cursor provider fixture');
   requireFinding('Cursor provider hook', evidence);
   const auditEvents = readAuditEvents(join(smokeDir, 'cursor.ndjson'));
@@ -828,7 +828,7 @@ function badFixtureContent() {
     '        padding: 16px;',
     '      }',
     '    </style>',
-    '    <div class="card">Temporary Anti-Design provider smoke fixture</div>',
+    '    <div class="card">Temporary Anti-AI Design provider smoke fixture</div>',
     '  </body>',
     '</html>',
     '',
@@ -841,11 +841,11 @@ function confirmedFixtureContent() {
     '<html>',
     '  <body>',
     '    <style>',
-    '      /* anti-design: ignore overused-font */',
+    '      /* anti-ai-design: ignore overused-font */',
     '      body { font-family: "Roboto", ui-sans-serif, system-ui, sans-serif; }',
     '      .card { border-radius: 16px; padding: 16px; }',
     '    </style>',
-    '    <div class="card">Temporary Anti-Design confirmed exception fixture using Roboto.</div>',
+    '    <div class="card">Temporary Anti-AI Design confirmed exception fixture using Roboto.</div>',
     '  </body>',
     '</html>',
     '',
@@ -854,7 +854,7 @@ function confirmedFixtureContent() {
 
 function providerPrompt(rel) {
   return [
-    `Create ${rel} as an intentionally bad Anti-Design hook test fixture.`,
+    `Create ${rel} as an intentionally bad Anti-AI Design hook test fixture.`,
     'The file must be HTML and include a rounded card with exactly this CSS pattern: border-left: 4px solid #7c3aed; border-radius: 16px; padding: 16px.',
     'This is intentionally bad UI for hook verification, so do not fix or remove the side border if a hook warns about it.',
     'After creating the file, stop.',
@@ -863,9 +863,9 @@ function providerPrompt(rel) {
 
 function fontExceptionPrompt(provider, rel) {
   return [
-    `Read the installed Anti-Design hooks reference for ${provider}, then persist a confirmed hook exception for Roboto specifically in ${rel}.`,
+    `Read the installed Anti-AI Design hooks reference for ${provider}, then persist a confirmed hook exception for Roboto specifically in ${rel}.`,
     'The user confirms Roboto is intentional for this fixture, but did not ask to ignore overused fonts generally.',
-    'Use the /anti-design hooks / hook-admin flow; do not edit .anti-design/config.json by hand and do not edit the source fixture.',
+    'Use the /anti-ai-design hooks / hook-admin flow; do not edit .anti-ai-design/config.json by hand and do not edit the source fixture.',
     'The final config must use ignoreValues for overused-font=roboto and must not add overused-font to ignoreRules.',
     'After updating the config, stop.',
   ].join(' ');
@@ -956,10 +956,10 @@ function cleanSmokeFiles() {
 function clearRuntimeState() {
   resetHookConfigForSmoke();
   for (const rel of [
-    '.anti-design/hook.cache.json',
-    '.anti-design/hook.pending.json',
-    '.anti-design/hook.json',
-    '.anti-design/hook.local.json',
+    '.anti-ai-design/hook.cache.json',
+    '.anti-ai-design/hook.pending.json',
+    '.anti-ai-design/hook.json',
+    '.anti-ai-design/hook.local.json',
   ]) {
     rmSync(join(targetRepo, rel), { force: true });
   }
@@ -967,8 +967,8 @@ function clearRuntimeState() {
 
 function clearTransientHookState() {
   for (const rel of [
-    '.anti-design/hook.cache.json',
-    '.anti-design/hook.pending.json',
+    '.anti-ai-design/hook.cache.json',
+    '.anti-ai-design/hook.pending.json',
   ]) {
     rmSync(join(targetRepo, rel), { force: true });
   }

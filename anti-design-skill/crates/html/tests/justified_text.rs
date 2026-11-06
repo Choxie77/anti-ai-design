@@ -2,7 +2,7 @@
 //! column, no automatic hyphenation, and a script that justifies by
 //! stretching word spaces.
 
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::Path;
 
 fn page(style: &str, body: &str) -> String {
@@ -19,7 +19,7 @@ fn justified_hits(html: &str) -> usize {
 }
 
 fn repo_root() -> std::path::PathBuf {
-    std::env::var("ANTI_DESIGN_PUBLIC_REPO")
+    std::env::var("ANTI_AI_DESIGN_PUBLIC_REPO")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."))
 }

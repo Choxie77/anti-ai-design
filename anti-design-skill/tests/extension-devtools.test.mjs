@@ -57,13 +57,13 @@ test('copy-all treats hard shadows as advisories without prescribing a fix', asy
   const report = await panel().formatFindingsForCopy([item([shadow])]);
   assert.match(report, /## Advisories \(1\)/);
   assert.match(report, /Hard offset shadow.*#card.*8px 8px/);
-  assert.doesNotMatch(report, /AI tells|Suggested Anti-Design skills to fix|\/polish/);
+  assert.doesNotMatch(report, /AI tells|Suggested Anti-AI Design skills to fix|\/polish/);
 });
 
 test('single-finding copy retains design guidance without prescribing a fix', async () => {
   const report = await panel().formatSingleFindingForCopy(item([shadow]), shadow);
   assert.match(report, /Check whether this fits the intended design direction/);
-  assert.doesNotMatch(report, /Suggested Anti-Design skill|\/polish/);
+  assert.doesNotMatch(report, /Suggested Anti-AI Design skill|\/polish/);
 });
 
 test('mixed reports preserve existing categories and suggestions for other rules', async () => {
@@ -75,7 +75,7 @@ test('mixed reports preserve existing categories and suggestions for other rules
   assert.match(report, /## AI tells \(1\)/);
   assert.match(report, /## Quality issues \(1\)/);
   assert.match(report, /## Advisories \(1\)/);
-  assert.match(report, /Suggested Anti-Design skills to fix: \/distill, \/polish, \/colorize, \/audit/);
+  assert.match(report, /Suggested Anti-AI Design skills to fix: \/distill, \/polish, \/colorize, \/audit/);
 });
 
 test('empty reports and the existing unknown-rule fallback still work', async () => {
@@ -83,8 +83,8 @@ test('empty reports and the existing unknown-rule fallback still work', async ()
   const report = await context.formatFindingsForCopy([]);
   assert.match(report, /URL: https:\/\/example.test\//);
   assert.match(report, /Total findings: 0/);
-  assert.match(report, /Anti-Design found no anti-patterns on this page\./);
-  assert.equal(context.AntiDesignReport.fixSkillFor({ type: 'unknown-rule' }), '/polish');
+  assert.match(report, /Anti-AI Design found no anti-patterns on this page\./);
+  assert.equal(context.AntiAiDesignReport.fixSkillFor({ type: 'unknown-rule' }), '/polish');
 });
 
 test('advisory presentation follows metadata for any rule and registry row', async () => {
@@ -94,29 +94,29 @@ test('advisory presentation follows metadata for any rule and registry row', asy
     { type: 'future-slop-rule', category: 'slop', advisory: true },
     { id: 'future-settings-rule', category: 'quality', severity: 'advisory' },
   ]) {
-    assert.equal(context.AntiDesignReport.presentationCategory(advisory), 'advisory');
-    assert.equal(context.AntiDesignReport.fixSkillFor(advisory), '');
+    assert.equal(context.AntiAiDesignReport.presentationCategory(advisory), 'advisory');
+    assert.equal(context.AntiAiDesignReport.fixSkillFor(advisory), '');
     const finding = { ...advisory, name: 'Review this choice', detail: 'example' };
     const report = await context.formatFindingsForCopy([item([finding])]);
     assert.match(report, /## Advisories \(1\)/);
-    assert.doesNotMatch(report, /Suggested Anti-Design skills to fix/);
+    assert.doesNotMatch(report, /Suggested Anti-AI Design skills to fix/);
     const single = await context.formatSingleFindingForCopy(item([finding]), finding);
-    assert.doesNotMatch(single, /Suggested Anti-Design skill/);
+    assert.doesNotMatch(single, /Suggested Anti-AI Design skill/);
   }
-  assert.equal(context.AntiDesignReport.presentationCategory({ type: 'hard-offset-shadow', category: 'quality' }), 'quality');
-  assert.equal(context.AntiDesignReport.fixSkillFor({ type: 'side-tab', advisory: false }), '/distill, /polish');
+  assert.equal(context.AntiAiDesignReport.presentationCategory({ type: 'hard-offset-shadow', category: 'quality' }), 'quality');
+  assert.equal(context.AntiAiDesignReport.fixSkillFor({ type: 'side-tab', advisory: false }), '/distill, /polish');
 });
 
 test('advisories keep a mapped fix command and drop only the generic fallback', async () => {
   const context = panel();
-  assert.equal(context.AntiDesignReport.fixSkillFor({ type: 'bounce-easing', category: 'slop', advisory: true }), '/animate');
-  assert.equal(context.AntiDesignReport.fixSkillFor({ type: 'straggler', category: 'quality', severity: 'advisory' }), '/typeset');
-  assert.equal(context.AntiDesignReport.fixSkillFor({ type: 'unbalanced-heading', category: 'quality', severity: 'advisory' }), '/typeset');
-  assert.equal(context.AntiDesignReport.fixSkillFor(shadow), '');
+  assert.equal(context.AntiAiDesignReport.fixSkillFor({ type: 'bounce-easing', category: 'slop', advisory: true }), '/animate');
+  assert.equal(context.AntiAiDesignReport.fixSkillFor({ type: 'straggler', category: 'quality', severity: 'advisory' }), '/typeset');
+  assert.equal(context.AntiAiDesignReport.fixSkillFor({ type: 'unbalanced-heading', category: 'quality', severity: 'advisory' }), '/typeset');
+  assert.equal(context.AntiAiDesignReport.fixSkillFor(shadow), '');
   const finding = { type: 'bounce-easing', category: 'slop', advisory: true, name: 'Bounce easing', detail: 'cubic-bezier' };
   const report = await context.formatFindingsForCopy([item([finding])]);
   assert.match(report, /## Advisories \(1\)/);
-  assert.match(report, /Suggested Anti-Design skills to fix: \/animate/);
+  assert.match(report, /Suggested Anti-AI Design skills to fix: \/animate/);
 });
 
 // Exercise the rendered button, not just the formatter with a complete finding.
@@ -137,8 +137,8 @@ for (const [label, finding, expected] of [
     assert.equal(context.writes.length, 1);
     assert.match(context.writes[0], /Element: `#card`/);
     assert.match(context.writes[0], /Check whether this fits the intended design direction/);
-    if (expected) assert.ok(context.writes[0].includes(`Suggested Anti-Design skill(s) to fix: ${expected}`));
-    else assert.doesNotMatch(context.writes[0], /Suggested Anti-Design skill|\/polish/);
+    if (expected) assert.ok(context.writes[0].includes(`Suggested Anti-AI Design skill(s) to fix: ${expected}`));
+    else assert.doesNotMatch(context.writes[0], /Suggested Anti-AI Design skill|\/polish/);
   });
 }
 

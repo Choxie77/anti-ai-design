@@ -101,7 +101,7 @@ function __directTextRects(el) {
   return __collectTextRects(__el(el), false, []);
 }
 
-const __antiDesignDom = {
+const __antiAiDesignDom = {
   document_element() { return __intern(document.documentElement); },
   body() { return __intern(document.body); },
   query_all(root, selector) {
@@ -204,7 +204,7 @@ const __antiDesignDom = {
   },
   document_html_for_patterns() {
     const docClone = document.documentElement.cloneNode(true);
-    for (const node of docClone.querySelectorAll('[id^="anti-design-live-"]')) node.remove();
+    for (const node of docClone.querySelectorAll('[id^="anti-ai-design-live-"]')) node.remove();
     return docClone.outerHTML;
   },
   tag_name(el) { return __el(el).tagName; },

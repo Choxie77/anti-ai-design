@@ -10,7 +10,7 @@ use serde_json::Value;
 /// JS: HARD_EXCLUDES
 pub const HARD_EXCLUDES: [&str; 2] = ["**/node_modules/**", "**/.git/**"];
 
-/// The parsed `.anti-design/live/config.json` (kept as JSON so `--check` can
+/// The parsed `.anti-ai-design/live/config.json` (kept as JSON so `--check` can
 /// echo it verbatim), with typed accessors for the validated fields.
 #[derive(Debug, Clone)]
 pub struct LiveConfig {

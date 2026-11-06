@@ -1,8 +1,8 @@
 //! The host capture service as NATIVE-CAPTURE.md describes it: the engine
 //! binary's `capture-server <registered-project> <ready-file>`, a host-generated
 //! capability, and a client configured only through the port and capability.
-use anti_design::capture_service::RemoteEntryRenderer;
-use anti_design_comp_verbs::asset_capture::capture_sha256;
+use anti_ai_design::capture_service::RemoteEntryRenderer;
+use anti_ai_design_comp_verbs::asset_capture::capture_sha256;
 use serde_json::Value;
 use std::{
     collections::HashMap,
@@ -31,19 +31,19 @@ impl CaptureService {
         std::fs::create_dir_all(&dir).unwrap();
         let ready = dir.join("ready.json");
         let key = capture_sha256(nonce.as_bytes());
-        let mut command = Command::new(env!("CARGO_BIN_EXE_anti-design"));
+        let mut command = Command::new(env!("CARGO_BIN_EXE_anti-ai-design"));
         command
             .arg("capture-server")
             .arg(project)
             .arg(&ready)
-            .env("ANTI_DESIGN_CAPTURE_CAPABILITY", &key)
-            .env_remove("ANTI_DESIGN_COMPONENT_REVIEW_PENDING")
-            .env_remove("ANTI_DESIGN_CAPTURE_REVIEW_SESSION")
+            .env("ANTI_AI_DESIGN_CAPTURE_CAPABILITY", &key)
+            .env_remove("ANTI_AI_DESIGN_COMPONENT_REVIEW_PENDING")
+            .env_remove("ANTI_AI_DESIGN_CAPTURE_REVIEW_SESSION")
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::inherit());
         if let Some(session) = session {
-            command.env("ANTI_DESIGN_CAPTURE_REVIEW_SESSION", session);
+            command.env("ANTI_AI_DESIGN_CAPTURE_REVIEW_SESSION", session);
         }
         let mut child = command.spawn().expect("start capture-server");
         let started = Instant::now();
@@ -76,8 +76,8 @@ impl CaptureService {
     /// The client exactly as build-phase builds it from the host's environment.
     pub fn renderer(&self) -> RemoteEntryRenderer {
         let env = HashMap::from([
-            ("ANTI_DESIGN_CAPTURE_PORT".to_string(), self.port.to_string()),
-            ("ANTI_DESIGN_CAPTURE_CAPABILITY".to_string(), self.key.clone()),
+            ("ANTI_AI_DESIGN_CAPTURE_PORT".to_string(), self.port.to_string()),
+            ("ANTI_AI_DESIGN_CAPTURE_CAPABILITY".to_string(), self.key.clone()),
         ]);
         RemoteEntryRenderer::from_env(&env).unwrap().expect("service configured")
     }

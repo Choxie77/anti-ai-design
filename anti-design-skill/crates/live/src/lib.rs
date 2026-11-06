@@ -56,7 +56,7 @@ pub mod live_status;
 pub mod live_target;
 pub mod live_wrap;
 
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 
 /// Verb dispatcher for every `live*` verb. Unknown live verbs (parts 2/3
 /// until they land) report `not implemented` with exit 70.
@@ -82,7 +82,7 @@ pub fn run(verb: &str, args: &[String], io: &mut Io) -> i32 {
         }
         other => {
             io.err(&format!(
-                "anti-design: verb '{}' is not implemented yet\n",
+                "anti-ai-design: verb '{}' is not implemented yet\n",
                 other
             ));
             70

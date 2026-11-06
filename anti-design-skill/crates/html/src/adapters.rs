@@ -2,7 +2,7 @@
 //! their DOM helpers (`scopedIgnoreActive`, `isTabContextElement`,
 //! `isStatusContextElement`, `cleanInlineText`, kicker / numbered-label
 //! candidate collection, radial spotlight, clipped overflow). Every pure
-//! check comes from `anti_design_core::checks`; this file only reads the DOM
+//! check comes from `anti_ai_design_core::checks`; this file only reads the DOM
 //! and the computed style and hands plain data over.
 
 use crate::background::{
@@ -16,15 +16,15 @@ use crate::dom::{StaticDocument, StaticElement};
 use crate::quality::{
     collapse_ws, is_in_non_rendered_markup, is_visually_hidden, pf0, resolve_font_size_px,
 };
-use anti_design_core::checks::css_scan::css_length_to_px;
-use anti_design_core::checks::measures::{
+use anti_ai_design_core::checks::css_scan::css_length_to_px;
+use anti_ai_design_core::checks::measures::{
     self, border_colors_from_style, border_widths_from_style, check_oversized_h1,
     data_svg_intrinsic_size, gpt_border_shadow_halo_blur_px, gpt_border_shadow_lengths_close,
     gpt_border_shadow_row_finding, gpt_border_shadow_row_size, gpt_thin_border_wide_shadow_pair,
     positioned_style_implies_escape_axis, resolve_length_px, GptBorderShadowInput,
     GptBorderShadowRowTree, OversizedH1Input, StyleMap, ICON_MAX_PX,
 };
-use anti_design_core::checks::rules::{
+use anti_ai_design_core::checks::rules::{
     check_borders, check_colors_deduped_shaped, check_glow, check_hero_eyebrow, check_hover_contrast,
     check_icon_tile, check_italic_serif, check_kicker_above_heading, check_motion,
     check_placeholder_colors, check_stripe_child, is_close_letter_text, is_emoji_only_text,
@@ -34,19 +34,19 @@ use anti_design_core::checks::rules::{
     HoverContrastOpts, IconTileOpts, ItalicSerifOpts, KickerCandidate, MotionOpts, RuleHit,
     SafeTagTextSeen, Sides,
 };
-use anti_design_core::checks::text_rules::{
+use anti_ai_design_core::checks::text_rules::{
     check_numbered_section_labels, is_kicker_candidate, is_numbered_section_label_candidate,
     parse_numbered_label_text, KickerCandidateInput, NumberedLabelCandidate,
     NumberedLabelCandidateInput, HEADING_TAGS, KICKER_CARD_CONTEXT_SELECTOR, KICKER_SKIP_SELECTOR,
     POPOVER_LAYER_SELECTOR, POSITIONED_CHILD_INTERACTIVE_SELECTOR,
 };
-use anti_design_core::color::{
+use anti_ai_design_core::color::{
     composite_color_over, is_no_paint_color_value, parse_any_color, parse_rgb, Rgba,
 };
-use anti_design_core::constants::SAFE_TAGS;
-use anti_design_core::js::{self, parse_float, parse_int};
-use anti_design_core::js_ext_a::num_truthy;
-use anti_design_core::js_ext_b::slice_utf16_prefix;
+use anti_ai_design_core::constants::SAFE_TAGS;
+use anti_ai_design_core::js::{self, parse_float, parse_int};
+use anti_ai_design_core::js_ext_a::num_truthy;
+use anti_ai_design_core::js_ext_b::slice_utf16_prefix;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::HashSet;
@@ -79,7 +79,7 @@ pub fn scoped_ignore_active(el: &StaticElement<'_>, rule_id: &str) -> bool {
     let rule = js::to_lower_case(rule_id);
     let mut cur = Some(*el);
     while let Some(e) = cur {
-        if let Some(attr) = e.get_attribute("data-anti-design-ignore") {
+        if let Some(attr) = e.get_attribute("data-anti-ai-design-ignore") {
             let lowered = js::to_lower_case(js::trim(attr));
             let rules: Vec<&str> = IGNORE_SPLIT_RE
                 .split(&lowered)
@@ -199,7 +199,7 @@ fn font_size_of(style: &StyleValues) -> f64 {
 
 fn strip_edge_quotes_slice(text: &str, n: usize) -> String {
     slice_utf16_prefix(
-        &anti_design_core::checks::text_rules::strip_edge_quotes(text),
+        &anti_ai_design_core::checks::text_rules::strip_edge_quotes(text),
         n,
     )
 }
@@ -274,10 +274,10 @@ pub fn collect_kicker_candidates(doc: &StaticDocument) -> Vec<KickerCandidate> {
             && heading_font_size >= 48.0
             && (kicker_letter_spacing >= 1.6
                 || (kicker_font_size <= 14.0
-                    && anti_design_core::checks::rules::hero_eyebrow_tracked(
+                    && anti_ai_design_core::checks::rules::hero_eyebrow_tracked(
                         kicker_letter_spacing,
                         kicker_font_size,
-                        Some(anti_design_core::checks::rules::HERO_EYEBROW_TRACKING_EM),
+                        Some(anti_ai_design_core::checks::rules::HERO_EYEBROW_TRACKING_EM),
                     )
                     && !check_element_hero_eyebrow(&heading, heading_style, "h1").is_empty()))
         {
@@ -330,11 +330,11 @@ pub fn collect_numbered_section_label_candidates(
         }
         if is_kicker_card_context(&heading, &label)
             || label
-                .query_selector(anti_design_core::browser::text_collectors::NUMBERED_LABEL_MEDIA_SELECTOR)
+                .query_selector(anti_ai_design_core::browser::text_collectors::NUMBERED_LABEL_MEDIA_SELECTOR)
                 .is_some()
             || label.query_selector_all("svg").iter().any(|svg| {
                 svg.parent_element().is_some_and(|box_| {
-                    anti_design_core::browser::text_collectors::holds_number_text(&box_.direct_text())
+                    anti_ai_design_core::browser::text_collectors::holds_number_text(&box_.direct_text())
                 })
             })
         {
@@ -734,8 +734,8 @@ fn text_clipped_by_an_ancestor(el: &StaticElement<'_>) -> bool {
     for _ in 0..MAX_ANCESTORS {
         let Some(c) = cur else { return false };
         let style = c.style();
-        if anti_design_core::checks::rules::background_clips_to_text(sv(style, "webkitBackgroundClip"))
-            || anti_design_core::checks::rules::background_clips_to_text(sv(style, "backgroundClip"))
+        if anti_ai_design_core::checks::rules::background_clips_to_text(sv(style, "webkitBackgroundClip"))
+            || anti_ai_design_core::checks::rules::background_clips_to_text(sv(style, "backgroundClip"))
         {
             return true;
         }
@@ -794,7 +794,7 @@ fn opacity_of(style: &StyleValues) -> f64 {
 
 /// The ink a reader sees once the opacity of the boxes between the text and
 /// its surface is applied. The browser engine's fold (see
-/// `anti_design_core::browser::element_checks`) over the cascade's declared
+/// `anti_ai_design_core::browser::element_checks`) over the cascade's declared
 /// opacity: only boxes below the surface take part, a faded box with no fill
 /// inside it fades the glyphs alone, and one with a fill fades both.
 fn fold_surface_opacity(
@@ -839,7 +839,7 @@ fn fold_surface_opacity(
         return None;
     }
     let base = surface.base?;
-    let (fg, bg) = anti_design_core::checks::gradient_geometry::fold_opacity(ink, &layers, &base);
+    let (fg, bg) = anti_ai_design_core::checks::gradient_geometry::fold_opacity(ink, &layers, &base);
     *effective_bg = Some(bg);
     Some(fg)
 }
@@ -919,7 +919,7 @@ pub fn check_element_stripe_child(el: &StaticElement<'_>, style: &StyleValues) -
     };
     if host.tag_lower() == "body"
         || host.tag_lower() == "html"
-        || anti_design_core::browser::element_checks::is_stripe_heading_host(&host.tag_lower())
+        || anti_ai_design_core::browser::element_checks::is_stripe_heading_host(&host.tag_lower())
     {
         return Vec::new();
     }
@@ -1161,7 +1161,7 @@ pub fn check_element_colors(
         }
     };
     let font_weight =
-        anti_design_core::checks::rules::contrast_font_weight(font_weight, sv(style, "fontFamily"));
+        anti_ai_design_core::checks::rules::contrast_font_weight(font_weight, sv(style, "fontFamily"));
     let bg_clip = {
         let a = sv(style, "webkitBackgroundClip");
         if !a.is_empty() {
@@ -1211,7 +1211,7 @@ pub fn check_element_colors(
     let mut findings = check_colors_deduped_shaped(
         &color_opts,
         seen,
-        Some(anti_design_core::checks::rules::PairClaim { owner: element_handle(el), on_screen: true }),
+        Some(anti_ai_design_core::checks::rules::PairClaim { owner: element_handle(el), on_screen: true }),
         &is_decorative,
         &mut |h: &RuleHit| !scoped_ignore_active(el, &h.id) && !picture_under_text(el),
     );
@@ -1243,7 +1243,7 @@ pub fn check_element_colors(
                         if hits.iter().any(|h| h.id == "low-contrast")
                             && (is_decorative() || crate::field_label::field_has_visible_label(el))
                         {
-                            anti_design_core::checks::rules::demote_low_contrast(&mut hits);
+                            anti_ai_design_core::checks::rules::demote_low_contrast(&mut hits);
                         }
                         findings.extend(hits);
                     }
@@ -1303,7 +1303,7 @@ pub fn check_element_hover_contrast(
         }
     };
     let font_weight =
-        anti_design_core::checks::rules::contrast_font_weight(font_weight, sv(style, "fontFamily"));
+        anti_ai_design_core::checks::rules::contrast_font_weight(font_weight, sv(style, "fontFamily"));
     let font_size = {
         let n = parse_float(sv(style, "fontSize"));
         if num_truthy(n) {
@@ -1363,10 +1363,10 @@ pub fn check_element_icon_tile(el: &StaticElement<'_>, tag: &str) -> Vec<RuleHit
         // A ring drawn by a zero-blur box-shadow (`ring-1`) is the tile's
         // border as far as a reader can tell.
         sibling_border_width: pf0(sv(sib_style, "borderTopWidth")).max(
-            anti_design_core::checks::measures::parse_shadow_layers(sv(sib_style, "boxShadow"))
+            anti_ai_design_core::checks::measures::parse_shadow_layers(sv(sib_style, "boxShadow"))
                 .iter()
                 .filter(|l| {
-                    l.alpha >= anti_design_core::checks::measures::FAINT_PAINT_ALPHA
+                    l.alpha >= anti_ai_design_core::checks::measures::FAINT_PAINT_ALPHA
                         && l.x == 0.0
                         && l.y == 0.0
                         && l.blur == 0.0
@@ -1468,7 +1468,7 @@ pub fn check_element_hero_eyebrow(
         sibling_font_weight: Some(font_weight_raw.to_string()),
         sibling_color: Some(color_raw.to_string()),
         sibling_has_accent_dash_pseudo: el.doc.has_accent_dash_pseudo(sibling.id()),
-        sibling_tracking_floor_em: Some(anti_design_core::checks::rules::HERO_EYEBROW_TRACKING_EM),
+        sibling_tracking_floor_em: Some(anti_ai_design_core::checks::rules::HERO_EYEBROW_TRACKING_EM),
         sibling_holds_time: sibling.tag_lower() == "time"
             || sibling.query_selector("time").is_some(),
     })
@@ -1494,7 +1494,7 @@ pub fn check_element_motion(tag: &str, style: &StyleValues) -> Vec<RuleHit> {
 /// JS: checks.mjs#checkElementGlow(tag, style, effectiveBg)
 pub fn check_element_glow(
     style: &StyleValues,
-    effective_bg: Option<anti_design_core::color::Rgba>,
+    effective_bg: Option<anti_ai_design_core::color::Rgba>,
 ) -> Vec<RuleHit> {
     let box_shadow = match sv_opt(style, "boxShadow") {
         Some(v) if !v.is_empty() && v != "none" => v,
@@ -1536,7 +1536,7 @@ pub fn check_element_broken_image(el: &StaticElement<'_>) -> Vec<RuleHit> {
     // or a binding of one (`:src`, `[ngSrc]`, `data-src`).
     if el.attributes().any(|(name, value)| {
         let value = js::trim(value);
-        anti_design_detect::regex_matchers::names_image_source(name)
+        anti_ai_design_detect::regex_matchers::names_image_source(name)
             && !value.is_empty()
             && value != "#"
     }) {
@@ -1756,9 +1756,9 @@ fn positioned_child_is_decorative(child: &StaticElement<'_>) -> bool {
         child.get_attribute("class").unwrap_or(""),
         child.get_attribute("id").unwrap_or("")
     );
-    if anti_design_core::checks::measures::ident_names_any(
+    if anti_ai_design_core::checks::measures::ident_names_any(
         &ident,
-        anti_design_core::browser::element_checks::DECOR_IDENT_WORDS,
+        anti_ai_design_core::browser::element_checks::DECOR_IDENT_WORDS,
         &[],
     ) && !positioned_child_has_substantive_content(child)
     {
@@ -1787,10 +1787,10 @@ fn ident_names_viewport(el: &StaticElement<'_>) -> bool {
         el.get_attribute("class").unwrap_or(""),
         el.get_attribute("id").unwrap_or("")
     );
-    anti_design_core::checks::measures::ident_names_any(
+    anti_ai_design_core::checks::measures::ident_names_any(
         &ident,
-        anti_design_core::browser::element_checks::VIEWPORT_IDENT_WORDS,
-        anti_design_core::browser::element_checks::VIEWPORT_IDENT_PAIRS,
+        anti_ai_design_core::browser::element_checks::VIEWPORT_IDENT_WORDS,
+        anti_ai_design_core::browser::element_checks::VIEWPORT_IDENT_PAIRS,
     )
 }
 
@@ -1913,7 +1913,7 @@ pub fn check_element_clipped_overflow(el: &StaticElement<'_>, style: &StyleValue
 /// names do not establish whether a neobrutalist treatment is intentional.
 pub fn check_element_hard_offset_shadow(el: &StaticElement<'_>) -> Vec<RuleHit> {
     let box_shadow = sv(el.style(), "boxShadow");
-    if !anti_design_core::checks::hard_offset_shadow::has_shadow(box_shadow) {
+    if !anti_ai_design_core::checks::hard_offset_shadow::has_shadow(box_shadow) {
         return Vec::new();
     }
     let mut current = Some(*el);
@@ -1924,7 +1924,7 @@ pub fn check_element_hard_offset_shadow(el: &StaticElement<'_>) -> Vec<RuleHit> 
         current = node.parent_element();
     }
     if matches!(sv(el.style(), "visibility"), "hidden" | "collapse") { return Vec::new(); }
-    anti_design_core::checks::hard_offset_shadow::check_hard_offset_shadow(
+    anti_ai_design_core::checks::hard_offset_shadow::check_hard_offset_shadow(
         box_shadow, sv(el.style(), "color"), static_effective_opacity(el),
     )
 }

@@ -25,7 +25,7 @@ When a sub-agent tool is available and permitted, run these independently; other
 2. **Mechanical scan:** run:
 
 ```bash
-{{scripts_path}}/anti-design detect --json --scope layout [target files or dirs]
+{{scripts_path}}/anti-ai-design detect --json --scope layout [target files or dirs]
 ```
 
 Also inspect arbitrary spacing, overflow, stacking, and container behavior the detector cannot resolve. Keep mechanical evidence out of the first assessment, then synthesize both passes before editing. A clean scan cannot prove hierarchy or rhythm.
@@ -71,7 +71,7 @@ Variation is not a goal by itself. Repetition should support recognition; break 
 
 Answer each item with rendered or source evidence, then rerun the scan. Do not substitute a bare “yes” for verification.
 
-When the structure holds, hand off to `{{command_prefix}}anti-design polish`.
+When the structure holds, hand off to `{{command_prefix}}anti-ai-design polish`.
 
 ## Live-mode signature params
 

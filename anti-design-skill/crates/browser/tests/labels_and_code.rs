@@ -14,8 +14,8 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
 
-use anti_design_browser::BrowserEngine;
-use anti_design_detect::engines::{ScanOptions, UrlEngine};
+use anti_ai_design_browser::BrowserEngine;
+use anti_ai_design_detect::engines::{ScanOptions, UrlEngine};
 
 fn fixtures_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/antipatterns")
@@ -56,9 +56,9 @@ fn handle(mut stream: TcpStream) {
     let _ = stream.flush();
 }
 
-fn scan(page: &str) -> Option<Vec<anti_design_core::findings::Finding>> {
+fn scan(page: &str) -> Option<Vec<anti_ai_design_core::findings::Finding>> {
     let env: HashMap<String, String> = std::env::vars().collect();
-    if anti_design_browser::discovery::find_browser(&env).is_err() {
+    if anti_ai_design_browser::discovery::find_browser(&env).is_err() {
         eprintln!("skip: no installed browser found");
         return None;
     }
@@ -68,7 +68,7 @@ fn scan(page: &str) -> Option<Vec<anti_design_core::findings::Finding>> {
     Some(engine.detect_url(&url, &ScanOptions::default()).expect("scan"))
 }
 
-fn selector(f: &anti_design_core::findings::Finding) -> String {
+fn selector(f: &anti_ai_design_core::findings::Finding) -> String {
     f.extras.get("selector").and_then(|s| s.as_str()).unwrap_or("").to_string()
 }
 

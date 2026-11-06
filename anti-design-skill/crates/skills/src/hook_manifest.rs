@@ -5,20 +5,20 @@
 //!
 //! Where the JS wrote `[ ! -f "<skill>/scripts/hook.mjs" ] || node
 //! "<skill>/scripts/hook.mjs"` (and a `node -e` guard on Windows), the binary
-//! writes the launcher form `[ ! -f "<skill>/scripts/anti-design" ] ||
-//! "<skill>/scripts/anti-design" hook` (Cursor included, on `postToolUse`), the
+//! writes the launcher form `[ ! -f "<skill>/scripts/anti-ai-design" ] ||
+//! "<skill>/scripts/anti-ai-design" hook` (Cursor included, on `postToolUse`), the
 //! shape the public build's `transformers/hooks.js` puts in the bundle; the
 //! Codex `commandWindows` sibling and a Windows Grok `command` run
-//! `anti-design.cmd` behind `cmd /c if exist`.
-//! `anti-design hooks on` (`anti_design_hook::admin`) writes the same launcher
+//! `anti-ai-design.cmd` behind `cmd /c if exist`.
+//! `anti-ai-design hooks on` (`anti_ai_design_hook::admin`) writes the same launcher
 //! invocation for a project install (no existence guard on the POSIX `command`). Recognition of an
-//! Anti-Design-owned entry (either the JS `.mjs` generation or the launcher
+//! Anti-AI Design-owned entry (either the JS `.mjs` generation or the launcher
 //! generation) is shared with the hook crate, `context`, and `doctor` through
-//! `anti_design_context::hook_markers::is_anti_design_hook_command`, so the two
+//! `anti_ai_design_context::hook_markers::is_anti_ai_design_hook_command`, so the two
 //! writers and the three readers can never disagree on what counts as ours.
 
-use anti_design_context::hermes;
-use anti_design_context::hook_markers::{cursor_hook_manifest, cursor_manifest_has_retired_gate, is_anti_design_hook_command, is_launcher_hook_command, parse_manifest_jsonc, windows_launcher_hook_command};
+use anti_ai_design_context::hermes;
+use anti_ai_design_context::hook_markers::{cursor_hook_manifest, cursor_manifest_has_retired_gate, is_anti_ai_design_hook_command, is_launcher_hook_command, parse_manifest_jsonc, windows_launcher_hook_command};
 use serde_json::{Map, Value};
 
 use crate::providers::Sys;
@@ -38,8 +38,8 @@ pub fn provider_hook_artifacts(provider: &str) -> &'static [HookArtifactSpec] {
         ".gemini" => &[HookArtifactSpec { source_provider: ".gemini", rel: "settings.json", dest_provider: ".gemini", dest_rel: None }],
         ".cursor" => &[HookArtifactSpec { source_provider: ".cursor", rel: "hooks.json", dest_provider: ".cursor", dest_rel: None }],
         ".agents" => &[HookArtifactSpec { source_provider: ".codex", rel: "hooks.json", dest_provider: ".codex", dest_rel: None }],
-        ".github" => &[HookArtifactSpec { source_provider: ".github", rel: "hooks/anti-design.json", dest_provider: ".github", dest_rel: None }],
-        ".grok" => &[HookArtifactSpec { source_provider: ".grok", rel: "hooks/anti-design.json", dest_provider: ".grok", dest_rel: None }],
+        ".github" => &[HookArtifactSpec { source_provider: ".github", rel: "hooks/anti-ai-design.json", dest_provider: ".github", dest_rel: None }],
+        ".grok" => &[HookArtifactSpec { source_provider: ".grok", rel: "hooks/anti-ai-design.json", dest_provider: ".grok", dest_rel: None }],
         _ => &[],
     }
 }
@@ -100,7 +100,7 @@ pub fn hook_verb(_provider: &str) -> &'static str {
 }
 
 /// Moves a Cursor manifest off the retired `preToolUse` before-edit gate:
-/// drops Anti-Design entries from every event (other tools' hooks stay) and
+/// drops Anti-AI Design entries from every event (other tools' hooks stay) and
 /// adds the post-edit `postToolUse` entry, its command rewritten for the
 /// install. A manifest without the gate is returned unchanged, so this is
 /// safe to run after any write.
@@ -109,7 +109,7 @@ pub fn migrate_cursor_gate(value: &Value, skill_root: &str, absolute: bool) -> V
         return value.clone();
     }
     // Any launcher-form command carries the marker the rewrite replaces.
-    let template = cursor_hook_manifest("\".cursor/skills/anti-design/scripts/anti-design\" hook", CURSOR_TIMEOUT_SECONDS);
+    let template = cursor_hook_manifest("\".cursor/skills/anti-ai-design/scripts/anti-ai-design\" hook", CURSOR_TIMEOUT_SECONDS);
     let fresh = rewrite_hook_commands_for_skill_root(&template, ".cursor", skill_root, absolute);
     merge_hook_manifests(value, &fresh)
 }
@@ -121,7 +121,7 @@ const CURSOR_TIMEOUT_SECONDS: i64 = 5;
 /// project-relative launcher path (Claude keeps its `${CLAUDE_PROJECT_DIR}`
 /// token).
 pub fn launcher_rel_path(provider: &str) -> String {
-    let rel = format!("{provider}/skills/anti-design/scripts/anti-design");
+    let rel = format!("{provider}/skills/anti-ai-design/scripts/anti-ai-design");
     if provider == ".claude" {
         format!("${{CLAUDE_PROJECT_DIR}}/{rel}")
     } else if provider == ".gemini" {
@@ -141,7 +141,7 @@ pub fn launcher_rel_path(provider: &str) -> String {
 pub fn launcher_path(skill_root: &str, provider: &str) -> Option<String> {
     match provider {
         ".cursor" | ".claude" | ".agents" | ".grok" | ".gemini" => {
-            Some(jsp::join(&[skill_root, provider, "skills", "anti-design", "scripts", "anti-design"]))
+            Some(jsp::join(&[skill_root, provider, "skills", "anti-ai-design", "scripts", "anti-ai-design"]))
         }
         _ => None,
     }
@@ -188,10 +188,10 @@ pub fn quoted_launcher_path(skill_root: &str, provider: &str, absolute: bool) ->
 /// so write that resolved root with Bash-compatible forward slashes.
 fn quoted_github_user_launcher(skill_root: &str, win32: bool) -> QuotedPath {
     let path = if win32 {
-        jsp::win32::join(&[skill_root, ".github", "skills", "anti-design", "scripts", "anti-design"])
+        jsp::win32::join(&[skill_root, ".github", "skills", "anti-ai-design", "scripts", "anti-ai-design"])
             .replace('\\', "/")
     } else {
-        "$HOME/.github/skills/anti-design/scripts/anti-design".to_string()
+        "$HOME/.github/skills/anti-ai-design/scripts/anti-ai-design".to_string()
     };
     QuotedPath {
         posix: if win32 { sh_single_quote(&path) } else { json_string(&path) },
@@ -284,9 +284,9 @@ pub fn rewrite_hook_commands_for_platform(value: &Value, provider: &str, skill_r
 fn rewrite_value(value: &Value, provider: &str, quoted: &QuotedPath, win32: bool) -> Value {
     match value {
         Value::String(_) => {
-            // JS: the string arm goes through valueHasAntiDesignHookMarker,
+            // JS: the string arm goes through valueHasAntiAiDesignHookMarker,
             // so the separator normalization applies here too.
-            if !value_has_anti_design_hook_marker(value) {
+            if !value_has_anti_ai_design_hook_marker(value) {
                 return value.clone();
             }
             Value::String(hook_command(quoted, provider, win32))
@@ -299,7 +299,7 @@ fn rewrite_value(value: &Value, provider: &str, quoted: &QuotedPath, win32: bool
             }
             if provider == ".agents" {
                 if let Some(cmd @ Value::String(_)) = map.get("command") {
-                    if value_has_anti_design_hook_marker(cmd) {
+                    if value_has_anti_ai_design_hook_marker(cmd) {
                         next.insert("commandWindows".to_string(), Value::String(windows_hook_command(quoted, provider)));
                     }
                 }
@@ -310,17 +310,17 @@ fn rewrite_value(value: &Value, provider: &str, quoted: &QuotedPath, win32: bool
     }
 }
 
-/// JS: valueHasAntiDesignHookMarker(value).
-pub fn value_has_anti_design_hook_marker(value: &Value) -> bool {
+/// JS: valueHasAntiAiDesignHookMarker(value).
+pub fn value_has_anti_ai_design_hook_marker(value: &Value) -> bool {
     match value {
-        Value::String(s) => is_anti_design_hook_command(s),
-        Value::Array(a) => a.iter().any(value_has_anti_design_hook_marker),
-        Value::Object(o) => o.values().any(value_has_anti_design_hook_marker),
+        Value::String(s) => is_anti_ai_design_hook_command(s),
+        Value::Array(a) => a.iter().any(value_has_anti_ai_design_hook_marker),
+        Value::Object(o) => o.values().any(value_has_anti_ai_design_hook_marker),
         _ => false,
     }
 }
 
-/// True when `value` names an Anti-Design hook in the launcher generation.
+/// True when `value` names an Anti-AI Design hook in the launcher generation.
 pub fn value_has_launcher_hook_marker(value: &Value) -> bool {
     match value {
         Value::String(s) => is_launcher_hook_command(s),
@@ -330,7 +330,7 @@ pub fn value_has_launcher_hook_marker(value: &Value) -> bool {
     }
 }
 
-/// True when a manifest's `hooks` subtree carries an Anti-Design hook only in
+/// True when a manifest's `hooks` subtree carries an Anti-AI Design hook only in
 /// the JS-era `.mjs` spelling (no launcher marker): a pre-launcher install
 /// whose hook script no longer exists after the skill update, so the hook is
 /// dead and the manifest must be rewritten to the launcher form.
@@ -341,7 +341,7 @@ pub fn manifest_has_stale_hook(file: &str) -> bool {
     let Ok(text) = util::read_text(file) else { return false };
     let Ok(Value::Object(map)) = serde_json::from_str::<Value>(&text) else { return false };
     match map.get("hooks") {
-        Some(h @ (Value::Object(_) | Value::Array(_))) => value_has_anti_design_hook_marker(h) && !value_has_launcher_hook_marker(h),
+        Some(h @ (Value::Object(_) | Value::Array(_))) => value_has_anti_ai_design_hook_marker(h) && !value_has_launcher_hook_marker(h),
         _ => false,
     }
 }
@@ -357,12 +357,12 @@ pub fn manifest_has_retired_cursor_gate(file: &str) -> bool {
     cursor_manifest_has_retired_gate(&parsed)
 }
 
-/// JS: fileHasAntiDesignHookMarker(file): parse and scan only the `hooks`
+/// JS: fileHasAntiAiDesignHookMarker(file): parse and scan only the `hooks`
 /// subtree.
-pub fn file_has_anti_design_hook_marker(file: &str) -> bool {
+pub fn file_has_anti_ai_design_hook_marker(file: &str) -> bool {
     let Some((Value::Object(map), _)) = read_manifest(file) else { return false };
     match map.get("hooks") {
-        Some(h @ (Value::Object(_) | Value::Array(_))) => value_has_anti_design_hook_marker(h),
+        Some(h @ (Value::Object(_) | Value::Array(_))) => value_has_anti_ai_design_hook_marker(h),
         _ => false,
     }
 }
@@ -404,10 +404,10 @@ pub fn hook_installed_for_provider(sys: &Sys, root: &str, provider: &str) -> boo
     }
     artifacts.iter().all(|spec| {
         let write_rel = spec.dest_rel.unwrap_or(spec.rel);
-        if file_has_anti_design_hook_marker(&jsp::join(&[root, spec.dest_provider, write_rel])) {
+        if file_has_anti_ai_design_hook_marker(&jsp::join(&[root, spec.dest_provider, write_rel])) {
             return true;
         }
-        write_rel != spec.rel && file_has_anti_design_hook_marker(&jsp::join(&[root, spec.dest_provider, spec.rel]))
+        write_rel != spec.rel && file_has_anti_ai_design_hook_marker(&jsp::join(&[root, spec.dest_provider, spec.rel]))
     })
 }
 
@@ -433,11 +433,11 @@ pub fn hook_installed_for_provider_at_scope(sys: &Sys, root: &str, provider: &st
 }
 
 /// The portable prefix of a project Copilot hook command.
-const GITHUB_PORTABLE_PREFIX: &str = "$(git rev-parse --show-toplevel)/.github/skills/anti-design/scripts/anti-design";
+const GITHUB_PORTABLE_PREFIX: &str = "$(git rev-parse --show-toplevel)/.github/skills/anti-ai-design/scripts/anti-ai-design";
 
 /// True when the project carries its own Copilot skill launcher.
 fn github_project_skill_exists(project_root: &str) -> bool {
-    util::exists(&jsp::join(&[project_root, ".github", "skills", "anti-design", "scripts", "anti-design"]))
+    util::exists(&jsp::join(&[project_root, ".github", "skills", "anti-ai-design", "scripts", "anti-ai-design"]))
 }
 
 /// True when `root` is a project (not the home dir) that ships its own
@@ -446,40 +446,40 @@ fn github_keeps_portable_form(sys: &Sys, root: &str) -> bool {
     !sys.is_home_dir(root) && github_project_skill_exists(root)
 }
 
-/// True when `<root>/.github/hooks/anti-design.json` runs an Anti-Design hook in
+/// True when `<root>/.github/hooks/anti-ai-design.json` runs an Anti-AI Design hook in
 /// the portable project form while `<root>` has no Copilot skill to run.
 fn github_manifest_names_missing_project_skill(root: &str) -> bool {
     if github_project_skill_exists(root) {
         return false;
     }
-    let Some((Value::Object(map), _)) = read_manifest(&jsp::join(&[root, ".github", "hooks", "anti-design.json"])) else {
+    let Some((Value::Object(map), _)) = read_manifest(&jsp::join(&[root, ".github", "hooks", "anti-ai-design.json"])) else {
         return false;
     };
     let Some(hooks @ (Value::Object(_) | Value::Array(_))) = map.get("hooks") else { return false };
     let mut commands = Vec::new();
-    collect_anti_design_hook_commands(hooks, &mut commands);
+    collect_anti_ai_design_hook_commands(hooks, &mut commands);
     commands.iter().any(|c| c.contains(GITHUB_PORTABLE_PREFIX))
 }
 
 /// The command a user-scope install writes into `<home>/.claude/settings.json`:
-/// the guarded absolute launcher under `<home>/.claude/skills/anti-design`.
+/// the guarded absolute launcher under `<home>/.claude/skills/anti-ai-design`.
 pub fn user_claude_hook_command(home_root: &str, win32: bool) -> Option<String> {
     let quoted = quoted_launcher_path(home_root, ".claude", true)?;
     Some(hook_command(&quoted, ".claude", win32))
 }
 
-fn collect_anti_design_hook_commands<'a>(value: &'a Value, out: &mut Vec<&'a str>) {
+fn collect_anti_ai_design_hook_commands<'a>(value: &'a Value, out: &mut Vec<&'a str>) {
     match value {
-        Value::String(s) if is_anti_design_hook_command(s) => out.push(s),
-        Value::Array(a) => a.iter().for_each(|v| collect_anti_design_hook_commands(v, out)),
-        Value::Object(o) => o.values().for_each(|v| collect_anti_design_hook_commands(v, out)),
+        Value::String(s) if is_anti_ai_design_hook_command(s) => out.push(s),
+        Value::Array(a) => a.iter().for_each(|v| collect_anti_ai_design_hook_commands(v, out)),
+        Value::Object(o) => o.values().for_each(|v| collect_anti_ai_design_hook_commands(v, out)),
         _ => {}
     }
 }
 
 /// True only when `<home>/.claude/settings.json` parses, its launcher exists,
-/// and every Anti-Design hook command in it is exactly the form this engine
-/// writes for a user-scope install. An Anti-Design marker alone is not enough:
+/// and every Anti-AI Design hook command in it is exactly the form this engine
+/// writes for a user-scope install. An Anti-AI Design marker alone is not enough:
 /// a legacy `node .../hook.mjs` entry, or one naming a launcher that is gone,
 /// is a dead hook, and counting it would skip the rewrite and let the
 /// duplicate-hook cleanup delete the project hook that still works.
@@ -499,16 +499,16 @@ pub fn user_claude_hook_is_current_for(home_root: &str, win32: bool) -> bool {
     };
     let Some(hooks @ (Value::Object(_) | Value::Array(_))) = map.get("hooks") else { return false };
     let mut commands = Vec::new();
-    collect_anti_design_hook_commands(hooks, &mut commands);
+    collect_anti_ai_design_hook_commands(hooks, &mut commands);
     !commands.is_empty() && commands.iter().all(|c| *c == expected)
 }
 
 fn marker_in(entry: &Map<String, Value>, key: &str) -> bool {
-    entry.get(key).map(value_has_anti_design_hook_marker).unwrap_or(false)
+    entry.get(key).map(value_has_anti_ai_design_hook_marker).unwrap_or(false)
 }
 
-/// JS: stripAntiDesignHookEntry(entry)
-fn strip_anti_design_hook_entry(entry: &Value) -> Option<Value> {
+/// JS: stripAntiAiDesignHookEntry(entry)
+fn strip_anti_ai_design_hook_entry(entry: &Value) -> Option<Value> {
     let Value::Object(e) = entry else {
         return Some(entry.clone());
     };
@@ -523,8 +523,8 @@ fn strip_anti_design_hook_entry(entry: &Value) -> Option<Value> {
     let Some(Value::Array(hooks)) = e.get("hooks") else {
         return Some(entry.clone());
     };
-    let stripped: Vec<Value> = hooks.iter().filter_map(strip_anti_design_hook_entry).collect();
-    if stripped.is_empty() && hooks.iter().any(value_has_anti_design_hook_marker) {
+    let stripped: Vec<Value> = hooks.iter().filter_map(strip_anti_ai_design_hook_entry).collect();
+    if stripped.is_empty() && hooks.iter().any(value_has_anti_ai_design_hook_marker) {
         return None;
     }
     let mut next = e.clone();
@@ -532,18 +532,18 @@ fn strip_anti_design_hook_entry(entry: &Value) -> Option<Value> {
     Some(Value::Object(next))
 }
 
-/// JS: stripAntiDesignHookEntries(entries)
-pub fn strip_anti_design_hook_entries(entries: Option<&Value>) -> Vec<Value> {
+/// JS: stripAntiAiDesignHookEntries(entries)
+pub fn strip_anti_ai_design_hook_entries(entries: Option<&Value>) -> Vec<Value> {
     match entries {
-        Some(Value::Array(a)) => a.iter().filter_map(strip_anti_design_hook_entry).collect(),
+        Some(Value::Array(a)) => a.iter().filter_map(strip_anti_ai_design_hook_entry).collect(),
         _ => Vec::new(),
     }
 }
 
-/// JS: pruneAntiDesignHookFromManifest(manifestPath). Returns true if it
+/// JS: pruneAntiAiDesignHookFromManifest(manifestPath). Returns true if it
 /// changed anything.
-pub fn prune_anti_design_hook_from_manifest(manifest_path: &str) -> Result<bool, String> {
-    if !file_has_anti_design_hook_marker(manifest_path) {
+pub fn prune_anti_ai_design_hook_from_manifest(manifest_path: &str) -> Result<bool, String> {
+    if !file_has_anti_ai_design_hook_marker(manifest_path) {
         return Ok(false);
     }
     let Some((Value::Object(parsed), had_comments)) = read_manifest(manifest_path) else { return Ok(false) };
@@ -553,7 +553,7 @@ pub fn prune_anti_design_hook_from_manifest(manifest_path: &str) -> Result<bool,
     };
     let mut cleaned = Map::new();
     for (event, entries) in &existing_hooks {
-        let kept = strip_anti_design_hook_entries(Some(entries));
+        let kept = strip_anti_ai_design_hook_entries(Some(entries));
         if !kept.is_empty() {
             cleaned.insert(event.clone(), Value::Array(kept));
         }
@@ -606,7 +606,7 @@ pub fn merge_hook_manifests(existing: &Value, fresh: &Value) -> Value {
     }
     let mut hooks = Map::new();
     for event in events {
-        let mut entries = strip_anti_design_hook_entries(existing_hooks.get(&event));
+        let mut entries = strip_anti_ai_design_hook_entries(existing_hooks.get(&event));
         if let Some(Value::Array(added)) = fresh_hooks.get(&event) {
             entries.extend(added.iter().cloned());
         }
@@ -649,8 +649,8 @@ pub fn copy_provider_hooks(sys: &crate::providers::Sys, bundle_dir: &str, root: 
                 continue;
             }
             if let Some(shared) = &artifact.shared_dest {
-                if file_has_anti_design_hook_marker(shared) {
-                    prune_anti_design_hook_from_manifest(&artifact.dest)?;
+                if file_has_anti_ai_design_hook_marker(shared) {
+                    prune_anti_ai_design_hook_from_manifest(&artifact.dest)?;
                     continue;
                 }
             }
@@ -687,7 +687,7 @@ pub fn copy_provider_hooks(sys: &crate::providers::Sys, bundle_dir: &str, root: 
             }
             util::mkdir_p(&jsp::dirname(&artifact.dest))?;
             // Atomic: in user scope this is the user's whole Claude settings file.
-            anti_design_common::fsx::write_atomic(&artifact.dest, format!("{}\n", util::json_pretty(&next)).as_bytes()).map_err(|e| util::node_error("open", &artifact.dest, &e))?;
+            anti_ai_design_common::fsx::write_atomic(&artifact.dest, format!("{}\n", util::json_pretty(&next)).as_bytes()).map_err(|e| util::node_error("open", &artifact.dest, &e))?;
             if !written.contains(&artifact.dest) {
                 written.push(artifact.dest.clone());
             }
@@ -738,7 +738,7 @@ pub fn hermes_plugin_enabled(sys: &Sys) -> bool {
 }
 
 /// Once a user-scope Claude hook is in `<home>/.claude/settings.json`, the
-/// Anti-Design entries in `settings.local.json` (the home one Claude never
+/// Anti-AI Design entries in `settings.local.json` (the home one Claude never
 /// loads, and the project's gitignored one) only make the hook fire twice.
 /// Prunes them, and only when the user hook is confirmed current: a legacy or
 /// dangling user entry does not count. Runs after a fresh hook write and on a
@@ -747,9 +747,9 @@ pub fn prune_duplicate_claude_hooks(sys: &crate::providers::Sys, home_root: &str
     if !user_claude_hook_is_current(home_root) {
         return Ok(());
     }
-    prune_anti_design_hook_from_manifest(&jsp::join(&[home_root, ".claude", "settings.local.json"]))?;
+    prune_anti_ai_design_hook_from_manifest(&jsp::join(&[home_root, ".claude", "settings.local.json"]))?;
     if !sys.is_home_dir(project_root) {
-        prune_anti_design_hook_from_manifest(&jsp::join(&[project_root, ".claude", "settings.local.json"]))?;
+        prune_anti_ai_design_hook_from_manifest(&jsp::join(&[project_root, ".claude", "settings.local.json"]))?;
     }
     Ok(())
 }
@@ -759,9 +759,9 @@ pub fn prune_duplicate_claude_hooks(sys: &crate::providers::Sys, home_root: &str
 /// the launcher-era skill no longer ships, so the editor fires a dead command
 /// on every edit and `context` would otherwise still count the stale marker as
 /// an active hook. Rewrite each such manifest's command strings to the
-/// launcher form this engine writes, in place, without touching non-Anti-Design
+/// launcher form this engine writes, in place, without touching non-Anti-AI Design
 /// entries. Runs regardless of hook consent — it repairs an already-installed
-/// hook, it does not add one (a dir with no Anti-Design marker is left alone).
+/// hook, it does not add one (a dir with no Anti-AI Design marker is left alone).
 /// Idempotent: a manifest already in the launcher form is not stale and is
 /// skipped. `.github` (and any provider with no rewritable launcher path)
 /// carries a portable, team-committed command form that must not be pinned to
@@ -813,11 +813,11 @@ pub fn repair_stale_hook_manifests(sys: &Sys, root: &str, providers: &[&'static 
 }
 
 /// JS: HOOK_EXPLAINER
-pub const HOOK_EXPLAINER: &str = "\nAntiDesign can install a design hook for this project. It checks UI files\nafter your agent edits them and feeds the findings back to the agent, so\ndesign slop gets caught as you build. Change it later with\n/anti-design hooks on|off.\n";
+pub const HOOK_EXPLAINER: &str = "\nAntiAiDesign can install a design hook for this project. It checks UI files\nafter your agent edits them and feeds the findings back to the agent, so\ndesign slop gets caught as you build. Change it later with\n/anti-ai-design hooks on|off.\n";
 
-/// JS: anti-design-config.mjs#setHookConsent(root, value)
+/// JS: anti-ai-design-config.mjs#setHookConsent(root, value)
 pub fn set_hook_consent(root: &str, value: &str) -> Result<String, String> {
-    let file_path = anti_design_detect::config::get_local_config_path(root);
+    let file_path = anti_ai_design_detect::config::get_local_config_path(root);
     let existing: Map<String, Value> = util::read_text(&file_path)
         .ok()
         .and_then(|t| serde_json::from_str::<Value>(&t).ok())
@@ -835,11 +835,11 @@ pub fn set_hook_consent(root: &str, value: &str) -> Result<String, String> {
     next.insert("hook".to_string(), Value::Object(hook));
     util::mkdir_p(&jsp::dirname(&file_path))?;
     util::write_bytes(&file_path, format!("{}\n", util::json_pretty(&Value::Object(next))).as_bytes())?;
-    anti_design_detect::config::ensure_config_git_exclude(root);
+    anti_ai_design_detect::config::ensure_config_git_exclude(root);
     Ok(file_path)
 }
 
-/// JS: anti-design-config.mjs#getHookConsent(root)
+/// JS: anti-ai-design-config.mjs#getHookConsent(root)
 pub fn get_hook_consent(root: &str) -> Option<String> {
-    anti_design_detect::config::get_hook_consent(root)
+    anti_ai_design_detect::config::get_hook_consent(root)
 }

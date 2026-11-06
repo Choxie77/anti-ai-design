@@ -1,4 +1,4 @@
-//! anti-design-comp: the pure, browser-independent foundation of the
+//! anti-ai-design-comp: the pure, browser-independent foundation of the
 //! comp-fidelity pipeline, ported from the skill's JS libs.
 //!
 //! Ported modules (all pure, no browser, no CLI):

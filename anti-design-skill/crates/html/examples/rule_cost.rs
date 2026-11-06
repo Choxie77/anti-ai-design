@@ -1,6 +1,6 @@
 //! What each detector rule costs the edit hook, per edit, in milliseconds.
 //!
-//!     cargo run --release -p anti-design-html --example rule_cost -- \
+//!     cargo run --release -p anti-ai-design-html --example rule_cost -- \
 //!         [--runs 9] [--out rule-cost.json] <file-or-dir>...
 //!
 //! The hook (`crates/hook/src/hook.rs`, `run_hook`) is a new process on every
@@ -14,7 +14,7 @@
 //! This measures exactly that. For every sample it starts itself again as a
 //! fresh process (`--one <file>`), runs the file's engine the way the hook
 //! does (inline ignores on, no design system, no rule pack) with the
-//! engines' own profiler switched on (`anti_design_detect::profiler`), and
+//! engines' own profiler switched on (`anti_ai_design_detect::profiler`), and
 //! reports the timed units. Runs are interleaved across files so drift on the
 //! machine spreads over every file instead of landing on one.
 //!
@@ -33,10 +33,10 @@ use std::process::Command;
 use std::rc::Rc;
 use std::time::Instant;
 
-use anti_design_detect::detect_text::{detect_text, TextOptions};
-use anti_design_detect::engines::{HtmlEngine, ScanOptions};
-use anti_design_detect::profiler::DetectorProfile;
-use anti_design_html::StaticHtmlEngine;
+use anti_ai_design_detect::detect_text::{detect_text, TextOptions};
+use anti_ai_design_detect::engines::{HtmlEngine, ScanOptions};
+use anti_ai_design_detect::profiler::DetectorProfile;
+use anti_ai_design_html::StaticHtmlEngine;
 use serde_json::{json, Value};
 
 /// `crates/hook/src/hook_lib.rs` `ALLOWED_EXTS`: the files the hook scans.

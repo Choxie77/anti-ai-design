@@ -4,9 +4,9 @@
 use std::collections::BTreeSet;
 use std::io::Write;
 
-use anti_design_common::Io;
-use anti_design_core::findings::Finding;
-use anti_design_core::registry::{all_antipatterns, filter_by_scopes, rule_scopes};
+use anti_ai_design_common::Io;
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_core::registry::{all_antipatterns, filter_by_scopes, rule_scopes};
 use serde_json::Value;
 
 use crate::config::{
@@ -31,7 +31,7 @@ use crate::list_rules::{
 };
 use crate::util::{exists, re, D};
 
-pub const USAGE: &str = "Usage: anti-design detect [options] [file-or-dir-or-url...]
+pub const USAGE: &str = "Usage: anti-ai-design detect [options] [file-or-dir-or-url...]
 
 Scan files or URLs for UI anti-patterns and design quality issues.
 
@@ -48,8 +48,8 @@ Options:
                       e.g. --viewport 390x844 for a mobile-width pass
   --no-config         Do not apply project config, detector ignores, inline
                       ignore comments, or DESIGN.md
-  --no-inline-ignores Do not honor in-file anti-design-disable* ignore comments
-  --no-design-system  Do not load local DESIGN.md / .anti-design/design.json context
+  --no-inline-ignores Do not honor in-file anti-ai-design-disable* ignore comments
+  --no-design-system  Do not load local DESIGN.md / .anti-ai-design/design.json context
   --no-advisory       Suppress advisory findings entirely (e.g. em-dash overuse)
   --no-consent-hiding URL scans: keep known consent managers' banners
                       (OneTrust, Cookiebot, ...) on the page instead of hiding
@@ -64,6 +64,12 @@ Options:
                       resized or closed. Takes no file or URL targets
   --target <text>     With --cdp: pick the page whose URL or title contains
                       this text when the app has more than one
+  --fix               Safe-fix mode: print the automatic fixes as a unified
+                      diff on stdout and change nothing. Files and
+                      directories only; not with --github, --list-rules
+                      or --cdp
+  --write             Apply those fixes to the files and log each one in
+                      .anti-ai-design/changelog.md. Implies --fix
   --help              Show this help message
 
 Advisory findings:
@@ -84,16 +90,16 @@ Exit status:
   Operational failure takes precedence when a multi-target scan is partial.
 
 Project config:
-  Respects .anti-design/config.json and .anti-design/config.local.json detector
+  Respects .anti-ai-design/config.json and .anti-ai-design/config.local.json detector
   settings: detector.ignoreRules, detector.ignoreFiles, detector.ignoreValues,
   and detector.designSystem.enabled.
 
 Inline ignores:
   In-file comments waive a finding where it lives and travel with the file:
-    <!-- anti-design-disable overused-font -- exported brand doc -->
-    .brand { font-family: Inter } /* anti-design-disable-line overused-font */
-    // anti-design-disable-next-line bounce-easing: intentional bounce
-  anti-design-disable applies to the whole file; -line / -next-line are scoped.
+    <!-- anti-ai-design-disable overused-font -- exported brand doc -->
+    .brand { font-family: Inter } /* anti-ai-design-disable-line overused-font */
+    // anti-ai-design-disable-next-line bounce-easing: intentional bounce
+  anti-ai-design-disable applies to the whole file; -line / -next-line are scoped.
   List one or more rule ids (comma-separated), or omit them / use * for all.
 
 Detection modes:
@@ -105,14 +111,16 @@ Detection modes:
                  DevTools port and scanned like a URL
 
 Examples:
-  anti-design detect src/
-  anti-design detect index.html
-  anti-design detect https://example.com
-  anti-design detect --cdp 9222 --target \"My App\" --json
-  anti-design detect --json .
-  anti-design detect --github src/
-  anti-design detect --list-rules
-  anti-design detect --no-config src/
+  anti-ai-design detect src/
+  anti-ai-design detect index.html
+  anti-ai-design detect https://example.com
+  anti-ai-design detect --cdp 9222 --target \"My App\" --json
+  anti-ai-design detect --json .
+  anti-ai-design detect --github src/
+  anti-ai-design detect --fix src/
+  anti-ai-design detect --write src/
+  anti-ai-design detect --list-rules
+  anti-ai-design detect --no-config src/
 ";
 
 /// Remove every `--name <value>` / `--name=<value>` from `args`. `None` when
@@ -163,7 +171,7 @@ fn expand_joined_url_targets(targets: Vec<String>) -> Vec<String> {
             continue;
         }
         let parts: Vec<&str> = WS_RUN_RE
-            .split(anti_design_core::js::trim(&target))
+            .split(anti_ai_design_core::js::trim(&target))
             .filter(|p| !p.is_empty())
             .collect();
         if parts.len() > 1 && parts.iter().all(|p| URL_RE.is_match(p)) {
@@ -233,7 +241,7 @@ fn format_findings_body(findings: &[&Finding]) -> Vec<String> {
             let line = if item.line != 0.0 && !item.line.is_nan() {
                 format!(
                     "line {}: ",
-                    anti_design_core::js::number_to_string(item.line)
+                    anti_ai_design_core::js::number_to_string(item.line)
                 )
             } else {
                 String::new()
@@ -430,8 +438,8 @@ impl<'a> Ctx<'a> {
 
 re!(VIEWPORT_RE, format!("^({D}{{2,5}})[xX]({D}{{2,5}})$"));
 re!(URL_RE, "^(?i:https?|file)://");
-re!(WHITESPACE_RE, anti_design_core::js::WS.to_string());
-re!(WS_RUN_RE, format!("{}+", anti_design_core::js::WS));
+re!(WHITESPACE_RE, anti_ai_design_core::js::WS.to_string());
+re!(WS_RUN_RE, format!("{}+", anti_ai_design_core::js::WS));
 re!(FILE_URL_RE, "^(?i:file):");
 
 /// `fileURLToPath` for the `file:` URLs the CLI accepts; None when it can't map.
@@ -538,7 +546,7 @@ fn detect_cli(args_in: &[String], io: &mut Io, engines: &Engines) -> Result<i32,
         let parsed: Vec<String> = match value {
             Some(v) if !v.starts_with("--") => v
                 .split(',')
-                .map(|s| anti_design_core::js::trim(s).to_string())
+                .map(|s| anti_ai_design_core::js::trim(s).to_string())
                 .filter(|s| !s.is_empty())
                 .collect(),
             _ => vec![],
@@ -613,7 +621,7 @@ fn detect_cli(args_in: &[String], io: &mut Io, engines: &Engines) -> Result<i32,
     };
     let target_filter = match target_filter {
         None => None,
-        Some(Some(v)) if !anti_design_core::js::trim(&v).is_empty() => Some(v),
+        Some(Some(v)) if !anti_ai_design_core::js::trim(&v).is_empty() => Some(v),
         Some(_) => {
             io.err("Error: --target requires a substring of the page's URL or title, e.g. --target localhost:5173\n");
             return Err(Exit(1));
@@ -636,10 +644,10 @@ fn detect_cli(args_in: &[String], io: &mut Io, engines: &Engines) -> Result<i32,
         design_system: None,
         viewport,
         profile: None,
-        // Modified by Anti-Design contributors, 2026-11-05: the binary installs its
+        // Modified by Anti-AI Design contributors, 2026-11-05: the binary installs its
         // first-party pack (crates/aad-rules) through `install_default`; a library caller
         // that never does gets `None`, as before.
-        rule_pack: anti_design_core::rule_pack::default_pack(),
+        rule_pack: anti_ai_design_core::rule_pack::default_pack(),
         keep_consent_banners: has(&args, "--no-consent-hiding"),
         keep_overlays: has(&args, "--no-overlay-hiding"),
         unreported_rules: unreported_rules(&detection_config.ignore_rules, &scopes),
@@ -887,7 +895,7 @@ fn regex_only_note(n: usize, exts: &BTreeSet<String>, ports: &BTreeSet<u32>) -> 
     );
     if ports.is_empty() {
         note.push_str(
-            "For the full check, scan the running dev server (npx anti-design detect http://localhost:PORT) or a static site's built .html.\n",
+            "For the full check, scan the running dev server (npx anti-ai-design detect http://localhost:PORT) or a static site's built .html.\n",
         );
     } else {
         // One URL per scanned project, so a run over a Vite app and a Next
@@ -898,7 +906,7 @@ fn regex_only_note(n: usize, exts: &BTreeSet<String>, ports: &BTreeSet<u32>) -> 
             "For the full check, scan each running app:\n"
         });
         for p in ports {
-            note.push_str(&format!("  npx anti-design detect http://localhost:{p}\n"));
+            note.push_str(&format!("  npx anti-ai-design detect http://localhost:{p}\n"));
         }
     }
     let templates: Vec<&str> = listed
@@ -908,7 +916,7 @@ fn regex_only_note(n: usize, exts: &BTreeSet<String>, ports: &BTreeSet<u32>) -> 
         .collect();
     if let Some(first) = templates.first() {
         note.push_str(&format!(
-            "{} files can take the HTML engine instead: add {{ \"ext\": \"{first}\", \"engine\": \"html\" }} under detector.extensions in .anti-design/config.json (trades the regex rules and line numbers for the element rules).\n",
+            "{} files can take the HTML engine instead: add {{ \"ext\": \"{first}\", \"engine\": \"html\" }} under detector.extensions in .anti-ai-design/config.json (trades the regex rules and line numbers for the element rules).\n",
             templates.join("/")
         ));
     }
@@ -1007,7 +1015,7 @@ fn scan_targets(
                     let probe = is_port_listening(fw.port, Some(fw.fingerprint));
                     let msg = if probe.listening && probe.matched {
                         format!(
-                            "\n{} dev server detected on localhost:{}.\nFor more accurate results, scan the running site:\n  npx anti-design detect http://localhost:{}\n\n",
+                            "\n{} dev server detected on localhost:{}.\nFor more accurate results, scan the running site:\n  npx anti-ai-design detect http://localhost:{}\n\n",
                             fw.name, fw.port, fw.port
                         )
                     } else if probe.listening && !probe.matched {
@@ -1020,7 +1028,7 @@ fn scan_targets(
                         )
                     } else {
                         format!(
-                            "\n{} project detected ({}).\nStart the dev server and scan via URL for best results:\n  npx anti-design detect http://localhost:{}\n\n",
+                            "\n{} project detected ({}).\nStart the dev server and scan via URL for best results:\n  npx anti-ai-design detect http://localhost:{}\n\n",
                             fw.name,
                             jsp::basename(&fw.config_path),
                             fw.port
@@ -1139,7 +1147,7 @@ fn confirm(io: &mut Io, question: &str) -> bool {
     // Only reached when stdin is a TTY, so a direct line read is what the
     // JS readline does too.
     let _ = std::io::stdin().read_line(&mut answer);
-    let a = anti_design_core::js::trim(&answer);
+    let a = anti_ai_design_core::js::trim(&answer);
     a.is_empty() || a.eq_ignore_ascii_case("y") || a.eq_ignore_ascii_case("yes")
 }
 
@@ -1188,7 +1196,7 @@ mod design_note_tests {
 
     #[test]
     fn the_purple_note_follows_only_a_scan_that_ran() {
-        let dir = std::env::temp_dir().join(format!("anti-design-design-note-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-design-note-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("DESIGN.md"), "---\ncolors:\n  primary: \"#5c2d91\"\n---\n# Design\n").unwrap();

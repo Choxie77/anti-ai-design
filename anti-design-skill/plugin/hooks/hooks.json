@@ -5,10 +5,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
-            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook",
+            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd hook",
             "env": {
-              "ANTI_DESIGN_HOOK_HARNESS": "vscode"
+              "ANTI_AI_DESIGN_HOOK_HARNESS": "vscode"
             },
             "timeout": 5,
             "statusMessage": "Preparing build session"
@@ -22,10 +22,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
-            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook",
+            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd hook",
             "env": {
-              "ANTI_DESIGN_HOOK_HARNESS": "vscode"
+              "ANTI_AI_DESIGN_HOOK_HARNESS": "vscode"
             },
             "timeout": 5,
             "statusMessage": "Checking UI changes"
@@ -38,10 +38,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-design/scripts/anti-design\" hook",
-            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-design\\scripts\\anti-design.cmd hook",
+            "command": "[ ! -f \"${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design\" ] || sh \"${CLAUDE_PLUGIN_ROOT}/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "windows": "cmd /c if exist ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd ${CLAUDE_PLUGIN_ROOT}\\skills\\anti-ai-design\\scripts\\anti-ai-design.cmd hook",
             "env": {
-              "ANTI_DESIGN_HOOK_HARNESS": "vscode"
+              "ANTI_AI_DESIGN_HOOK_HARNESS": "vscode"
             },
             "timeout": 30,
             "statusMessage": "Design deep pass"

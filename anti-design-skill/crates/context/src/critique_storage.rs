@@ -1,16 +1,16 @@
-//! JS: critique-storage.mjs -> `anti-design critique-storage`
+//! JS: critique-storage.mjs -> `anti-ai-design critique-storage`
 
 use crate::context::resolve_project_root;
 use crate::jsp;
 use crate::target_args::TargetOptions;
 use crate::target_slug::{legacy_slug_from_target, slug_from_target};
 use crate::util::{exists, iso_now, js_trim, json_pretty, node_read_error, read_dir_names, safe_read, Env};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
 pub fn get_critique_dir(cwd: &str, env: &Env) -> String {
-    jsp::join(&[&resolve_project_root(cwd, &TargetOptions::default(), env), ".anti-design", "critique"])
+    jsp::join(&[&resolve_project_root(cwd, &TargetOptions::default(), env), ".anti-ai-design", "critique"])
 }
 
 /// JS: nowFilenameStamp(date)
@@ -474,7 +474,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
                 }
             };
             let mut parsed_meta: Map<String, Value> = Map::new();
-            if let Some(m) = env.get("ANTI_DESIGN_CRITIQUE_META").filter(|s| !s.is_empty()) {
+            if let Some(m) = env.get("ANTI_AI_DESIGN_CRITIQUE_META").filter(|s| !s.is_empty()) {
                 if let Ok(Value::Object(o)) = serde_json::from_str::<Value>(m) {
                     parsed_meta = o;
                 }
@@ -500,7 +500,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             let dir = get_critique_dir(&cwd, &env);
             let _ = std::fs::create_dir_all(&dir);
             // Snapshots are local runtime output; `ignore.md` is the one hand-edited, team-shared file here.
-            anti_design_common::git::ensure_dir_ignored(&dir, &["*", "!ignore.md"]);
+            anti_ai_design_common::git::ensure_dir_ignored(&dir, &["*", "!ignore.md"]);
             let timestamp = now_filename_stamp();
             let mut front = meta.clone();
             front.insert("timestamp".into(), Value::String(timestamp.clone()));
@@ -697,7 +697,7 @@ pub fn run(args: &[String], io: &mut Io) -> i32 {
             0
         }
         _ => {
-            io.err("usage: anti-design critique-storage <slug|write|latest|trend|close> [args]\n");
+            io.err("usage: anti-ai-design critique-storage <slug|write|latest|trend|close> [args]\n");
             1
         }
     }
@@ -755,7 +755,7 @@ pub fn js_string_value(v: &Value) -> String {
 #[cfg(test)]
 mod tests_660 {
     use super::*;
-    use anti_design_common::Io;
+    use anti_ai_design_common::Io;
     use std::collections::HashMap;
     use std::path::PathBuf;
 
@@ -763,7 +763,7 @@ mod tests_660 {
 
     fn tmp() -> String {
         let base = std::env::temp_dir().join(format!(
-            "anti-design-critique-{}-{}-{}",
+            "anti-ai-design-critique-{}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos(),
             // A per-process counter: Windows' clock is coarse enough that two
@@ -827,7 +827,7 @@ mod tests_660 {
     #[test]
     fn close_verb_round_trip_and_ownership() {
         let cwd = tmp();
-        let dir = jsp::join(&[&cwd, ".anti-design", "critique"]);
+        let dir = jsp::join(&[&cwd, ".anti-ai-design", "critique"]);
         std::fs::create_dir_all(&dir).unwrap();
         let name = "2026-05-12T18-30-00Z__app-tsx.md";
         // The identity exactly as the verb resolves it for this target from this
@@ -870,8 +870,8 @@ mod tests_660 {
         let body = jsp::join(&[&cwd, "body.md"]);
         std::fs::write(&body, "# Critique\n").unwrap();
         assert_eq!(run_capture(&cwd, &["write", "demo", &body]).0, 0);
-        let ignore = jsp::join(&[&cwd, ".anti-design", "critique", ".gitignore"]);
-        let expected = format!("{}\n*\n!ignore.md\n", anti_design_common::git::RUNTIME_IGNORE_HEADER);
+        let ignore = jsp::join(&[&cwd, ".anti-ai-design", "critique", ".gitignore"]);
+        let expected = format!("{}\n*\n!ignore.md\n", anti_ai_design_common::git::RUNTIME_IGNORE_HEADER);
         assert_eq!(std::fs::read_to_string(&ignore).unwrap(), expected);
         assert_eq!(run_capture(&cwd, &["write", "demo", &body]).0, 0);
         assert_eq!(std::fs::read_to_string(&ignore).unwrap(), expected, "idempotent");
@@ -881,7 +881,7 @@ mod tests_660 {
     #[test]
     fn latest_json_emits_snapshot_file_and_body() {
         let cwd = tmp();
-        let dir = jsp::join(&[&cwd, ".anti-design", "critique"]);
+        let dir = jsp::join(&[&cwd, ".anti-ai-design", "critique"]);
         std::fs::create_dir_all(&dir).unwrap();
         // A URL-target snapshot: no local fingerprint, so latest stays current.
         let name = "2026-05-12T18-30-00Z__example-com-pricing.md";
@@ -897,7 +897,7 @@ mod tests_660 {
     #[test]
     fn explicit_long_targets_find_and_close_pre_hash_snapshots() {
         let cwd = tmp();
-        let dir = jsp::join(&[&cwd, ".anti-design", "critique"]);
+        let dir = jsp::join(&[&cwd, ".anti-ai-design", "critique"]);
         std::fs::create_dir_all(&dir).unwrap();
         let target = "https://example.com/a-very-long-directory-structure-with-many-segments/component-name";
         let legacy_slug = legacy_slug_from_target(Some(target), &cwd).unwrap();
@@ -929,7 +929,7 @@ mod tests_660 {
     #[test]
     fn pre_hash_slug_collisions_require_matching_identity() {
         let cwd = tmp();
-        let dir = jsp::join(&[&cwd, ".anti-design", "critique"]);
+        let dir = jsp::join(&[&cwd, ".anti-ai-design", "critique"]);
         std::fs::create_dir_all(&dir).unwrap();
         let target = "https://example.com/first-prefix-that-is-long-enough/a-very-long-shared-tail/component-name";
         let collision = "https://example.com/second-prefix-that-is-long-enough/a-very-long-shared-tail/component-name";

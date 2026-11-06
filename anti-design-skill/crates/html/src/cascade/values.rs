@@ -8,8 +8,8 @@ use super::checks_shim::{resolve_length_px, resolve_var_refs, CustomProps};
 use super::defaults::{
     static_default_style, static_named_color, static_prop_map, NAMED_COLORS, STATIC_NAMED_COLORS,
 };
-use anti_design_core::color::{parse_any_color, Rgba, CSS_NAMED_COLORS};
-use anti_design_core::js;
+use anti_ai_design_core::color::{parse_any_color, Rgba, CSS_NAMED_COLORS};
+use anti_ai_design_core::js;
 use once_cell::sync::Lazy;
 use regex::Regex;
 

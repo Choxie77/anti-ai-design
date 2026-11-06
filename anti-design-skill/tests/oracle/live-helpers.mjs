@@ -7,7 +7,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { REPO_ROOT } from './lib.mjs';
 
-export const LIVE_FILES = ['.anti-design/**', '.gitignore', '.gitfake/**', 'node_modules/.anti-design-live/**'];
+export const LIVE_FILES = ['.anti-ai-design/**', '.gitignore', '.gitfake/**', 'node_modules/.anti-ai-design-live/**'];
 
 /**
  * A `.git` FILE pointing at a non-repo gitdir. Marks the git boundary for
@@ -42,16 +42,16 @@ export function writeJournal(ws, id, events) {
   const lines = events.map((event, i) => JSON.stringify({
     seq: i + 1, id, type: event.type, ts: `2026-08-01T10:0${i % 10}:00.000Z`, event: { id, ...event },
   }));
-  write(ws, `.anti-design/live/sessions/${id}.jsonl`, lines.join('\n') + '\n');
+  write(ws, `.anti-ai-design/live/sessions/${id}.jsonl`, lines.join('\n') + '\n');
 }
 
 export function writeBuffer(ws, entries) {
-  write(ws, '.anti-design/live/pending-manual-edits.json', JSON.stringify({ version: 1, entries }, null, 2) + '\n');
+  write(ws, '.anti-ai-design/live/pending-manual-edits.json', JSON.stringify({ version: 1, entries }, null, 2) + '\n');
 }
 
 export function lockPathFor(ws, relFile) {
   const hash = crypto.createHash('sha256').update(path.resolve(ws, relFile)).digest('hex').slice(0, 24);
-  return `.anti-design/live/locks/${hash}.lock`;
+  return `.anti-ai-design/live/locks/${hash}.lock`;
 }
 
 /** Fake-agent params, one kind per variant. */
@@ -63,18 +63,18 @@ export const PARAMS = {
 
 export function scopedCss(tag) {
   return [
-    '@scope ([data-anti-design-variant="1"]) {',
+    '@scope ([data-anti-ai-design-variant="1"]) {',
     `  :scope > ${tag} {`,
     '    font-weight: 300;',
     '    color: oklch(var(--p-lightness, 0.5) 0.25 25);',
     '  }',
     '}',
-    '@scope ([data-anti-design-variant="2"]) {',
+    '@scope ([data-anti-ai-design-variant="2"]) {',
     `  :scope > ${tag} { font-weight: 900; }`,
     `  :scope[data-p-face="serif"] > ${tag} { font-family: ui-serif, serif; }`,
     `  :scope[data-p-face="mono"]  > ${tag} { font-family: ui-monospace, monospace; }`,
     '}',
-    '@scope ([data-anti-design-variant="3"]) {',
+    '@scope ([data-anti-ai-design-variant="3"]) {',
     `  :scope > ${tag} { font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }`,
     `  :scope[data-p-italic] > ${tag} { font-style: italic; }`,
     '}',
@@ -91,13 +91,13 @@ export function variantsBlock({ id, tag, inner, indent, jsx = false }) {
   const c = jsx ? '*/}' : '-->';
   const css = scopedCss(tag).split('\n').map((l) => indent + '    ' + l);
   const style = jsx
-    ? [indent + '  <style data-anti-design-css="' + id + '">{`', ...css, indent + '  `}</style>']
-    : [indent + '  <style data-anti-design-css="' + id + '">', ...css, indent + '  </style>'];
+    ? [indent + '  <style data-anti-ai-design-css="' + id + '">{`', ...css, indent + '  `}</style>']
+    : [indent + '  <style data-anti-ai-design-css="' + id + '">', ...css, indent + '  </style>'];
   const blocks = [1, 2, 3].map((n) => {
     const hide = n === 1 ? '' : jsx ? " style={{display: 'none'}}" : ' style="display: none"';
     return [
       indent + '  ' + o + ' Variant ' + n + ' ' + c,
-      indent + '  <div data-anti-design-variant="' + n + '"' + hide + " data-anti-design-params='" + JSON.stringify(PARAMS[n]) + "'>",
+      indent + '  <div data-anti-ai-design-variant="' + n + '"' + hide + " data-anti-ai-design-params='" + JSON.stringify(PARAMS[n]) + "'>",
       indent + '    ' + inner,
       indent + '  </div>',
     ].join('\n');
@@ -113,29 +113,29 @@ export function wrappedBlock({ id, count = 3, tag, inner, original, indent, jsx 
   const variants = variantsBlock({ id, tag, inner, indent, jsx });
   if (jsx) {
     return [
-      indent + '<div data-anti-design-variants="' + id + '" data-anti-design-variant-count="' + count + '" ' + styleContents + '>',
-      indent + '  ' + o + ' anti-design-variants-start ' + id + ' ' + c,
+      indent + '<div data-anti-ai-design-variants="' + id + '" data-anti-ai-design-variant-count="' + count + '" ' + styleContents + '>',
+      indent + '  ' + o + ' anti-ai-design-variants-start ' + id + ' ' + c,
       indent + '  ' + o + ' Original ' + c,
-      indent + '  <div data-anti-design-variant="original">',
+      indent + '  <div data-anti-ai-design-variant="original">',
       indent + '    ' + original,
       indent + '  </div>',
       indent + '  ' + o + ' Variants: insert below this line ' + c,
       variants,
-      indent + '  ' + o + ' anti-design-variants-end ' + id + ' ' + c,
+      indent + '  ' + o + ' anti-ai-design-variants-end ' + id + ' ' + c,
       indent + '</div>',
     ].join('\n');
   }
   return [
-    indent + o + ' anti-design-variants-start ' + id + ' ' + c,
-    indent + '<div data-anti-design-variants="' + id + '" data-anti-design-variant-count="' + count + '" ' + styleContents + '>',
+    indent + o + ' anti-ai-design-variants-start ' + id + ' ' + c,
+    indent + '<div data-anti-ai-design-variants="' + id + '" data-anti-ai-design-variant-count="' + count + '" ' + styleContents + '>',
     indent + '  ' + o + ' Original ' + c,
-    indent + '  <div data-anti-design-variant="original">',
+    indent + '  <div data-anti-ai-design-variant="original">',
     indent + '    ' + original,
     indent + '  </div>',
     indent + '  ' + o + ' Variants: insert below this line ' + c,
     variants,
     indent + '</div>',
-    indent + o + ' anti-design-variants-end ' + id + ' ' + c,
+    indent + o + ' anti-ai-design-variants-end ' + id + ' ' + c,
   ].join('\n');
 }
 
@@ -159,14 +159,14 @@ export function stageWrappedAstro(ws, id = 'ab12cd34') {
   const original = '<h1 class="hero-title">Astro Fixture</h1>';
   const indent = '    ';
   const css = [
-    '[data-anti-design-variant="1"] > h1 { font-weight: 300; color: oklch(var(--p-lightness, 0.5) 0.25 25); }',
-    '[data-anti-design-variant="2"] > h1 { font-weight: 900; }',
-    '[data-anti-design-variant="2"][data-p-face="serif"] > h1 { font-family: ui-serif, serif; }',
-    '[data-anti-design-variant="3"] > h1 { font-weight: 600; text-transform: uppercase; }',
+    '[data-anti-ai-design-variant="1"] > h1 { font-weight: 300; color: oklch(var(--p-lightness, 0.5) 0.25 25); }',
+    '[data-anti-ai-design-variant="2"] > h1 { font-weight: 900; }',
+    '[data-anti-ai-design-variant="2"][data-p-face="serif"] > h1 { font-family: ui-serif, serif; }',
+    '[data-anti-ai-design-variant="3"] > h1 { font-weight: 600; text-transform: uppercase; }',
   ];
   const block = wrappedBlock({ id, tag: 'h1', inner: original, original, indent })
-    .replace(/<style data-anti-design-css="[^"]*">[\s\S]*?<\/style>/, [
-      '<style is:inline data-anti-design-css="' + id + '">',
+    .replace(/<style data-anti-ai-design-css="[^"]*">[\s\S]*?<\/style>/, [
+      '<style is:inline data-anti-ai-design-css="' + id + '">',
       ...css.map((l) => indent + '    ' + l),
       indent + '  </style>',
     ].join('\n'));

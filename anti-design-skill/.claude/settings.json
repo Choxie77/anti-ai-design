@@ -1,12 +1,12 @@
 {
-  "description": "Anti-Design design detector: immediate-tier checks after Edit/Write on UI files, full-rule deep pass on Stop.",
+  "description": "Anti-AI Design design detector: immediate-tier checks after Edit/Write on UI files, full-rule deep pass on Stop.",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" ] || \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" hook",
+            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" ] || \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" hook",
             "timeout": 5,
             "statusMessage": "Preparing build session"
           }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" ] || \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" hook",
+            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" ] || \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" hook",
             "timeout": 5,
             "statusMessage": "Checking UI changes"
           }
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" ] || \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-design/scripts/anti-design\" hook",
+            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" ] || \"${CLAUDE_PROJECT_DIR}/.claude/skills/anti-ai-design/scripts/anti-ai-design\" hook",
             "timeout": 30,
             "statusMessage": "Design deep pass"
           }

@@ -1,12 +1,12 @@
 //! The text engine's half of the rule-pack extension point: the pack's
 //! `check_text` hook runs on every scanned source file after the built-in
-//! matchers, its findings are waivable with `anti-design-disable`, and a run
+//! matchers, its findings are waivable with `anti-ai-design-disable`, and a run
 //! with no pack is identical to the built-in output.
 
-use anti_design_core::findings::{finding_for, Finding};
-use anti_design_core::registry::Antipattern;
-use anti_design_core::rule_pack::RulePack;
-use anti_design_detect::detect_text::{detect_text, TextOptions};
+use anti_ai_design_core::findings::{finding_for, Finding};
+use anti_ai_design_core::registry::Antipattern;
+use anti_ai_design_core::rule_pack::RulePack;
+use anti_ai_design_detect::detect_text::{detect_text, TextOptions};
 
 const MARKER: &str = "TODO(pack)";
 
@@ -68,7 +68,7 @@ fn text_hook_fires_and_no_pack_is_unchanged() {
         .iter()
         .all(|f| !f.antipattern.starts_with("testpack/")));
 
-    anti_design_core::rule_pack::install(&PACK);
+    anti_ai_design_core::rule_pack::install(&PACK);
     let with_pack = scan(Some(&PACK));
 
     // Built-in findings come first, unchanged, in the same order.
@@ -97,9 +97,9 @@ fn text_hook_fires_and_no_pack_is_unchanged() {
 
 #[test]
 fn pack_findings_are_waivable_inline() {
-    anti_design_core::rule_pack::install(&PACK);
+    anti_ai_design_core::rule_pack::install(&PACK);
     let source = format!(
-        "// anti-design-disable-next-line testpack/todo-marker\nconst copy = \"{MARKER} later\";\n"
+        "// anti-ai-design-disable-next-line testpack/todo-marker\nconst copy = \"{MARKER} later\";\n"
     );
     let waived = detect_text(
         &source,

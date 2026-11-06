@@ -1,4 +1,4 @@
-//! JS: live-accept.mjs -> `anti-design live-accept` / `accept`. Deterministic
+//! JS: live-accept.mjs -> `anti-ai-design live-accept` / `accept`. Deterministic
 //! accept/discard of variant sessions: HTML/JSX wrapper carbonize, the
 //! Svelte component inline path, receipts, source locks, buffer scrub.
 
@@ -13,15 +13,15 @@ use crate::svelte_component::{
 };
 use crate::util::{eprintln, iso_now, json_compact, json_pretty, jsp, println, safe_read, Env};
 use crate::wrap_common::{arg_val, leading_ws, min_leading_spaces, slice_chars};
-use anti_design_common::Io;
-use anti_design_core::js::{trim, trim_start, WS};
+use anti_ai_design_common::Io;
+use anti_ai_design_core::js::{trim, trim_start, WS};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{json, Map, Value};
 
 const ACCEPT_LOCK_WAIT_MS: f64 = 1000.0;
 
-const HELP: &str = "Usage: anti-design live-accept [options]
+const HELP: &str = "Usage: anti-ai-design live-accept [options]
 
 Deterministic accept/discard for live variant sessions.
 
@@ -621,8 +621,8 @@ struct MarkerBlock {
 
 /// JS: findMarkerBlock(id, lines)
 fn find_marker_block(id: &str, lines: &[String]) -> Option<MarkerBlock> {
-    let start_pattern = format!("anti-design-variants-start {}", id);
-    let end_pattern = format!("anti-design-variants-end {}", id);
+    let start_pattern = format!("anti-ai-design-variants-start {}", id);
+    let end_pattern = format!("anti-ai-design-variants-end {}", id);
     let mut start: Option<usize> = None;
     let mut end: Option<usize> = None;
     for (i, line) in lines.iter().enumerate() {
@@ -720,7 +720,7 @@ fn build_carbonize_replacement(
     let push_body = |lines: &mut Vec<String>, body_indent: &str| {
         let body_restored = reindent_content(restored, indent, &format!("{}  ", body_indent));
         lines.push(format!(
-            "{}{} anti-design-carbonize-start {} {}",
+            "{}{} anti-ai-design-carbonize-start {} {}",
             body_indent, co, id, cc
         ));
         lines.push(format!(
@@ -740,7 +740,7 @@ fn build_carbonize_replacement(
         if let Some(pv) = param_values {
             if !pv.is_empty() {
                 lines.push(format!(
-                    "{}{} anti-design-param-values {}: {} {}",
+                    "{}{} anti-ai-design-param-values {}: {} {}",
                     body_indent,
                     co,
                     id,
@@ -750,11 +750,11 @@ fn build_carbonize_replacement(
             }
         }
         lines.push(format!(
-            "{}{} anti-design-carbonize-end {} {}",
+            "{}{} anti-ai-design-carbonize-end {} {}",
             body_indent, co, id, cc
         ));
         lines.push(format!(
-            "{}<div data-anti-design-variant=\"{}\" {}>",
+            "{}<div data-anti-ai-design-variant=\"{}\" {}>",
             body_indent, variant_num, variant_style_attr
         ));
         lines.extend(body_restored);
@@ -762,7 +762,7 @@ fn build_carbonize_replacement(
     };
     if is_jsx {
         lines.push(format!(
-            "{}<div data-anti-design-carbonize=\"{}\" style={{{{ display: \"contents\" }}}}>",
+            "{}<div data-anti-ai-design-carbonize=\"{}\" style={{{{ display: \"contents\" }}}}>",
             indent, id
         ));
         push_body(&mut lines, &format!("{}  ", indent));
@@ -817,7 +817,7 @@ fn handle_accept_unlocked(
     let original_content = extract_original(lines, &block).unwrap_or_default();
     let css_content = extract_css(lines, &block, id);
     let variant_text = variant_content.join("\n");
-    let has_helper_attrs = variant_text.contains("data-anti-design-variant");
+    let has_helper_attrs = variant_text.contains("data-anti-ai-design-variant");
     let needs_carbonize = css_content.is_some() || has_helper_attrs;
     let restored = deindent_content(&variant_content, &indent);
     let mut bake_skipped: Option<String> = None;
@@ -878,11 +878,11 @@ fn handle_accept_unlocked(
 }
 
 /// JS: readSourceShadowPreviewMeta(content, id) → whether the wrapper carries
-/// `data-anti-design-preview="source-shadow"` (the only bit accept acts on).
+/// `data-anti-ai-design-preview="source-shadow"` (the only bit accept acts on).
 fn read_source_shadow_preview_meta(content: &str, id: &str) -> bool {
-    // /<[^>]+data-anti-design-variants=(["'])ID\1[^>]*>/
+    // /<[^>]+data-anti-ai-design-variants=(["'])ID\1[^>]*>/
     let chars: Vec<char> = content.chars().collect();
-    let needle: Vec<char> = "data-anti-design-variants=".chars().collect();
+    let needle: Vec<char> = "data-anti-ai-design-variants=".chars().collect();
     let mut i = 0;
     let mut tag: Option<String> = None;
     while i + needle.len() <= chars.len() {
@@ -924,16 +924,16 @@ fn read_source_shadow_preview_meta(content: &str, id: &str) -> bool {
         i += 1;
     }
     let Some(tag) = tag else { return false };
-    let preview = read_html_attr(&tag, "data-anti-design-preview");
+    let preview = read_html_attr(&tag, "data-anti-ai-design-preview");
     if preview.as_deref() != Some("source-shadow") {
         return false;
     }
-    let source_file = read_html_attr(&tag, "data-anti-design-source-file");
-    let start = read_html_attr(&tag, "data-anti-design-source-start")
-        .map(|s| anti_design_core::js::string_to_number(&s))
+    let source_file = read_html_attr(&tag, "data-anti-ai-design-source-file");
+    let start = read_html_attr(&tag, "data-anti-ai-design-source-start")
+        .map(|s| anti_ai_design_core::js::string_to_number(&s))
         .unwrap_or(0.0);
-    let end = read_html_attr(&tag, "data-anti-design-source-end")
-        .map(|s| anti_design_core::js::string_to_number(&s))
+    let end = read_html_attr(&tag, "data-anti-ai-design-source-end")
+        .map(|s| anti_ai_design_core::js::string_to_number(&s))
         .unwrap_or(0.0);
     let sf_ok = source_file.map(|s| !s.is_empty()).unwrap_or(false);
     sf_ok && start.is_finite() && end.is_finite()
@@ -945,16 +945,16 @@ fn read_html_attr(tag: &str, name: &str) -> Option<String> {
     let needle: Vec<char> = name.chars().collect();
     let mut i = 0;
     while i + 1 + needle.len() <= chars.len() {
-        if anti_design_core::js::is_js_whitespace(chars[i])
+        if anti_ai_design_core::js::is_js_whitespace(chars[i])
             && chars[i + 1..i + 1 + needle.len()] == needle[..]
         {
             let mut j = i + 1 + needle.len();
-            while j < chars.len() && anti_design_core::js::is_js_whitespace(chars[j]) {
+            while j < chars.len() && anti_ai_design_core::js::is_js_whitespace(chars[j]) {
                 j += 1;
             }
             if j < chars.len() && chars[j] == '=' {
                 j += 1;
-                while j < chars.len() && anti_design_core::js::is_js_whitespace(chars[j]) {
+                while j < chars.len() && anti_ai_design_core::js::is_js_whitespace(chars[j]) {
                     j += 1;
                 }
                 if let Some((content, _)) = crate::accept_css::quoted_lazy(&chars, j, &|_, _| true)
@@ -976,10 +976,10 @@ fn decode_html_attr(value: &str) -> String {
         .replace("&amp;", "&")
 }
 
-/// JS: isVariantEndMarkerLine(line, id): `anti-design-variants-end\s+ID(?:\s|--|\*/|$)`
+/// JS: isVariantEndMarkerLine(line, id): `anti-ai-design-variants-end\s+ID(?:\s|--|\*/|$)`
 fn is_variant_end_marker_line(line: &str, id: &str) -> bool {
     let re = Regex::new(&format!(
-        r"anti-design-variants-end{ws}+{id}(?:{ws}|--|\*/|$)",
+        r"anti-ai-design-variants-end{ws}+{id}(?:{ws}|--|\*/|$)",
         ws = WS,
         id = regex::escape(id)
     ))
@@ -991,7 +991,7 @@ fn is_variant_end_marker_line(line: &str, id: &str) -> bool {
 fn has_variant_wrapper_attr(line: &str, id: &str) -> bool {
     let e = regex::escape(id);
     let re = Regex::new(&format!(
-        r#"data-anti-design-variants{ws}*={ws}*(?:"{id}"|'{id}'|\{{["']{id}["']\}})"#,
+        r#"data-anti-ai-design-variants{ws}*={ws}*(?:"{id}"|'{id}'|\{{["']{id}["']\}})"#,
         ws = WS,
         id = e
     ))
@@ -1061,22 +1061,22 @@ fn expand_replace_range(
 
 /// The variants block's preview style element: `<style>`, or
 /// `<component is="style">` on `.vue` (`SourceTraits::style_tag`). Every
-/// opener also requires `data-anti-design-css` inside the tag: `<component>`
+/// opener also requires `data-anti-ai-design-css` inside the tag: `<component>`
 /// is also Vue's dynamic component, so the name alone would match the user's
 /// own markup.
 const STYLE_EL: &str = "(?:style|component)";
 static STYLE_FULL_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(&format!(r"(?s)<{STYLE_EL}(?-u:\b)[^>]*data-anti-design-css[^>]*>.*?</{STYLE_EL}{WS}*>")).unwrap()
+    Regex::new(&format!(r"(?s)<{STYLE_EL}(?-u:\b)[^>]*data-anti-ai-design-css[^>]*>.*?</{STYLE_EL}{WS}*>")).unwrap()
 });
 static STYLE_SELF_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(&format!(r"<{STYLE_EL}(?-u:\b)[^>]*data-anti-design-css[^>]*/{WS}*>")).unwrap()
+    Regex::new(&format!(r"<{STYLE_EL}(?-u:\b)[^>]*data-anti-ai-design-css[^>]*/{WS}*>")).unwrap()
 });
 // No closing `>`: the opening tag may continue on the next line.
 static STYLE_OPEN_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(&format!(r"<{STYLE_EL}(?-u:\b)[^>]*data-anti-design-css")).unwrap());
+    Lazy::new(|| Regex::new(&format!(r"<{STYLE_EL}(?-u:\b)[^>]*data-anti-ai-design-css")).unwrap());
 static STYLE_CLOSE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(&format!(r"</{STYLE_EL}{WS}*>")).unwrap());
 static STYLE_SAME_LINE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(&format!(r"(?s)<{STYLE_EL}(?-u:\b)[^>]*data-anti-design-css[^>]*>(.*?)</{STYLE_EL}{WS}*>")).unwrap()
+    Regex::new(&format!(r"(?s)<{STYLE_EL}(?-u:\b)[^>]*data-anti-ai-design-css[^>]*>(.*?)</{STYLE_EL}{WS}*>")).unwrap()
 });
 
 /// JS: stripStyleAndJoin(lines, block)
@@ -1165,24 +1165,24 @@ fn trim_surrounding_blank_lines(lines: Vec<String>) -> Vec<String> {
 }
 
 /// JS: extractOriginal(lines, block), with the missing slot kept apart from
-/// an empty one: `None` when the block has no `data-anti-design-variant="original"`
+/// an empty one: `None` when the block has no `data-anti-ai-design-variant="original"`
 /// element at all.
 fn extract_original(lines: &[String], block: &MarkerBlock) -> Option<Vec<String>> {
     let text = strip_style_and_join(lines, block);
-    extract_inner_by_attr(&text, "data-anti-design-variant=\"original\"")
+    extract_inner_by_attr(&text, "data-anti-ai-design-variant=\"original\"")
         .map(|inner| trim_surrounding_blank_lines(inner.split('\n').map(String::from).collect()))
 }
 
-const ORIGINAL_MISSING: &str = "Original not found: the variants wrapper has no data-anti-design-variant=\"original\" slot, so the element it replaced cannot be restored from it.";
+const ORIGINAL_MISSING: &str = "Original not found: the variants wrapper has no data-anti-ai-design-variant=\"original\" slot, so the element it replaced cannot be restored from it.";
 
 static INSERT_MODE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(&format!(r#"data-anti-design-mode{ws}*={ws}*(?:"insert"|'insert')"#, ws = WS)).unwrap()
+    Regex::new(&format!(r#"data-anti-ai-design-mode{ws}*={ws}*(?:"insert"|'insert')"#, ws = WS)).unwrap()
 });
 
 /// The original slot's content for discard, or `None` (refuse, write nothing)
 /// when a wrapper that replaced an element has none (#875): restoring "nothing" there
 /// deletes the element while reporting success. An insert wrapper
-/// (`data-anti-design-mode="insert"`) replaced nothing and legitimately has no
+/// (`data-anti-ai-design-mode="insert"`) replaced nothing and legitimately has no
 /// slot, so it restores to nothing.
 fn original_or_refuse(
     id: &str,
@@ -1204,12 +1204,12 @@ fn original_or_refuse(
         .then(Vec::new)
 }
 
-/// The whole opening tag that carries `data-anti-design-variants="<id>"`,
+/// The whole opening tag that carries `data-anti-ai-design-variants="<id>"`,
 /// from its `<` to its `>`, across line breaks.
 fn wrapper_open_tag<'a>(text: &'a str, id: &str) -> Option<&'a str> {
     let e = regex::escape(id);
     let re = Regex::new(&format!(
-        r#"data-anti-design-variants{ws}*={ws}*(?:"{id}"|'{id}'|\{{["']{id}["']\}})"#,
+        r#"data-anti-ai-design-variants{ws}*={ws}*(?:"{id}"|'{id}'|\{{["']{id}["']\}})"#,
         ws = WS,
         id = e
     ))
@@ -1229,7 +1229,7 @@ fn extract_variant(
     let text = strip_style_and_join(lines, block);
     let inner = extract_inner_by_attr(
         &text,
-        &format!("data-anti-design-variant=\"{}\"", variant_num),
+        &format!("data-anti-ai-design-variant=\"{}\"", variant_num),
     )?;
     let result = trim_surrounding_blank_lines(inner.split('\n').map(String::from).collect());
     if result.is_empty() {
@@ -1241,7 +1241,7 @@ fn extract_variant(
 
 /// JS: extractCss(lines, block, id)
 fn extract_css(lines: &[String], block: &MarkerBlock, id: &str) -> Option<Vec<String>> {
-    let style_attr = format!("data-anti-design-css=\"{}\"", id);
+    let style_attr = format!("data-anti-ai-design-css=\"{}\"", id);
     let mut in_style = false;
     let mut content: Vec<String> = Vec::new();
     for line in &lines[block.start..=block.end.min(lines.len() - 1)] {
@@ -1300,7 +1300,7 @@ fn strip_jsx_template_lines(content: &[String]) -> Option<Vec<String>> {
     }
     let last_idx = out.len() - 1;
     let last_trim = out[last_idx]
-        .trim_end_matches(anti_design_core::js::is_js_whitespace)
+        .trim_end_matches(anti_ai_design_core::js::is_js_whitespace)
         .to_string();
     if last_trim == "`}" {
         out.pop();
@@ -1344,10 +1344,10 @@ fn deindent_content(content: &[String], base_indent: &str) -> Vec<String> {
 
 /// JS: findSessionFile(id, cwd) → (file, content, lines)
 fn find_session_file(id: &str, cwd: &str) -> Option<(String, String, Vec<String>)> {
-    let skip: [&str; 5] = ["node_modules", ".git", ".anti-design", "dist", "build"];
+    let skip: [&str; 5] = ["node_modules", ".git", ".anti-ai-design", "dist", "build"];
     let extensions = resolve_live_template_extensions(cwd);
     let file = find_source_file(
-        &format!("anti-design-variants-start {}", id),
+        &format!("anti-ai-design-variants-start {}", id),
         cwd,
         &extensions,
         &skip,
@@ -1369,7 +1369,7 @@ mod discard_tests {
             .map(|d| d.as_nanos())
             .unwrap_or(0);
         let dir = std::env::temp_dir().join(format!(
-            "anti-design-discard-{}-{nanos}",
+            "anti-ai-design-discard-{}-{nanos}",
             std::process::id()
         ));
         let _ = std::fs::remove_dir_all(&dir);
@@ -1377,20 +1377,20 @@ mod discard_tests {
         let file = dir.join("Login.tsx");
         let src = [
             "      </div>",
-            "      <div data-anti-design-variants=\"ab12cd34\" data-anti-design-variant-count=\"3\" style={{ display: \"contents\" }}>",
-            "        {/* anti-design-variants-start ab12cd34 */}",
-            "        <style data-anti-design-css=\"ab12cd34\">{`",
-            "          @scope ([data-anti-design-variant=\"1\"]) { :scope > .x { color: red; } }",
+            "      <div data-anti-ai-design-variants=\"ab12cd34\" data-anti-ai-design-variant-count=\"3\" style={{ display: \"contents\" }}>",
+            "        {/* anti-ai-design-variants-start ab12cd34 */}",
+            "        <style data-anti-ai-design-css=\"ab12cd34\">{`",
+            "          @scope ([data-anti-ai-design-variant=\"1\"]) { :scope > .x { color: red; } }",
             "        `}</style>",
             "        {/* Original */}",
-            "        <div data-anti-design-variant=\"original\">",
+            "        <div data-anti-ai-design-variant=\"original\">",
             "          <Bar title=\"Log in\" />",
             "        </div>",
             "        {/* Variants: insert below this line */}",
-            "        <div data-anti-design-variant=\"1\">",
+            "        <div data-anti-ai-design-variant=\"1\">",
             "          <Bar title=\"Log in\" />",
             "        </div>",
-            "        {/* anti-design-variants-end ab12cd34 */}",
+            "        {/* anti-ai-design-variants-end ab12cd34 */}",
             "      </div>",
             "    </AuthPage>",
         ];
@@ -1417,7 +1417,7 @@ mod original_slot_tests {
             .map(|d| d.as_nanos())
             .unwrap_or(0);
         let dir = std::env::temp_dir().join(format!(
-            "anti-design-original-slot-{}-{nanos}",
+            "anti-ai-design-original-slot-{}-{nanos}",
             std::process::id()
         ));
         std::fs::create_dir_all(&dir).unwrap();
@@ -1431,13 +1431,13 @@ mod original_slot_tests {
     // The hand-written fallback scaffold live.md used to show: no original slot.
     const NO_ORIGINAL: &[&str] = &[
         "<main>",
-        "  <!-- anti-design-variants-start ab12cd34 -->",
-        "  <div data-anti-design-variants=\"ab12cd34\" data-anti-design-variant-count=\"1\" style=\"display: contents\">",
-        "    <div data-anti-design-variant=\"1\">",
+        "  <!-- anti-ai-design-variants-start ab12cd34 -->",
+        "  <div data-anti-ai-design-variants=\"ab12cd34\" data-anti-ai-design-variant-count=\"1\" style=\"display: contents\">",
+        "    <div data-anti-ai-design-variant=\"1\">",
         "      <h1 class=\"hero\">Bolder</h1>",
         "    </div>",
         "  </div>",
-        "  <!-- anti-design-variants-end ab12cd34 -->",
+        "  <!-- anti-ai-design-variants-end ab12cd34 -->",
         "</main>",
     ];
 
@@ -1460,26 +1460,26 @@ mod original_slot_tests {
         let _ = std::fs::remove_dir_all(&dir);
         assert!(result.is_ok(), "{:?}", result.err());
         assert!(out.contains("<h1 class=\"hero\">Bolder</h1>"), "{out}");
-        assert!(!out.contains("anti-design-variants-start"), "{out}");
+        assert!(!out.contains("anti-ai-design-variants-start"), "{out}");
     }
 
     #[test]
     fn an_empty_original_slot_still_restores_to_empty() {
         let src = [
             "<main>",
-            "  <!-- anti-design-variants-start ab12cd34 -->",
-            "  <div data-anti-design-variants=\"ab12cd34\" data-anti-design-variant-count=\"1\" style=\"display: contents\">",
-            "    <div data-anti-design-variant=\"original\"></div>",
-            "    <div data-anti-design-variant=\"1\"><p>New</p></div>",
+            "  <!-- anti-ai-design-variants-start ab12cd34 -->",
+            "  <div data-anti-ai-design-variants=\"ab12cd34\" data-anti-ai-design-variant-count=\"1\" style=\"display: contents\">",
+            "    <div data-anti-ai-design-variant=\"original\"></div>",
+            "    <div data-anti-ai-design-variant=\"1\"><p>New</p></div>",
             "  </div>",
-            "  <!-- anti-design-variants-end ab12cd34 -->",
+            "  <!-- anti-ai-design-variants-end ab12cd34 -->",
             "</main>",
         ];
         let (dir, path, lines) = scratch("index.html", &src);
         handle_discard_unlocked("ab12cd34", &lines, &path).unwrap();
         let out = std::fs::read_to_string(&path).unwrap();
         let _ = std::fs::remove_dir_all(&dir);
-        assert!(!out.contains("anti-design-variants"), "{out}");
+        assert!(!out.contains("anti-ai-design-variants"), "{out}");
     }
 
     #[test]
@@ -1488,14 +1488,14 @@ mod original_slot_tests {
         // this replace wrapper; neither may exempt it from the refusal.
         let src = [
             "<main>",
-            "  <!-- anti-design-variants-start ab12cd34 -->",
-            "  <div data-anti-design-variants=\"ab12cd34\" data-anti-design-variant-count=\"1\" style=\"display: contents\">",
-            "    <style data-anti-design-css=\"ab12cd34\">[data-anti-design-mode=\"insert\"] { outline: 0; }</style>",
-            "    <div data-anti-design-variant=\"1\">",
-            "      <div data-anti-design-variants=\"ef56ab78\" data-anti-design-mode=\"insert\" data-anti-design-variant-count=\"1\"></div>",
+            "  <!-- anti-ai-design-variants-start ab12cd34 -->",
+            "  <div data-anti-ai-design-variants=\"ab12cd34\" data-anti-ai-design-variant-count=\"1\" style=\"display: contents\">",
+            "    <style data-anti-ai-design-css=\"ab12cd34\">[data-anti-ai-design-mode=\"insert\"] { outline: 0; }</style>",
+            "    <div data-anti-ai-design-variant=\"1\">",
+            "      <div data-anti-ai-design-variants=\"ef56ab78\" data-anti-ai-design-mode=\"insert\" data-anti-ai-design-variant-count=\"1\"></div>",
             "    </div>",
             "  </div>",
-            "  <!-- anti-design-variants-end ab12cd34 -->",
+            "  <!-- anti-ai-design-variants-end ab12cd34 -->",
             "</main>",
         ];
         let (dir, path, lines) = scratch("index.html", &src);
@@ -1510,16 +1510,16 @@ mod original_slot_tests {
     fn an_insert_wrapper_split_over_lines_still_discards() {
         let src = [
             "<main>",
-            "  <!-- anti-design-variants-start ab12cd34 -->",
+            "  <!-- anti-ai-design-variants-start ab12cd34 -->",
             "  <div",
-            "    data-anti-design-variants=\"ab12cd34\"",
-            "    data-anti-design-mode=\"insert\"",
-            "    data-anti-design-variant-count=\"1\"",
+            "    data-anti-ai-design-variants=\"ab12cd34\"",
+            "    data-anti-ai-design-mode=\"insert\"",
+            "    data-anti-ai-design-variant-count=\"1\"",
             "    style=\"display: contents\"",
             "  >",
-            "    <div data-anti-design-variant=\"1\"><p>New</p></div>",
+            "    <div data-anti-ai-design-variant=\"1\"><p>New</p></div>",
             "  </div>",
-            "  <!-- anti-design-variants-end ab12cd34 -->",
+            "  <!-- anti-ai-design-variants-end ab12cd34 -->",
             "</main>",
         ];
         let (dir, path, lines) = scratch("index.html", &src);
@@ -1533,11 +1533,11 @@ mod original_slot_tests {
     fn an_insert_wrapper_has_no_original_and_discards_to_nothing() {
         let src = [
             "<main>",
-            "  <!-- anti-design-variants-start ab12cd34 -->",
-            "  <div data-anti-design-variants=\"ab12cd34\" data-anti-design-mode=\"insert\" data-anti-design-variant-count=\"1\" style=\"display: contents\">",
-            "    <div data-anti-design-variant=\"1\"><p>New</p></div>",
+            "  <!-- anti-ai-design-variants-start ab12cd34 -->",
+            "  <div data-anti-ai-design-variants=\"ab12cd34\" data-anti-ai-design-mode=\"insert\" data-anti-ai-design-variant-count=\"1\" style=\"display: contents\">",
+            "    <div data-anti-ai-design-variant=\"1\"><p>New</p></div>",
             "  </div>",
-            "  <!-- anti-design-variants-end ab12cd34 -->",
+            "  <!-- anti-ai-design-variants-end ab12cd34 -->",
             "</main>",
         ];
         let (dir, path, lines) = scratch("index.html", &src);
@@ -1560,25 +1560,25 @@ mod carbonize_tests {
         };
         [
             "  <main>",
-            "    <!-- anti-design-variants-start ab12cd34 -->",
-            "    <div data-anti-design-variants=\"ab12cd34\" data-anti-design-variant-count=\"2\" style=\"display: contents\">",
+            "    <!-- anti-ai-design-variants-start ab12cd34 -->",
+            "    <div data-anti-ai-design-variants=\"ab12cd34\" data-anti-ai-design-variant-count=\"2\" style=\"display: contents\">",
             "      <!-- Original -->",
-            "      <div data-anti-design-variant=\"original\">",
+            "      <div data-anti-ai-design-variant=\"original\">",
             "        <h1 class=\"hero-title\">Title</h1>",
             "      </div>",
             "      <!-- Variants: insert below this line -->",
             style_open,
-            "        [data-anti-design-variant=\"1\"] > h1 { font-weight: 300; }",
-            "        [data-anti-design-variant=\"2\"] > h1 { font-weight: 900; }",
+            "        [data-anti-ai-design-variant=\"1\"] > h1 { font-weight: 300; }",
+            "        [data-anti-ai-design-variant=\"2\"] > h1 { font-weight: 900; }",
             style_close,
-            "      <div data-anti-design-variant=\"1\">",
+            "      <div data-anti-ai-design-variant=\"1\">",
             "        <h1 class=\"hero-title\">Title</h1>",
             "      </div>",
-            "      <div data-anti-design-variant=\"2\" style=\"display: none\">",
+            "      <div data-anti-ai-design-variant=\"2\" style=\"display: none\">",
             "        <h1 class=\"hero-title\">Title</h1>",
             "      </div>",
             "    </div>",
-            "    <!-- anti-design-variants-end ab12cd34 -->",
+            "    <!-- anti-ai-design-variants-end ab12cd34 -->",
             "  </main>",
             "",
             "<style>",
@@ -1595,7 +1595,7 @@ mod carbonize_tests {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos())
             .unwrap_or(0);
-        let dir = std::env::temp_dir().join(format!("anti-design-carbonize-{}-{nanos}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-carbonize-{}-{nanos}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let file = dir.join(file_name);
@@ -1627,13 +1627,13 @@ mod carbonize_tests {
     /// the dev server fails the reload of the index that vanished.
     #[test]
     fn an_astro_carbonize_block_keeps_the_style_tag_inline() {
-        let out = carbonize("index.astro", "      <style is:inline data-anti-design-css=\"ab12cd34\">");
+        let out = carbonize("index.astro", "      <style is:inline data-anti-ai-design-css=\"ab12cd34\">");
         assert_eq!(
             style_tags(&out),
-            vec!["<style is:inline data-anti-design-css=\"ab12cd34\">", "<style>"],
+            vec!["<style is:inline data-anti-ai-design-css=\"ab12cd34\">", "<style>"],
             "{out}"
         );
-        assert!(out.contains("<!-- anti-design-carbonize-start ab12cd34 -->"), "{out}");
+        assert!(out.contains("<!-- anti-ai-design-carbonize-start ab12cd34 -->"), "{out}");
     }
 
     /// The tag comes from the file type, not from what the agent wrote: an
@@ -1641,20 +1641,20 @@ mod carbonize_tests {
     /// into the inline form.
     #[test]
     fn an_astro_carbonize_block_is_inline_whatever_the_variants_tag_was() {
-        let out = carbonize("index.astro", "      <style data-anti-design-css=\"ab12cd34\">");
+        let out = carbonize("index.astro", "      <style data-anti-ai-design-css=\"ab12cd34\">");
         assert_eq!(
             style_tags(&out),
-            vec!["<style is:inline data-anti-design-css=\"ab12cd34\">", "<style>"],
+            vec!["<style is:inline data-anti-ai-design-css=\"ab12cd34\">", "<style>"],
             "{out}"
         );
     }
 
     #[test]
     fn an_html_carbonize_block_keeps_the_plain_style_tag() {
-        let out = carbonize("index.html", "      <style data-anti-design-css=\"ab12cd34\">");
+        let out = carbonize("index.html", "      <style data-anti-ai-design-css=\"ab12cd34\">");
         assert_eq!(
             style_tags(&out),
-            vec!["<style data-anti-design-css=\"ab12cd34\">", "<style>"],
+            vec!["<style data-anti-ai-design-css=\"ab12cd34\">", "<style>"],
             "{out}"
         );
     }
@@ -1665,14 +1665,14 @@ mod carbonize_tests {
     fn a_vue_carbonize_block_uses_the_component_tag() {
         let out = carbonize(
             "Hero.vue",
-            "      <component is=\"style\" data-anti-design-css=\"ab12cd34\">",
+            "      <component is=\"style\" data-anti-ai-design-css=\"ab12cd34\">",
         );
         let lines: Vec<&str> = out.lines().map(str::trim).collect();
         let open = lines
             .iter()
-            .position(|l| *l == "<component is=\"style\" data-anti-design-css=\"ab12cd34\">")
+            .position(|l| *l == "<component is=\"style\" data-anti-ai-design-css=\"ab12cd34\">")
             .unwrap_or_else(|| panic!("no component open tag: {out}"));
-        assert_eq!(lines[open + 1], "[data-anti-design-variant=\"1\"] > h1 { font-weight: 300; }", "{out}");
+        assert_eq!(lines[open + 1], "[data-anti-ai-design-variant=\"1\"] > h1 { font-weight: 300; }", "{out}");
         assert_eq!(lines[open + 3], "</component>", "{out}");
         assert_eq!(style_tags(&out), vec!["<style>"], "{out}");
         assert_eq!(out.matches("</style>").count(), 1, "{out}");
@@ -1681,8 +1681,8 @@ mod carbonize_tests {
     #[test]
     fn css_is_extracted_from_a_component_style_block_up_to_its_close() {
         let lines: Vec<String> = [
-            "<div data-anti-design-variants=\"ab12cd34\">",
-            "  <component is=\"style\" data-anti-design-css=\"ab12cd34\">",
+            "<div data-anti-ai-design-variants=\"ab12cd34\">",
+            "  <component is=\"style\" data-anti-ai-design-css=\"ab12cd34\">",
             "    .a { color: red; }",
             "  </component>",
             "  <p>after</p>",
@@ -1697,7 +1697,7 @@ mod carbonize_tests {
             Some(vec!["    .a { color: red; }".to_string()])
         );
         let one_line = vec![
-            "<component is=\"style\" data-anti-design-css=\"ab12cd34\">.a { color: red; }</component>".to_string(),
+            "<component is=\"style\" data-anti-ai-design-css=\"ab12cd34\">.a { color: red; }</component>".to_string(),
         ];
         let block = MarkerBlock { start: 0, end: 0 };
         assert_eq!(
@@ -1711,8 +1711,8 @@ mod carbonize_tests {
     #[test]
     fn a_users_own_style_in_a_slot_is_kept_and_not_counted_as_tags() {
         let lines: Vec<String> = [
-            "<div data-anti-design-variants=\"ab12cd34\">",
-            "  <div data-anti-design-variant=\"original\">",
+            "<div data-anti-ai-design-variants=\"ab12cd34\">",
+            "  <div data-anti-ai-design-variant=\"original\">",
             "    <style>.x::after { content: \"</div>\"; }</style>",
             "    <p>kept</p>",
             "  </div>",
@@ -1736,11 +1736,11 @@ mod carbonize_tests {
     #[test]
     fn a_self_closing_style_does_not_mask_the_next_slot() {
         let lines: Vec<String> = [
-            "<div data-anti-design-variants=\"ab12cd34\">",
-            "  <div data-anti-design-variant=\"original\">",
+            "<div data-anti-ai-design-variants=\"ab12cd34\">",
+            "  <div data-anti-ai-design-variant=\"original\">",
             "    <style dangerouslySetInnerHTML={{ __html: css }} />",
             "  </div>",
-            "  <div data-anti-design-variant=\"1\">",
+            "  <div data-anti-ai-design-variant=\"1\">",
             "    <style>{`.x { color: red; }`}</style>",
             "  </div>",
             "</div>",
@@ -1760,19 +1760,19 @@ mod carbonize_tests {
     }
 
     /// `<component>` is also Vue's dynamic component. Only the preview element
-    /// (the one carrying `data-anti-design-css`) is plumbing; the user's own
+    /// (the one carrying `data-anti-ai-design-css`) is plumbing; the user's own
     /// `<component :is>` lines, self-closing or paired, must survive.
     #[test]
     fn vue_dynamic_components_are_not_mistaken_for_the_preview_style() {
         let lines: Vec<String> = [
-            "<div data-anti-design-variants=\"ab12cd34\">",
-            "  <div data-anti-design-variant=\"original\">",
+            "<div data-anti-ai-design-variants=\"ab12cd34\">",
+            "  <div data-anti-ai-design-variant=\"original\">",
             "    <component :is=\"Icon\" class=\"x\" />",
             "  </div>",
-            "  <component is=\"style\" data-anti-design-css=\"ab12cd34\">",
+            "  <component is=\"style\" data-anti-ai-design-css=\"ab12cd34\">",
             "    .secret { color: red; }",
             "  </component>",
-            "  <div data-anti-design-variant=\"1\">",
+            "  <div data-anti-ai-design-variant=\"1\">",
             "    <component :is=\"Icon\" class=\"x\" />",
             "    <component :is=\"Card\">",
             "      <p>inside</p>",
@@ -1788,7 +1788,7 @@ mod carbonize_tests {
 
         let stripped = strip_style_and_join(&lines, &block);
         assert!(!stripped.contains(".secret"), "{stripped}");
-        assert!(!stripped.contains("data-anti-design-css"), "{stripped}");
+        assert!(!stripped.contains("data-anti-ai-design-css"), "{stripped}");
         assert_eq!(stripped.matches("<component :is=\"Icon\" class=\"x\" />").count(), 2, "{stripped}");
 
         let original = extract_original(&lines, &block).expect("original slot");
@@ -1821,11 +1821,11 @@ mod bake_tests {
         let variant = |n: &str, hidden: bool| {
             let style = if hidden { " style={{ display: 'none' }}" } else { "" };
             format!(
-                "          <div data-anti-design-variant=\"{n}\"{style}>\n            <div className=\"pricing-grid\">\n              <article className=\"pricing-card\">Starter</article>\n            </div>\n          </div>\n"
+                "          <div data-anti-ai-design-variant=\"{n}\"{style}>\n            <div className=\"pricing-grid\">\n              <article className=\"pricing-card\">Starter</article>\n            </div>\n          </div>\n"
             )
         };
         format!(
-            "export default function App() {{\n  return (\n    <main>\n      <section className=\"pricing\" id=\"pricing\">\n        <h2 className=\"pricing-title\">Simple pricing</h2>\n        <div data-anti-design-variants=\"{s}\" data-anti-design-variant-count=\"3\" style={{{{ display: \"contents\" }}}}>\n          {{/* anti-design-variants-start {s} */}}\n          {{/* Original */}}\n          <div data-anti-design-variant=\"original\">\n            <div className=\"pricing-grid\">\n              <article className=\"pricing-card\">Starter</article>\n            </div>\n          </div>\n          {{/* Variants: insert below this line */}}\n          <style data-anti-design-css=\"{s}\">{{`\n            @scope ([data-anti-design-variant=\"1\"]) {{ :scope > .pricing-grid {{ gap: 8px; }} }}\n            @scope ([data-anti-design-variant=\"2\"]) {{\n              :scope > .pricing-grid {{ gap: 32px; }}\n              :scope .pricing-card {{ border: 2px solid #111; }}\n            }}\n            @scope ([data-anti-design-variant=\"3\"]) {{ :scope > .pricing-grid {{ gap: 0; }} }}\n          `}}</style>\n{v1}{v2}{v3}          {{/* anti-design-variants-end {s} */}}\n        </div>\n      </section>\n    </main>\n  );\n}}\n",
+            "export default function App() {{\n  return (\n    <main>\n      <section className=\"pricing\" id=\"pricing\">\n        <h2 className=\"pricing-title\">Simple pricing</h2>\n        <div data-anti-ai-design-variants=\"{s}\" data-anti-ai-design-variant-count=\"3\" style={{{{ display: \"contents\" }}}}>\n          {{/* anti-ai-design-variants-start {s} */}}\n          {{/* Original */}}\n          <div data-anti-ai-design-variant=\"original\">\n            <div className=\"pricing-grid\">\n              <article className=\"pricing-card\">Starter</article>\n            </div>\n          </div>\n          {{/* Variants: insert below this line */}}\n          <style data-anti-ai-design-css=\"{s}\">{{`\n            @scope ([data-anti-ai-design-variant=\"1\"]) {{ :scope > .pricing-grid {{ gap: 8px; }} }}\n            @scope ([data-anti-ai-design-variant=\"2\"]) {{\n              :scope > .pricing-grid {{ gap: 32px; }}\n              :scope .pricing-card {{ border: 2px solid #111; }}\n            }}\n            @scope ([data-anti-ai-design-variant=\"3\"]) {{ :scope > .pricing-grid {{ gap: 0; }} }}\n          `}}</style>\n{v1}{v2}{v3}          {{/* anti-ai-design-variants-end {s} */}}\n        </div>\n      </section>\n    </main>\n  );\n}}\n",
             s = SESSION,
             v1 = variant("1", false),
             v2 = variant("2", true),
@@ -1840,10 +1840,10 @@ mod bake_tests {
     }
 
     fn project_with(tag: &str, element: Option<Value>) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("anti-design-accept-bake-{}-{}", tag, std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-accept-bake-{}-{}", tag, std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("src")).unwrap();
-        std::fs::create_dir_all(dir.join(".anti-design/live")).unwrap();
+        std::fs::create_dir_all(dir.join(".anti-ai-design/live")).unwrap();
         std::fs::write(dir.join("src/App.jsx"), app_jsx()).unwrap();
         std::fs::write(dir.join("src/styles.css"), ".pricing-grid { display: grid; gap: 20px; }\n.pricing-card { padding: 20px; }\n").unwrap();
         std::fs::write(dir.join("index.html"), "<html><body><div id=\"root\"></div></body></html>").unwrap();
@@ -1884,19 +1884,19 @@ mod bake_tests {
         assert_eq!(result["css"]["anchor"], json!("div.pricing-grid"));
         assert_eq!(result["verify"]["clean"], json!(true), "{result}");
         let jsx = std::fs::read_to_string(dir.join("src/App.jsx")).unwrap();
-        assert!(!jsx.contains("data-anti-design"), "{jsx}");
-        assert!(!jsx.contains("anti-design-variants"), "{jsx}");
+        assert!(!jsx.contains("data-anti-ai-design"), "{jsx}");
+        assert!(!jsx.contains("anti-ai-design-variants"), "{jsx}");
         assert!(!jsx.contains("<style"), "{jsx}");
         assert_eq!(jsx.matches("className=\"pricing-grid\"").count(), 1, "{jsx}");
         // The element sits where the wrapper started, at its indentation.
         assert!(jsx.contains("        <h2 className=\"pricing-title\">Simple pricing</h2>\n        <div className=\"pricing-grid\">\n          <article className=\"pricing-card\">Starter</article>\n        </div>\n      </section>"), "{jsx}");
         let css = std::fs::read_to_string(dir.join("src/styles.css")).unwrap();
         assert!(css.starts_with(".pricing-grid { display: grid; gap: 20px; }\n"), "existing rules untouched: {css}");
-        assert!(css.contains("/* anti-design generate ab12cd34: accepted variant 2 */"), "{css}");
+        assert!(css.contains("/* anti-ai-design generate ab12cd34: accepted variant 2 */"), "{css}");
         assert!(css.contains("div.pricing-grid { gap: 32px; }"), "{css}");
         assert!(css.contains("div.pricing-grid .pricing-card { border: 2px solid #111; }"), "{css}");
         assert!(!css.contains("8px") && !css.contains("gap: 0"), "other variants dropped: {css}");
-        assert!(!css.contains(":scope") && !css.contains("data-anti-design"), "{css}");
+        assert!(!css.contains(":scope") && !css.contains("data-anti-ai-design"), "{css}");
         // Idempotent: the receipt answers a rerun.
         let again = accept(&dir, &["--id", SESSION, "--variant", "2", "--bake"]);
         assert_eq!(again["alreadyApplied"], json!(true), "{again}");
@@ -1912,7 +1912,7 @@ mod bake_tests {
         assert_eq!(plain["carbonize"], json!(true), "{plain}");
         assert!(plain.get("baked").is_none(), "{plain}");
         let jsx = std::fs::read_to_string(dir.join("src/App.jsx")).unwrap();
-        assert!(jsx.contains("anti-design-carbonize-start"), "{jsx}");
+        assert!(jsx.contains("anti-ai-design-carbonize-start"), "{jsx}");
         assert!(!std::fs::read_to_string(dir.join("src/styles.css")).unwrap().contains("32px"));
 
         // The generate verb's session (the journal says origin agent) carbonizes
@@ -1925,7 +1925,7 @@ mod bake_tests {
         let lane = accept(&dir2, &["--id", SESSION, "--variant", "2"]);
         assert_eq!(lane["carbonize"], json!(true), "{lane}");
         assert!(lane.get("baked").is_none(), "{lane}");
-        assert!(std::fs::read_to_string(dir2.join("src/App.jsx")).unwrap().contains("anti-design-carbonize-start"));
+        assert!(std::fs::read_to_string(dir2.join("src/App.jsx")).unwrap().contains("anti-ai-design-carbonize-start"));
         // --bake is the only way in, and --no-bake still wins over it.
         let dir3 = project("origin3");
         let baked = accept(&dir3, &["--id", SESSION, "--variant", "2", "--bake"]);
@@ -1946,7 +1946,7 @@ mod bake_tests {
         let result = accept(&dir, &["--id", SESSION, "--variant", "2", "--bake"]);
         assert_eq!(result["carbonize"], json!(true), "{result}");
         assert!(result["bakeSkipped"].as_str().unwrap().contains("div.pricing-grid matches 3 elements"), "{result}");
-        assert!(std::fs::read_to_string(dir.join("src/App.jsx")).unwrap().contains("anti-design-carbonize-start"));
+        assert!(std::fs::read_to_string(dir.join("src/App.jsx")).unwrap().contains("anti-ai-design-carbonize-start"));
         assert!(!std::fs::read_to_string(dir.join("src/styles.css")).unwrap().contains("32px"));
         // Without the overlay's descriptor there is nothing to verify against.
         let dir2 = project_with("nodesc", None);
@@ -1967,7 +1967,7 @@ mod bake_tests {
         assert_eq!(result["carbonize"], json!(true), "{result}");
         assert!(result["bakeSkipped"].as_str().unwrap().contains("knobs"), "{result}");
         let jsx = std::fs::read_to_string(dir.join("src/App.jsx")).unwrap();
-        assert!(jsx.contains("anti-design-carbonize-start"), "{jsx}");
+        assert!(jsx.contains("anti-ai-design-carbonize-start"), "{jsx}");
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
