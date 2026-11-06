@@ -8,11 +8,11 @@ export function renderFixes(main, ctx) {
   let alive = true;
   const narrow = window.matchMedia('(max-width: 47.99rem)');
 
-  const root = h('div', { class: 'screen' }, h('h1', { text: 'Safe fixes' }));
+  const root = h('div', { class: 'screen' }, h('h1', { text: 'Fixes' }));
   main.append(root);
 
   if (!scan) {
-    root.append(h('div', { class: 'notice' }, h('h2', { class: 'notice-title', text: 'Nothing to fix yet' }), h('p', { text: 'Scan a folder or snippet first. Fixes are previewed from the scan target.' }), h('a', { class: 'btn btn-primary', href: '#/scan', text: 'Go to Scan' })));
+    root.append(h('div', { class: 'notice' }, h('h2', { class: 'notice-title', text: 'Run a scan first' }), h('p', { text: 'Fixes come from a scan. Once you have scanned your project, any finding the detector can fix safely shows up here as a before-and-after.' }), h('a', { class: 'btn btn-primary', href: '#/scan', text: 'Go to Scan' })));
     return;
   }
   if (!state.fix || state.fix.scan !== scan) {
@@ -27,7 +27,7 @@ export function renderFixes(main, ctx) {
   narrow.addEventListener('change', onNarrow);
 
   function guarantee() {
-    return h('p', { class: 'guarantee' }, h('strong', { text: 'Nothing is written until you apply.' }), ' ', isSnippet ? 'This is a pasted snippet: applying only produces fixed text for you to copy.' : 'This page shows a dry run. Applying edits the files shown below and appends a line per fix to the changelog.');
+    return h('p', { class: 'guarantee' }, h('strong', { text: 'Nothing has been changed yet.' }), ' ', isSnippet ? 'This is pasted code, so applying only gives you fixed text to copy. No file is touched.' : 'Below is a preview. If you apply it, only the files shown are edited, and each change is recorded in a changelog.');
   }
 
   async function load(force) {
@@ -112,9 +112,9 @@ export function renderFixes(main, ctx) {
     const panel = h(
       'div',
       { class: 'confirm', role: 'group', 'aria-labelledby': 'confirm-h' },
-      h('h2', { id: 'confirm-h', class: 'notice-title', text: isSnippet ? 'Produce the fixed snippet?' : `Write ${plural(p.fixCount, 'fix', 'fixes')} to ${plural(p.fileCount, 'file')}?` }),
+      h('h2', { id: 'confirm-h', class: 'notice-title', text: isSnippet ? 'Get the fixed code?' : `Write ${plural(p.fixCount, 'fix', 'fixes')} to ${plural(p.fileCount, 'file')}?` }),
       h('p', { text: isSnippet ? 'No file is touched. You get the fixed text back to copy.' : `This edits ${p.files.map((f) => f.file).join(', ')} under ${state.info?.root || 'the root'} and logs each change to .anti-ai-design/changelog.md. There is no undo button; the diff above is the record.` }),
-      h('div', { class: 'row' }, h('button', { type: 'button', class: 'btn btn-primary', text: isSnippet ? 'Yes, produce it' : 'Yes, write the changes', onclick: apply }), cancel),
+      h('div', { class: 'row' }, h('button', { type: 'button', class: 'btn btn-primary', text: isSnippet ? 'Yes, give me the fixed code' : 'Yes, change these files', onclick: apply }), cancel),
     );
     setTimeout(() => panel.querySelector('button')?.focus(), 0);
     return panel;
@@ -129,11 +129,11 @@ export function renderFixes(main, ctx) {
       return;
     }
     if (fx.phase === 'loading') {
-      body.append(h('p', { class: 'loading', role: 'status', text: 'Reading the fixes the detector would make…' }));
+      body.append(h('p', { class: 'loading', role: 'status', text: 'Working out what the fixes would change…' }));
       return;
     }
     if (fx.phase === 'applying') {
-      body.append(h('p', { class: 'loading', role: 'status', text: 'Applying, then scanning again…' }));
+      body.append(h('p', { class: 'loading', role: 'status', text: 'Applying the fixes, then scanning again to check…' }));
       return;
     }
     if (fx.phase === 'error') {
@@ -147,18 +147,19 @@ export function renderFixes(main, ctx) {
     if (!p || p.fixCount === 0) {
       body.append(
         guarantee(),
-        h('div', { class: 'notice' }, h('h2', { class: 'notice-title', text: 'No safe fix for this scan' }), h('p', { text: 'The detector only rewrites code when the change is mechanical and cannot alter meaning. Today that covers gradient text. The findings on the Results screen need a person.' }), h('a', { class: 'btn btn-quiet', href: '#/results', text: 'Back to the findings' })),
+        h('div', { class: 'notice' }, h('h2', { class: 'notice-title', text: 'Nothing here can be fixed automatically' }), h('p', { text: 'The detector only rewrites code when the change is mechanical and cannot alter meaning. Today that covers gradient text. Everything else needs a person to decide, and the Findings screen says what to change.' }), h('a', { class: 'btn btn-quiet', href: '#/results', text: 'Back to Findings' })),
       );
       return;
     }
     body.append(
       guarantee(),
-      h('p', { class: 'lede' }, `${plural(p.fixCount, 'fix', 'fixes')} in ${plural(p.fileCount, 'file')}. Read the diff, then decide.`),
+      h('p', { class: 'lede' }, `${plural(p.fixCount, 'fix', 'fixes')} in ${plural(p.fileCount, 'file')}. Read what would change, then decide.`),
+      h('p', { class: 'help legend' }, 'How to read it: lines starting with ', h('code', { text: '−' }), ' are removed, lines starting with ', h('code', { text: '+' }), ' are added, and unmarked lines are unchanged context.'),
       layoutToggle(),
       diffs(p.files),
       fx.confirm
         ? confirmPanel(p)
-        : h('div', { class: 'row' }, h('button', { id: 'apply-btn', type: 'button', class: 'btn btn-primary', text: `Apply ${plural(p.fixCount, 'fix', 'fixes')}`, onclick: () => { fx.confirm = true; draw(); } }), h('p', { class: 'help', text: 'You will be asked to confirm first.' })),
+        : h('div', { class: 'row' }, h('button', { id: 'apply-btn', type: 'button', class: 'btn btn-primary', text: `Apply ${plural(p.fixCount, 'fix', 'fixes')}`, onclick: () => { fx.confirm = true; draw(); } }), h('p', { class: 'help', text: 'You will be asked to confirm before anything is written.' })),
     );
   }
 
@@ -181,10 +182,10 @@ export function renderFixes(main, ctx) {
       h(
         'section',
         {},
-        h('h2', { class: 'section-title', text: 'Scanned again' }),
+        h('h2', { class: 'section-title', text: 'Checked again after the fix' }),
         h('p', { class: gone ? 'verdict' : 'verdict verdict-open', text: gone ? `The fixed findings are gone. ${plural(fx.rescan.after, 'finding')} left, down from ${fx.rescan.before}.` : `Some fixed findings still show up. ${plural(fx.rescan.after, 'finding')} now, ${fx.rescan.before} before.` }),
         h('ul', { class: 'rule-list' }, fx.compare.map((c) => h('li', { class: 'tally-row2' }, h('code', { text: `${c.rule} · ${c.file}` }), ` ${c.gone ? 'not reported any more' : `still ${c.after} reported`} (was ${c.before})`))),
-        h('div', { class: 'row' }, fx.rescan.after > 0 ? h('a', { class: 'btn btn-quiet', href: '#/results', text: 'See the remaining findings' }) : null, h('a', { class: 'btn btn-quiet', href: '#/scan', text: 'Scan something else' })),
+        h('div', { class: 'row' }, fx.rescan.after > 0 ? h('a', { class: 'btn btn-quiet', href: '#/results', text: 'See what is left' }) : null, h('a', { class: 'btn btn-quiet', href: '#/scan', text: 'Scan something else' })),
       ),
     );
   }

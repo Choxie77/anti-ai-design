@@ -1,5 +1,6 @@
 import { h, clear, plural, copyText, nextId } from '../ui.js';
 import { EngineError } from '../engine.js';
+import { CATEGORY } from '../glossary.js';
 
 const EXAMPLE = `.hero h1 {
   font-size: 3rem;
@@ -31,13 +32,14 @@ export function renderScan(main, ctx) {
     class: 'field mono',
     type: 'text',
     value: form.path,
-    placeholder: 'Leave empty to scan the whole root',
+    placeholder: 'Leave empty to scan the whole project',
     autocomplete: 'off',
     spellcheck: 'false',
     'aria-describedby': 'path-help',
     onchange: () => {
       form.path = pathInput.value.trim();
       loadBrowse();
+      sync();
     },
   });
 
@@ -82,7 +84,7 @@ export function renderScan(main, ctx) {
   function sync() {
     folderBody.hidden = form.mode !== 'folder';
     snippetBody.hidden = form.mode !== 'snippet';
-    submit.textContent = form.mode === 'folder' ? 'Scan folder' : 'Scan snippet';
+    submit.textContent = form.mode === 'folder' ? (form.path.trim() ? 'Scan this folder' : 'Scan whole project') : 'Scan this code';
     submit.disabled = busy || !engineOk;
   }
 
@@ -93,19 +95,19 @@ export function renderScan(main, ctx) {
       data = await engine.browse(form.path);
     } catch (err) {
       if (!alive || req !== browseReq) return;
-      const msg = err.code === 'not_a_folder' ? 'This is a single file. It will be scanned on its own.' : err.status === 404 ? 'No such file or folder under the root.' : err.message;
+      const msg = err.code === 'not_a_folder' ? 'That is a single file. Only that file will be scanned.' : err.status === 404 ? 'No file or folder with that name in your project.' : err.message;
       clear(browseList).append(h('p', { class: 'meta', text: msg }));
       return;
     }
     if (!alive || req !== browseReq) return;
-    const here = data.path || 'the root';
+    const here = data.path || 'the project';
     clear(browseList).append(
-      h('p', { class: 'meta' }, 'In ', h('code', { text: data.path || '.' }), ` · ${plural(data.fileCount, 'file')}, ${plural(data.dirs.length, 'folder')}`),
+      h('p', { class: 'meta' }, 'Inside ', h('code', { text: data.path || 'the project folder' }), `: ${plural(data.fileCount, 'file')}, ${plural(data.dirs.length, 'folder')}. Click a folder to limit the scan to it.`),
       h(
         'ul',
         { class: 'rule-list', 'aria-label': `Folders inside ${here}` },
         data.parent !== null
-          ? h('li', {}, h('button', { type: 'button', class: 'linkish', onclick: () => pick(data.parent) }, 'Up one level'))
+          ? h('li', {}, h('button', { type: 'button', class: 'linkish', onclick: () => pick(data.parent) }, 'Back up one level'))
           : null,
         data.dirs.map((d) =>
           h('li', {}, h('button', { type: 'button', class: 'linkish mono', onclick: () => pick(data.path ? `${data.path}/${d}` : d) }, d + '/')),
@@ -119,6 +121,7 @@ export function renderScan(main, ctx) {
     form.path = p;
     pathInput.value = p;
     loadBrowse();
+    sync();
   }
 
   function showError(err) {
@@ -129,7 +132,7 @@ export function renderScan(main, ctx) {
       h(
         'div',
         { class: 'notice notice-error', role: 'alert' },
-        h('h2', { class: 'notice-title', text: missing ? 'The detector is not built' : 'The scan did not finish' }),
+        h('h2', { class: 'notice-title', text: missing ? 'The detector has not been built yet' : 'The scan did not finish' }),
         h('p', { text: err.message }),
         missing && err.details?.buildCommand ? h('pre', { class: 'plain mono', text: err.details.buildCommand }) : null,
         err.details?.stderr ? h('pre', { class: 'plain mono', text: err.details.stderr }) : null,
@@ -143,7 +146,7 @@ export function renderScan(main, ctx) {
     let input;
     if (form.mode === 'snippet') {
       if (!form.snippet.trim()) {
-        showError(new EngineError('empty_snippet', 'Paste some code first, or load the example.'));
+        showError(new EngineError('empty_snippet', 'Paste some code first, or use the example to see how it works.'));
         code.focus();
         return;
       }
@@ -175,14 +178,14 @@ export function renderScan(main, ctx) {
   }
 
   folderBody.append(
-    h('label', { for: ids.path, class: 'label', text: 'Folder or file under the root' }),
-    h('p', { id: 'path-help', class: 'help', text: 'A path relative to the root, such as src/styles. Nothing outside the root can be read.' }),
+    h('label', { for: ids.path, class: 'label', text: 'Limit to a folder or file (optional)' }),
+    h('p', { id: 'path-help', class: 'help', text: 'Type a path inside your project, such as src/styles, or pick a folder below. Files outside the project are never read.' }),
     pathInput,
     browseList,
   );
   snippetBody.append(
-    h('div', { class: 'row' }, h('label', { for: ids.ext, class: 'label', text: 'Type' }), extSelect),
-    h('label', { for: ids.code, class: 'label', text: 'Code' }),
+    h('div', { class: 'row' }, h('label', { for: ids.ext, class: 'label', text: 'What kind of code is it?' }), extSelect),
+    h('label', { for: ids.code, class: 'label', text: 'Your code' }),
     code,
     h(
       'p',
@@ -190,7 +193,7 @@ export function renderScan(main, ctx) {
       h('button', {
         type: 'button',
         class: 'linkish',
-        text: 'Load the gradient-text example',
+        text: 'Fill in a small example',
         onclick: () => {
           form.snippet = EXAMPLE;
           form.ext = 'css';
@@ -198,7 +201,7 @@ export function renderScan(main, ctx) {
           extSelect.value = 'css';
         },
       }),
-      ' · pasted code is written to a private temporary folder and deleted straight after the scan.',
+      ' Pasted code is held in a private temporary folder and deleted right after the scan.',
     ),
   );
 
@@ -207,48 +210,58 @@ export function renderScan(main, ctx) {
     : h(
         'div',
         { class: 'notice notice-error', role: 'alert' },
-        h('h2', { class: 'notice-title', text: 'Engine not found' }),
-        h('p', { text: info?.engine?.error || 'The Studio looked for the detector next to this repository and on your PATH and found nothing it could run.' }),
-        h('p', { class: 'meta', text: 'Build it from the repository root, then reload this page:' }),
+        h('h2', { class: 'notice-title', text: 'The detector was not found' }),
+        h('p', { text: info?.engine?.error || 'The Studio looked for the detector program next to this repository and on your PATH, and found nothing it could run.' }),
+        h('p', { class: 'meta', text: 'Build it once from the repository folder, then reload this page:' }),
         h('pre', { class: 'plain mono', text: info?.buildCommand || '' }),
         h('button', { type: 'button', class: 'btn btn-quiet', text: 'Copy the build command', onclick: () => copyText(info?.buildCommand || '') }),
       );
+
+  const how = h(
+    'ol',
+    { class: 'how', 'aria-label': 'How the Studio works' },
+    [
+      ['Scan', 'The detector reads your code. A scan never changes a file.'],
+      ['Findings', 'Each mark is listed with the reason it matters and the exact line of code.'],
+      ['Fixes', 'Only mechanical fixes are offered. You see the change first and confirm it.'],
+    ].map(([t, d], i) => h('li', { class: 'how-step' }, h('span', { class: 'how-n', 'aria-hidden': 'true', text: String(i + 1) }), h('div', {}, h('p', { class: 'how-t', text: t }), h('p', { class: 'how-d', text: d })))),
+  );
+
+  const checks = h('p', { class: 'meta checks' });
+  engine
+    .listRules()
+    .then(({ rules }) => {
+      if (!alive) return;
+      const by = {};
+      for (const r of rules) by[r.category] = (by[r.category] || 0) + 1;
+      const parts = Object.keys(CATEGORY)
+        .filter((k) => by[k])
+        .map((k) => `${by[k]} on ${CATEGORY[k].topic}`);
+      checks.append(`${rules.length} checks: ${parts.join(', ')}. `, h('a', { href: '#/rules', text: 'See every check' }), '.');
+    })
+    .catch(() => {});
 
   main.append(
     h(
       'div',
       { class: 'screen' },
-      h('h1', { text: 'Scan a project' }),
-      h('p', { class: 'lede', text: 'Point the detector at a folder or paste a snippet. It reads the code, marks what looks machine-made, and tells you which marks it can fix safely.' }),
+      h('h1', { text: 'Scan your project' }),
+      h('p', { class: 'lede', text: 'The detector reads your HTML, CSS and component code and flags what makes an interface look machine-generated, plus basic craft and accessibility slips.' }),
+      how,
       engineNotice,
       h(
         'form',
-        { class: 'folio', onsubmit: onSubmit, novalidate: true },
+        { class: 'panel', onsubmit: onSubmit, novalidate: true },
         h(
-          'div',
-          { class: 'folio-row' },
-          h('div', { class: 'margin' }, h('p', { class: 'step', 'aria-hidden': 'true', text: '1' }), h('p', { class: 'margin-note', text: 'What to read' })),
-          h(
-            'fieldset',
-            { class: 'folio-main' },
-            h('legend', { class: 'label', text: 'Source' }),
-            h('div', { class: 'segs' }, modeRadio('folder', 'A folder'), modeRadio('snippet', 'A pasted snippet')),
-            folderBody,
-            snippetBody,
-          ),
+          'fieldset',
+          { class: 'panel-body' },
+          h('legend', { class: 'label', text: 'What do you want to check?' }),
+          h('div', { class: 'segs' }, modeRadio('folder', 'My project'), modeRadio('snippet', 'Paste code')),
+          folderBody,
+          snippetBody,
         ),
-        h(
-          'div',
-          { class: 'folio-row' },
-          h('div', { class: 'margin' }, h('p', { class: 'step', 'aria-hidden': 'true', text: '2' }), h('p', { class: 'margin-note', text: 'Go' })),
-          h(
-            'div',
-            { class: 'folio-main' },
-            errorSlot,
-            submit,
-            h('p', { class: 'help', text: 'A scan only reads. Fixes are a separate step and are previewed first.' }),
-          ),
-        ),
+        h('div', { class: 'panel-foot' }, errorSlot, submit, h('p', { class: 'help', text: 'Reading only. You will review the results before anything can be fixed.' })),
+        checks,
       ),
     ),
   );

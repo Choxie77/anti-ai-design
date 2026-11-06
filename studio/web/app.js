@@ -8,7 +8,7 @@ import { renderRules } from './views/rules.js';
 
 const ROUTES = [
   { id: 'scan', label: 'Scan', render: renderScan },
-  { id: 'results', label: 'Results', render: renderResults },
+  { id: 'results', label: 'Findings', render: renderResults },
   { id: 'fixes', label: 'Fixes', render: renderFixes },
   { id: 'rules', label: 'Rules', render: renderRules },
 ];
@@ -103,20 +103,32 @@ function drawNav() {
   const cur = current();
   const resultCount = state.scan ? state.scan.summary.total : null;
   const fixCount = state.preview ? state.preview.fixCount : null;
+  const stepItem = (r, i) => {
+    let extra = null;
+    if (r.id === 'results' && resultCount !== null) extra = h('span', { class: 'nav-count', text: String(resultCount) });
+    if (r.id === 'fixes' && fixCount) extra = h('span', { class: 'nav-count', text: String(fixCount) });
+    // Findings and Fixes are empty until a scan has run; say so instead of leaving a blank page.
+    const waiting = !state.scan && (r.id === 'results' || r.id === 'fixes');
+    return h(
+      'li',
+      { class: waiting ? 'nav-step is-waiting' : 'nav-step' },
+      h(
+        'a',
+        { href: '#/' + r.id, 'aria-current': r.id === cur.id ? 'page' : false, class: 'nav-link' },
+        h('span', { class: 'nav-n', 'aria-hidden': 'true', text: String(i + 1) }),
+        h('span', { text: r.label }),
+        extra,
+        waiting ? h('span', { class: 'sr-only', text: ' (available after a scan)' }) : null,
+      ),
+    );
+  };
+  const rules = ROUTES.find((r) => r.id === 'rules');
   clear(nav).append(
+    h('ol', { class: 'nav-list nav-steps' }, ROUTES.filter((r) => r.id !== 'rules').map(stepItem)),
     h(
       'ul',
-      { class: 'nav-list' },
-      ROUTES.map((r) => {
-        let extra = null;
-        if (r.id === 'results' && resultCount !== null) extra = h('span', { class: 'nav-count', text: ` ${resultCount}` });
-        if (r.id === 'fixes' && fixCount) extra = h('span', { class: 'nav-count', text: ` ${fixCount}` });
-        return h(
-          'li',
-          {},
-          h('a', { href: '#/' + r.id, 'aria-current': r.id === cur.id ? 'page' : false, class: 'nav-link' }, r.label, extra),
-        );
-      }),
+      { class: 'nav-list nav-ref' },
+      h('li', {}, h('a', { href: '#/rules', 'aria-current': rules.id === cur.id ? 'page' : false, class: 'nav-link', title: 'Reference: everything the detector checks' }, 'All rules')),
     ),
   );
 }
@@ -124,13 +136,13 @@ function drawNav() {
 function drawColophon() {
   clear(colophon);
   if (!state.info) {
-    colophon.append(h('p', { class: 'meta', text: 'Everything runs on this machine. No network calls, no telemetry.' }));
+    colophon.append(h('p', { class: 'meta', text: 'Everything runs on this computer. Nothing is uploaded and nothing is tracked.' }));
     return;
   }
   const e = state.info.engine;
   colophon.append(
-    h('p', { class: 'meta' }, 'Engine ', h('code', { text: e.found ? e.path : 'not found' }), e.version ? ` · ${e.version}` : ''),
-    h('p', { class: 'meta' }, 'Root ', h('code', { text: state.info.root }), ' · everything runs on this machine, nothing is sent anywhere'),
+    h('p', { class: 'meta' }, 'Project folder ', h('code', { text: state.info.root }), ' · the Studio can only read and change files inside it.'),
+    h('p', { class: 'meta' }, 'Detector ', h('code', { text: e.found ? e.path : 'not found' }), e.version ? ` · version ${e.version}` : '', ' · Everything runs on this computer; nothing is uploaded.'),
   );
 }
 

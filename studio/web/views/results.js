@@ -1,9 +1,10 @@
 import { h, clear, plural, cap, formatMs } from '../ui.js';
 import { SEVERITY_ORDER, filterFindings, groupFindings } from '../model.js';
+import { SEVERITY, CATEGORY, categoryLabel, severityLabel } from '../glossary.js';
 
-export function codeBlock(ctxData, label) {
+export function codeBlock(ctxData, label, wholeFile = false) {
   if (!ctxData) {
-    return h('p', { class: 'meta', text: 'The code around this line is not shown (hidden file, too large, or no longer on disk).' });
+    return h('p', { class: 'meta', text: wholeFile ? 'This applies to the file as a whole, so there is no single line to show.' : 'The code for this line cannot be shown. The file may be hidden, very large, or changed since the scan.' });
   }
   return h(
     'div',
@@ -20,10 +21,10 @@ export function codeBlock(ctxData, label) {
 }
 
 export function sevChip(sev) {
-  return h('span', { class: `sev sev-${sev}`, text: cap(sev) });
+  return h('span', { class: `sev sev-${sev}`, text: severityLabel(sev) });
 }
 
-function countRows(title, counts, total, order) {
+function countRows(title, counts, total, order, glossary) {
   const keys = order || Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
   return h(
     'section',
@@ -37,10 +38,16 @@ function countRows(title, counts, total, order) {
         .map((k) => {
           const bar = h('span', { class: 'bar', 'aria-hidden': 'true' });
           bar.style.setProperty('--w', `${Math.max(4, Math.round((counts[k] / total) * 100))}%`);
-          return h('li', { class: 'tally-row' }, h('span', { class: 'tally-k', text: cap(k) }), h('span', { class: 'tally-n', text: String(counts[k]) }), bar);
+          const g = glossary?.[k];
+          return h('li', { class: 'tally-row' }, h('span', { class: 'tally-k', text: g?.label || cap(k) }), h('span', { class: 'tally-n', text: String(counts[k]) }), g ? h('span', { class: 'tally-d', text: g.means }) : null, bar);
         }),
     ),
   );
+}
+
+/** `index.html:7`, or just the file name when the finding covers the whole file. */
+function place(f) {
+  return f.line ? `${f.file}:${f.line}` : `${f.file} (whole file)`;
 }
 
 export function renderResults(main, ctx) {
@@ -59,7 +66,7 @@ export function renderResults(main, ctx) {
   }
 
   const { summary } = scan;
-  const where = scan.kind === 'snippet' ? 'your snippet' : scan.target === '.' || scan.target === '' ? 'the project root' : scan.target;
+  const where = scan.kind === 'snippet' ? 'your snippet' : scan.target === '.' || scan.target === '' ? 'your whole project' : scan.target;
   const head = h(
     'div',
     { class: 'screen' },
@@ -88,15 +95,20 @@ export function renderResults(main, ctx) {
     h(
       'div',
       { class: 'ledger' },
-      h('p', { class: 'big' }, h('span', { class: 'big-n', text: String(summary.total) }), h('span', { class: 'big-l', text: ` ${summary.total === 1 ? 'finding' : 'findings'} in ${plural(summary.files, 'file')}` })),
-      countRows('By severity', summary.bySeverity, summary.total, SEVERITY_ORDER),
-      countRows('By category', summary.byCategory, summary.total),
+      h(
+        'div',
+        { class: 'big-wrap' },
+        h('p', { class: 'big' }, h('span', { class: 'big-n', text: String(summary.total) }), h('span', { class: 'big-l', text: ` ${summary.total === 1 ? 'finding' : 'findings'} in ${plural(summary.files, 'file')}` })),
+        h('p', { class: 'help', text: 'A finding is one place where your code matches a known mark of generic or careless design.' }),
+      ),
+      countRows('How serious', summary.bySeverity, summary.total, SEVERITY_ORDER, SEVERITY),
+      countRows('What kind', summary.byCategory, summary.total, null, CATEGORY),
     ),
   );
 
   const list = h('div', { class: 'groups' });
   const count = h('p', { class: 'meta', role: 'status' });
-  const fixNote = h('p', { class: 'meta' });
+  const nextStep = h('div', { class: 'next', 'aria-live': 'polite' }, h('p', { class: 'meta', text: 'Checking which of these have a safe automatic fix…' }));
 
   function drawList() {
     const shown = filterFindings(scan.findings, view, state.fixable);
@@ -116,7 +128,7 @@ export function renderResults(main, ctx) {
             'header',
             { class: 'group-head' },
             h('h2', { class: byRule ? 'group-title' : 'group-title mono', text: g.title }),
-            h('p', { class: 'meta' }, byRule ? [sevChip(g.sample.severity), ` ${cap(g.sample.category)} · `, h('code', { text: g.key }), ' · '] : null, plural(g.items.length, 'finding')),
+            h('p', { class: 'meta' }, byRule ? [sevChip(g.sample.severity), ` ${categoryLabel(g.sample.category)} · `, h('code', { text: g.key }), ' · '] : null, plural(g.items.length, 'finding')),
             byRule ? h('p', { class: 'why', text: g.sample.description }) : null,
           ),
           h('ol', { class: 'entries' }, g.items.map((f) => entry(f, byRule))),
@@ -133,14 +145,14 @@ export function renderResults(main, ctx) {
       h(
         'div',
         { class: 'finding-head' },
-        h('h3', { class: 'finding-title' }, byRule ? h('code', { text: `${f.file}:${f.line}` }) : f.name),
+        h('h3', { class: 'finding-title' }, byRule ? h('code', { text: place(f) }) : f.name),
         sevChip(f.severity),
-        fixable ? h('a', { class: 'tag', href: '#/fixes', text: 'Safe fix ready' }) : null,
+        fixable ? h('a', { class: 'tag', href: '#/fixes', text: 'Can be fixed automatically' }) : null,
       ),
-      h('p', { class: 'where' }, byRule ? null : [h('code', { text: `${f.file}:${f.line}` }), ' · '], h('code', { text: f.rule }), ` · ${cap(f.category)}`),
+      h('p', { class: 'where' }, byRule ? null : [h('code', { text: place(f) }), ' · '], h('code', { text: f.rule }), ` · ${categoryLabel(f.category)}`),
       byRule ? null : h('p', { class: 'why', text: f.description }),
-      f.snippet ? h('p', { class: 'note' }, 'Detector note: ', h('span', { text: f.snippet })) : null,
-      codeBlock(f.context, `Code around ${f.file} line ${f.line}`),
+      f.snippet ? h('p', { class: 'note' }, 'What matched: ', h('code', { text: f.snippet })) : null,
+      codeBlock(f.context, `Code around ${place(f)}`, !f.line),
     );
   }
 
@@ -149,7 +161,8 @@ export function renderResults(main, ctx) {
       type: 'button',
       class: 'toggle',
       'aria-pressed': String(view.severities.has(s)),
-      text: `${cap(s)} (${summary.bySeverity[s]})`,
+      text: `${severityLabel(s)} (${summary.bySeverity[s]})`,
+      title: SEVERITY[s]?.means,
       onclick: () => {
         if (view.severities.has(s)) view.severities.delete(s);
         else view.severities.add(s);
@@ -165,7 +178,7 @@ export function renderResults(main, ctx) {
     type: 'search',
     id: 'q',
     value: view.query,
-    placeholder: 'Rule, file or words',
+    placeholder: 'File name, rule, or a word',
     autocomplete: 'off',
     oninput: () => {
       view.query = search.value;
@@ -182,8 +195,8 @@ export function renderResults(main, ctx) {
         drawList();
       },
     },
-    h('option', { value: 'all', text: 'All categories' }),
-    categories.map((c) => h('option', { value: c, text: cap(c) })),
+    h('option', { value: 'all', text: 'All kinds' }),
+    categories.map((c) => h('option', { value: c, text: categoryLabel(c) })),
   );
   catSel.value = view.category;
   const fixOnly = h('input', {
@@ -219,24 +232,37 @@ export function renderResults(main, ctx) {
     h(
       'form',
       { class: 'filters', onsubmit: (e) => e.preventDefault(), 'aria-label': 'Filter findings' },
-      h('fieldset', { class: 'fs' }, h('legend', { class: 'label', text: 'Group by' }), h('div', { class: 'segs' }, groupRadio('file', 'File'), groupRadio('rule', 'Rule'))),
-      h('fieldset', { class: 'fs' }, h('legend', { class: 'label', text: 'Severity' }), h('div', { class: 'row' }, sevButtons)),
-      h('div', { class: 'fs' }, h('label', { class: 'label', for: 'cat', text: 'Category' }), catSel),
+      h('fieldset', { class: 'fs' }, h('legend', { class: 'label', text: 'Organize by' }), h('div', { class: 'segs' }, groupRadio('file', 'File'), groupRadio('rule', 'Problem type'))),
+      h('fieldset', { class: 'fs' }, h('legend', { class: 'label', text: 'How serious' }), h('div', { class: 'row' }, sevButtons)),
+      h('div', { class: 'fs' }, h('label', { class: 'label', for: 'cat', text: 'Kind' }), catSel),
       h('div', { class: 'fs grow' }, h('label', { class: 'label', for: 'q', text: 'Search' }), search),
-      h('div', { class: 'fs check' }, fixOnly, h('label', { for: 'fixonly', text: 'Safe fix ready only' })),
+      h('div', { class: 'fs check' }, fixOnly, h('label', { for: 'fixonly', text: 'Only ones I can fix automatically' })),
     ),
     count,
-    fixNote,
     list,
   );
+  // The next step goes right under the summary, before the long list.
+  head.querySelector('.ledger').after(nextStep);
   main.append(head);
   drawList();
 
   // Which findings have a safe fix is only known after a dry run. Ask for it quietly.
   ctx.ensurePreview().then((p) => {
     if (!main.isConnected || state.scan !== scan) return;
-    if (p) {
-      fixNote.textContent = p.fixCount ? `${plural(state.fixable.size, 'finding')} can be fixed safely. Open Fixes to read the diff before anything is written.` : 'No finding here has a safe automatic fix.';
+    clear(nextStep);
+    if (p && p.fixCount) {
+      nextStep.append(
+        h('p', { class: 'next-t', text: `${plural(state.fixable.size, 'finding')} can be fixed automatically.` }),
+        h('p', { class: 'next-d', text: `You will see exactly what changes and confirm before anything is written.${p.fixCount !== state.fixable.size ? ' One change can clear more than one finding.' : ''} The other findings need a person to decide.` }),
+        h('a', { class: 'btn btn-primary', href: '#/fixes', text: `Review ${plural(p.fixCount, 'fix', 'fixes')}` }),
+      );
+    } else if (p) {
+      nextStep.append(
+        h('p', { class: 'next-t', text: 'None of these can be fixed automatically.' }),
+        h('p', { class: 'next-d', text: 'The detector only rewrites code when the change is mechanical and cannot alter meaning. Work through the list below by hand; each entry says what to change.' }),
+      );
+    } else {
+      nextStep.append(h('p', { class: 'meta', text: 'Could not check for automatic fixes. The findings below are still accurate.' }));
     }
     drawList();
   });
