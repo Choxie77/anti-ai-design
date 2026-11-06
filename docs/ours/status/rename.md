@@ -1,6 +1,6 @@
 # Status: rename (task-51)
 
-Branch `agent/rename` (base `main` bbc3a568, worktree `../aad-worktrees/rename`). **NOT fully done**: the full Rust workspace test run (`cargo test --workspace --no-fail-fast`) had not finished when the session hit its usage limit, so the Rust result is unverified. Everything else below was run.
+Branch `agent/rename` (base `main` bbc3a568, worktree `../aad-worktrees/rename`). **Done**, with one caveat under "Rust".
 
 ## What changed
 - `tools/rebrand/rebrand2.sh` (+ `rebrand2.pl`, `rebrand2_paths.pl`): idempotent (tree hash identical on a second run). anti-design -> anti-ai-design in contents and paths under `anti-design-skill/` and `docs/` (not `docs/ours/status`, `agent-prompts`, `BASELINE.md` tables, `tools/rebrand/`, LICENSE/NOTICE/UPSTREAM). `OWNER/anti-design` -> `Choxie77/anti-ai-design`; placeholder domains -> `https://github.com/Choxie77/anti-ai-design` (scheme kept, bare mentions too). Subfolder `anti-design-skill/` keeps its name. Trap: `git grep` skips `-diff` files (oracle goldens, vectors); the script uses `git ls-files | grep -I --null` (BSD grep: `-Z` means decompress).
@@ -12,14 +12,15 @@ Branch `agent/rename` (base `main` bbc3a568, worktree `../aad-worktrees/rename`)
 ## Results (real)
 | Suite | Result |
 |---|---|
+| `bun run test` (all default suites, after the fixes, rc=0) | Bun 486/0; Node core 254/0 (2 skipped); oracle+aad 9/0; detector 82/0; live 263/0 (2 skipped); framework 196/0; plugin-e2e 4/0 |
 | Bun core | 486 pass, 0 fail |
 | Node core | 254 pass, 0 fail, 2 skipped |
-| Oracle replay | 1320 pass, 0 fail, 23 accepted deltas, 0 missing goldens (27 goldens re-recorded, logged in `tests/oracle/DELTAS.md`: 25 rename/extras reasons, 2 not rename: `detect-unknown-flag`, `detect-config-cross-project`, which also fail on main because DESIGN.md gained a type ramp) |
+| Oracle replay (re-run last) | 1320 pass, 0 fail, 23 accepted deltas, 0 missing goldens (27 goldens re-recorded, logged in `tests/oracle/DELTAS.md`: 25 rename/extras reasons, 2 not rename: `detect-unknown-flag`, `detect-config-cross-project`, which also fail on main because DESIGN.md gained a type ramp) |
 | Detector | 82 pass |
 | Live | 263 pass, 0 fail, 2 skipped (re-run after the README fix) |
 | Framework | 196 pass |
 | Plugin E2E | 4 pass |
-| `cargo test --workspace` | NOT FINISHED, no result |
+| Rust | first full `cargo test --workspace --no-fail-fast`: 2507 pass, 11 fail, 9 ignored (158 targets). Causes: 7 real rename bugs (below, fixed and re-run green: context lib 239/0, html `css_rules` 2/2), `url::tests::basics` (fixed), 2 Chrome `pixel_pass_identity` tests (passed alone, load flake). The full workspace was **not re-run end to end** after the fixes; only the affected targets were |
 | `cargo xtask bundle --check`, `bun run build:release` drift | build:release ran clean after the display-name fix, no tracked drift |
 
 `grep -rIl 'OWNER/anti-design' anti-design-skill ... | wc -l` = 0. `target/release/anti-ai-design --version` prints `0.1.18+engine`.
@@ -35,3 +36,8 @@ Branch `agent/rename` (base `main` bbc3a568, worktree `../aad-worktrees/rename`)
 5. `skill/scripts/engine-checksums.txt` still has pre-fork digests (names renamed only); first release needs a new ENGINE_VERSION.
 6. Process note: I once ran `git add -A -- .` scoped to `anti-design-skill/` (ignored dirs excluded); nothing outside ownership was staged.
 7. `main` moved (f8295596) after this branch was cut; merge may need a re-run of `rebrand2.sh` for new files.
+
+## Bugs the rename itself introduced (found by the Rust run, fixed)
+- The display-name rule turned the HTTP header `X-Anti-Design-Client` into `X-Anti-AI Design-Client` (a space is not valid in a header name) in `telemetry.rs`, the test servers and docs; 13 occurrences, now `X-Anti-AI-Design-*`. Six telemetry tests failed on it. `rebrand2.pl` has a rule for it.
+- A prose fixture (`css-in-prose-should-pass.html`) had `anti-design.example changelog line` turned into a dotted host, which changed the CSS parser's specificity on the junk "selector" (the dot became a class). The phrase is now `Anti-AI Design changelog line`; the vector `css-rules.json` carries the one corrected specificity `[0,0,29]`. `rebrand2.pl` has a rule for it.
+- `url::tests::basics` now expects path `/Choxie77/anti-ai-design/docs/audit/`.

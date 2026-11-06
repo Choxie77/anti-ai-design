@@ -13,6 +13,8 @@ s{anti-design\.example\.evil\.test}{github.com.evil.test}g;
 s{(https?)://(?:www\.)?anti-design\.(?:example|style)(?![\w.-])}{$1://github.com/Choxie77/anti-ai-design}gi;
 #    Possessive prose ("anti-design.example's tab strip") names the product, not a URL.
 s{\banti-design\.(?:example|style)'s}{Anti-AI Design's}g;
+#    A host used as a plain word in a prose fixture (the CSS-in-prose fixture feeds a parser; a dotted host changes its output).
+s{\banti-design\.(?:example|style) changelog}{Anti-AI Design changelog}g;
 #    Any bare host left over.
 s{\banti-design\.(?:example|style)(?![\w-])}{github.com/Choxie77/anti-ai-design}g;
 s{Anti-Design\.Example}{github.com/Choxie77/anti-ai-design}g;
@@ -25,5 +27,6 @@ s{anti_design}{anti_ai_design}g;
 s{antiDesign}{antiAiDesign}g;
 s{AntiDesign}{AntiAiDesign}g;
 s{ANTI_DESIGN}{ANTI_AI_DESIGN}g;
+s{X-Anti-Design}{X-Anti-AI-Design}g;   # HTTP header names cannot hold a space
 s{Anti-Design}{Anti-AI Design}g;
 s{Anti Design}{Anti-AI Design}g;

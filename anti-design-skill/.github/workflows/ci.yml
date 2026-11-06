@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 # Any request a job makes to the roll API is tagged as test traffic
-# (X-Anti-AI Design-Client carries the channel), so CI never lands in the
+# (X-Anti-AI-Design-Client carries the channel), so CI never lands in the
 # choice dataset.
 env:
   ANTI_AI_DESIGN_TELEMETRY_CHANNEL: test
