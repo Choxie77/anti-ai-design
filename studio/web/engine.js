@@ -12,6 +12,11 @@
 //   applyFixes(input)           -> previewFixes result + { applied, written:[...], fixed? } ; input.confirm must be true
 //   browse(path)                -> { path, parent, dirs:[...], fileCount }       (folder mode only)
 //   changelog()                 -> { exists, path, entries:[{time,rule,where,change}] } (folder mode only)
+//   folders(path)               -> { path, name, parent, home, tooBroad, scannable, dirs:[{name,files,more}], shortcuts:[{label,path}] }
+//                                  any folder on this computer, to pick a project from (local server only)
+//   findFolder(name)            -> { name, matches:[{path,files}] }  where a dropped folder of that name lives
+//   pickFolder()                -> { path } | { cancelled:true }     the operating system's own folder window
+//   openProject(path)           -> { root, name, focus, scannable, recent }  makes that folder the project
 //
 // input is either { target: "relative/folder/or/file" } or { snippet: "code", ext: "html|css|jsx|tsx" }.
 
@@ -83,6 +88,18 @@ export class LocalEngine {
   changelog() {
     return this.call('GET', '/api/changelog');
   }
+  folders(path = '') {
+    return this.call('GET', '/api/folders' + (path ? '?path=' + encodeURIComponent(path) : ''));
+  }
+  findFolder(name) {
+    return this.call('GET', '/api/folders/find?name=' + encodeURIComponent(name));
+  }
+  pickFolder() {
+    return this.call('POST', '/api/project/pick', {});
+  }
+  openProject(path) {
+    return this.call('POST', '/api/project', { path });
+  }
 }
 
 const NOT_YET = 'The in-browser engine is not available yet.';
@@ -117,6 +134,18 @@ export class WasmEngine {
     return this.fail();
   }
   changelog() {
+    return this.fail();
+  }
+  folders() {
+    return this.fail();
+  }
+  findFolder() {
+    return this.fail();
+  }
+  pickFolder() {
+    return this.fail();
+  }
+  openProject() {
     return this.fail();
   }
 }

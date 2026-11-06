@@ -10,6 +10,7 @@ import * as engine from './engine.mjs';
 import { parseUnifiedDiff } from './diff.mjs';
 import { inspectProject, SKIP_DIRS } from './project.mjs';
 import { locateFinding, linkedStylesheets } from './locate.mjs';
+import { resolveTyped, isTooBroad, listFolders, findFolders, pickFolderNative, readRecent, rememberRecent } from './folders.mjs';
 import {
   HttpError,
   CSP,
@@ -44,19 +45,43 @@ const MIME = {
 
 /**
  * @param {object} opts
- * @param {string} opts.root        project folder the server may touch
- * @param {string} [opts.token]     API token (random when omitted)
- * @param {string} [opts.engineBin] explicit engine binary
- * @param {string} [opts.tmpParent] where snippet temp folders are created
+ * @param {string} [opts.root]       project folder the server may touch; without one the page asks for it
+ * @param {boolean} [opts.lockRoot]  when true the page cannot change the project (only `root` is ever touched)
+ * @param {string} [opts.token]      API token (random when omitted)
+ * @param {string} [opts.engineBin]  explicit engine binary
+ * @param {string} [opts.tmpParent]  where snippet temp folders are created
+ * @param {string} [opts.home]       the person's home folder (where folder browsing starts)
+ * @param {string} [opts.stateFile]  JSON file that remembers recent projects; none means "do not remember"
+ * @param {Function} [opts.pickFolder] asks the operating system for a folder (replaceable for tests)
  */
 export function createApp(opts) {
-  const realRoot = fs.realpathSync(opts.root);
-  if (!fs.statSync(realRoot).isDirectory()) throw new Error('--root must be a folder');
+  // The project the Studio is looking at. It changes when the person opens another one, always under
+  // `writeLock` so it never moves in the middle of applying fixes.
+  let realRoot = null;
+  if (opts.root) {
+    realRoot = fs.realpathSync(opts.root);
+    if (!fs.statSync(realRoot).isDirectory()) throw new Error('--root must be a folder');
+  }
+  const lockRoot = Boolean(opts.lockRoot);
+  const home = opts.home || os.homedir();
+  const stateFile = opts.stateFile || null;
+  const pickFolder = opts.pickFolder || pickFolderNative;
+  let recent = readRecent(stateFile);
+  if (realRoot && !lockRoot) recent = rememberRecent(stateFile, recent, realRoot);
   const token = opts.token || newToken();
   const tmpParent = opts.tmpParent || os.tmpdir();
   let port = 0;
   let cachedRules = null;
   let writeLock = Promise.resolve();
+
+  /** The current project, or a clear 409 when none has been chosen yet. */
+  function needRoot() {
+    if (!realRoot) throw new HttpError(409, 'no_project', 'Choose a project folder first.');
+    return realRoot;
+  }
+  function needSwitching() {
+    if (lockRoot) throw new HttpError(403, 'project_locked', 'This Studio was started for one project and cannot switch. Restart it with a different --root.');
+  }
 
   const server = http.createServer((req, res) => {
     handle(req, res).catch((err) => sendError(res, err));
@@ -89,10 +114,12 @@ export function createApp(opts) {
     return {
       engine: { found: Boolean(bin) && !error, path: bin, version, error },
       root: realRoot,
+      home,
+      recent: recent.filter((p) => p !== realRoot),
       buildCommand: engine.BUILD_COMMAND,
       limits: { maxFileBytes: MAX_FILE_BYTES, maxSnippetBytes: MAX_SNIPPET_BYTES },
       snippetExts: [...SNIPPET_EXTS],
-      capabilities: { folders: true, snippets: true, apply: true, changelog: true },
+      capabilities: { folders: true, snippets: true, apply: true, changelog: true, switchProject: !lockRoot },
     };
   }
 
@@ -114,10 +141,11 @@ export function createApp(opts) {
         await fsp.rm(dir, { recursive: true, force: true });
       }
     }
-    const real = resolveInside(realRoot, typeof body?.target === 'string' && body.target !== '' ? body.target : '.');
+    const base = needRoot(); // kept for the whole request, even if another project is opened meanwhile
+    const real = resolveInside(base, typeof body?.target === 'string' && body.target !== '' ? body.target : '.');
     const st = fs.statSync(real);
     if (st.isFile() && st.size > MAX_FILE_BYTES) throw new HttpError(413, 'file_too_large', 'That file is over 2 MB.');
-    return fn({ kind: st.isDirectory() ? 'folder' : 'file', cwd: realRoot, base: realRoot, target: real, label: relLabel(realRoot, real) || '.' });
+    return fn({ kind: st.isDirectory() ? 'folder' : 'file', cwd: base, base, target: real, label: relLabel(base, real) || '.' });
   }
 
   /** The lines of a file inside base, or null when it is hidden, outside base, too big or unreadable. */
@@ -327,8 +355,8 @@ export function createApp(opts) {
           return { ...preview, applied: preview.fixCount, written: [], fixed };
         }
         // The engine logs to <root>/.anti-ai-design/changelog.md; that folder must not be a way out.
-        const ctxDir = path.join(realRoot, path.dirname(CHANGELOG_REL));
-        if (fs.existsSync(ctxDir) && !isInside(realRoot, fs.realpathSync(ctxDir))) {
+        const ctxDir = path.join(ctx.base, path.dirname(CHANGELOG_REL));
+        if (fs.existsSync(ctxDir) && !isInside(ctx.base, fs.realpathSync(ctxDir))) {
           throw new HttpError(403, 'outside_root', 'The changelog folder resolves outside the project folder.');
         }
         const { diff, summary } = await engine.fixWrite(bin, ctx.target, ctx.cwd);
@@ -342,14 +370,16 @@ export function createApp(opts) {
 
   async function doChangelog() {
     const empty = { exists: false, path: CHANGELOG_REL, entries: [] };
-    const dir = path.join(realRoot, path.dirname(CHANGELOG_REL));
+    if (!realRoot) return empty;
+    const root = realRoot;
+    const dir = path.join(root, path.dirname(CHANGELOG_REL));
     let file;
     try {
       file = fs.realpathSync(path.join(dir, path.basename(CHANGELOG_REL)));
     } catch {
       return empty;
     }
-    if (!isInside(realRoot, file)) throw new HttpError(403, 'outside_root', 'The changelog resolves outside the project folder.');
+    if (!isInside(root, file)) throw new HttpError(403, 'outside_root', 'The changelog resolves outside the project folder.');
     const st = fs.statSync(file);
     if (!st.isFile() || st.size > MAX_FILE_BYTES) return empty;
     const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/).filter((l) => l.startsWith('- '));
@@ -361,6 +391,7 @@ export function createApp(opts) {
   }
 
   async function doBrowse(url) {
+    const realRoot = needRoot();
     const real = resolveInside(realRoot, url.searchParams.get('path') || '.');
     if (!fs.statSync(real).isDirectory()) throw new HttpError(400, 'not_a_folder', 'That path is not a folder.');
     const rel = relLabel(realRoot, real);
@@ -394,6 +425,56 @@ export function createApp(opts) {
       dirs: dirs.slice(0, 500),
       truncated: dirs.length > 500,
       fileCount,
+    };
+  }
+
+  // ---- choosing a project ---------------------------------------------------
+  const typedOpts = () => ({ home, bases: realRoot ? [realRoot, path.dirname(realRoot)] : [] });
+
+  /** Sub-folders of any folder on this computer, for the page's own folder browser. Names only; nothing is read. */
+  async function doFolders(url) {
+    needSwitching();
+    const asked = url.searchParams.get('path');
+    const { real, isFile } = resolveTyped(asked || home, typedOpts());
+    if (isFile) throw new HttpError(400, 'not_a_folder', 'That is a file, not a folder.');
+    return listFolders(real, { home });
+  }
+
+  /** Folders with a given name near the home folder: how a folder dropped onto the page gets found. */
+  async function doFindFolder(url) {
+    needSwitching();
+    return { name: url.searchParams.get('name') || '', matches: findFolders(url.searchParams.get('name'), { home }) };
+  }
+
+  /** Ask the operating system's folder dialog; the page then opens whatever was chosen. */
+  async function doPickFolder() {
+    needSwitching();
+    return pickFolder();
+  }
+
+  /**
+   * Make `body.path` the project. A file means "its folder, narrowed to that file". The disk root and the
+   * whole home folder are refused: scanning them reads everything the person owns.
+   */
+  async function doOpenProject(body) {
+    needSwitching();
+    const { real, isFile } = resolveTyped(body?.path, typedOpts());
+    const dir = isFile ? path.dirname(real) : real;
+    if (isTooBroad(dir, home)) {
+      throw new HttpError(400, 'too_broad', 'That is your whole home folder (or whole disk). Pick the one folder that holds your project, such as the one with index.html or package.json in it.');
+    }
+    const run = writeLock.then(() => {
+      realRoot = dir;
+      recent = rememberRecent(stateFile, recent, dir);
+    });
+    writeLock = run.catch(() => {});
+    await run;
+    return {
+      root: dir,
+      name: path.basename(dir) || dir,
+      focus: isFile ? path.basename(real) : '',
+      scannable: inspectProject(dir),
+      recent: recent.filter((p) => p !== dir),
     };
   }
 
@@ -537,6 +618,15 @@ export function createApp(opts) {
         return sendJson(res, 200, await doBrowse(url));
       case 'GET /api/changelog':
         return sendJson(res, 200, await doChangelog());
+      case 'GET /api/folders':
+        return sendJson(res, 200, await doFolders(url));
+      case 'GET /api/folders/find':
+        return sendJson(res, 200, await doFindFolder(url));
+      case 'POST /api/project/pick':
+        await readJson(req);
+        return sendJson(res, 200, await doPickFolder());
+      case 'POST /api/project':
+        return sendJson(res, 200, await doOpenProject(await readJson(req)));
       case 'POST /api/scan':
         return sendJson(res, 200, await doScan(await readJson(req)));
       case 'POST /api/fix/preview':
@@ -551,7 +641,10 @@ export function createApp(opts) {
   return {
     server,
     token,
-    root: realRoot,
+    /** The project folder right now; null until one is chosen. */
+    get root() {
+      return realRoot;
+    },
     /** Listens on 127.0.0.1 only. Resolves with the port. */
     listen(wantedPort = 0) {
       return new Promise((resolve, reject) => {

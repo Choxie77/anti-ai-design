@@ -20,13 +20,18 @@ export function write(root, rel, text) {
   return p;
 }
 
-/** Start the app on a random port over a fresh root. */
-export async function startApp({ files = {}, engineBin = FAKE, token = 'test-token-0123456789' } = {}) {
+/**
+ * Start the app on a random port over a fresh root.
+ * `noRoot` starts with no project chosen; `home` is a fresh empty folder standing in for the person's
+ * home folder, so nothing here ever reads or writes the real one.
+ */
+export async function startApp({ files = {}, engineBin = FAKE, token = 'test-token-0123456789', noRoot = false, lockRoot = false, stateFile, pickFolder } = {}) {
   const root = makeDir('aad-root-');
   const outside = makeDir('aad-outside-');
   const tmpParent = makeDir('aad-tmp-');
+  const home = makeDir('aad-home-');
   for (const [rel, text] of Object.entries(files)) write(root, rel, text);
-  const app = createApp({ root, token, engineBin, tmpParent });
+  const app = createApp({ root: noRoot ? undefined : root, lockRoot, token, engineBin, tmpParent, home, stateFile, pickFolder });
   const port = await app.listen(0);
   function raw(method, urlPath, { body, headers = {}, host, auth = true } = {}) {
     return new Promise((resolve, reject) => {
@@ -61,6 +66,7 @@ export async function startApp({ files = {}, engineBin = FAKE, token = 'test-tok
     root,
     outside,
     tmpParent,
+    home,
     token,
     port,
     base: `http://127.0.0.1:${port}`,
@@ -69,7 +75,7 @@ export async function startApp({ files = {}, engineBin = FAKE, token = 'test-tok
     post: (p, body, o) => raw('POST', p, { body, ...o }),
     async close() {
       await app.close();
-      for (const d of [root, outside, tmpParent]) fs.rmSync(d, { recursive: true, force: true });
+      for (const d of [root, outside, tmpParent, home]) fs.rmSync(d, { recursive: true, force: true });
     },
   };
 }

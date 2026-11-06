@@ -1,0 +1,242 @@
+/* Choosing a project: the chooser card, the project bar, the folder list.
+   Same workbench language as styles.css: hard edges, one highlighter yellow for "this is where you are". */
+
+.choose {
+  position: relative;
+  padding: 1.1rem 1.1rem 1.25rem;
+  background: var(--panel-2);
+  border: 2px solid var(--ink);
+}
+
+.choose > * + * {
+  margin-top: 1rem;
+}
+
+.choose-t {
+  margin: 0;
+  font-size: 1.375rem;
+}
+
+.choose .help {
+  margin-top: 0.4rem;
+}
+
+.choose-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* A drop target in words. Dropping works anywhere on the page; this just says so. */
+.dropzone {
+  padding: 1rem;
+  border: 2px dashed var(--control);
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.choose.is-dragging {
+  border-color: var(--alert);
+}
+
+.choose.is-dragging .dropzone {
+  border-style: solid;
+  border-color: var(--ink);
+  background: var(--mark-wash);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.choose-path .row {
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.choose-path .field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 30rem) {
+  .choose-path .row {
+    flex-wrap: wrap;
+  }
+}
+
+/* The chosen project, shown as a bar with a yellow edge. */
+.proj-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.85rem 1rem;
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-left: 6px solid var(--mark);
+}
+
+.proj-id {
+  min-width: 0;
+}
+
+.proj-id .label {
+  margin: 0 0 0.1rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.proj-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.proj-path {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+/* Folder browser */
+.fb {
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.fb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--control);
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--ink);
+  background: var(--mark-wash);
+}
+
+.fb-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.fb-here {
+  min-width: 0;
+  color: var(--ink-soft);
+}
+
+.fb-list {
+  max-width: 36rem;
+  max-height: 18rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+}
+
+.fb-list li + li {
+  border-top: 1px solid var(--rule);
+}
+
+.fb-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fb-row:hover,
+.fb-row:focus-visible {
+  background: var(--mark-wash);
+  color: var(--ink);
+}
+
+/* Folders that hold something to scan are the likely projects. */
+.fb-row.has-files {
+  color: var(--ink);
+}
+
+.fb-name {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.has-files .fb-name {
+  font-weight: 700;
+}
+
+.fb-count {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.recent .fb-count {
+  font-family: var(--mono);
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.fb-empty {
+  padding: 0.6rem 0.75rem;
+}
+
+.fb-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.fb-foot .meta {
+  margin: 0;
+}
+
+/* "Only check part of the project" stays out of the way until it is wanted. */
+.scope {
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.scope > summary {
+  min-height: 2rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scope-body {
+  margin-top: 1rem;
+}

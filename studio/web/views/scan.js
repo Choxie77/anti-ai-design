@@ -4,6 +4,12 @@ import { CATEGORY } from '../glossary.js';
 import { SAMPLE, SAMPLE_EXT } from '../sample.js';
 import { MINI } from '../art.js';
 import { SCANNED_KINDS, SKIPPED_FOLDERS } from './results.js';
+import { projectChooser } from './project.js';
+
+/** The last part of a path, whichever way the computer writes its slashes. */
+function baseName(p) {
+  return String(p).replace(/[\\/]+$/, '').split(/[\\/]/).pop() || p;
+}
 
 /** A page of code being read by a red band. Used while a scan runs. */
 export function readingAnimation(lines) {
@@ -58,10 +64,14 @@ export function renderScan(main, ctx) {
   let alive = true;
   let browseReq = 0;
   let scannable = null; // what the detector would read in the chosen folder, from the last browse
+  let chooser = null; // the "which project?" card while it is on screen
+  const canSwitch = info?.capabilities?.switchProject !== false;
 
   const errorSlot = h('div', { class: 'slot', id: ids.err });
   const readingSlot = h('div', { class: 'slot reading-slot' });
   const folderBody = h('div', { class: 'stack' });
+  const projectSlot = h('div', { class: 'slot project-slot' });
+  const summarySlot = h('div', { class: 'slot', 'aria-live': 'polite' });
   const snippetBody = h('div', { class: 'stack' });
   const browseList = h('div', { class: 'browse', 'aria-live': 'polite' });
   const submit = h('button', { type: 'submit', class: 'btn btn-primary' });
@@ -123,11 +133,15 @@ export function renderScan(main, ctx) {
   function sync() {
     folderBody.hidden = form.mode !== 'folder';
     snippetBody.hidden = form.mode !== 'snippet';
-    submit.textContent = form.mode === 'folder' ? (form.path.trim() ? 'Scan this folder' : 'Scan whole project') : 'Scan this code';
-    submit.disabled = busy || !engineOk || (form.mode === 'folder' && scannable !== null && scannable.files === 0);
+    const noProject = !info?.root;
+    scopeBox.hidden = noProject || choosing || form.mode !== 'folder';
+    summarySlot.hidden = noProject || choosing;
+    submit.textContent = form.mode === 'folder' ? (noProject ? 'Choose a project first' : form.path.trim() ? 'Scan this folder' : 'Scan whole project') : 'Scan this code';
+    submit.disabled = busy || !engineOk || (form.mode === 'folder' && (noProject || (scannable !== null && scannable.files === 0)));
   }
 
   async function loadBrowse() {
+    if (!info?.root) return;
     const req = ++browseReq;
     let data;
     try {
@@ -137,7 +151,8 @@ export function renderScan(main, ctx) {
       scannable = err.status === 404 ? { files: 0, byExt: {}, skippedDirs: [], missing: true } : null;
       sync();
       const msg = err.code === 'not_a_folder' ? 'That is a single file. Only that file will be scanned.' : err.status === 404 ? 'No file or folder with that name in your project.' : err.message;
-      clear(browseList).append(h('p', { class: err.status === 404 ? 'notice notice-error' : 'meta', role: 'status', text: msg }));
+      clear(browseList);
+      clear(summarySlot).append(h('p', { class: err.status === 404 ? 'notice notice-error' : 'meta', role: 'status', text: msg }));
       return;
     }
     if (!alive || req !== browseReq) return;
@@ -145,8 +160,9 @@ export function renderScan(main, ctx) {
     scannable = data.scannable || null;
     sync();
     const where = data.path || 'the project folder';
+    // What will be read stays in view under the project; the folder list (for narrowing the scan) is tucked away.
+    clear(summarySlot).append(scannable ? scanSummary(scannable, where) : h('p', { class: 'meta' }, 'Inside ', h('code', { text: where }), `: ${plural(data.fileCount, 'file')}, ${plural(data.dirs.length, 'folder')}.`));
     clear(browseList).append(
-      scannable ? scanSummary(scannable, where) : h('p', { class: 'meta' }, 'Inside ', h('code', { text: where }), `: ${plural(data.fileCount, 'file')}, ${plural(data.dirs.length, 'folder')}.`),
       data.dirs.length || data.parent !== null ? h('p', { class: 'meta', text: 'Click a folder to limit the scan to it.' }) : null,
       h(
         'ul',
@@ -229,12 +245,46 @@ export function renderScan(main, ctx) {
     }
   }
 
-  folderBody.append(
-    h('label', { for: ids.path, class: 'label', text: 'Limit to a folder or file (optional)' }),
-    h('p', { id: 'path-help', class: 'help', text: 'Type a path inside your project, such as src/styles, or pick a folder below. Files outside the project are never read.' }),
-    pathInput,
-    browseList,
+  // Which project: a bar once one is chosen, the chooser card until then (or when the person wants another).
+  function drawProject() {
+    chooser?.dispose();
+    chooser = null;
+    clear(projectSlot);
+    if (info?.root && !choosing) {
+      projectSlot.append(
+        h(
+          'div',
+          { class: 'proj-bar' },
+          h('div', { class: 'proj-id' }, h('p', { class: 'label', text: 'Project' }), h('p', { class: 'proj-name', text: baseName(info.root) }), h('code', { class: 'proj-path', text: info.root })),
+          canSwitch ? h('button', { type: 'button', class: 'btn', onclick: () => ((choosing = true), drawProject(), sync()) }, 'Change project') : null,
+        ),
+      );
+      return;
+    }
+    chooser = projectChooser(ctx, {
+      onCancel: info?.root ? () => ((choosing = false), drawProject(), sync()) : null,
+      onOpened: (r) => {
+        choosing = false;
+        form.path = r.focus || '';
+        pathInput.value = form.path;
+        scannable = null;
+        drawProject();
+        loadBrowse();
+        sync();
+        announce(`Opened ${r.name}. ${plural(r.scannable.files, 'file')} will be read.`);
+        if (!submit.disabled) submit.focus();
+      },
+    });
+    projectSlot.append(chooser.el);
+  }
+
+  const scopeBox = h(
+    'details',
+    { class: 'scope', open: Boolean(form.path) },
+    h('summary', { text: 'Only check part of the project (optional)' }),
+    h('div', { class: 'stack scope-body' }, h('label', { for: ids.path, class: 'label', text: 'A folder or file inside the project' }), h('p', { id: 'path-help', class: 'help', text: 'Type a path inside your project, such as src/styles, or pick a folder below. Files outside the project are never read.' }), pathInput, browseList),
   );
+  folderBody.append(projectSlot, summarySlot, scopeBox);
   snippetBody.append(
     h('div', { class: 'row' }, h('label', { for: ids.ext, class: 'label', text: 'What kind of code is it?' }), extSelect),
     h('label', { for: ids.code, class: 'label', text: 'Your code' }),
@@ -326,6 +376,9 @@ export function renderScan(main, ctx) {
     ),
   );
 
+  let choosing = Boolean(state.choosing) && canSwitch;
+  state.choosing = false;
+  drawProject();
   sync();
   if (engineOk) loadBrowse();
   // "Try it on a sample" lands here with the sample filled in and asks for the scan to run itself.
@@ -335,5 +388,6 @@ export function renderScan(main, ctx) {
   }
   return () => {
     alive = false;
+    chooser?.dispose();
   };
 }

@@ -58,6 +58,7 @@ export const state = {
   fix: null,
   guide: null, // which screen the guided sample run wants to walk through next
   autoRun: false,
+  choosing: false, // the Scan screen should open on "which project?" (set by the footer's Change link)
   ruleCount: null,
 };
 
@@ -118,7 +119,23 @@ function runSample() {
   go('scan');
 }
 
-const ctx = { engine, state, go, announce, ensurePreview, setScan, runSample };
+/**
+ * Make another folder the project. Anything shown about the old project (findings, fix previews) is dropped,
+ * because it would now be about files the Studio no longer looks at. `state.info` is updated in place so
+ * screens that already hold it see the change.
+ */
+async function openProject(path) {
+  const r = await engine.openProject(path);
+  Object.assign(state.info, { root: r.root, recent: r.recent });
+  state.scanForm.path = r.focus || '';
+  state.scanForm.mode = 'folder';
+  state.choosing = false;
+  setScan(null, null);
+  drawColophon();
+  return r;
+}
+
+const ctx = { engine, state, go, announce, ensurePreview, setScan, runSample, openProject };
 
 function current() {
   const id = /^#\/(\w+)/.exec(location.hash)?.[1];
@@ -165,8 +182,14 @@ function drawColophon() {
     return;
   }
   const e = state.info.engine;
+  const canSwitch = state.info.capabilities?.switchProject !== false;
+  const change = canSwitch
+    ? h('a', { href: '#/scan', class: 'linkish', onclick: () => ((state.choosing = true), location.hash === '#/scan' && route_()) }, 'Change project')
+    : null;
   colophon.append(
-    h('p', { class: 'meta' }, 'Project folder ', h('code', { text: state.info.root }), ' · the Studio can only read and change files inside it.'),
+    state.info.root
+      ? h('p', { class: 'meta' }, 'Project folder ', h('code', { text: state.info.root }), ' · the Studio only reads and changes files inside it. ', change)
+      : h('p', { class: 'meta' }, 'No project chosen yet. ', change),
     h('p', { class: 'meta' }, 'Detector ', h('code', { text: e.found ? e.path : 'not found' }), e.version ? ` · version ${e.version}` : '', ' · Everything runs on this computer; nothing is uploaded.'),
   );
 }
@@ -202,7 +225,7 @@ function renderBlocked(el, err) {
           ? 'Every request carries a one-time token. Open the full address that the server printed in your terminal when it started; it ends in #token= and a long string.'
           : err.message,
       }),
-      h('p', { class: 'meta', text: 'Start it with: node studio/server.mjs --root <folder>' }),
+      h('p', { class: 'meta', text: 'Start it again with: node studio/server.mjs' }),
     ),
   );
 }
