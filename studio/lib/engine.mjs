@@ -5,11 +5,10 @@ import { accessSync, constants, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The binary is still called `anti-design` in the code base; the rename pass
-// will switch it to `anti-ai-design`. Both names live ONLY in this list.
-export const ENGINE_NAMES = ['anti-ai-design', 'anti-design'];
-export const ENGINE_ENV_VARS = ['ANTI_AI_DESIGN_BIN', 'ANTI_DESIGN_BIN'];
-export const BUILD_COMMAND = 'cargo build --release -p anti-design --manifest-path anti-design-skill/Cargo.toml';
+// The binary name and its env var live ONLY here.
+export const ENGINE_NAMES = ['anti-ai-design'];
+export const ENGINE_ENV_VARS = ['ANTI_AI_DESIGN_BIN'];
+export const BUILD_COMMAND = 'cargo build --release -p anti-ai-design --manifest-path anti-design-skill/Cargo.toml';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_RELEASE = path.resolve(here, '..', '..', 'anti-design-skill', 'target', 'release');
@@ -110,7 +109,7 @@ export async function fixDryRun(bin, target, cwd) {
   return { diff: stdout, summary: stderr.trim() };
 }
 
-/** Writes the fixes and appends to .anti-design/changelog.md in cwd. */
+/** Writes the fixes and appends to .anti-ai-design/changelog.md in cwd. */
 export async function fixWrite(bin, target, cwd) {
   const { stdout, stderr } = await run(bin, ['detect', '--write', target], { cwd });
   return { diff: stdout, summary: stderr.trim() };

@@ -48,7 +48,7 @@ function walk(p, out) {
     return out;
   }
   for (const name of fs.readdirSync(p).sort()) {
-    if (name === '.anti-design') continue;
+    if (name === '.anti-ai-design') continue;
     walk(path.join(p, name), out);
   }
   return out;
@@ -114,7 +114,7 @@ for (const f of files) {
 }
 process.stdout.write(diff);
 if (write && count) {
-  const dir = path.join(process.cwd(), '.anti-design');
+  const dir = path.join(process.cwd(), '.anti-ai-design');
   fs.mkdirSync(dir, { recursive: true });
   const log = path.join(dir, 'changelog.md');
   if (!fs.existsSync(log)) fs.writeFileSync(log, '# changelog\n\n');
