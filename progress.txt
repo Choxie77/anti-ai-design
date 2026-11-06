@@ -82,3 +82,25 @@ workspace and live/framework suites with the pack. Hook verb does not pass the p
 
 [task-46 verification] 2026-11-05 - with the pack: cargo workspace 2499 pass / 1 Chrome timeout (passes alone), live 263,
 framework 196, plugin-e2e 4, detector 82, core 486+254, oracle 1322, aad-rules.test 6. Details in docs/ours/BASELINE.md.
+
+[task-42, 47, 48, 51, 53 integrated] 2026-11-06 - branch `integration` (task-55)
+Merged into integration: agent/rename (task-51), agent/studio (Studio web UI); branding (450ac129), release (e6bdc88e) and
+safefix (b04e76bc) were already merged into main. `release-gh` is the release agent's work replayed on the GitHub history
+(same file contents as main for the release files); it is not merged, its content is already here.
+Integration fixes: root .github/workflows use anti-ai-design names and the ANTI_AI_DESIGN_SIGNING_KEY secret; studio uses
+the anti-ai-design engine name, ANTI_AI_DESIGN_BIN and .anti-ai-design/changelog.md (legacy names dropped), and its test now
+resolves its own path with fileURLToPath (the repo path has a space); tools/dashboard command names.
+Full run on integration (engine rebuilt, 0.1.18+engine): cargo test --workspace --no-fail-fast 2518 pass / 0 fail / 9 ignored
+(158 targets); bun run test rc=0 (Bun 486/0, Node 254/0 +2 skipped, oracle+aad 9/0, detector 82/0, live 263/0 +2 skipped,
+framework 196/0, plugin-e2e 4/0); oracle replay 1320 pass / 0 fail / 23 accepted deltas / 0 missing; studio 30 pass / 2 skipped.
+Cargo.lock, dist/ and the bundle signature vector regenerated: no tracked drift.
+Note on dist/: the git-ignored dist/ and build/ still held pre-rename output (names like dist/openai/anti-design); they were
+deleted and rebuilt, which is why a grep that respects .gitignore and one that does not disagreed on task-42.
+PRD hygiene: task-43 and task-46 verification commands used the old binary/crate/env names; updated. task-42 verification used
+`wc -l | grep -qx 0`, which fails on macOS (wc pads with spaces); now `tr -d ' '`. Tasks 51, 53, 55 added (they were only named in
+the agent prompts). No task-50, 52 or 54 exists in prd.json or the prompts; branding and studio have status files, no PRD id.
+
+[task-49] COMPLETED - End-to-end run on a sample app (2026-11-06)
+docs/ours/e2e.md: sample app anti-design-skill/tests/fixtures/sample-app. detect: 8 findings + 3 advisory; detect --fix (dry run)
+changes nothing; --write applies 2 gradient-text fixes and logs them; rescan 4 + 3 advisory; second --write does nothing.
+Honest caveat in the doc: the solid colour the fixer picks (indigo) is itself flagged by ai-color-palette.

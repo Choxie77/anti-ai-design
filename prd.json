@@ -326,15 +326,15 @@
     {
       "id": "task-42",
       "title": "Fork hygiene: remove placeholders and upstream branding",
-      "description": "In anti-design-skill/, replace the OWNER and anti-design.example placeholders (about 220 files) with the real GitHub owner and URLs, replace or remove upstream-derived marketing assets (docs/images/readme-*.webp, Neo Mirai case references, README comparison text), and rewrite README.md in our own voice. Keep LICENSE, NOTICE.md and UPSTREAM.md accurate. BLOCKED on: GitHub owner, final product name (anti-design vs anti-ai-design).",
-      "verification": "grep -rIl 'OWNER/anti-design' anti-design-skill --exclude-dir=node_modules --exclude-dir=target | wc -l | grep -qx 0 && test -s anti-design-skill/LICENSE && test -s anti-design-skill/NOTICE.md",
-      "status": "pending"
+      "description": "In anti-design-skill/, replace the OWNER and anti-design.example placeholders (about 220 files) with the real GitHub owner and URLs, replace or remove upstream-derived marketing assets (docs/images/readme-*.webp, Neo Mirai case references, README comparison text), and rewrite README.md in our own voice. Keep LICENSE, NOTICE.md and UPSTREAM.md accurate. Decided 2026-11-05/06: owner Choxie77, name Anti-AI Design (anti-ai-design), repository https://github.com/Choxie77/anti-ai-design.",
+      "verification": "test \"$(grep -rIl 'OWNER/anti-design' anti-design-skill --exclude-dir=node_modules --exclude-dir=target | wc -l | tr -d ' ')\" = 0 && test -s anti-design-skill/LICENSE && test -s anti-design-skill/NOTICE.md",
+      "status": "completed"
     },
     {
       "id": "task-43",
       "title": "Install toolchain and build the engine",
       "description": "With the owner's approval, install Rust via rustup and Bun, then run 'cargo build --release -p anti-design' in anti-design-skill/ and set ANTI_DESIGN_BIN to target/release/anti-design. Record versions and the build time in docs/ours/BUILD.md. BLOCKED on owner approval to install system tooling.",
-      "verification": "test -x anti-design-skill/target/release/anti-design && anti-design-skill/target/release/anti-design --version",
+      "verification": "test -x anti-design-skill/target/release/anti-ai-design && anti-design-skill/target/release/anti-ai-design --version",
       "status": "completed"
     },
     {
@@ -355,7 +355,7 @@
       "id": "task-46",
       "title": "Add our first detector rules",
       "description": "Implement the top 5 candidate rules from docs/ours/rule-gap.md in anti-design-skill: AAD-Q02 (focus style and accessible names), AAD-C07 (more than one accent), AAD-V07 (mixed corner radii without DESIGN.md), AAD-V06 (emoji as interface icons), AAD-V02 (glass everywhere). Put them in new files with our header, register them, add fixtures and tests. Mark any upstream file edited with a modification notice (Apache-2.0 section 4).",
-      "verification": "cd anti-design-skill && cargo test -p anti-design-aad-rules && ANTI_DESIGN_BIN=$PWD/target/release/anti-design node --test tests/aad-rules.test.mjs",
+      "verification": "cd anti-design-skill && cargo test -p anti-ai-design-aad-rules && ANTI_AI_DESIGN_BIN=$PWD/target/release/anti-ai-design node --test tests/aad-rules.test.mjs",
       "status": "completed"
     },
     {
@@ -363,21 +363,42 @@
       "title": "Document the fork's actual CLI contract versus our spec",
       "description": "Read anti-design-skill/docs/CLI-CONTRACT.md and compare with docs/spec/cli-schema.json. Write docs/ours/contract-diff.md: which of our commands and flags exist, which differ, which we want (dry-run default, --write, run log). Update cli-schema.json to say it is a wish list, not the contract.",
       "verification": "test -s docs/ours/contract-diff.md",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "task-48",
       "title": "Safe-fix tier and dry-run default",
       "description": "Using contract-diff.md, decide and implement the smallest change that gives detect findings a safe automatic fix tier (for example gradient text to a solid color) applied only with --write, otherwise printed as a diff. Add the append-only run log in .anti-design/changelog.md if the fork has none. Test idempotence: running twice changes nothing the second time.",
       "verification": "cd anti-design-skill && cargo test --workspace safe_fix",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "task-49",
       "title": "End-to-end run on a real project",
       "description": "Run the built binary's detect on a real web project (the owner picks one; default: a small sample app fixture) and save before/after findings to docs/ours/e2e.md.",
       "verification": "test -s docs/ours/e2e.md",
-      "status": "pending"
+      "status": "completed"
+    },
+    {
+      "id": "task-51",
+      "title": "Rename anti-design to anti-ai-design",
+      "description": "Rename crates, binary, env vars, folder names and npm scope to anti-ai-design / @anti-ai-design, replace the OWNER and placeholder-domain URLs with https://github.com/Choxie77/anti-ai-design, regenerate lockfile, dist and the signature vector, re-record only rename-caused oracle goldens (logged in anti-design-skill/tests/oracle/DELTAS.md). The subfolder anti-design-skill/ keeps its name.",
+      "verification": "cd anti-design-skill && test \"$(target/release/anti-ai-design --version)\" = '0.1.18+engine' && ANTI_AI_DESIGN_BIN=$PWD/target/release/anti-ai-design node tests/oracle/run.mjs | tail -1 | grep -q ' 0 fail, .* 0 missing'",
+      "status": "completed"
+    },
+    {
+      "id": "task-53",
+      "title": "Make the project releasable from Choxie77/anti-ai-design",
+      "description": "Own Ed25519 bundle-signing key, GitHub Releases engine channel, @anti-ai-design platform packages, root workflows (test, release-engine, release). Nothing is published until the owner runs the human steps in docs/ours/status/release.md.",
+      "verification": "test -s .github/workflows/release.yml && test -s .github/workflows/release-engine.yml && test -s .github/workflows/test.yml && cd anti-design-skill && node --test tests/check-engine-release.test.mjs tests/release.test.mjs",
+      "status": "completed"
+    },
+    {
+      "id": "task-55",
+      "title": "Integrate the agent branches",
+      "description": "Merge agent/rename and agent/studio (branding, release and safefix were already merged) into branch integration, rename the root workflows and studio, regenerate dist/Cargo.lock/vector, run the full suite and the release scripts in dry-run, write docs/ours/e2e.md. Fast-forwarding main, tagging and pushing wait for the owner's OK.",
+      "verification": "cd anti-design-skill && ANTI_AI_DESIGN_BIN=$PWD/target/release/anti-ai-design cargo test --workspace --no-fail-fast && test -s ../docs/ours/e2e.md",
+      "status": "completed"
     }
   ]
 }
