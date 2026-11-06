@@ -13,11 +13,16 @@ export function sortFindings(findings) {
   );
 }
 
-/** Ids of findings that sit on a line the dry-run diff deletes or rewrites. */
+/**
+ * Ids of findings that sit on a line the dry-run diff deletes or rewrites.
+ * A finding whose line the Studio only guessed (`located`) is left out: another mark on the same line
+ * would otherwise be claimed as fixed when the change does not touch it.
+ */
 export function fixableIds(findings, previewFiles) {
   const byFile = new Map((previewFiles || []).map((f) => [f.file, new Set(f.changedLines)]));
   const out = new Set();
   for (const f of findings) {
+    if (f.located) continue;
     const lines = byFile.get(f.file);
     if (lines && lines.has(f.line)) out.add(f.id);
   }
@@ -88,4 +93,22 @@ export function splitRows(hunk) {
   }
   flush();
   return rows;
+}
+
+/**
+ * Rules that are reported more often after a fix than before it: what the change itself stirred up.
+ * Counted per rule across the whole scan, not per file, so a finding whose guessed location moves from a page
+ * to the stylesheet it links is not mistaken for a new one.
+ */
+export function newAfterFix(before, after) {
+  const was = new Map();
+  for (const f of before) was.set(f.rule, (was.get(f.rule) || 0) + 1);
+  const now = new Map();
+  for (const f of after) {
+    if (!now.has(f.rule)) now.set(f.rule, { rule: f.rule, name: f.name, files: new Set(), n: 0 });
+    const v = now.get(f.rule);
+    v.n += 1;
+    v.files.add(f.file);
+  }
+  return [...now.values()].filter((v) => v.n > (was.get(v.rule) || 0)).map((v) => ({ rule: v.rule, name: v.name, file: [...v.files].join(', '), added: v.n - (was.get(v.rule) || 0) }));
 }

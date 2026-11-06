@@ -1,5 +1,5 @@
 import { h, clear, plural, copyText } from '../ui.js';
-import { compareRescan } from '../model.js';
+import { compareRescan, newAfterFix } from '../model.js';
 import { unifiedDiff, splitDiff } from './diffview.js';
 import { startCoach } from '../coach.js';
 import { setFlag } from '../onboarding.js';
@@ -77,6 +77,7 @@ export function renderFixes(main, ctx) {
       }
       const after = await engine.scan(nextInput);
       fx.compare = compareRescan(before.findings, after.findings, fixableBefore);
+      fx.introduced = newAfterFix(before.findings, after.findings);
       fx.rescan = { before: before.summary.total, after: after.summary.total };
       if (!isSnippet) {
         try {
@@ -202,6 +203,13 @@ export function renderFixes(main, ctx) {
   function drawDone() {
     const r = fx.result;
     const gone = fx.compare.every((c) => c.gone);
+    const introduced = fx.introduced || [];
+    const left = `${plural(fx.rescan.after, 'finding')} left, down from ${fx.rescan.before}`;
+    const verdict = !gone
+      ? `Some fixed findings still show up. ${plural(fx.rescan.after, 'finding')} now, ${fx.rescan.before} before.`
+      : introduced.length
+        ? `The fixed findings are gone, but the change brought up ${plural(introduced.length, 'new finding')}. ${fx.rescan.after < fx.rescan.before ? `${left}.` : `${plural(fx.rescan.after, 'finding')} now, ${fx.rescan.before} before.`}`
+        : `The fixed findings are gone. ${left}.`;
     body.append(
       h('div', { class: 'notice' }, h('h2', { class: 'notice-title', text: isSnippet ? 'Fixed snippet ready' : `Applied ${plural(r.applied, 'fix', 'fixes')}` }), h('p', { text: isSnippet ? 'No file was written. Copy the fixed text below.' : `Written: ${r.written.join(', ') || 'nothing'}.` })),
     );
@@ -220,7 +228,10 @@ export function renderFixes(main, ctx) {
         {},
         h('h2', { class: 'section-title', text: 'Checked again after the fix' }),
         scoreVisual(fx.rescan.before, fx.rescan.after),
-        h('p', { class: gone ? 'verdict' : 'verdict verdict-open', text: gone ? `The fixed findings are gone. ${plural(fx.rescan.after, 'finding')} left, down from ${fx.rescan.before}.` : `Some fixed findings still show up. ${plural(fx.rescan.after, 'finding')} now, ${fx.rescan.before} before.` }),
+        h('p', { class: gone && !introduced.length ? 'verdict' : 'verdict verdict-open', text: verdict }),
+        introduced.length
+          ? h('div', { class: 'notice' }, h('p', { class: 'notice-title', text: 'The change itself raised something new' }), h('p', { text: 'A mechanical fix can leave a neighbouring problem behind. These were not reported before, so look at them next:' }), h('ul', { class: 'rule-list' }, introduced.map((c) => h('li', {}, h('code', { text: `${c.rule} · ${c.file}` }), c.added > 1 ? ` (${c.added} new)` : ''))))
+          : null,
         h('ul', { class: 'rule-list' }, fx.compare.map((c) => h('li', { class: 'tally-row2' }, h('code', { text: `${c.rule} · ${c.file}` }), ` ${c.gone ? 'not reported any more' : `still ${c.after} reported`} (was ${c.before})`))),
         h('div', { class: 'row' }, fx.rescan.after > 0 ? h('a', { class: 'btn btn-quiet', href: '#/results', text: 'See what is left' }) : null, h('a', { class: 'btn btn-quiet', href: '#/scan', text: 'Scan something else' })),
       ),

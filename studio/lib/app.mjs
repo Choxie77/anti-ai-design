@@ -8,6 +8,8 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as engine from './engine.mjs';
 import { parseUnifiedDiff } from './diff.mjs';
+import { inspectProject, SKIP_DIRS } from './project.mjs';
+import { locateFinding, linkedStylesheets } from './locate.mjs';
 import {
   HttpError,
   CSP,
@@ -118,8 +120,8 @@ export function createApp(opts) {
     return fn({ kind: st.isDirectory() ? 'folder' : 'file', cwd: realRoot, base: realRoot, target: real, label: relLabel(realRoot, real) || '.' });
   }
 
-  function readContext(base, rel, line, cache) {
-    if (!Number.isInteger(line) || line < 1) return null;
+  /** The lines of a file inside base, or null when it is hidden, outside base, too big or unreadable. */
+  function loadLines(base, rel, cache) {
     if (hasDotSegment(rel)) return null; // dotfiles are only read by the engine
     let lines = cache.get(rel);
     if (lines === undefined) {
@@ -135,12 +137,51 @@ export function createApp(opts) {
       }
       cache.set(rel, lines);
     }
+    return lines;
+  }
+
+  function readContext(base, rel, line, cache) {
+    if (!Number.isInteger(line) || line < 1) return null;
+    const lines = loadLines(base, rel, cache);
     if (!lines) return null;
     const start = Math.max(1, line - CONTEXT_RADIUS);
     const end = Math.min(lines.length, line + CONTEXT_RADIUS);
     const out = [];
     for (let n = start; n <= end; n++) out.push({ n, text: lines[n - 1].slice(0, 400), hit: n === line });
     return { start, end, lines: out };
+  }
+
+  /**
+   * The detector gives no line for findings in HTML pages, nor for ones that come from a stylesheet the page
+   * links. Find the most likely line (in the page first, then its stylesheets) and say it is a guess.
+   */
+  function locateMissingLines(base, findings, cache) {
+    const used = new Set();
+    const linked = new Map();
+    for (const f of findings) {
+      if (f.line) continue;
+      const own = loadLines(base, f.file, cache);
+      if (!own) continue;
+      const candidates = [{ rel: f.file, lines: own }];
+      if (/\.html?$/i.test(f.file)) {
+        if (!linked.has(f.file)) {
+          const found = [];
+          for (const href of linkedStylesheets(own)) {
+            const abs = path.resolve(base, path.dirname(f.file), href);
+            const rel = isInside(base, abs) ? relLabel(base, abs) : null;
+            const lines = rel ? loadLines(base, rel, cache) : null;
+            if (lines) found.push({ rel, lines, via: f.file });
+          }
+          linked.set(f.file, found);
+        }
+        candidates.push(...linked.get(f.file));
+      }
+      const hit = locateFinding(f, candidates, used);
+      if (!hit) continue;
+      f.file = hit.rel;
+      f.line = hit.line;
+      f.located = { approximate: true, via: hit.via };
+    }
   }
 
   function summarize(findings, files) {
@@ -181,14 +222,29 @@ export function createApp(opts) {
           line: Number.isInteger(f.line) ? f.line : 0,
           snippet: String(f.snippet ?? ''),
           advisory: Boolean(f.advisory),
-          context: readContext(ctx.base, rel, f.line, cache),
+          context: null,
         });
       }
+      locateMissingLines(ctx.base, findings, cache);
+      // A page that links a stylesheet makes the engine report the stylesheet's marks twice: once for the page
+      // and once for the file itself. Once both sit on the same line they are the same mark, so keep one.
+      const seen = new Set(findings.filter((f) => !f.located).map((f) => `${f.rule}|${f.file}:${f.line}`));
+      const unique = findings.filter((f) => {
+        if (!f.located) return true;
+        const k = `${f.rule}|${f.file}:${f.line}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      findings.length = 0;
+      unique.forEach((f, i) => findings.push({ ...f, id: String(i) }));
+      for (const f of findings) f.context = readContext(ctx.base, f.file, f.line, cache);
       const files = new Set(findings.map((f) => f.file));
       return {
         kind: ctx.kind,
         target: ctx.label,
         durationMs: Date.now() - started,
+        scanned: ctx.kind === 'snippet' ? { files: 1, byExt: { ['.' + ctx.label.split('.').pop()]: 1 }, skippedDirs: [], truncated: false } : inspectProject(ctx.target),
         skipped,
         summary: summarize(findings, files),
         findings,
@@ -331,6 +387,8 @@ export function createApp(opts) {
     }
     dirs.sort((a, b) => a.localeCompare(b));
     return {
+      scannable: inspectProject(real),
+      skippedDirs: dirs.filter((d) => SKIP_DIRS.includes(d)),
       path: rel,
       parent: rel === '' ? null : path.posix.dirname(rel) === '.' ? '' : path.posix.dirname(rel),
       dirs: dirs.slice(0, 500),

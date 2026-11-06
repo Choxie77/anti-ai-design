@@ -6,6 +6,9 @@ import { specimenForRule } from '../guide-content.js';
 import { SEVERITY_ORDER, filterFindings, groupFindings } from '../model.js';
 import { SEVERITY, CATEGORY, categoryLabel, severityLabel } from '../glossary.js';
 
+export const SCANNED_KINDS = 'HTML, CSS, Sass, Less, JavaScript, TypeScript, JSX, Vue, Svelte and Astro files';
+export const SKIPPED_FOLDERS = 'node_modules, dist, build';
+
 export function codeBlock(ctxData, label, wholeFile = false) {
   if (!ctxData) {
     return h('p', { class: 'meta', text: wholeFile ? 'This applies to the file as a whole, so there is no single line to show.' : 'The code for this line cannot be shown. The file may be hidden, very large, or changed since the scan.' });
@@ -51,7 +54,14 @@ function countRows(title, counts, total, order, glossary) {
 
 /** `index.html:7`, or just the file name when the finding covers the whole file. */
 function place(f) {
-  return f.line ? `${f.file}:${f.line}` : `${f.file} (whole file)`;
+  if (!f.line) return `${f.file} (whole file)`;
+  return f.located ? `${f.file}:${f.line} (likely)` : `${f.file}:${f.line}`;
+}
+
+/** Say plainly when the line is the Studio's best guess rather than the detector's own answer. */
+function locatedNote(f) {
+  if (!f.located) return null;
+  return h('p', { class: 'note', text: f.located.via ? `The detector did not name a line. The closest match is in ${f.file}, a stylesheet that ${f.located.via} links to. Treat the line as a good guess.` : 'The detector did not name a line for this one. This is the closest match in the file; treat it as a good guess.' });
 }
 
 export function renderResults(main, ctx) {
@@ -76,17 +86,20 @@ export function renderResults(main, ctx) {
     'div',
     { class: 'screen' },
     h('h1', { text: 'Findings' }),
-    h('p', { class: 'meta' }, `Scanned `, h('code', { text: where }), ` in ${formatMs(scan.durationMs)}`, scan.skipped ? ` · ${plural(scan.skipped, 'finding')} outside the root hidden` : ''),
+    h('p', { class: 'meta' }, `Scanned `, h('code', { text: where }), `${scan.scanned?.files ? ` (${plural(scan.scanned.files, 'file')})` : ''} in ${formatMs(scan.durationMs)}`, scan.skipped ? ` · ${plural(scan.skipped, 'finding')} outside the root hidden` : ''),
   );
   const walkBtn = h('button', { type: 'button', class: 'btn btn-quiet walk', onclick: () => startWalk() }, 'Walk me through this page');
 
   if (summary.total === 0) {
+    const read = scan.scanned?.files;
     head.append(
       h(
         'section',
         { class: 'notice' },
-        h('h2', { class: 'notice-title', text: 'Nothing reported' }),
-        h('p', { text: 'None of the detector’s rules matched. That says the rules found no marks, not that the design is good.' }),
+        read === 0 ? h('h2', { class: 'notice-title', text: 'No files were scanned' }) : h('h2', { class: 'notice-title', text: 'Nothing reported' }),
+        read === 0
+          ? h('p', { text: `There was nothing here for the detector to read. It reads ${SCANNED_KINDS}, and it skips ${SKIPPED_FOLDERS} and hidden folders. Pick the folder that holds your front-end code.` })
+          : h('p', { text: `${read ? `The detector read ${plural(read, 'file')} and none` : 'None'} of its rules matched. That says the rules found no marks, not that the design is good.` }),
         h('div', { class: 'row' }, h('a', { class: 'btn btn-primary', href: '#/scan', text: 'Scan something else' }), h('a', { class: 'btn btn-quiet', href: '#/rules', text: 'Read the rules' })),
       ),
     );
@@ -159,6 +172,7 @@ export function renderResults(main, ctx) {
       h('p', { class: 'where' }, byRule ? null : [h('code', { text: place(f) }), ' · '], h('code', { text: f.rule }), ` · ${categoryLabel(f.category)}`),
       byRule ? null : h('p', { class: 'why', text: f.description }),
       f.snippet ? h('p', { class: 'note' }, 'What matched: ', h('code', { text: f.snippet })) : null,
+      locatedNote(f),
       codeBlock(f.context, `Code around ${place(f)}`, !f.line),
     );
   }

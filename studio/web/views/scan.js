@@ -3,6 +3,7 @@ import { EngineError } from '../engine.js';
 import { CATEGORY } from '../glossary.js';
 import { SAMPLE, SAMPLE_EXT } from '../sample.js';
 import { MINI } from '../art.js';
+import { SCANNED_KINDS, SKIPPED_FOLDERS } from './results.js';
 
 /** A page of code being read by a red band. Used while a scan runs. */
 export function readingAnimation(lines) {
@@ -21,6 +22,32 @@ export function readingAnimation(lines) {
   );
 }
 
+/** "This will read 14 files (9 CSS, 4 HTML, 1 JSX)", or a plain explanation of why a folder has nothing to read. */
+function scanSummary(sc, where) {
+  const label = (ext) => ext.replace(/^\./, '').toUpperCase();
+  if (sc.files === 0) {
+    return h(
+      'div',
+      { class: 'notice notice-error', role: 'status' },
+      h('p', { class: 'notice-title', text: 'Nothing to scan in here' }),
+      h('p', { text: `There are no ${SCANNED_KINDS} in ${where}${sc.skippedDirs?.length ? `, apart from ${sc.skippedDirs.join(', ')}, which are skipped` : ''}. Pick the folder that holds your front-end code, or go back up a level.` }),
+    );
+  }
+  const parts = Object.entries(sc.byExt)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([ext, n]) => `${n} ${label(ext)}`);
+  return h(
+    'p',
+    { class: 'meta scan-summary', role: 'status' },
+    h('strong', { text: `${sc.truncated ? 'At least ' : ''}${plural(sc.files, 'file')} will be read` }),
+    ` in `,
+    h('code', { text: where }),
+    ` (${parts.join(', ')}${Object.keys(sc.byExt).length > 5 ? ', …' : ''}).`,
+    sc.skippedDirs?.length ? ` ${sc.skippedDirs.join(', ')} ${sc.skippedDirs.length === 1 ? 'is' : 'are'} skipped.` : '',
+  );
+}
+
 export function renderScan(main, ctx) {
   const { engine, state, go, announce } = ctx;
   const form = state.scanForm;
@@ -30,6 +57,7 @@ export function renderScan(main, ctx) {
   let busy = false;
   let alive = true;
   let browseReq = 0;
+  let scannable = null; // what the detector would read in the chosen folder, from the last browse
 
   const errorSlot = h('div', { class: 'slot', id: ids.err });
   const readingSlot = h('div', { class: 'slot reading-slot' });
@@ -96,7 +124,7 @@ export function renderScan(main, ctx) {
     folderBody.hidden = form.mode !== 'folder';
     snippetBody.hidden = form.mode !== 'snippet';
     submit.textContent = form.mode === 'folder' ? (form.path.trim() ? 'Scan this folder' : 'Scan whole project') : 'Scan this code';
-    submit.disabled = busy || !engineOk;
+    submit.disabled = busy || !engineOk || (form.mode === 'folder' && scannable !== null && scannable.files === 0);
   }
 
   async function loadBrowse() {
@@ -106,23 +134,30 @@ export function renderScan(main, ctx) {
       data = await engine.browse(form.path);
     } catch (err) {
       if (!alive || req !== browseReq) return;
+      scannable = err.status === 404 ? { files: 0, byExt: {}, skippedDirs: [], missing: true } : null;
+      sync();
       const msg = err.code === 'not_a_folder' ? 'That is a single file. Only that file will be scanned.' : err.status === 404 ? 'No file or folder with that name in your project.' : err.message;
-      clear(browseList).append(h('p', { class: 'meta', text: msg }));
+      clear(browseList).append(h('p', { class: err.status === 404 ? 'notice notice-error' : 'meta', role: 'status', text: msg }));
       return;
     }
     if (!alive || req !== browseReq) return;
     const here = data.path || 'the project';
+    scannable = data.scannable || null;
+    sync();
+    const where = data.path || 'the project folder';
     clear(browseList).append(
-      h('p', { class: 'meta' }, 'Inside ', h('code', { text: data.path || 'the project folder' }), `: ${plural(data.fileCount, 'file')}, ${plural(data.dirs.length, 'folder')}. Click a folder to limit the scan to it.`),
+      scannable ? scanSummary(scannable, where) : h('p', { class: 'meta' }, 'Inside ', h('code', { text: where }), `: ${plural(data.fileCount, 'file')}, ${plural(data.dirs.length, 'folder')}.`),
+      data.dirs.length || data.parent !== null ? h('p', { class: 'meta', text: 'Click a folder to limit the scan to it.' }) : null,
       h(
         'ul',
         { class: 'rule-list', 'aria-label': `Folders inside ${here}` },
         data.parent !== null
           ? h('li', {}, h('button', { type: 'button', class: 'linkish', onclick: () => pick(data.parent) }, 'Back up one level'))
           : null,
-        data.dirs.map((d) =>
-          h('li', {}, h('button', { type: 'button', class: 'linkish mono', onclick: () => pick(data.path ? `${data.path}/${d}` : d) }, d + '/')),
-        ),
+        data.dirs.map((d) => {
+          const skip = (data.skippedDirs || []).includes(d);
+          return h('li', {}, h('button', { type: 'button', class: 'linkish mono', onclick: () => pick(data.path ? `${data.path}/${d}` : d) }, d + '/'), skip ? h('span', { class: 'meta', text: ' (not scanned: dependencies and build output)' }) : null);
+        }),
         data.dirs.length === 0 ? h('li', { class: 'meta', text: 'No subfolders here.' }) : null,
       ),
     );

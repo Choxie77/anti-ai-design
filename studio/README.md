@@ -13,6 +13,15 @@ Engine lookup order: `--engine`, env `ANTI_AI_DESIGN_BIN`, `../anti-design-skill
 
 Tests: `cd studio && npm test` (or `node --test studio/tests/*.test.mjs` from the repo root; Node 24 does not accept a bare directory argument). The integration test uses the real binary and skips if missing; set `ANTI_AI_DESIGN_BIN` to run it.
 
+## Giving it a project
+
+The project is the folder passed as `--root`; the Scan screen narrows it to a subfolder or a file.
+
+- **Before the scan.** `GET /api/browse` also returns `scannable` (`lib/project.mjs`): how many files the detector will read under the chosen path, by type, and which folders it skips (`node_modules`, `dist`, `build`, hidden folders). The Scan screen shows "14 files will be read (9 CSS, 4 HTML, 1 JSX)". A folder with nothing to read says so and disables the button; a path that does not exist says so too. The lists mirror the engine's walker, and `tests/project.test.mjs` compares them with the engine source when it is next to this checkout.
+- **After the scan.** The result carries `scanned` (files read), so "No files were scanned" is told apart from "Nothing reported".
+- **Lines the detector does not name.** For HTML pages, and for marks it finds in a stylesheet the page links, the detector gives line 0. `lib/locate.mjs` finds the most likely line from what the detector says it matched (in the page first, then its local stylesheets) and sets `located: {approximate: true, via}` on the finding. The UI labels these "(likely)". The same mark reported once for a page and once for its stylesheet is collapsed into one. A finding with a guessed line is never tagged "can be fixed automatically", because another mark on the same line would otherwise be claimed as fixed.
+- **After a fix.** The re-scan lists rules that are reported more often than before ("the change itself raised something new"), since a mechanical fix can leave a neighbouring problem, such as a low-contrast colour.
+
 ## Guided experience (first-time visitors)
 
 The Studio teaches itself, for someone who has never heard of the tool.
