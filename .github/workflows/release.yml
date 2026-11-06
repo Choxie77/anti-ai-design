@@ -5,7 +5,7 @@ name: release
 # It refuses unless the engine release for the pinned ENGINE_VERSION is already
 # published (release-engine.yml) and the committed engine-checksums.txt matches
 # it, builds universal.zip from the tagged tree, signs it with the Ed25519
-# bundle-signing key held in the ANTI_DESIGN_SIGNING_KEY secret, and publishes
+# bundle-signing key held in the ANTI_AI_DESIGN_SIGNING_KEY secret, and publishes
 # universal.zip + universal.zip.sig.json together.
 #
 # The installer (crates/skills) looks for the bundle at the release tag
@@ -81,10 +81,10 @@ jobs:
         env:
           # The PKCS#8 PEM from ~/aad-secrets/bundle-signing-private.pem,
           # stored as a repository (or `release` environment) secret.
-          ANTI_DESIGN_SIGNING_KEY: ${{ secrets.ANTI_DESIGN_SIGNING_KEY }}
+          ANTI_AI_DESIGN_SIGNING_KEY: ${{ secrets.ANTI_AI_DESIGN_SIGNING_KEY }}
         run: |
           set -e
-          [ -n "$ANTI_DESIGN_SIGNING_KEY" ] || { echo "::error title=Signing key missing::Add the ANTI_DESIGN_SIGNING_KEY Actions secret (see docs/BUNDLE-SIGNING.md)."; exit 1; }
+          [ -n "$ANTI_AI_DESIGN_SIGNING_KEY" ] || { echo "::error title=Signing key missing::Add the ANTI_AI_DESIGN_SIGNING_KEY Actions secret (see docs/BUNDLE-SIGNING.md)."; exit 1; }
           version="${GITHUB_REF_NAME#v}"
           node scripts/sign-bundle.mjs "$version" dist/universal.zip
       - name: Verify the signature against the committed public key
