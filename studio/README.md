@@ -9,9 +9,9 @@ node studio/server.mjs --root <folder> [--port 4180] [--engine <binary>]
 ```
 
 Open the full URL it prints (it ends in `#token=...`). Node >= 20, no dependencies.
-Engine lookup order: `--engine`, env `ANTI_AI_DESIGN_BIN`, env `ANTI_DESIGN_BIN`, `../anti-design-skill/target/release/anti-ai-design`, `.../anti-design`, then PATH. Names live in `lib/engine.mjs` only. If none is found the UI shows the build command.
+Engine lookup order: `--engine`, env `ANTI_AI_DESIGN_BIN`, `../anti-design-skill/target/release/anti-ai-design`, then PATH. Names live in `lib/engine.mjs` only. If none is found the UI shows the build command.
 
-Tests: `cd studio && npm test` (or `node --test studio/tests/*.test.mjs` from the repo root; Node 24 does not accept a bare directory argument). The integration test uses the real binary and skips if missing; set `ANTI_DESIGN_BIN` to run it.
+Tests: `cd studio && npm test` (or `node --test studio/tests/*.test.mjs` from the repo root; Node 24 does not accept a bare directory argument). The integration test uses the real binary and skips if missing; set `ANTI_AI_DESIGN_BIN` to run it.
 
 ## Security model
 

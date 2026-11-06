@@ -113,7 +113,7 @@ export function renderFixes(main, ctx) {
       'div',
       { class: 'confirm', role: 'group', 'aria-labelledby': 'confirm-h' },
       h('h2', { id: 'confirm-h', class: 'notice-title', text: isSnippet ? 'Produce the fixed snippet?' : `Write ${plural(p.fixCount, 'fix', 'fixes')} to ${plural(p.fileCount, 'file')}?` }),
-      h('p', { text: isSnippet ? 'No file is touched. You get the fixed text back to copy.' : `This edits ${p.files.map((f) => f.file).join(', ')} under ${state.info?.root || 'the root'} and logs each change to .anti-design/changelog.md. There is no undo button; the diff above is the record.` }),
+      h('p', { text: isSnippet ? 'No file is touched. You get the fixed text back to copy.' : `This edits ${p.files.map((f) => f.file).join(', ')} under ${state.info?.root || 'the root'} and logs each change to .anti-ai-design/changelog.md. There is no undo button; the diff above is the record.` }),
       h('div', { class: 'row' }, h('button', { type: 'button', class: 'btn btn-primary', text: isSnippet ? 'Yes, produce it' : 'Yes, write the changes', onclick: apply }), cancel),
     );
     setTimeout(() => panel.querySelector('button')?.focus(), 0);

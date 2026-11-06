@@ -26,7 +26,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = path.resolve(here, '..', 'web');
 const SNIPPET_EXTS = new Set(['html', 'css', 'jsx', 'tsx']);
 const CONTEXT_RADIUS = 3;
-const CHANGELOG_REL = '.anti-design/changelog.md'; // the engine's changelog location (renamed later with the engine)
+const CHANGELOG_REL = '.anti-ai-design/changelog.md'; // the engine's changelog location
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -270,7 +270,7 @@ export function createApp(opts) {
           const fixed = await fsp.readFile(ctx.file, 'utf8');
           return { ...preview, applied: preview.fixCount, written: [], fixed };
         }
-        // The engine logs to <root>/.anti-design/changelog.md; that folder must not be a way out.
+        // The engine logs to <root>/.anti-ai-design/changelog.md; that folder must not be a way out.
         const ctxDir = path.join(realRoot, path.dirname(CHANGELOG_REL));
         if (fs.existsSync(ctxDir) && !isInside(realRoot, fs.realpathSync(ctxDir))) {
           throw new HttpError(403, 'outside_root', 'The changelog folder resolves outside the project folder.');

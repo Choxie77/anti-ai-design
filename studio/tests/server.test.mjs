@@ -126,7 +126,7 @@ test('apply without confirm is rejected and writes nothing', async () => {
       assert.equal(r.json.error.code, 'confirmation_required');
     }
     assert.equal(fs.readFileSync(path.join(s.root, 'a.css'), 'utf8'), GRADIENT);
-    assert.ok(!fs.existsSync(path.join(s.root, '.anti-design')));
+    assert.ok(!fs.existsSync(path.join(s.root, '.anti-ai-design')));
   } finally {
     await s.close();
   }
@@ -202,7 +202,7 @@ test('a diff that names a file outside the root is refused', async () => {
 test('a changelog folder that is a symlink out of the root blocks writing', async () => {
   const s = await startApp({ files: { 'a.css': GRADIENT } });
   try {
-    fs.symlinkSync(s.outside, path.join(s.root, '.anti-design'));
+    fs.symlinkSync(s.outside, path.join(s.root, '.anti-ai-design'));
     const r = await s.post('/api/fix/apply', { target: 'a.css', confirm: true });
     assert.equal(r.status, 403);
     assert.equal(fs.readFileSync(path.join(s.root, 'a.css'), 'utf8'), GRADIENT);
