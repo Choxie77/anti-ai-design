@@ -1,0 +1,6 @@
+{
+  "name": "aad-sample-app",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Tiny static app used by docs/ours/e2e.md. It is built to trip the Anti-AI Design detector on purpose."
+}
