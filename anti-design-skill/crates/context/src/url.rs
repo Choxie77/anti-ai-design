@@ -225,7 +225,7 @@ mod tests {
     fn basics() {
         let u = parse("https://github.com/Choxie77/anti-ai-design/docs/audit/").unwrap();
         assert_eq!(u.hostname, "github.com");
-        assert_eq!(u.pathname, "/docs/audit/");
+        assert_eq!(u.pathname, "/Choxie77/anti-ai-design/docs/audit/");
         let u = parse("http://localhost:3000/pricing?x=1#h").unwrap();
         assert_eq!(u.port, "3000");
         assert_eq!(u.pathname, "/pricing");
