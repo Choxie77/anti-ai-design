@@ -4,7 +4,7 @@
   let expenses = $state([]);
 
   onMount(() => {
-    window.__antiDesignStatefulMounts = (window.__antiDesignStatefulMounts || 0) + 1;
+    window.__antiAiDesignStatefulMounts = (window.__antiAiDesignStatefulMounts || 0) + 1;
   });
 
   const CATALOG = [

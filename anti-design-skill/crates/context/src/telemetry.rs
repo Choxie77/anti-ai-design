@@ -3,12 +3,12 @@
 //!
 //! Three pieces live here:
 //! - the request plumbing: API base, timeout, opt-outs, and the
-//!   `X-Anti-Design-Client` header every `/api/roll` and `/api/chosen` request
+//!   `X-Anti-AI-Design-Client` header every `/api/roll` and `/api/chosen` request
 //!   carries;
 //! - the seed reference and the seed ledger. The reference,
-//!   `seed:<16 hex of sha256("anti-design-seed:" + key)>`, is what committed
+//!   `seed:<16 hex of sha256("anti-ai-design-seed:" + key)>`, is what committed
 //!   files (the surface brief's FORM line) record instead of the key. The
-//!   ledger, `.anti-design/questions/seeds/<those 16 hex>.json`, is the local,
+//!   ledger, `.anti-ai-design/questions/seeds/<those 16 hex>.json`, is the local,
 //!   self-ignored record that resolves a reference back to its key on this
 //!   machine (`{"key"}`, written for every roll), plus, only while telemetry
 //!   is on, one entry per API-dealt round (`poolRevision`, the dealt catalog
@@ -41,14 +41,14 @@ pub const MAX_REROLL: usize = 8;
 pub const MAX_OPTION: usize = 15;
 
 pub fn api_base(env: &Env) -> String {
-    let base = env.get("ANTI_DESIGN_API_URL").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| "https://anti-design.example/api".to_string());
+    let base = env.get("ANTI_AI_DESIGN_API_URL").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| "https://github.com/Choxie77/anti-ai-design/api".to_string());
     base.strip_suffix('/').unwrap_or(&base).to_string()
 }
 
-/// `ANTI_DESIGN_API_TIMEOUT` in ms (default 4000): one budget for the API
+/// `ANTI_AI_DESIGN_API_TIMEOUT` in ms (default 4000): one budget for the API
 /// calls a run makes.
 pub fn api_timeout(env: &Env) -> Duration {
-    let ms = env.get("ANTI_DESIGN_API_TIMEOUT").filter(|v| !v.is_empty()).map(|v| crate::critique_storage::js_number(v)).unwrap_or(4000.0);
+    let ms = env.get("ANTI_AI_DESIGN_API_TIMEOUT").filter(|v| !v.is_empty()).map(|v| crate::critique_storage::js_number(v)).unwrap_or(4000.0);
     let ms = if ms.is_nan() { 0.0 } else { ms.max(0.0) };
     Duration::from_millis(ms as u64)
 }
@@ -59,10 +59,10 @@ pub fn env_opts_out(v: Option<&String>) -> bool {
     v.map(|v| v.trim()).is_some_and(|v| !v.is_empty() && v != "0" && !v.eq_ignore_ascii_case("false"))
 }
 
-/// The user-level config, `~/.anti-design/config.json`, where
-/// `anti-design telemetry off` records `"telemetry": false`.
+/// The user-level config, `~/.anti-ai-design/config.json`, where
+/// `anti-ai-design telemetry off` records `"telemetry": false`.
 pub fn user_config_path(env: &Env) -> String {
-    jsp::join(&[&crate::util::homedir(env), ".anti-design", "config.json"])
+    jsp::join(&[&crate::util::homedir(env), ".anti-ai-design", "config.json"])
 }
 
 fn config_says_off(path: &str) -> bool {
@@ -70,19 +70,19 @@ fn config_says_off(path: &str) -> bool {
 }
 
 /// Why telemetry is off, or `None` when it is on: `DO_NOT_TRACK` or
-/// `ANTI_DESIGN_NO_TELEMETRY` (`env_opts_out`), `"telemetry": false` in the
-/// user config, or in the project's `.anti-design/config.json` /
+/// `ANTI_AI_DESIGN_NO_TELEMETRY` (`env_opts_out`), `"telemetry": false` in the
+/// user config, or in the project's `.anti-ai-design/config.json` /
 /// `config.local.json` (a project may opt everyone out; nothing opts back in
 /// over an off anywhere).
 pub fn opt_out_reason(env: &Env, cwd: &str) -> Option<String> {
-    for var in ["DO_NOT_TRACK", "ANTI_DESIGN_NO_TELEMETRY"] {
+    for var in ["DO_NOT_TRACK", "ANTI_AI_DESIGN_NO_TELEMETRY"] {
         if env_opts_out(env.get(var)) {
             return Some(format!("{} is set", var));
         }
     }
     let user = user_config_path(env);
     if config_says_off(&user) {
-        return Some(format!("\"telemetry\": false in {}", anti_design_common::jsp::to_posix(&user)));
+        return Some(format!("\"telemetry\": false in {}", anti_ai_design_common::jsp::to_posix(&user)));
     }
     // The project config is read where `context` reads its defaults: the
     // working directory, the resolved project root, then the repo root.
@@ -99,12 +99,12 @@ pub fn opt_out_reason(env: &Env, cwd: &str) -> Option<String> {
     }
     for root in &roots {
         for name in ["config.local.json", "config.json"] {
-            let p = jsp::join(&[root, ".anti-design", name]);
+            let p = jsp::join(&[root, ".anti-ai-design", name]);
             if config_says_off(&p) {
                 // Shown with forward slashes on every platform, like every
                 // path the engine prints.
                 let shown = jsp::relative(cwd, cwd, &p);
-                return Some(format!("\"telemetry\": false in {}", anti_design_common::jsp::to_posix(if shown.is_empty() { &p } else { &shown })));
+                return Some(format!("\"telemetry\": false in {}", anti_ai_design_common::jsp::to_posix(if shown.is_empty() { &p } else { &shown })));
             }
         }
     }
@@ -117,33 +117,33 @@ pub fn telemetry_disabled(env: &Env, cwd: &str) -> bool {
 
 /// Sent on the roll request when telemetry is off: the roll still happens
 /// (it is the feature), and the server records nothing for it.
-pub const TELEMETRY_HEADER: &str = "X-Anti-Design-Telemetry";
+pub const TELEMETRY_HEADER: &str = "X-Anti-AI-Design-Telemetry";
 
 pub fn agent(timeout: Duration) -> ureq::Agent {
     crate::http::agent_builder().timeout_connect(timeout).timeout(timeout).build()
 }
 
-pub const CLIENT_HEADER: &str = "X-Anti-Design-Client";
+pub const CLIENT_HEADER: &str = "X-Anti-AI-Design-Client";
 
 fn version_token(v: &str) -> bool {
     !v.is_empty() && v.len() <= 32 && v.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'+' | b'-'))
 }
 
-/// `anti-design/<version>[ <channel>]`, matching
-/// `^anti-design/[0-9A-Za-z.+-]{1,32}( [a-z]{1,16})?$`. The version is the
+/// `anti-ai-design/<version>[ <channel>]`, matching
+/// `^anti-ai-design/[0-9A-Za-z.+-]{1,32}( [a-z]{1,16})?$`. The version is the
 /// installed skill's (SKILL.md frontmatter, what `/api/version` compares)
 /// when the engine can read it, else the engine's own as `<engine>+engine`.
-/// The channel is `ANTI_DESIGN_TELEMETRY_CHANNEL` when it is 1 to 16 lowercase
+/// The channel is `ANTI_AI_DESIGN_TELEMETRY_CHANNEL` when it is 1 to 16 lowercase
 /// letters (`test` in this repo's tests and CI), else absent.
 pub fn client_header(env: &Env, cwd: &str) -> String {
     let skill = crate::context_cli::installed_skill_version(env, cwd).filter(|v| version_token(v));
     let version = skill.unwrap_or_else(|| format!("{}+engine", env!("CARGO_PKG_VERSION")));
     let channel = env
-        .get("ANTI_DESIGN_TELEMETRY_CHANNEL")
+        .get("ANTI_AI_DESIGN_TELEMETRY_CHANNEL")
         .filter(|c| !c.is_empty() && c.len() <= 16 && c.bytes().all(|b| b.is_ascii_lowercase()))
         .map(|c| format!(" {}", c))
         .unwrap_or_default();
-    format!("anti-design/{}{}", version, channel)
+    format!("anti-ai-design/{}{}", version, channel)
 }
 
 /// A roll response's `poolRevision` when it is the 12 lowercase hex the API
@@ -189,20 +189,20 @@ impl SeedRound {
     }
 }
 
-/// The salt seed references are computed under (`anti_design_common::seed`).
+/// The salt seed references are computed under (`anti_ai_design_common::seed`).
 /// `None` when no valid salt can be persisted on this machine: then there
 /// is no seed reference at all, never an unsalted one.
 pub fn seed_salt(env: &Env, cwd: &str) -> Option<String> {
-    anti_design_common::seed::salt(&crate::util::homedir(env), Some(cwd), env.get("ANTI_DESIGN_SEED_SALT").map(String::as_str))
+    anti_ai_design_common::seed::salt(&crate::util::homedir(env), Some(cwd), env.get("ANTI_AI_DESIGN_SEED_SALT").map(String::as_str))
 }
 
 /// Every valid salt this machine keeps (home and project): a reference made
 /// under any of them resolves.
 pub fn seed_salts(env: &Env, cwd: &str) -> Vec<String> {
-    anti_design_common::seed::existing_salts(&crate::util::homedir(env), Some(cwd), env.get("ANTI_DESIGN_SEED_SALT").map(String::as_str))
+    anti_ai_design_common::seed::existing_salts(&crate::util::homedir(env), Some(cwd), env.get("ANTI_AI_DESIGN_SEED_SALT").map(String::as_str))
 }
 
-/// The seed ledger of one project directory: `.anti-design/questions/seeds/
+/// The seed ledger of one project directory: `.anti-ai-design/questions/seeds/
 /// <reference hex>.json`, `{"key", "rounds"?: {"<reroll>": {...}}}`. The key
 /// entry is what lets a reference stand for its key on this machine and is
 /// never pruned; rounds exist only while telemetry is on and are pruned after
@@ -302,21 +302,21 @@ impl Ledger {
     }
 
     fn dir(&self) -> String {
-        jsp::join(&[&self.cwd, ".anti-design", "questions", "seeds"])
+        jsp::join(&[&self.cwd, ".anti-ai-design", "questions", "seeds"])
     }
 
     /// The key's ledger, located once by the shared rule
-    /// (`anti_design_common::seed::locate`): every operation, the printed
+    /// (`anti_ai_design_common::seed::locate`): every operation, the printed
     /// reference and resolution all derive from this one answer.
-    fn locate(&self, key: &str) -> anti_design_common::seed::Located {
+    fn locate(&self, key: &str) -> anti_ai_design_common::seed::Located {
         if self.fresh.as_deref() == Some(key) {
-            return anti_design_common::seed::locate_fresh(&self.cwd, self.salt.as_deref(), key);
+            return anti_ai_design_common::seed::locate_fresh(&self.cwd, self.salt.as_deref(), key);
         }
-        anti_design_common::seed::locate(&self.cwd, self.salt.as_deref(), &self.salts, key)
+        anti_ai_design_common::seed::locate(&self.cwd, self.salt.as_deref(), &self.salts, key)
     }
 
     /// Marks `key` as one this run just generated (no `--from`, no
-    /// `ANTI_DESIGN_CONCEPT_SEED`): 128 random bits have no ledger, so no
+    /// `ANTI_AI_DESIGN_CONCEPT_SEED`): 128 random bits have no ledger, so no
     /// name check or folder scan is spent on it.
     pub fn for_fresh_key(mut self, key: &str, fresh: bool) -> Ledger {
         if fresh {
@@ -366,7 +366,7 @@ impl Ledger {
         if std::fs::create_dir_all(self.dir()).is_err() {
             return None;
         }
-        crate::serve_question::ignore_questions_dir(&jsp::join(&[&self.cwd, ".anti-design", "questions"]));
+        crate::serve_question::ignore_questions_dir(&jsp::join(&[&self.cwd, ".anti-ai-design", "questions"]));
         let located = self.locate(key);
         let path = located.path.to_string_lossy().into_owned();
         let _guard = lock(&path)?;
@@ -387,11 +387,11 @@ impl Ledger {
     /// reference resolves to the key this machine recorded for it. `Err`
     /// names a reference this machine has no record of.
     pub fn resolve(&self, v: &str) -> Result<String, String> {
-        if anti_design_common::seed::parse_reference(v).is_none() {
+        if anti_ai_design_common::seed::parse_reference(v).is_none() {
             return Ok(v.to_string());
         }
         // The ledger is named by the reference itself, whatever salt made it.
-        anti_design_common::seed::resolve(&self.cwd, v).ok_or_else(|| v.to_string())
+        anti_ai_design_common::seed::resolve(&self.cwd, v).ok_or_else(|| v.to_string())
     }
 
     /// Records the key behind a reference, for every roll whatever the
@@ -407,7 +407,7 @@ impl Ledger {
     /// round (a reproduced roll is a new presentation, so it gets a fresh
     /// `pingId` and no sent state). Telemetry only.
     pub fn record_round(&self, key: &str, round: &SeedRound) {
-        let ping_id = anti_design_common::seed::random_hex32();
+        let ping_id = anti_ai_design_common::seed::random_hex32();
         self.update(key, |l| {
             l.insert("key".into(), Value::String(key.to_string()));
             let rounds = l.entry("rounds").or_insert_with(|| Value::Object(Map::new()));
@@ -616,7 +616,7 @@ fn card_text<'a>(card: &'a Value, k: &str) -> Option<&'a str> {
 
 fn is_pick_kicker(kicker: &str) -> bool {
     let k = kicker.to_uppercase().replace('\u{2019}', "'");
-    k == "ANTI_DESIGN'S PICK"
+    k == "ANTI_AI_DESIGN'S PICK"
 }
 
 /// The single dealt catalog world a challenger card draws from, matched by
@@ -659,7 +659,7 @@ fn matched_world(card: &Value, dealt: &[Value]) -> Option<String> {
 /// - A card with no valid `kind` (a payload from older skill text) falls
 ///   back to the old conventions (`kindSource: inferred`): a `verdict` card
 ///   is a challenger, its `chosenId` the one dealt world its card images
-///   match; kicker `ANTI_DESIGN'S PICK` is the pick on a plain direction
+///   match; kicker `ANTI_AI_DESIGN'S PICK` is the pick on a plain direction
 ///   round; kicker `THE ROLL`, or the lead card, is the assigned card on a
 ///   plain direction round and the dealt lead on a surface round. Anything
 ///   else sends no kind.
@@ -725,22 +725,22 @@ pub fn picker_choice(seed: &Value, payload: &Value, option_id: &str, steer: Opti
     Some(ChoicePing { kind: kind.map(str::to_string), chosen_id, option, kind_source: Some("inferred"), ..base })
 }
 
-// ---- `anti-design telemetry off|on|status` -------------------------------------
+// ---- `anti-ai-design telemetry off|on|status` -------------------------------------
 
-pub const PRIVACY_URL: &str = "https://anti-design.example/privacy";
+pub const PRIVACY_URL: &str = "https://github.com/Choxie77/anti-ai-design/privacy";
 
 fn status_line(env: &Env, cwd: &str) -> String {
     match opt_out_reason(env, cwd) {
         Some(reason) => format!("telemetry: off ({}). Rolls still work; the roll API is told not to record them, and no choice is sent.\n", reason),
-        None => format!("telemetry: on. The roll request and the choice ping carry the seed key, scope, mode, round, pool revision, the card kind and catalog id that won, and the client version; never your project's names or code. Turn it off with `anti-design telemetry off`, DO_NOT_TRACK=1, or ANTI_DESIGN_NO_TELEMETRY=1. Details: {}\n", PRIVACY_URL),
+        None => format!("telemetry: on. The roll request and the choice ping carry the seed key, scope, mode, round, pool revision, the card kind and catalog id that won, and the client version; never your project's names or code. Turn it off with `anti-ai-design telemetry off`, DO_NOT_TRACK=1, or ANTI_AI_DESIGN_NO_TELEMETRY=1. Details: {}\n", PRIVACY_URL),
     }
 }
 
-/// `anti-design telemetry off|on|status`: `off` records `"telemetry": false`
+/// `anti-ai-design telemetry off|on|status`: `off` records `"telemetry": false`
 /// in the user config (`user_config_path`), `on` removes it, `status` says
 /// whether telemetry is on and, when off, why. Other keys in the file are
 /// kept.
-pub fn run(args: &[String], io: &mut anti_design_common::Io) -> i32 {
+pub fn run(args: &[String], io: &mut anti_ai_design_common::Io) -> i32 {
     let env = io.env.clone();
     let cwd = io.cwd.to_string_lossy().into_owned();
     let path = user_config_path(&env);
@@ -750,12 +750,12 @@ pub fn run(args: &[String], io: &mut anti_design_common::Io) -> i32 {
         let Some(text) = safe_read(&path) else { return Ok(Map::new()) };
         match serde_json::from_str::<Value>(&text) {
             Ok(Value::Object(m)) => Ok(m),
-            Ok(_) => Err(format!("{} is not a JSON object", anti_design_common::jsp::to_posix(&path))),
-            Err(e) => Err(format!("{} is not valid JSON ({})", anti_design_common::jsp::to_posix(&path), e)),
+            Ok(_) => Err(format!("{} is not a JSON object", anti_ai_design_common::jsp::to_posix(&path))),
+            Err(e) => Err(format!("{} is not valid JSON ({})", anti_ai_design_common::jsp::to_posix(&path), e)),
         }
     };
     let write = |m: &Map<String, Value>| -> Result<(), String> {
-        let dir = jsp::join(&[&crate::util::homedir(&env), ".anti-design"]);
+        let dir = jsp::join(&[&crate::util::homedir(&env), ".anti-ai-design"]);
         std::fs::create_dir_all(&dir)
             .and_then(|_| std::fs::write(&path, format!("{}\n", crate::util::json_pretty(&Value::Object(m.clone())))))
             .map_err(|e| format!("{}: {}", path, e))
@@ -769,7 +769,7 @@ pub fn run(args: &[String], io: &mut anti_design_common::Io) -> i32 {
             let mut m = match read() {
                 Ok(m) => m,
                 Err(e) => {
-                    io.err(&format!("telemetry: {}; fix or remove it, then run `anti-design telemetry {}` again. Nothing was changed.\n", e, cmd));
+                    io.err(&format!("telemetry: {}; fix or remove it, then run `anti-ai-design telemetry {}` again. Nothing was changed.\n", e, cmd));
                     return 1;
                 }
             };
@@ -797,7 +797,7 @@ mod tests {
     use super::*;
 
     fn temp_dir(name: &str) -> String {
-        let dir = std::env::temp_dir().join(format!("anti-design-telemetry-{}-{}", name, std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-telemetry-{}-{}", name, std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir.to_string_lossy().into_owned()
@@ -808,7 +808,7 @@ mod tests {
     }
 
     fn header_ok(h: &str) -> bool {
-        let re = regex::Regex::new(r"^anti-design/[0-9A-Za-z.+-]{1,32}( [a-z]{1,16})?$").unwrap();
+        let re = regex::Regex::new(r"^anti-ai-design/[0-9A-Za-z.+-]{1,32}( [a-z]{1,16})?$").unwrap();
         re.is_match(h)
     }
 
@@ -817,28 +817,28 @@ mod tests {
         let dir = temp_dir("header");
         let skill = format!("{}/skill", dir);
         std::fs::create_dir_all(&skill).unwrap();
-        let e = env(&[("ANTI_DESIGN_SKILL_DIR", &skill)]);
+        let e = env(&[("ANTI_AI_DESIGN_SKILL_DIR", &skill)]);
         let h = client_header(&e, &dir);
-        assert_eq!(h, format!("anti-design/{}+engine", env!("CARGO_PKG_VERSION")));
+        assert_eq!(h, format!("anti-ai-design/{}+engine", env!("CARGO_PKG_VERSION")));
         assert!(header_ok(&h), "{h}");
-        std::fs::write(format!("{}/SKILL.md", skill), "---\nname: anti-design\nversion: 4.5.2\n---\n# x\n").unwrap();
-        assert_eq!(client_header(&e, &dir), "anti-design/4.5.2");
-        let e = env(&[("ANTI_DESIGN_SKILL_DIR", &skill), ("ANTI_DESIGN_TELEMETRY_CHANNEL", "test")]);
+        std::fs::write(format!("{}/SKILL.md", skill), "---\nname: anti-ai-design\nversion: 4.5.2\n---\n# x\n").unwrap();
+        assert_eq!(client_header(&e, &dir), "anti-ai-design/4.5.2");
+        let e = env(&[("ANTI_AI_DESIGN_SKILL_DIR", &skill), ("ANTI_AI_DESIGN_TELEMETRY_CHANNEL", "test")]);
         let h = client_header(&e, &dir);
-        assert_eq!(h, "anti-design/4.5.2 test");
+        assert_eq!(h, "anti-ai-design/4.5.2 test");
         assert!(header_ok(&h), "{h}");
         // A channel that does not fit the format is dropped, never sent malformed.
         for bad in ["Test", "te st", "abcdefghijklmnopq", "t3st"] {
-            let e = env(&[("ANTI_DESIGN_SKILL_DIR", &skill), ("ANTI_DESIGN_TELEMETRY_CHANNEL", bad)]);
-            assert_eq!(client_header(&e, &dir), "anti-design/4.5.2", "{bad}");
+            let e = env(&[("ANTI_AI_DESIGN_SKILL_DIR", &skill), ("ANTI_AI_DESIGN_TELEMETRY_CHANNEL", bad)]);
+            assert_eq!(client_header(&e, &dir), "anti-ai-design/4.5.2", "{bad}");
         }
         // A frontmatter version outside the token alphabet falls back to the engine.
         std::fs::write(format!("{}/SKILL.md", skill), "---\nversion: 4.5 beta\n---\n").unwrap();
-        assert!(client_header(&env(&[("ANTI_DESIGN_SKILL_DIR", &skill)]), &dir).ends_with("+engine"));
+        assert!(client_header(&env(&[("ANTI_AI_DESIGN_SKILL_DIR", &skill)]), &dir).ends_with("+engine"));
     }
 
     pub(crate) fn test_ledger(cwd: &str) -> Ledger {
-        Ledger::new(&env(&[("ANTI_DESIGN_SEED_SALT", "test-salt")]), cwd)
+        Ledger::new(&env(&[("ANTI_AI_DESIGN_SEED_SALT", "test-salt")]), cwd)
     }
 
     fn round(n: usize, dealt: &[&str]) -> SeedRound {
@@ -892,13 +892,13 @@ mod tests {
         assert_eq!((back.pool_revision, back.hand_id), (None, None));
         // Files are named by the reference's hex and hold no time but a pending send's.
         l.record_round("../Evil Key", &round(0, &["x"]));
-        for e in std::fs::read_dir(format!("{}/.anti-design/questions/seeds", cwd)).unwrap().flatten() {
+        for e in std::fs::read_dir(format!("{}/.anti-ai-design/questions/seeds", cwd)).unwrap().flatten() {
             let name = e.file_name().to_string_lossy().into_owned();
             assert!(name.len() == 21 && name.ends_with(".json") && !name.contains("k1") && !name.contains("Evil"), "{name}");
             assert!(!std::fs::read_to_string(e.path()).unwrap().contains("\"at\""));
         }
         assert_eq!(l.resolve(&l.reference("../Evil Key").unwrap()).unwrap(), "../Evil Key");
-        assert_eq!(std::fs::read_to_string(format!("{}/.anti-design/questions/.gitignore", cwd)).unwrap(), format!("{}\n*\n", anti_design_common::git::RUNTIME_IGNORE_HEADER));
+        assert_eq!(std::fs::read_to_string(format!("{}/.anti-ai-design/questions/.gitignore", cwd)).unwrap(), format!("{}\n*\n", anti_ai_design_common::git::RUNTIME_IGNORE_HEADER));
     }
 
     #[test]
@@ -926,11 +926,11 @@ mod tests {
     fn no_salt_means_no_reference_never_an_unsalted_one() {
         let cwd = temp_dir("no-salt");
         let home = format!("{}/home", cwd);
-        std::fs::create_dir_all(format!("{}/.anti-design", home)).unwrap();
-        std::fs::write(format!("{}/.anti-design/seed-salt", home), "corrupt").unwrap();
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", home)).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/seed-salt", home), "corrupt").unwrap();
         let l = Ledger::new(&env(&[("HOME", home.as_str()), ("USERPROFILE", home.as_str())]), &cwd);
         assert_eq!(l.reference("k1"), None);
-        assert_eq!(l.resolve(&anti_design_common::seed::reference("", "k1")), Err(anti_design_common::seed::reference("", "k1")), "an unsalted hash resolves to nothing");
+        assert_eq!(l.resolve(&anti_ai_design_common::seed::reference("", "k1")), Err(anti_ai_design_common::seed::reference("", "k1")), "an unsalted hash resolves to nothing");
         // Telemetry rounds still work by key.
         l.record_round("k1", &round(0, &["a"]));
         assert!(l.round("k1", Some(0)).is_some());
@@ -961,7 +961,7 @@ mod tests {
         for n in 0..8 {
             assert!(l.round("k1", Some(n)).unwrap().confirmed(), "round {n}");
         }
-        let leftovers: Vec<String> = std::fs::read_dir(format!("{}/.anti-design/questions/seeds", cwd)).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).filter(|n| n.contains(".tmp-") || n.ends_with(".lock")).collect();
+        let leftovers: Vec<String> = std::fs::read_dir(format!("{}/.anti-ai-design/questions/seeds", cwd)).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).filter(|n| n.contains(".tmp-") || n.ends_with(".lock")).collect();
         assert!(leftovers.is_empty(), "{leftovers:?}");
     }
 
@@ -1043,9 +1043,9 @@ mod tests {
     fn legacy_page() -> Value {
         json!({ "options": [
             { "id": "assigned", "label": "Fillmore", "hero": "https://cards.test/teletext-service-hero.webp" },
-            { "id": "model-pick", "label": "Broadside", "kicker": "ANTI_DESIGN’S PICK" },
+            { "id": "model-pick", "label": "Broadside", "kicker": "ANTI_AI_DESIGN’S PICK" },
             { "id": "challenger-teletext", "verdict": "competitive", "hero": "https://cards.test/teletext-service-hero.webp" },
-            { "id": "challenger-microfiche", "verdict": "declined", "hero": ".anti-design/mocks/worlds/microfiche-reader-hero.webp" },
+            { "id": "challenger-microfiche", "verdict": "declined", "hero": ".anti-ai-design/mocks/worlds/microfiche-reader-hero.webp" },
             { "id": "challenger-own", "verdict": "wins", "hero": "https://elsewhere.test/x.webp" },
             { "id": "grounded-2", "label": "Another" }
         ], "canon": true })
@@ -1054,7 +1054,7 @@ mod tests {
     fn explicit_page() -> Value {
         json!({ "options": [
             { "id": "a", "kind": "assigned" },
-            { "id": "p", "kind": "pick", "kicker": "ANTI_DESIGN’S PICK" },
+            { "id": "p", "kind": "pick", "kicker": "ANTI_AI_DESIGN’S PICK" },
             { "id": "c1", "kind": "challenger", "catalogId": "teletext-service", "verdict": "competitive" },
             { "id": "c2", "kind": "challenger", "catalogId": "challenger-teletext", "verdict": "wins" },
             { "id": "d", "kind": "dealt" },
@@ -1154,9 +1154,9 @@ mod tests {
         let cwd = temp_dir("reference");
         let l = test_ledger(&cwd);
         let r = l.reference("3f9a1c2e").unwrap();
-        assert!(anti_design_common::seed::parse_reference(&r).is_some() && r.len() == 21 && !r.contains("3f9a1c2e"), "{r}");
+        assert!(anti_ai_design_common::seed::parse_reference(&r).is_some() && r.len() == 21 && !r.contains("3f9a1c2e"), "{r}");
         assert_eq!(l.reference("3f9a1c2e").unwrap(), r, "stable");
-        assert_ne!(Ledger::new(&env(&[("ANTI_DESIGN_SEED_SALT", "another")]), &cwd).reference("3f9a1c2e").unwrap(), r, "salted");
+        assert_ne!(Ledger::new(&env(&[("ANTI_AI_DESIGN_SEED_SALT", "another")]), &cwd).reference("3f9a1c2e").unwrap(), r, "salted");
         // A key resolves to itself; a reference only once this machine recorded its key.
         assert_eq!(l.resolve("k1").unwrap(), "k1");
         assert_eq!(l.resolve(&r), Err(r.clone()));
@@ -1180,19 +1180,19 @@ mod tests {
         assert_eq!(opt_out_reason(&base(&[]), &cwd), None);
         for v in ["1", "true", "yes", "anything"] {
             assert!(telemetry_disabled(&base(&[("DO_NOT_TRACK", v)]), &cwd), "{v}");
-            assert!(telemetry_disabled(&base(&[("ANTI_DESIGN_NO_TELEMETRY", v)]), &cwd), "{v}");
+            assert!(telemetry_disabled(&base(&[("ANTI_AI_DESIGN_NO_TELEMETRY", v)]), &cwd), "{v}");
         }
         for v in ["", "0", "false", "FALSE", " "] {
             assert!(!telemetry_disabled(&base(&[("DO_NOT_TRACK", v)]), &cwd), "{v:?}");
         }
-        std::fs::create_dir_all(format!("{}/.anti-design", home)).unwrap();
-        std::fs::write(format!("{}/.anti-design/config.json", home), r#"{"telemetry": false}"#).unwrap();
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", home)).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/config.json", home), r#"{"telemetry": false}"#).unwrap();
         assert!(opt_out_reason(&base(&[]), &cwd).unwrap().contains("telemetry\": false in"));
-        std::fs::write(format!("{}/.anti-design/config.json", home), r#"{"telemetry": true}"#).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/config.json", home), r#"{"telemetry": true}"#).unwrap();
         assert_eq!(opt_out_reason(&base(&[]), &cwd), None);
-        std::fs::create_dir_all(format!("{}/.anti-design", cwd)).unwrap();
-        std::fs::write(format!("{}/.anti-design/config.json", cwd), r#"{"telemetry": false}"#).unwrap();
-        assert_eq!(opt_out_reason(&base(&[]), &cwd).as_deref(), Some("\"telemetry\": false in .anti-design/config.json"));
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", cwd)).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/config.json", cwd), r#"{"telemetry": false}"#).unwrap();
+        assert_eq!(opt_out_reason(&base(&[]), &cwd).as_deref(), Some("\"telemetry\": false in .anti-ai-design/config.json"));
     }
 
     #[test]
@@ -1201,23 +1201,23 @@ mod tests {
         let home = format!("{}/home", cwd);
         let call = |args: &[&str]| {
             let e = env(&[("HOME", home.as_str()), ("USERPROFILE", home.as_str())]);
-            let (mut io, cap) = anti_design_common::Io::captured("", std::path::PathBuf::from(&cwd), e);
+            let (mut io, cap) = anti_ai_design_common::Io::captured("", std::path::PathBuf::from(&cwd), e);
             let argv: Vec<String> = args.iter().map(|s| s.to_string()).collect();
             let code = run(&argv, &mut io);
             let out = String::from_utf8(cap.stdout.borrow().clone()).unwrap();
             (code, out)
         };
         assert!(call(&["status"]).1.starts_with("telemetry: on."));
-        std::fs::create_dir_all(format!("{}/.anti-design", home)).unwrap();
-        std::fs::write(format!("{}/.anti-design/config.json", home), r#"{"other": 1}"#).unwrap();
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", home)).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/config.json", home), r#"{"other": 1}"#).unwrap();
         let (code, out) = call(&["off"]);
         assert_eq!(code, 0);
         assert!(out.starts_with("telemetry: off (\"telemetry\": false in "), "{out}");
-        let cfg: Value = serde_json::from_str(&std::fs::read_to_string(format!("{}/.anti-design/config.json", home)).unwrap()).unwrap();
+        let cfg: Value = serde_json::from_str(&std::fs::read_to_string(format!("{}/.anti-ai-design/config.json", home)).unwrap()).unwrap();
         assert_eq!(cfg, json!({ "other": 1, "telemetry": false }));
         assert!(call(&["status"]).1.starts_with("telemetry: off"));
         assert!(call(&["on"]).1.starts_with("telemetry: on."));
-        let cfg: Value = serde_json::from_str(&std::fs::read_to_string(format!("{}/.anti-design/config.json", home)).unwrap()).unwrap();
+        let cfg: Value = serde_json::from_str(&std::fs::read_to_string(format!("{}/.anti-ai-design/config.json", home)).unwrap()).unwrap();
         assert_eq!(cfg, json!({ "other": 1 }));
         assert_eq!(call(&["maybe"]).0, 1);
     }
@@ -1226,8 +1226,8 @@ mod tests {
     fn a_project_opt_out_counts_from_a_subdirectory() {
         let root = temp_dir("optout-root");
         std::fs::create_dir_all(format!("{}/.git", root)).unwrap();
-        std::fs::create_dir_all(format!("{}/.anti-design", root)).unwrap();
-        std::fs::write(format!("{}/.anti-design/config.json", root), r#"{"telemetry": false}"#).unwrap();
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", root)).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/config.json", root), r#"{"telemetry": false}"#).unwrap();
         // A workspace monorepo, run from a package: the same roots `context`
         // reads its config defaults from.
         std::fs::write(format!("{}/package.json", root), r#"{"private": true, "workspaces": ["packages/*"]}"#).unwrap();
@@ -1236,23 +1236,23 @@ mod tests {
         std::fs::write(format!("{}/package.json", sub), r#"{"name": "web"}"#).unwrap();
         let e = env(&[("HOME", &format!("{}/home", root)), ("USERPROFILE", &format!("{}/home", root))]);
         let reason = opt_out_reason(&e, &sub).expect("the project root's config counts");
-        assert!(reason.contains("\"telemetry\": false in") && reason.contains(".anti-design/config.json"), "{reason}");
+        assert!(reason.contains("\"telemetry\": false in") && reason.contains(".anti-ai-design/config.json"), "{reason}");
     }
 
     #[test]
     fn telemetry_off_and_on_refuse_to_overwrite_a_malformed_user_config() {
         let cwd = temp_dir("verb-malformed");
         let home = format!("{}/home", cwd);
-        std::fs::create_dir_all(format!("{}/.anti-design", home)).unwrap();
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", home)).unwrap();
         for (body, why) in [("{not json", "is not valid JSON"), ("[1, 2]", "is not a JSON object")] {
-            std::fs::write(format!("{}/.anti-design/config.json", home), body).unwrap();
+            std::fs::write(format!("{}/.anti-ai-design/config.json", home), body).unwrap();
             for cmd in ["off", "on"] {
                 let e = env(&[("HOME", home.as_str()), ("USERPROFILE", home.as_str())]);
-                let (mut io, cap) = anti_design_common::Io::captured("", std::path::PathBuf::from(&cwd), e);
+                let (mut io, cap) = anti_ai_design_common::Io::captured("", std::path::PathBuf::from(&cwd), e);
                 assert_eq!(run(&[cmd.to_string()], &mut io), 1);
                 let err = String::from_utf8(cap.stderr.borrow().clone()).unwrap();
                 assert!(err.contains(why) && err.contains("Nothing was changed"), "{err}");
-                assert_eq!(std::fs::read_to_string(format!("{}/.anti-design/config.json", home)).unwrap(), body, "untouched");
+                assert_eq!(std::fs::read_to_string(format!("{}/.anti-ai-design/config.json", home)).unwrap(), body, "untouched");
             }
         }
     }
@@ -1270,11 +1270,11 @@ mod tests {
         let old = sandboxed.reference("k1").unwrap();
         sandboxed.record_key("k1");
         // A stray home salt appears later (another tool, a restored backup).
-        std::fs::create_dir_all(format!("{}/.anti-design", home)).unwrap();
-        std::fs::write(format!("{}/.anti-design/seed-salt", home), "0123456789abcdef0123456789abcdef\n").unwrap();
+        std::fs::create_dir_all(format!("{}/.anti-ai-design", home)).unwrap();
+        std::fs::write(format!("{}/.anti-ai-design/seed-salt", home), "0123456789abcdef0123456789abcdef\n").unwrap();
         let l = Ledger::new(&e, &cwd);
         let new = l.reference("k2").unwrap();
-        assert_ne!(anti_design_common::seed::parse_reference(&new), None);
+        assert_ne!(anti_ai_design_common::seed::parse_reference(&new), None);
         l.record_key("k2");
         assert_eq!(l.resolve(&old).unwrap(), "k1", "the project salt's reference still resolves");
         assert_eq!(l.resolve(&new).unwrap(), "k2");

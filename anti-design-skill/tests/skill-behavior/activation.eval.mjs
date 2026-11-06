@@ -5,9 +5,9 @@
  * Harnesses put every installed skill's name and description into every
  * session; the model decides from that line alone whether to load the skill.
  * This eval simulates that decision. The system prompt lists twelve skills
- * (anti-design plus the eleven neighbours in activation-cases.mjs), the user
+ * (anti-ai-design plus the eleven neighbours in activation-cases.mjs), the user
  * message is one request, and the model has the Skill tool plus Read, Edit,
- * Write and Bash. An activation is a `Skill` call naming `anti-design`.
+ * Write and Bash. An activation is a `Skill` call naming `anti-ai-design`.
  * Starting the work directly or routing to another skill is a miss; that is
  * what the misses in issue #744 looked like (Read, then Edit, no Skill call).
  *
@@ -86,8 +86,8 @@ const GATES = {
 // Simulated harness
 // ---------------------------------------------------------------------------
 
-export function systemPrompt(antiDesignDescription) {
-  const skills = [...COMPETITORS.slice(0, 5), ['anti-design', antiDesignDescription], ...COMPETITORS.slice(5)];
+export function systemPrompt(antiAiDesignDescription) {
+  const skills = [...COMPETITORS.slice(0, 5), ['anti-ai-design', antiAiDesignDescription], ...COMPETITORS.slice(5)];
   const listing = skills.map(([n, d]) => `- ${n}: ${d}`).join('\n');
   return [
     'You are a coding agent working in the user\'s repository at /work (a React + Vite web app with src/, a package.json and an api/ folder, unless the request says otherwise).',
@@ -140,13 +140,13 @@ async function runOne(modelId, description, prompt, steps) {
         maxOutputTokens: 2048,
       });
       const calls = result.steps.flatMap((st) => st.toolCalls ?? []);
-      // A response can load several skills (frontend-dev, then anti-design).
-      // Any anti-design load counts; otherwise report the first skill named.
+      // A response can load several skills (frontend-dev, then anti-ai-design).
+      // Any anti-ai-design load counts; otherwise report the first skill named.
       const loaded = calls
         .filter((t) => t.toolName === 'Skill')
         .map((t) => String(t.input?.skill ?? '').replace(/^\//, ''));
       return {
-        skill: loaded.includes('anti-design') ? 'anti-design' : (loaded[0] ?? null),
+        skill: loaded.includes('anti-ai-design') ? 'anti-ai-design' : (loaded[0] ?? null),
         skillsLoaded: loaded,
         firstTool: calls[0]?.toolName ?? 'text',
         steps: result.steps.length,
@@ -198,7 +198,7 @@ export async function runEval({ models, variants, samples, steps, concurrency, c
 // Scoring and report
 // ---------------------------------------------------------------------------
 
-const fired = (r) => r.skill === 'anti-design';
+const fired = (r) => r.skill === 'anti-ai-design';
 
 export function score(results, model, variant) {
   const rs = results.filter((r) => !r.error && r.model === model && r.variant === variant);
@@ -209,7 +209,7 @@ export function score(results, model, variant) {
     tp: pos.filter(fired).length, positives: pos.length,
     fp: neg.filter(fired).length, negatives: neg.length,
     docTp: doc.filter(fired).length, documents: doc.length,
-    otherSkill: pos.filter((r) => r.skill && r.skill !== 'anti-design').length,
+    otherSkill: pos.filter((r) => r.skill && r.skill !== 'anti-ai-design').length,
     errors: results.filter((r) => r.error && r.model === model && r.variant === variant).length,
   };
 }

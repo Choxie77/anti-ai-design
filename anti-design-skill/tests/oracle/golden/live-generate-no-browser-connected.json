@@ -21,11 +21,11 @@
     }
   ],
   "files": {
-    ".anti-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
+    ".anti-ai-design/live/config.json": "{\n  \"files\": [\"index.html\", \"public/**/*.html\"],\n  \"insertBefore\": \"</body>\",\n  \"commentSyntax\": \"html\"\n}\n"
   },
   "daemon": [
     {
-      "stdout": "\nAntiDesign live server running on http://localhost:<PORT>\nToken: <UUID>\n\nScript: http://localhost:<PORT>/live.js\nInject: managed by anti-design live-inject; Astro source tags use is:inline automatically.\nStop:   anti-design live-server stop\n",
+      "stdout": "\nAntiAiDesign live server running on http://localhost:<PORT>\nToken: <UUID>\n\nScript: http://localhost:<PORT>/live.js\nInject: managed by anti-ai-design live-inject; Astro source tags use is:inline automatically.\nStop:   anti-ai-design live-server stop\n",
       "stderr": ""
     }
   ]

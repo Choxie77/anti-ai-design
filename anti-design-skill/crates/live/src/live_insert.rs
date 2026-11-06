@@ -1,4 +1,4 @@
-//! JS: live-insert.mjs -> `anti-design live-insert` / `insert`. Find an anchor
+//! JS: live-insert.mjs -> `anti-ai-design live-insert` / `insert`. Find an anchor
 //! element in source and splice an insert-variant wrapper before or after
 //! it (no original variant), or scaffold a Svelte insert session.
 
@@ -11,10 +11,10 @@ use crate::svelte_component::{
 };
 use crate::util::{eprintln, json_compact, jsp, println};
 use crate::wrap_common::*;
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{json, Map, Value};
 
-const HELP: &str = "Usage: anti-design live-insert [options]
+const HELP: &str = "Usage: anti-ai-design live-insert [options]
 
 Find an anchor element in source and splice an insert-variant wrapper.
 
@@ -50,7 +50,7 @@ pub fn build_insert_wrapper_lines(
         "style=\"display: contents\""
     };
     let attrs = format!(
-        "data-anti-design-variants=\"{}\" data-anti-design-mode=\"insert\" data-anti-design-variant-count=\"{}\" {}",
+        "data-anti-ai-design-variants=\"{}\" data-anti-ai-design-mode=\"insert\" data-anti-ai-design-variant-count=\"{}\" {}",
         id,
         count_text(count),
         style_contents
@@ -59,18 +59,18 @@ pub fn build_insert_wrapper_lines(
     if is_jsx {
         return vec![
             format!("{}<div {}>", indent, attrs),
-            format!("{}  {} anti-design-variants-start {} {}", indent, co, id, cc),
+            format!("{}  {} anti-ai-design-variants-start {} {}", indent, co, id, cc),
             format!("{}  {} Variants: insert below this line {}", indent, co, cc),
-            format!("{}  {} anti-design-variants-end {} {}", indent, co, id, cc),
+            format!("{}  {} anti-ai-design-variants-end {} {}", indent, co, id, cc),
             format!("{}</div>", indent),
         ];
     }
     vec![
-        format!("{}{} anti-design-variants-start {} {}", indent, co, id, cc),
+        format!("{}{} anti-ai-design-variants-start {} {}", indent, co, id, cc),
         format!("{}<div {}>", indent, attrs),
         format!("{}  {} Variants: insert below this line {}", indent, co, cc),
         format!("{}</div>", indent),
-        format!("{}{} anti-design-variants-end {} {}", indent, co, id, cc),
+        format!("{}{} anti-ai-design-variants-end {} {}", indent, co, id, cc),
     ]
 }
 

@@ -45,7 +45,7 @@ pub fn has_scannable_extension(filename: &str) -> bool {
 
 /// Built-in scannable extensions plus configured suffix matches (#822).
 fn has_scannable_extension_with(filename: &str, extra_exts: &[ExtensionEntry]) -> bool {
-    let lower = anti_design_core::js::to_lower_case(filename);
+    let lower = anti_ai_design_core::js::to_lower_case(filename);
     if SCANNABLE_EXTENSIONS.contains(&jsp::extname(&lower).as_str()) {
         return true;
     }
@@ -59,7 +59,7 @@ fn has_scannable_extension_with(filename: &str, extra_exts: &[ExtensionEntry]) -
 
 /// `HTML_EXTENSIONS.has(path.extname(filePath).toLowerCase())`.
 pub fn is_html_path(file_path: &str) -> bool {
-    HTML_EXTENSIONS.contains(&anti_design_core::js::to_lower_case(&jsp::extname(file_path)).as_str())
+    HTML_EXTENSIONS.contains(&anti_ai_design_core::js::to_lower_case(&jsp::extname(file_path)).as_str())
 }
 
 /// Engine routing shared by `detect` and the hook: a configured
@@ -131,7 +131,7 @@ static IMPORT_SPECIFIER_PATTERNS: Lazy<Vec<Regex>> = Lazy::new(|| {
         .unwrap(),
         Regex::new(&format!(
             r#"@import{WS}+(?:url\({WS}*)?['"]?([^'");{WS_CHARS}]+)['"]?{WS}*\)?"#,
-            WS_CHARS = anti_design_core::js::WS_CHARS
+            WS_CHARS = anti_ai_design_core::js::WS_CHARS
         ))
         .unwrap(),
         Regex::new(&format!(r#"@(?:use|forward){WS}+['"]([^'"]+)['"]"#)).unwrap(),
@@ -484,7 +484,7 @@ fn http_get_once(
     let _ = stream.set_read_timeout(Some(remaining));
     let _ = stream.set_write_timeout(Some(remaining));
     let req = format!(
-        "GET {path} HTTP/1.1\r\nHost: {host}:{port}\r\nUser-Agent: anti-design\r\nAccept: */*\r\nConnection: close\r\n\r\n"
+        "GET {path} HTTP/1.1\r\nHost: {host}:{port}\r\nUser-Agent: anti-ai-design\r\nAccept: */*\r\nConnection: close\r\n\r\n"
     );
     stream.write_all(req.as_bytes()).ok()?;
     let mut buf = Vec::new();

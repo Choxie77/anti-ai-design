@@ -3,7 +3,7 @@
   "hooks": {
     "postToolUse": [
       {
-        "command": "[ ! -f \".cursor/skills/anti-design/scripts/anti-design\" ] || \".cursor/skills/anti-design/scripts/anti-design\" hook",
+        "command": "[ ! -f \".cursor/skills/anti-ai-design/scripts/anti-ai-design\" ] || \".cursor/skills/anti-ai-design/scripts/anti-ai-design\" hook",
         "matcher": "^Write$",
         "timeout": 5
       }

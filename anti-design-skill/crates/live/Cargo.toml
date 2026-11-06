@@ -1,15 +1,15 @@
 [package]
-name = "anti-design-live"
+name = "anti-ai-design-live"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [dependencies]
-anti-design-common = { workspace = true }
-anti-design-context = { workspace = true }
-anti-design-core = { workspace = true }
-anti-design-hook = { workspace = true }
+anti-ai-design-common = { workspace = true }
+anti-ai-design-context = { workspace = true }
+anti-ai-design-core = { workspace = true }
+anti-ai-design-hook = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true, features = ["preserve_order", "float_roundtrip"] }
 regex = { workspace = true }

@@ -1,12 +1,12 @@
-//! The two engine seams `anti-design detect` calls into but does not own:
+//! The two engine seams `anti-ai-design detect` calls into but does not own:
 //! the static HTML engine (crates/html) and the browser/URL engine
 //! (crates/browser). `detect` never depends on those crates; the `cli` binary
 //! wires concrete engines in through `Engines`.
 
 use std::rc::Rc;
 
-use anti_design_core::findings::Finding;
-use anti_design_core::rule_pack::RulePack;
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_core::rule_pack::RulePack;
 
 use crate::design_system::DesignSystem;
 use crate::profiler::DetectorProfile;
@@ -23,8 +23,8 @@ pub struct ScanOptions {
     pub viewport: Option<(u32, u32)>,
     /// JS `options.profile` (library callers only; no CLI flag).
     pub profile: Option<Rc<DetectorProfile>>,
-    /// The installed rule pack (`anti_design_core::rule_pack`), passed through
-    /// to the text engine and on to the HTML engine. `None` in the `anti-design`
+    /// The installed rule pack (`anti_ai_design_core::rule_pack`), passed through
+    /// to the text engine and on to the HTML engine. `None` in the `anti-ai-design`
     /// binary, which ships the built-in rules only.
     pub rule_pack: Option<&'static dyn RulePack>,
     /// URL scans only: leave known consent managers' banners on the page
@@ -140,7 +140,7 @@ pub struct Engines<'a> {
 }
 
 /// Fallback for a build that does not link crates/html (the `cli` binary
-/// registers `anti_design_html::StaticHtmlEngine`). The JS only degrades to the regex
+/// registers `anti_ai_design_html::StaticHtmlEngine`). The JS only degrades to the regex
 /// engine when its parser *modules* fail to import (an install problem, never
 /// the case for a compiled binary), so a missing engine here is an internal
 /// error: `detectCli` prints the message and exits 1, mirroring an uncaught
@@ -155,7 +155,7 @@ impl HtmlEngine for MissingHtmlEngine {
         _stderr: &mut dyn std::io::Write,
     ) -> Result<Vec<Finding>, EngineError> {
         Err(EngineError::new(
-            "anti-design detect: static HTML engine is not linked into this build",
+            "anti-ai-design detect: static HTML engine is not linked into this build",
         ))
     }
 }

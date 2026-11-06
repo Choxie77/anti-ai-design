@@ -1,4 +1,4 @@
-//! JS: live-discard-manual-edits.mjs -> `anti-design
+//! JS: live-discard-manual-edits.mjs -> `anti-ai-design
 //! live-discard-manual-edits`. Drops pending manual edits from the buffer
 //! without touching source files.
 
@@ -6,14 +6,14 @@ use crate::event_validation::truthy;
 use crate::live_commit_manual_edits::arg_val;
 use crate::manual_edits::buffer::{read_buffer, remove_entries, truncate_buffer};
 use crate::util::{json_compact, println};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{json, Map, Value};
 
 pub fn run(args: &[String], io: &mut Io) -> i32 {
     if args.iter().any(|a| a == "--help" || a == "-h") {
         println(
             io,
-            "Usage: anti-design live-discard-manual-edits [--page-url=<url>]",
+            "Usage: anti-ai-design live-discard-manual-edits [--page-url=<url>]",
         );
         return 0;
     }

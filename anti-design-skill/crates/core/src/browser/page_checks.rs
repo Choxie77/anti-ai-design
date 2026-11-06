@@ -37,7 +37,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 /// The hidden-text measurement result type is shared.
-pub use anti_design_foundation::browser::HiddenTextMeasure;
+pub use anti_ai_design_foundation::browser::HiddenTextMeasure;
 
 macro_rules! re {
     ($name:ident, $pat:expr) => {
@@ -231,8 +231,8 @@ fn face_never_loaded(dom: &dyn Dom, font: &str) -> bool {
     !faces.iter().any(|(family, status)| names_font(family) && status != "error")
 }
 
-const ANTI_DESIGN_OWN: &str =
-    ".anti-design-overlay, .anti-design-label, .anti-design-banner, .anti-design-tooltip";
+const ANTI_AI_DESIGN_OWN: &str =
+    ".anti-ai-design-overlay, .anti-ai-design-label, .anti-ai-design-banner, .anti-ai-design-tooltip";
 
 /// JS: checks.mjs#checkTypography()
 pub fn check_typography(dom: &dyn Dom) -> Vec<BrowserFinding> {
@@ -250,7 +250,7 @@ pub fn check_typography(dom: &dyn Dom) -> Vec<BrowserFinding> {
         )
         .unwrap_or_default()
     {
-        if closest_or_none(dom, el, ANTI_DESIGN_OWN).is_some() {
+        if closest_or_none(dom, el, ANTI_AI_DESIGN_OWN).is_some() {
             continue;
         }
         if !has_visible_direct_text(dom, el) {
@@ -352,7 +352,7 @@ pub fn check_typography(dom: &dyn Dom) -> Vec<BrowserFinding> {
 /// The overlay chrome `checkTypography` hands `checkFlatTypeHierarchyFromDoc`
 /// as its `skipElement` selector.
 pub const TYPE_HIERARCHY_SKIP_SELECTOR: &str =
-    ".anti-design-overlay, .anti-design-label, .anti-design-banner, .anti-design-tooltip, [id^=\"anti-design-live-\"]";
+    ".anti-ai-design-overlay, .anti-ai-design-label, .anti-ai-design-banner, .anti-ai-design-tooltip, [id^=\"anti-ai-design-live-\"]";
 
 /// JS: checks.mjs#isRenderedTypeElement over a live DOM, plus the
 /// screen-reader-only utility: a heading in a 1px box its `clip` or

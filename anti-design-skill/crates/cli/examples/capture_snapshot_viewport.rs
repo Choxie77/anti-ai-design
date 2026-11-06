@@ -1,6 +1,6 @@
 //! Offline diagnostic using a frozen static entry. Not a production CLI verb.
-//! cargo run -p anti-design --example capture_snapshot -- request.json new-output-dir
-use anti_design::{
+//! cargo run -p anti-ai-design --example capture_snapshot -- request.json new-output-dir
+use anti_ai_design::{
     asset_capture::CdpAssetRenderer,
     capture_snapshot::{HtmlSnapshot, SnapshotSelection},
 };

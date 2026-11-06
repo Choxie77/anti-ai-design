@@ -1,21 +1,21 @@
 # Windows engine signing
 
-Engine releases sign `anti-design.exe` with Azure Artifact Signing before
+Engine releases sign `anti-ai-design.exe` with Azure Artifact Signing before
 computing release checksums. The publisher is **Renaissance Geek, Inc.**
 Existing release assets are immutable; never replace a shipped unsigned binary
 with signed bytes under the same version.
 
 ## Access boundary
 
-- Azure account: `anti-design-signing`, East US (`https://eus.codesigning.azure.net/`).
-- Public Trust certificate profile: `anti-design-windows`.
-- User-assigned managed identity: `anti-design-release-signing`, in the same resource group.
+- Azure account: `anti-ai-design-signing`, East US (`https://eus.codesigning.azure.net/`).
+- Public Trust certificate profile: `anti-ai-design-windows`.
+- User-assigned managed identity: `anti-ai-design-release-signing`, in the same resource group.
 - Its only Azure role is **Artifact Signing Certificate Profile Signer**, scoped
-  to `anti-design-signing/certificateProfiles/anti-design-windows`, not the account
+  to `anti-ai-design-signing/certificateProfiles/anti-ai-design-windows`, not the account
   or subscription.
 - Federated credential: `github-windows-signing`, issuer
   `https://token.actions.githubusercontent.com`, audience `api://AzureADTokenExchange`,
-  subject `repo:OWNER/anti-design:environment:windows-signing`.
+  subject `repo:Choxie77/anti-ai-design:environment:windows-signing`.
 - GitHub environment: `windows-signing`, restricted to **tags** matching
   `engine-v*`, with `pbakaus` as required reviewer and administrator bypass off.
   Self-review allows the required reviewer to approve releases they trigger.
@@ -32,11 +32,11 @@ the ability to sign as the company.
 
 The build job uploads Windows output as `unsigned-windows-x64`. A separate
 Windows runner downloads that artifact from the same run, signs exactly
-`anti-design.exe`, and requires a valid Authenticode signature, the expected
-publisher, and a timestamp before uploading `anti-design-windows-x64`. That
+`anti-ai-design.exe`, and requires a valid Authenticode signature, the expected
+publisher, and a timestamp before uploading `anti-ai-design-windows-x64`. That
 runner does not check out repository code or execute the downloaded engine.
 Only its job receives an OIDC token; only the publish job can write releases.
-Publication waits for successful signing and downloads only `anti-design-*`
+Publication waits for successful signing and downloads only `anti-ai-design-*`
 artifacts, so it cannot package the unsigned intermediate.
 
 RFC 3161 timestamping is required because Azure issues short-lived signing

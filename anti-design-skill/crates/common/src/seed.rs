@@ -3,14 +3,14 @@
 //! A roll key is what the roll API deals from and what the choice ping
 //! names, so it must never be committed. Committed files (the surface brief,
 //! the build state) carry a seed reference instead: `seed:` plus 16 hex of
-//! SHA-256(`anti-design-seed:` + salt + `:` + key). The salt is 128 random
-//! bits kept per user in `~/.anti-design/seed-salt`, so a reference cannot be
+//! SHA-256(`anti-ai-design-seed:` + salt + `:` + key). The salt is 128 random
+//! bits kept per user in `~/.anti-ai-design/seed-salt`, so a reference cannot be
 //! computed from a key by anyone without that file: holding the telemetry
 //! dataset (which carries keys) is not enough to find a committed brief, and
 //! a short key cannot be enumerated back from its reference. The flip side:
 //! a reference resolves only on the machine (user) that made it. When no
 //! salt can be persisted there is no reference at all (`salt` is `None`),
-//! never an unsalted one. `ANTI_DESIGN_SEED_SALT` overrides the salt, for
+//! never an unsalted one. `ANTI_AI_DESIGN_SEED_SALT` overrides the salt, for
 //! reproducible tests.
 
 use sha2::{Digest, Sha256};
@@ -44,10 +44,10 @@ pub fn new_key() -> String {
 fn salt_places(home: &str, project: Option<&str>) -> Vec<std::path::PathBuf> {
     let mut places: Vec<std::path::PathBuf> = Vec::new();
     if !home.is_empty() {
-        places.push(std::path::Path::new(home).join(".anti-design").join("seed-salt"));
+        places.push(std::path::Path::new(home).join(".anti-ai-design").join("seed-salt"));
     }
     if let Some(p) = project.filter(|p| !p.is_empty()) {
-        places.push(std::path::Path::new(p).join(".anti-design").join("questions").join("seed-salt"));
+        places.push(std::path::Path::new(p).join(".anti-ai-design").join("questions").join("seed-salt"));
     }
     places
 }
@@ -111,11 +111,11 @@ fn create(file: &std::path::Path) -> Option<String> {
     }
 }
 
-/// The salt new references are made under. `ANTI_DESIGN_SEED_SALT` wins
+/// The salt new references are made under. `ANTI_AI_DESIGN_SEED_SALT` wins
 /// (reproducible tests). Otherwise an existing valid salt always wins over
 /// making one, so a reference never stops resolving because a better place
-/// became writable: the user's `<home>/.anti-design/seed-salt`, else the
-/// project's `<project>/.anti-design/questions/seed-salt` (an ignored runtime
+/// became writable: the user's `<home>/.anti-ai-design/seed-salt`, else the
+/// project's `<project>/.anti-ai-design/questions/seed-salt` (an ignored runtime
 /// folder, for sandboxes whose home is read-only); only with neither is one
 /// created, in the home first, then the project.
 ///
@@ -157,7 +157,7 @@ pub fn salt(home: &str, project: Option<&str>, override_salt: Option<&str>) -> O
 
 /// The 16 hex of a key's reference under `salt`.
 pub fn tag(salt: &str, key: &str) -> String {
-    hex(&Sha256::digest(format!("anti-design-seed:{}:{}", salt, key).as_bytes())[..8])
+    hex(&Sha256::digest(format!("anti-ai-design-seed:{}:{}", salt, key).as_bytes())[..8])
 }
 
 /// `seed:<tag>`.
@@ -176,10 +176,10 @@ pub fn parse_reference(v: &str) -> Option<&str> {
 /// ledger is marked `"unsalted": true` and never yields a reference.
 pub const NO_SALT: &str = "no-salt:local-ledger-name";
 
-/// `<project>/.anti-design/questions/seeds`: one ledger file per seed key,
+/// `<project>/.anti-ai-design/questions/seeds`: one ledger file per seed key,
 /// named by the key's reference tag and holding the key itself.
 pub fn seeds_dir(project: &str) -> std::path::PathBuf {
-    std::path::Path::new(project).join(".anti-design").join("questions").join("seeds")
+    std::path::Path::new(project).join(".anti-ai-design").join("questions").join("seeds")
 }
 
 /// A key's ledger as the locator found it.
@@ -305,7 +305,7 @@ mod tests {
     }
 
     fn temp(name: &str) -> std::path::PathBuf {
-        let d = std::env::temp_dir().join(format!("anti-design-salt-{}-{}", name, std::process::id()));
+        let d = std::env::temp_dir().join(format!("anti-ai-design-salt-{}-{}", name, std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         d
@@ -327,11 +327,11 @@ mod tests {
     fn a_corrupt_salt_is_never_replaced_or_bypassed() {
         let home = temp("corrupt");
         let project = temp("corrupt-project");
-        std::fs::create_dir_all(home.join(".anti-design")).unwrap();
-        std::fs::write(home.join(".anti-design/seed-salt"), "not a salt\n").unwrap();
+        std::fs::create_dir_all(home.join(".anti-ai-design")).unwrap();
+        std::fs::write(home.join(".anti-ai-design/seed-salt"), "not a salt\n").unwrap();
         assert_eq!(salt(&home.to_string_lossy(), Some(&project.to_string_lossy()), None), None);
-        assert_eq!(std::fs::read_to_string(home.join(".anti-design/seed-salt")).unwrap(), "not a salt\n", "left for the user");
-        assert!(!project.join(".anti-design/questions/seed-salt").exists(), "no silent switch to another salt");
+        assert_eq!(std::fs::read_to_string(home.join(".anti-ai-design/seed-salt")).unwrap(), "not a salt\n", "left for the user");
+        assert!(!project.join(".anti-ai-design/questions/seed-salt").exists(), "no silent switch to another salt");
     }
 
     #[cfg(unix)]
@@ -345,8 +345,8 @@ mod tests {
             return; // running as root: permissions are not enforced
         }
         let p = salt(&home.to_string_lossy(), Some(&project.to_string_lossy()), None).unwrap();
-        assert_eq!(std::fs::read_to_string(project.join(".anti-design/questions/seed-salt")).unwrap().trim(), p);
-        assert!(std::fs::read_to_string(project.join(".anti-design/questions/.gitignore")).unwrap().ends_with("*\n"));
+        assert_eq!(std::fs::read_to_string(project.join(".anti-ai-design/questions/seed-salt")).unwrap().trim(), p);
+        assert!(std::fs::read_to_string(project.join(".anti-ai-design/questions/.gitignore")).unwrap().ends_with("*\n"));
         std::fs::set_permissions(&project, std::fs::Permissions::from_mode(0o555)).unwrap();
         let other = temp("readonly-project-2");
         std::fs::set_permissions(&other, std::fs::Permissions::from_mode(0o555)).unwrap();
@@ -364,10 +364,10 @@ mod tests {
         let (h, p) = (home.to_string_lossy().into_owned(), project.to_string_lossy().into_owned());
         // A sandboxed run with no usable home made the project salt.
         let first = salt("", Some(&p), None).unwrap();
-        assert!(project.join(".anti-design/questions/seed-salt").exists());
+        assert!(project.join(".anti-ai-design/questions/seed-salt").exists());
         // Later the home is writable: the existing salt still wins, no new one is made.
         assert_eq!(salt(&h, Some(&p), None).unwrap(), first);
-        assert!(!home.join(".anti-design/seed-salt").exists());
+        assert!(!home.join(".anti-ai-design/seed-salt").exists());
         assert_eq!(existing_salts(&h, Some(&p), None), vec![first]);
     }
 
@@ -377,8 +377,8 @@ mod tests {
         let project = temp("both-project");
         let (h, p) = (home.to_string_lossy().into_owned(), project.to_string_lossy().into_owned());
         let project_salt = salt("", Some(&p), None).unwrap();
-        std::fs::create_dir_all(home.join(".anti-design")).unwrap();
-        std::fs::write(home.join(".anti-design/seed-salt"), "0123456789abcdef0123456789abcdef\n").unwrap();
+        std::fs::create_dir_all(home.join(".anti-ai-design")).unwrap();
+        std::fs::write(home.join(".anti-ai-design/seed-salt"), "0123456789abcdef0123456789abcdef\n").unwrap();
         assert_eq!(salt(&h, Some(&p), None).unwrap(), "0123456789abcdef0123456789abcdef");
         assert_eq!(existing_salts(&h, Some(&p), None), vec!["0123456789abcdef0123456789abcdef".to_string(), project_salt]);
     }

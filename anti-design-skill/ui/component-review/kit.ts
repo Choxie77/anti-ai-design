@@ -1,4 +1,4 @@
-/** The Anti-Design design-system kit, vendored verbatim from anti-design-site (see vendor/ and
+/** The Anti-AI Design design-system kit, vendored verbatim from anti-ai-design-site (see vendor/ and
  * scripts/sync-kinpaku-kit.mjs; the site is the source of truth). Shadow roots have no :root,
  * so the token blocks also apply to :host. Class names are the kit's own. */
 import { tokens, kit, rail } from './vendor/kit-css';

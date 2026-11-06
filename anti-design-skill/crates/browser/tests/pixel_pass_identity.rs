@@ -8,8 +8,8 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::Path;
 
-use anti_design_browser::BrowserEngine;
-use anti_design_detect::engines::{ScanOptions, UrlEngine};
+use anti_ai_design_browser::BrowserEngine;
+use anti_ai_design_detect::engines::{ScanOptions, UrlEngine};
 
 fn serve(body: String) -> u16 {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
@@ -38,7 +38,7 @@ fn handle(mut stream: TcpStream, body: &str) {
 #[test]
 fn a_repeated_id_does_not_send_the_pixel_pass_to_a_collapsed_copy() {
     let env: HashMap<String, String> = std::env::vars().collect();
-    if anti_design_browser::discovery::find_browser(&env).is_err() {
+    if anti_ai_design_browser::discovery::find_browser(&env).is_err() {
         eprintln!("skip: no installed browser found");
         return;
     }
@@ -110,7 +110,7 @@ const RTL_VECTOR_PAGE: &str = r##"<!DOCTYPE html>
 #[test]
 fn a_right_to_left_page_reads_pixels_where_the_text_paints() {
     let env: HashMap<String, String> = std::env::vars().collect();
-    if anti_design_browser::discovery::find_browser(&env).is_err() {
+    if anti_ai_design_browser::discovery::find_browser(&env).is_err() {
         eprintln!("skip: no installed browser found");
         return;
     }

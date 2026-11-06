@@ -9,12 +9,12 @@
 
 use std::path::{Path, PathBuf};
 
-use anti_design_common::Io;
-use anti_design_comp::hero::{
+use anti_ai_design_common::Io;
+use anti_ai_design_comp::hero::{
     chrome_strip_check, invented_ink, plate_clip_check, svg_illustrations, text_region_check, Chosen, Region,
 };
-use anti_design_comp::png_io;
-use anti_design_comp::raster::{self as r, Image};
+use anti_ai_design_comp::png_io;
+use anti_ai_design_comp::raster::{self as r, Image};
 use regex::Regex;
 use serde_json::{json, Map, Value};
 
@@ -27,12 +27,12 @@ use crate::util::{self, arg, flag, round, to_fixed};
 
 pub const PHASES: [&str; 8] =
     ["comps", "spec", "plates", "hero", "sections", "motion", "responsive", "review"];
-const MOCKS_DIR: &str = ".anti-design/mocks";
+const MOCKS_DIR: &str = ".anti-ai-design/mocks";
 const HERO_MIN: f64 = 0.72;
 const RESPONSIVE_MIN: f64 = 0.65;
 const PLATE_MIN: f64 = 0.4;
 const PLATE_STRUCTURE_MIN: f64 = 0.4;
-const HERO_REPRO: &str = ".anti-design/review/hero-repro.png";
+const HERO_REPRO: &str = ".anti-ai-design/review/hero-repro.png";
 const INVENTED_MIN: f64 = 0.04;
 
 fn state_path() -> String {
@@ -58,9 +58,9 @@ fn abs(io: &Io, p: &str) -> PathBuf {
 }
 
 pub(crate) fn self_cmd(io: &Io) -> String {
-    let value = io.env.get("ANTI_DESIGN_SELF").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| "anti-design".to_string());
+    let value = io.env.get("ANTI_AI_DESIGN_SELF").filter(|v| !v.is_empty()).cloned().unwrap_or_else(|| "anti-ai-design".to_string());
     // The skill launcher exports a raw filename; the npm shim exports a
-    // command prefix such as `npx anti-design`. Quote only a complete filename,
+    // command prefix such as `npx anti-ai-design`. Quote only a complete filename,
     // resolving relative launchers against the same cwd as the printed command.
     if abs(io, &value).is_file()
         && !value.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b'/' | b'.' | b'_' | b'-' | b':') || (cfg!(windows) && b == b'\\'))
@@ -68,7 +68,7 @@ pub(crate) fn self_cmd(io: &Io) -> String {
         if cfg!(windows) {
             // cmd.exe treats single quotes as literal filename characters;
             // a quoted .cmd launcher also needs PowerShell's call operator.
-            return anti_design_common::launcher::with_call_operator(&value, format!("\"{value}\""));
+            return anti_ai_design_common::launcher::with_call_operator(&value, format!("\"{value}\""));
         }
         return format!("'{}'", value.replace('\'', "'\\''"));
     }
@@ -89,7 +89,7 @@ fn load_raster(io: &Io, p: &str) -> Result<Image, String> {
 fn read_build_path(io: &Io) -> Option<String> {
     let mut value = None;
     for name in ["config.json", "config.local.json"] {
-        let p = abs(io, &format!(".anti-design/{name}"));
+        let p = abs(io, &format!(".anti-ai-design/{name}"));
         if let Ok(raw) = std::fs::read_to_string(&p) {
             if let Ok(v) = serde_json::from_str::<Value>(&raw) {
                 match v.get("buildPath").and_then(Value::as_str) {
@@ -108,14 +108,14 @@ fn load_state(io: &Io) -> Option<Value> {
     serde_json::from_str(&raw).ok()
 }
 
-/// The files under `.anti-design/mocks/` and `.anti-design/review/` a ship no
+/// The files under `.anti-ai-design/mocks/` and `.anti-ai-design/review/` a ship no
 /// longer needs: rejected comps, gate diffs, and captures. A re-ship still
 /// reads the approved and decision comps with their sidecars, every recorded
 /// capture input, the human review manifests, and the native capture
 /// evidence, so those stay out. `finish` records the list and `doctor`
 /// reports what is left of it.
 fn spent_runtime_output(io: &Io, state: &Value) -> Vec<String> {
-    let mut kept: Vec<String> = vec![".anti-design/review/hero.json".into(), ".anti-design/review/components.json".into()];
+    let mut kept: Vec<String> = vec![".anti-ai-design/review/hero.json".into(), ".anti-ai-design/review/components.json".into()];
     for comp in ["comp", "decisionComp"].iter().filter_map(|k| state.get(*k).and_then(Value::as_str)) {
         kept.push(comp.to_string());
         kept.push(format!("{comp}.json"));
@@ -137,9 +137,9 @@ fn spent_runtime_output(io: &Io, state: &Value) -> Vec<String> {
     }
     let mut spent = Vec::new();
     walk(io, MOCKS_DIR, &mut spent);
-    walk(io, ".anti-design/review", &mut spent);
+    walk(io, ".anti-ai-design/review", &mut spent);
     // `start --comp` records the path as given (absolute, `./`), so match files, not spellings.
-    spent.retain(|f| !f.starts_with(".anti-design/review/native/") && !kept.iter().any(|k| crate::approved_comp::same_file(io, k, f)));
+    spent.retain(|f| !f.starts_with(".anti-ai-design/review/native/") && !kept.iter().any(|k| crate::approved_comp::same_file(io, k, f)));
     spent.sort();
     spent
 }
@@ -147,32 +147,32 @@ fn spent_runtime_output(io: &Io, state: &Value) -> Vec<String> {
 /// The build state records the direction's seed key, the key the roll API
 /// saw, and timestamps, so it is runtime state: its directory keeps a
 /// `.gitignore` naming `state.json` (and only that, the rest of
-/// `.anti-design/build/` being left to the project). The build's comps and
+/// `.anti-ai-design/build/` being left to the project). The build's comps and
 /// captures are runtime output too: see `ignore_runtime_output`.
 fn save_state(io: &Io, state: &Value) {
     let p = abs(io, &state_path());
     if let Some(parent) = p.parent() {
         let _ = std::fs::create_dir_all(parent);
-        anti_design_common::git::ensure_dir_ignored(&parent.to_string_lossy(), &["state.json"]);
+        anti_ai_design_common::git::ensure_dir_ignored(&parent.to_string_lossy(), &["state.json"]);
     }
-    anti_design_common::git::ignore_runtime_output(&io.cwd.to_string_lossy());
+    anti_ai_design_common::git::ignore_runtime_output(&io.cwd.to_string_lossy());
     let _ = std::fs::write(p, util::json_pretty(state));
 }
 
 /// The seed reference the state records for `--direction`: a reference
 /// (`seed:` + 16 lowercase hex) or `none` as given, a raw seed key as the
-/// reference the shared locator gives it (`anti_design_common::seed::
+/// reference the shared locator gives it (`anti_ai_design_common::seed::
 /// reference_for_key`, the same answer concept-seed printed for that key),
 /// so the build state never holds the key the roll API saw. With no
 /// reference to give (no salt on this machine) a raw key becomes `none`,
 /// never an unsalted hash. The direction is only ever shown, never
 /// resolved, so nothing is lost.
 fn seed_reference(io: &Io, v: &str) -> String {
-    if v == "none" || anti_design_common::seed::parse_reference(v).is_some() {
+    if v == "none" || anti_ai_design_common::seed::parse_reference(v).is_some() {
         return v.to_string();
     }
     let home = io.home().map(|h| h.to_string_lossy().into_owned()).unwrap_or_default();
-    anti_design_common::seed::reference_for_key(&home, &io.cwd.to_string_lossy(), io.env("ANTI_DESIGN_SEED_SALT"), v).unwrap_or_else(|| "none".to_string())
+    anti_ai_design_common::seed::reference_for_key(&home, &io.cwd.to_string_lossy(), io.env("ANTI_AI_DESIGN_SEED_SALT"), v).unwrap_or_else(|| "none".to_string())
 }
 
 fn new_state(comp: Option<&str>, breakpoint: Option<&str>, artifact: Option<&str>, direction: Option<&str>) -> Value {
@@ -332,8 +332,8 @@ fn decision_comp(state: &Value) -> Option<String> {
 }
 
 /// The comp round's options: the recorded decision comp first, wherever it
-/// sits, then the comps directly in `.anti-design/mocks/`. Any other decision
-/// comp under `.anti-design/mocks/decision/` never counts.
+/// sits, then the comps directly in `.anti-ai-design/mocks/`. Any other decision
+/// comp under `.anti-ai-design/mocks/decision/` never counts.
 fn list_comps(io: &Io, state: &Value) -> Vec<CompEntry> {
     let dir = abs(io, MOCKS_DIR);
     let chosen = decision_comp(state);
@@ -653,7 +653,7 @@ fn gate_plates_for(io: &Io, spec: &Value, only_id: Option<&str>) -> Gate {
         // similarity while preserving this direct provenance evidence; a new
         // prompt tag does not turn those reference pixels into generated art.
         if !is_texture {
-            if let Some(origin) = img.text.get("anti-design:crop-of") {
+            if let Some(origin) = img.text.get("anti-ai-design:crop-of") {
                 reasons.push(format!(
                     "plate {file} records a comp crop ({origin}); generate a production plate from the crop as reference"
                 ));
@@ -704,9 +704,9 @@ fn gate_plates_for(io: &Io, spec: &Value, only_id: Option<&str>) -> Gate {
                     px_w,
                     rr.pointer("/px/h").and_then(Value::as_f64).unwrap_or(0.0),
                 );
-                let same = anti_design_comp::metrics::structure_score(&raw, &r::resize(&img.image, raw.width as f64, raw.height as f64), 256);
-                let copied_pixels = anti_design_comp::source_pixels::is_transformed_copy(&raw, &img.image)
-                    || anti_design_comp::source_pixels::is_transformed_copy(refimg, &img.image);
+                let same = anti_ai_design_comp::metrics::structure_score(&raw, &r::resize(&img.image, raw.width as f64, raw.height as f64), 256);
+                let copied_pixels = anti_ai_design_comp::source_pixels::is_transformed_copy(&raw, &img.image)
+                    || anti_ai_design_comp::source_pixels::is_transformed_copy(refimg, &img.image);
                 if copied_pixels {
                     reasons.push(format!(
                         "plate {file} is the comp crop of region {id} (registered RGB pixels match after resampling and a small translation): a crop of the comp is never a plate; regenerate the plate using the crop only as a reference"
@@ -837,7 +837,7 @@ fn regex_hex() -> &'static regex::Regex {
 // ---- source-file walk / referenced plates ---------------------------------
 
 fn source_files(io: &Io, limit: usize) -> Vec<String> {
-    let skip: std::collections::HashSet<&str> = ["node_modules", ".git", "dist", "build", "out", ".next", ".svelte-kit", ".anti-design", "coverage"].into_iter().collect();
+    let skip: std::collections::HashSet<&str> = ["node_modules", ".git", "dist", "build", "out", ".next", ".svelte-kit", ".anti-ai-design", "coverage"].into_iter().collect();
     use once_cell::sync::Lazy;
     static EXTS: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"(?i)\.(html?|css|scss|jsx?|tsx?|svelte|vue|astro|mdx?|php|erb|hbs)$").unwrap());
     let mut out: Vec<String> = Vec::new();
@@ -1101,7 +1101,7 @@ fn write_scaffold(io: &Io, spec: &Value) -> Scaffold {
     }
     vars.push("}".into());
     let mut css_lines: Vec<String> = Vec::new();
-    css_lines.push("/* Anti-Design scaffold: the measured layout of the approved comp as custom properties. Generated by build-phase.mjs scaffold; regenerate after comp-spec.mjs --regions changes. Bind these to your own markup; positions are % of the comp frame so they scale with it. */".into());
+    css_lines.push("/* Anti-AI Design scaffold: the measured layout of the approved comp as custom properties. Generated by build-phase.mjs scaffold; regenerate after comp-spec.mjs --regions changes. Bind these to your own markup; positions are % of the comp frame so they scale with it. */".into());
     css_lines.extend(vars);
     css_lines.push(String::new());
     css_lines.push(format!(".comp-frame {{ position: relative; width: 100%; aspect-ratio: {w} / {h}; overflow: hidden; }}"));
@@ -1299,7 +1299,7 @@ impl NativeCapture {
 }
 /// The engine renders the page itself (native capture) instead of reading saved screenshots.
 fn native_capture(io: &Io, state: &Value) -> bool {
-    state["capturePolicy"] == "native-html-v1" || io.env("ANTI_DESIGN_NATIVE_CAPTURE") == Some("1")
+    state["capturePolicy"] == "native-html-v1" || io.env("ANTI_AI_DESIGN_NATIVE_CAPTURE") == Some("1")
 }
 
 fn prepare_native_capture(
@@ -1340,7 +1340,7 @@ fn prepare_native_capture(
         })
         .map_err(|e| Gate::fail(vec![format!("native entry capture unavailable: {e}")]))?;
     let directory = format!(
-        ".anti-design/review/native/{}",
+        ".anti-ai-design/review/native/{}",
         match stage {
             EntryStage::Hero => "hero",
             EntryStage::Responsive => "responsive",
@@ -2433,7 +2433,7 @@ fn responsive_loop_verdict(state: &mut Value, gate: &Gate, viewport_accepted: bo
         return None;
     }
     let lead = format!("The responsive gate has failed {RESPONSIVE_ATTEMPTS} attempts in a row.");
-    let side = gate.side_by_side.as_deref().unwrap_or(".anti-design/review/diff/desktop/side-by-side.png");
+    let side = gate.side_by_side.as_deref().unwrap_or(".anti-ai-design/review/diff/desktop/side-by-side.png");
     if viewport_accepted {
         return Some(format!("{lead} The user already accepted a first viewport, so that review is closed. Stop iterating: show the user {side} with the regions below, and ask them to choose between restoring those regions at desktop width and keeping the desktop first viewport as it renders. Keeping it downgrades the comp at desktop width, so it takes their words saying so, quoted in {s} build-phase advance --force --reason (for example: the user said: \"the comp does not need to match at desktop width\"); force refuses any other reason. Until they answer, this phase stays open; a finish recorded over it is an unfinished build, not a fix round."));
     }
@@ -2441,9 +2441,9 @@ fn responsive_loop_verdict(state: &mut Value, gate: &Gate, viewport_accepted: bo
 }
 
 /// The `{path, sha256}` rows of the manifest the last native responsive capture
-/// bound (`.anti-design/review/native/responsive/inputs.json`).
+/// bound (`.anti-ai-design/review/native/responsive/inputs.json`).
 fn native_capture_inputs(io: &Io) -> Option<Vec<Value>> {
-    let bytes = std::fs::read(abs(io, ".anti-design/review/native/responsive/inputs.json")).ok()?;
+    let bytes = std::fs::read(abs(io, ".anti-ai-design/review/native/responsive/inputs.json")).ok()?;
     let report: Value = serde_json::from_slice(&bytes).ok()?;
     let files = report.pointer("/manifest/files")?.as_array()?;
     files.iter().map(|f| Some(json!({"path": f.get("path")?.as_str()?, "sha256": f.get("sha256")?.as_str()?}))).collect()
@@ -2483,8 +2483,8 @@ fn gate_responsive(io: &Io, state: &mut Value, min: f64, out_dir: &str, artifact
 fn gate_responsive_inner(io: &Io, state: &mut Value, min: f64, out_dir: &str, native: Option<&NativeCapture>) -> Gate {
     let native_desktop=native.map(|n|n.path("desktop"));
     let native_mobile=native.map(|n|n.path("mobile"));
-    let desktop = native_desktop.as_deref().unwrap_or(".anti-design/review/desktop.png");
-    let mobile = native_mobile.as_deref().unwrap_or(".anti-design/review/mobile.png");
+    let desktop = native_desktop.as_deref().unwrap_or(".anti-ai-design/review/desktop.png");
+    let mobile = native_mobile.as_deref().unwrap_or(".anti-ai-design/review/mobile.png");
     let mut reasons = Vec::new();
     if !abs(io, desktop).exists() {
         reasons.push(format!("no {desktop}: capture the page at a common desktop width (1440 wide, full page) into that path"));
@@ -2753,9 +2753,9 @@ fn run_gate(io: &Io, state: &mut Value, phase: &str, opts: &GateOpts, organic_sc
         "hero" => {
             let build_path = opts.build_path.clone().unwrap_or_else(|| HERO_REPRO.to_string());
             let min = opts.min.unwrap_or(HERO_MIN);
-            gate_hero(io, state, &build_path, min, ".anti-design/review/diff/hero", opts.artifact.as_deref(), organic_scan, renderer)
+            gate_hero(io, state, &build_path, min, ".anti-ai-design/review/diff/hero", opts.artifact.as_deref(), organic_scan, renderer)
         }
-        "responsive" => gate_responsive(io, state, opts.min.unwrap_or(RESPONSIVE_MIN), ".anti-design/review/diff/desktop", opts.artifact.as_deref(), renderer),
+        "responsive" => gate_responsive(io, state, opts.min.unwrap_or(RESPONSIVE_MIN), ".anti-ai-design/review/diff/desktop", opts.artifact.as_deref(), renderer),
         // No measurement here, but the build still stands on the approved comp.
         _ => match comp_refusal(io) { Some(why) => Gate::fail(vec![why]), None => Gate::ok("no mechanical gate".into()) },
     }
@@ -2768,23 +2768,23 @@ fn plan_review_refusal(io: &Io) -> Option<String> {
     // A spec with no plate and no code region to decide on has nothing to review;
     // `component-review plan` says so and writes no packet, so demanding an
     // acceptance here would deadlock the build on a review that cannot exist.
-    if !anti_design_context::component_review::plan::spec_needs_review(&io.cwd) {
+    if !anti_ai_design_context::component_review::plan::spec_needs_review(&io.cwd) {
         return None;
     }
     let s = self_cmd(io);
-    if let Some(tool) = io.env("ANTI_DESIGN_COMPONENT_REVIEW_TOOL") {
-        let Some(named) = io.env("ANTI_DESIGN_COMPONENT_REVIEW_SESSIONS") else {
+    if let Some(tool) = io.env("ANTI_AI_DESIGN_COMPONENT_REVIEW_TOOL") {
+        let Some(named) = io.env("ANTI_AI_DESIGN_COMPONENT_REVIEW_SESSIONS") else {
             // A harness defect, not something the agent can repair: say so rather than invite it to set the variable.
             return Some(format!("The plan and asset review runs in the host ({tool}), but this host does not name its review sessions, so no acceptance can be verified. This is a harness configuration problem: stop and report it; do not set environment variables to work around it."));
         };
         let sessions: Vec<PathBuf> = std::env::split_paths(named).filter(|p| !p.as_os_str().is_empty()).collect();
         if sessions.is_empty() {
-            return Some(format!("The plan and asset review is not accepted for this build. Call {tool} with manifest_path .anti-design/review/components.json (after `{s} component-review plan`) and wait for the user's decisions; page work waits until then."));
+            return Some(format!("The plan and asset review is not accepted for this build. Call {tool} with manifest_path .anti-ai-design/review/components.json (after `{s} component-review plan`) and wait for the user's decisions; page work waits until then."));
         }
-        return anti_design_context::component_review::plan::gate_hosted(&sessions, &io.cwd, &s, tool).err();
+        return anti_ai_design_context::component_review::plan::gate_hosted(&sessions, &io.cwd, &s, tool).err();
     }
     let Some(home) = io.home() else { return Some("the plan and asset review store needs a home directory".into()) };
-    anti_design_context::component_review::plan::gate(&home.join(".anti-design/component-reviews"), &io.cwd, &s).err()
+    anti_ai_design_context::component_review::plan::gate(&home.join(".anti-ai-design/component-reviews"), &io.cwd, &s).err()
 }
 
 /// The plan review as the hero phase sees it. A plates advance forced with a quoted
@@ -2797,10 +2797,10 @@ fn hero_plan_review_refusal(io: &Io, state: &Value) -> Option<String> {
 /// Whether the user accepted an assembled first viewport for this build, in the local
 /// review store or in the sessions a host names.
 fn first_viewport_accepted(io: &Io) -> bool {
-    let sessions: Vec<PathBuf> = io.env("ANTI_DESIGN_COMPONENT_REVIEW_SESSIONS")
+    let sessions: Vec<PathBuf> = io.env("ANTI_AI_DESIGN_COMPONENT_REVIEW_SESSIONS")
         .map(|named| std::env::split_paths(named).filter(|p| !p.as_os_str().is_empty()).collect()).unwrap_or_default();
-    let store = io.home().map(|h| h.join(".anti-design/component-reviews"));
-    anti_design_context::component_review::plan::first_viewport_accepted(store.as_deref(), &sessions, &io.cwd)
+    let store = io.home().map(|h| h.join(".anti-ai-design/component-reviews"));
+    anti_ai_design_context::component_review::plan::first_viewport_accepted(store.as_deref(), &sessions, &io.cwd)
 }
 
 /// JS: forceAllowed(reason).
@@ -2997,9 +2997,9 @@ fn next_instruction(io: &Io, state: &Value) -> String {
             "Measure the comp: {s} comp-spec --comp {comp} --grid, open {}, write regions.json (every illustration, photo, texture as its own plate region; every text block its own text region), run {s} comp-spec --comp {comp} --regions regions.json. Then measure the type: {s} font-match --measure <id> for each text region (cap height, width class, weight class) and {s} font-match --rank <lead text region> --text \"<its first words>\" to choose the headline face by metrics (the USE line is the CSS; with no browser it records the catalog's nearest face, which is the choice; do not install one, and do not write a chosen face into the spec by hand). Then {s} build-phase advance.",
             format!("{BUILD_DIR}/comp-grid.png")
         ),
-        "plates" => format!("Produce every plate in the spec ({s} comp-spec --print lists them). For each illustration, photo, or figure, run {s} comp-spec --crop <id> --out <crop.png> and save {s} comp-spec --plate-prompt <id> to a prompt file. For an isolated figure or object on the page ground, add --background transparent to that plate-prompt command. Prefer the harness image tool with the crop as reference and that prompt; request native transparent PNG for cutouts. With the API fallback, run {s} generate-image --ref <crop.png> --prompt-file <prompt.txt> --out <plate.png> --size <WxH> --quality high; add --background transparent for cutouts. Create the output directory first and choose a supported size matching the region's aspect at least 1.5x its pixel size. generate-image embeds the prompt; after a harness generation run {s} embed-prompt <plate.png> --prompt-file <prompt.txt>. Preserve white paint, fine edges, and interior holes; verify alpha and inspect the cutout on light and dark grounds. Do not chroma-key native transparent output. Keep photos and textures opaque. Place cutouts with a plain <img> over the page's own ground; inspect glass and other translucent material carefully. Textures (paper, cloth, grain): crop a clean patch from {s} comp-spec --crop <id> --raw and mirror-tile it to the plate size; generate only when no clean patch exists. The gate scores a texture against its whole region box, so draw its region around clean ground. Keep candidate crops in separate files. Test each with {s} build-phase check-plate <id> --candidate <png> --json; this does not replace the selected asset or advance state. Inspect the candidate before explicitly selecting it at the spec plate path. Then {s} build-phase advance scores all selected plates against their comp regions. A pass does not replace visual inspection of placement, scale, and alpha. Score the plates before the review opens: once advance reports nothing but the pending review, run {s} component-review plan, then {s} component-review capture --manifest .anti-design/review/components.json and {s} component-review serve --session <session>, and wait for the user: advance also waits until they accept this plan and asset review for the current spec. A plate replaced after they accept needs a new round. Write no page code before this passes."),
+        "plates" => format!("Produce every plate in the spec ({s} comp-spec --print lists them). For each illustration, photo, or figure, run {s} comp-spec --crop <id> --out <crop.png> and save {s} comp-spec --plate-prompt <id> to a prompt file. For an isolated figure or object on the page ground, add --background transparent to that plate-prompt command. Prefer the harness image tool with the crop as reference and that prompt; request native transparent PNG for cutouts. With the API fallback, run {s} generate-image --ref <crop.png> --prompt-file <prompt.txt> --out <plate.png> --size <WxH> --quality high; add --background transparent for cutouts. Create the output directory first and choose a supported size matching the region's aspect at least 1.5x its pixel size. generate-image embeds the prompt; after a harness generation run {s} embed-prompt <plate.png> --prompt-file <prompt.txt>. Preserve white paint, fine edges, and interior holes; verify alpha and inspect the cutout on light and dark grounds. Do not chroma-key native transparent output. Keep photos and textures opaque. Place cutouts with a plain <img> over the page's own ground; inspect glass and other translucent material carefully. Textures (paper, cloth, grain): crop a clean patch from {s} comp-spec --crop <id> --raw and mirror-tile it to the plate size; generate only when no clean patch exists. The gate scores a texture against its whole region box, so draw its region around clean ground. Keep candidate crops in separate files. Test each with {s} build-phase check-plate <id> --candidate <png> --json; this does not replace the selected asset or advance state. Inspect the candidate before explicitly selecting it at the spec plate path. Then {s} build-phase advance scores all selected plates against their comp regions. A pass does not replace visual inspection of placement, scale, and alpha. Score the plates before the review opens: once advance reports nothing but the pending review, run {s} component-review plan, then {s} component-review capture --manifest .anti-ai-design/review/components.json and {s} component-review serve --session <session>, and wait for the user: advance also waits until they accept this plan and asset review for the current spec. A plate replaced after they accept needs a new round. Write no page code before this passes."),
         "hero" => format!(
-            "Run {s} build-phase scaffold first: it writes the measured layout as CSS custom properties (.anti-design/build/scaffold/layout.css, --r-<id>-x/y/w/h in % of the comp, plus cap height, font-size, family, and weight where measured) and a reference page with every region at its box. Bind those numbers to your own markup (an element per region, its box from the properties); the reference is a check, not the page, and overlapping boxes are overlapping boxes. Build only the first viewport at {}. Copy the comp's words verbatim in this phase (headline, labels, table cells, footer): the user approved that comp with those words, and rewriting is a later, stated decision, never a silent one here. Set every text region's font-size from its measured cap height and its face from the ranking. Plates first: place every plate at its spec box ({s} comp-spec --print lists boxes as percentages of the viewport) with object-fit: cover before writing a line of text or a control, capture into {HERO_REPRO}, and run {s} build-phase record hero (not advance) once so you see the plate regions read as match before text exists; then lay the semantic layer (text, controls, rules) over the plates from the spec's palette and boxes, capture, advance. When it fails, open the region crops it lists first, in order, then fix; do not build past the hero until it passes.",
+            "Run {s} build-phase scaffold first: it writes the measured layout as CSS custom properties (.anti-ai-design/build/scaffold/layout.css, --r-<id>-x/y/w/h in % of the comp, plus cap height, font-size, family, and weight where measured) and a reference page with every region at its box. Bind those numbers to your own markup (an element per region, its box from the properties); the reference is a check, not the page, and overlapping boxes are overlapping boxes. Build only the first viewport at {}. Copy the comp's words verbatim in this phase (headline, labels, table cells, footer): the user approved that comp with those words, and rewriting is a later, stated decision, never a silent one here. Set every text region's font-size from its measured cap height and its face from the ranking. Plates first: place every plate at its spec box ({s} comp-spec --print lists boxes as percentages of the viewport) with object-fit: cover before writing a line of text or a control, capture into {HERO_REPRO}, and run {s} build-phase record hero (not advance) once so you see the plate regions read as match before text exists; then lay the semantic layer (text, controls, rules) over the plates from the spec's palette and boxes, capture, advance. When it fails, open the region crops it lists first, in order, then fix; do not build past the hero until it passes.",
             bp.unwrap_or("the comp size")
         ),
         "sections" => format!("Build the remaining sections inside the spec system (same corner language, rules, and palette; nothing the comp does not show). The hero passed with the comp's words verbatim; from here, content beyond the comp is yours to author at full fidelity, and any change to words the comp showed is a stated decision in your report, never silent. Then {s} build-phase advance."),
@@ -3011,7 +3011,7 @@ fn next_instruction(io: &Io, state: &Value) -> String {
             let compared = if native_capture(io, state) {
                 format!("The gate renders the page itself, a {frame} desktop first viewport and a 390-wide mobile frame, and diffs that desktop first viewport against the comp (scaled to the comp's width); captures you save are for your own inspection.")
             } else {
-                format!("Capture desktop.png (1440 wide, full page) and mobile.png (390 wide, full page) into .anti-design/review/; the gate diffs the first viewport of desktop.png (its top {frame}, scaled to the comp's width) against the comp.")
+                format!("Capture desktop.png (1440 wide, full page) and mobile.png (390 wide, full page) into .anti-ai-design/review/; the gate diffs the first viewport of desktop.png (its top {frame}, scaled to the comp's width) against the comp.")
             };
             format!("Build the other viewports (mobile first if the surface is mobile). The first viewport must hold at common desktop widths (1280 to 1600), not only at the comp's exact size: fluid columns, no fixed-px grid that wraps 96px narrower, and sizes that scale with the viewport so nothing the comp shows in the first viewport is pushed below it. Settle or disable entrance motion before capturing (an element mid-animation reads as missing). {compared} Then {s} build-phase advance. When it fails, open the region crops it lists first; after three failed attempts it names the route to the user instead of more edits.")
         }
@@ -3030,25 +3030,25 @@ mod transparency_guidance_tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let (io, _) = Io::captured("", dir.clone(), Default::default());
-        let (pinned, _) = Io::captured("", dir.clone(), [("ANTI_DESIGN_SEED_SALT".to_string(), "test-salt".to_string())].into_iter().collect());
+        let (pinned, _) = Io::captured("", dir.clone(), [("ANTI_AI_DESIGN_SEED_SALT".to_string(), "test-salt".to_string())].into_iter().collect());
         assert_eq!(seed_reference(&pinned, "seed:0123456789abcdef"), "seed:0123456789abcdef");
         let r = seed_reference(&pinned, "3f9a1c2e");
-        assert_eq!(r, anti_design_common::seed::reference("test-salt", "3f9a1c2e"), "the reference concept-seed prints");
+        assert_eq!(r, anti_ai_design_common::seed::reference("test-salt", "3f9a1c2e"), "the reference concept-seed prints");
         assert_eq!(seed_reference(&pinned, "none"), "none");
         // No salt on this machine: a raw key is recorded as no seed, never as an unsalted hash.
         let bad_home = dir.join("bad-home");
-        std::fs::create_dir_all(bad_home.join(".anti-design")).unwrap();
-        std::fs::write(bad_home.join(".anti-design/seed-salt"), "corrupt").unwrap();
+        std::fs::create_dir_all(bad_home.join(".anti-ai-design")).unwrap();
+        std::fs::write(bad_home.join(".anti-ai-design/seed-salt"), "corrupt").unwrap();
         let (nosalt, _) = Io::captured("", dir.clone(), [("HOME".to_string(), bad_home.to_string_lossy().into_owned()), ("USERPROFILE".to_string(), bad_home.to_string_lossy().into_owned())].into_iter().collect());
         assert_eq!(seed_reference(&nosalt, "3f9a1c2e"), "none");
         assert!(r.starts_with("seed:") && r.len() == 21 && !r.contains("3f9a1c2e"), "{r}");
         save_state(&io, &new_state(None, None, None, Some("seed-1")));
-        let ignore = dir.join(".anti-design/build/.gitignore");
-        let expected = format!("{}\nstate.json\n", anti_design_common::git::RUNTIME_IGNORE_HEADER);
+        let ignore = dir.join(".anti-ai-design/build/.gitignore");
+        let expected = format!("{}\nstate.json\n", anti_ai_design_common::git::RUNTIME_IGNORE_HEADER);
         assert_eq!(std::fs::read_to_string(&ignore).unwrap(), expected);
         save_state(&io, &new_state(None, None, None, Some("seed-1")));
         assert_eq!(std::fs::read_to_string(&ignore).unwrap(), expected);
-        assert!(dir.join(".anti-design/mocks/.gitignore").is_file() && dir.join(".anti-design/review/.gitignore").is_file());
+        assert!(dir.join(".anti-ai-design/mocks/.gitignore").is_file() && dir.join(".anti-ai-design/review/.gitignore").is_file());
         std::fs::remove_dir_all(dir).unwrap();
     }
 
@@ -3057,22 +3057,22 @@ mod transparency_guidance_tests {
         let dir = std::env::temp_dir().join(format!("build-spent-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         for rel in [
-            ".anti-design/mocks/.gitignore", ".anti-design/mocks/comp-1.png", ".anti-design/mocks/comp-1.png.json",
-            ".anti-design/mocks/decision/a.png", ".anti-design/review/hero.json", ".anti-design/review/native/hero/hero.png",
-            ".anti-design/review/shot.png", ".anti-design/mocks/comp-2.png", ".anti-design/review/diff/hero/side-by-side.png",
+            ".anti-ai-design/mocks/.gitignore", ".anti-ai-design/mocks/comp-1.png", ".anti-ai-design/mocks/comp-1.png.json",
+            ".anti-ai-design/mocks/decision/a.png", ".anti-ai-design/review/hero.json", ".anti-ai-design/review/native/hero/hero.png",
+            ".anti-ai-design/review/shot.png", ".anti-ai-design/mocks/comp-2.png", ".anti-ai-design/review/diff/hero/side-by-side.png",
         ] {
             let p = dir.join(rel);
             std::fs::create_dir_all(p.parent().unwrap()).unwrap();
             std::fs::write(p, "x").unwrap();
         }
         let (io, _) = Io::captured("", dir.clone(), Default::default());
-        let state = json!({"comp": "./.anti-design/mocks/comp-1.png", "decisionComp": ".anti-design/mocks/decision/a.png",
-            "finish": {"captureInputs": [{"path": ".anti-design/review/shot.png"}]}});
-        assert_eq!(spent_runtime_output(&io, &state), [".anti-design/mocks/comp-2.png", ".anti-design/review/diff/hero/side-by-side.png"]);
+        let state = json!({"comp": "./.anti-ai-design/mocks/comp-1.png", "decisionComp": ".anti-ai-design/mocks/decision/a.png",
+            "finish": {"captureInputs": [{"path": ".anti-ai-design/review/shot.png"}]}});
+        assert_eq!(spent_runtime_output(&io, &state), [".anti-ai-design/mocks/comp-2.png", ".anti-ai-design/review/diff/hero/side-by-side.png"]);
         // An absolute `--comp` names the same approved file.
-        let absolute = json!({"comp": dir.join(".anti-design/mocks/comp-1.png").to_string_lossy(), "decisionComp": ".anti-design/mocks/decision/a.png",
-            "finish": {"captureInputs": [{"path": ".anti-design/review/shot.png"}]}});
-        assert_eq!(spent_runtime_output(&io, &absolute), [".anti-design/mocks/comp-2.png", ".anti-design/review/diff/hero/side-by-side.png"]);
+        let absolute = json!({"comp": dir.join(".anti-ai-design/mocks/comp-1.png").to_string_lossy(), "decisionComp": ".anti-ai-design/mocks/decision/a.png",
+            "finish": {"captureInputs": [{"path": ".anti-ai-design/review/shot.png"}]}});
+        assert_eq!(spent_runtime_output(&io, &absolute), [".anti-ai-design/mocks/comp-2.png", ".anti-ai-design/review/diff/hero/side-by-side.png"]);
         std::fs::remove_dir_all(dir).unwrap();
     }
 
@@ -3086,10 +3086,10 @@ mod transparency_guidance_tests {
             "plate":"selected.png","px":{"x":0,"y":0,"w":64,"h":64},"palette":[{"hex":"#14466e"}]}]}).to_string();
         for (path, data) in [("comp.png",bytes.as_slice()),("candidate.png",bytes.as_slice()),
             ("selected.png",b"selected asset must survive".as_slice()),(SPEC_PATH,spec.as_bytes()),
-            (".anti-design/build/state.json",b"{\"phase\":\"plates\",\"attempts\":7}".as_slice())] {
+            (".anti-ai-design/build/state.json",b"{\"phase\":\"plates\",\"attempts\":7}".as_slice())] {
             std::fs::write(dir.join(path),data).unwrap();
         }
-        let before = ["comp.png","candidate.png","selected.png",SPEC_PATH,".anti-design/build/state.json"]
+        let before = ["comp.png","candidate.png","selected.png",SPEC_PATH,".anti-ai-design/build/state.json"]
             .map(|path| (path,std::fs::read(dir.join(path)).unwrap()));
         let (mut io, output) = Io::captured("",dir.clone(),Default::default());
         assert_eq!(run(&["check-plate","ground","--candidate","candidate.png","--json"].map(String::from), &mut io, &no_organic_scan),0);
@@ -3261,7 +3261,7 @@ mod transparency_guidance_tests {
         let (io, _) = Io::captured(
             "",
             dir.clone(),
-            [("ANTI_DESIGN_NATIVE_CAPTURE".into(), "1".into())].into(),
+            [("ANTI_AI_DESIGN_NATIVE_CAPTURE".into(), "1".into())].into(),
         );
         let mut state = json!({"artifact":"index.html","comp":"comp.png"});
         let result = prepare_native_capture(
@@ -3279,7 +3279,7 @@ mod transparency_guidance_tests {
 
     #[test]
     fn plate_gate_scores_sparse_and_partial_alpha_on_the_sampled_ground() {
-        let dir = std::env::temp_dir().join(format!("anti-design-plate-alpha-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-plate-alpha-{}", std::process::id()));
         std::fs::create_dir_all(dir.join(BUILD_DIR)).unwrap();
         let (io, _) = Io::captured("", dir.clone(), Default::default());
         let spec = json!({"comp": "comp.png", "regions": [{
@@ -3315,27 +3315,27 @@ mod transparency_guidance_tests {
 
     #[test]
     fn missing_plate_guidance_uses_the_configured_launcher() {
-        let dir = std::env::temp_dir().join(format!("anti-design-plate-launcher-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-plate-launcher-{}", std::process::id()));
         std::fs::create_dir_all(dir.join(BUILD_DIR)).unwrap();
         std::fs::write(dir.join(SPEC_PATH), json!({"comp":"comp.png","regions": [{"id": "art", "medium": "raster", "plate": "missing.png"}]}).to_string()).unwrap();
         std::fs::write(dir.join("comp.png"), png_io::encode_png(&r::create_image(8,8,[255,255,255,255]), &[]).unwrap()).unwrap();
-        let env = [("ANTI_DESIGN_SELF".into(), "/custom/anti-design".into())].into();
+        let env = [("ANTI_AI_DESIGN_SELF".into(), "/custom/anti-ai-design".into())].into();
         let (io, _) = Io::captured("", dir.clone(), env);
         let reasons = gate_plates(&io).reasons.join("\n");
         std::fs::remove_dir_all(dir).unwrap();
-        assert!(reasons.contains("/custom/anti-design comp-spec --crop art"), "{reasons}");
-        assert!(reasons.contains("/custom/anti-design generate-image --ref"), "{reasons}");
+        assert!(reasons.contains("/custom/anti-ai-design comp-spec --crop art"), "{reasons}");
+        assert!(reasons.contains("/custom/anti-ai-design generate-image --ref"), "{reasons}");
     }
 
     #[test]
     fn launcher_paths_are_quoted_but_command_prefixes_are_preserved() {
-        let dir = std::env::temp_dir().join(format!("anti-design-launcher-quoting-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-launcher-quoting-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("my tools")).unwrap();
-        let relative = if cfg!(windows) { "my tools/anti-design.cmd" } else { "my tools/anti-design" };
+        let relative = if cfg!(windows) { "my tools/anti-ai-design.cmd" } else { "my tools/anti-ai-design" };
         let launcher = dir.join(relative);
         std::fs::write(&launcher, "").unwrap();
         for value in [relative.to_string(), launcher.to_string_lossy().into_owned()] {
-            let env = [("ANTI_DESIGN_SELF".into(), value.clone())].into();
+            let env = [("ANTI_AI_DESIGN_SELF".into(), value.clone())].into();
             let (io, _) = Io::captured("", dir.clone(), env);
             // Windows spells the quoted .cmd launcher as a PowerShell call
             // on a literal string (#744); sh quotes the path in single quotes.
@@ -3344,8 +3344,8 @@ mod transparency_guidance_tests {
             let next = next_instruction(&io, &json!({"phase": "plates"}));
             assert!(next.contains(&format!("{expected} generate-image --ref")), "{next}");
         }
-        for value in ["anti-design", "npx anti-design", "bunx anti-design", "npx --yes anti-design"] {
-            let env = [("ANTI_DESIGN_SELF".into(), value.into())].into();
+        for value in ["anti-ai-design", "npx anti-ai-design", "bunx anti-ai-design", "npx --yes anti-ai-design"] {
+            let env = [("ANTI_AI_DESIGN_SELF".into(), value.into())].into();
             let (io, _) = Io::captured("", dir.clone(), env);
             assert_eq!(self_cmd(&io), value);
         }
@@ -3356,12 +3356,12 @@ mod transparency_guidance_tests {
     #[cfg(unix)]
     fn printed_launcher_path_survives_shell_parsing() {
         use std::os::unix::fs::PermissionsExt;
-        let dir = std::env::temp_dir().join(format!("anti-design-launcher-shell-{}", std::process::id()));
-        let launcher = dir.join("user's $assets `literal`/anti-design");
+        let dir = std::env::temp_dir().join(format!("anti-ai-design-launcher-shell-{}", std::process::id()));
+        let launcher = dir.join("user's $assets `literal`/anti-ai-design");
         std::fs::create_dir_all(launcher.parent().unwrap()).unwrap();
         std::fs::write(&launcher, "#!/bin/sh\nprintf '%s\\n' \"$@\"\n").unwrap();
         std::fs::set_permissions(&launcher, std::fs::Permissions::from_mode(0o755)).unwrap();
-        let env = [("ANTI_DESIGN_SELF".into(), launcher.to_string_lossy().into_owned())].into();
+        let env = [("ANTI_AI_DESIGN_SELF".into(), launcher.to_string_lossy().into_owned())].into();
         let (io, _) = Io::captured("", dir.clone(), env);
         let command = format!("{} generate-image --background transparent", self_cmd(&io));
         let output = std::process::Command::new("/bin/sh").arg("-c").arg(command).current_dir(&dir).output().unwrap();
@@ -3421,7 +3421,7 @@ fn render_status(io: &Io, state: &Value) -> String {
 
 // ---- CLI -------------------------------------------------------------------
 
-/// `anti-design build-phase <cmd> ...`
+/// `anti-ai-design build-phase <cmd> ...`
 pub fn run(argv: &[String], io: &mut Io, organic_scan: OrganicScan) -> i32 {
     run_with_renderer(argv,io,organic_scan,None)
 }
@@ -3470,7 +3470,7 @@ pub fn run_with_renderer(argv: &[String],io: &mut Io,organic_scan: OrganicScan,r
     }
     if cmd == "completion" {
         let state = load_state(io);
-        let session_id = arg(argv, "session-id").or_else(|| io.env("ANTI_DESIGN_SESSION_ID"))
+        let session_id = arg(argv, "session-id").or_else(|| io.env("ANTI_AI_DESIGN_SESSION_ID"))
             .or_else(|| io.env("CODEX_THREAD_ID"));
         let report = crate::completion::report(&io.cwd, state.as_ref(), session_id);
         io.out(&format!("{}\n", util::json_pretty(&report)));
@@ -3506,7 +3506,7 @@ pub fn run_with_renderer(argv: &[String],io: &mut Io,organic_scan: OrganicScan,r
         let _ = std::fs::remove_file(abs(io, &format!("{BUILD_DIR}/pending.json")));
         let build_path = read_build_path(io);
         if direction.is_some() && comp.is_none() && build_path.as_deref() == Some("code") {
-            io.out("CODE-LED (from .anti-design config): no comp round and no phase gates. Write the direction contract (reference/new-work.md section 5), build, and finish per section 7. The chosen decision comp, if any, rides to the finish review as the critique reference.\n");
+            io.out("CODE-LED (from .anti-ai-design config): no comp round and no phase gates. Write the direction contract (reference/new-work.md section 5), build, and finish per section 7. The chosen decision comp, if any, rides to the finish review as the critique reference.\n");
             return 0;
         }
         let mut breakpoint = arg(argv, "breakpoint").map(String::from);
@@ -3542,11 +3542,11 @@ pub fn run_with_renderer(argv: &[String],io: &mut Io,organic_scan: OrganicScan,r
         let direction_ref = direction.map(|d| seed_reference(io, d));
         let mut state = new_state(comp, breakpoint.as_deref(), arg(argv, "artifact"), direction_ref.as_deref());
         if let Some(d) = chosen_decision { state["decisionComp"] = json!(d); }
-        if io.env("ANTI_DESIGN_NATIVE_CAPTURE")==Some("1") {state["capturePolicy"]=json!("native-html-v1");}
+        if io.env("ANTI_AI_DESIGN_NATIVE_CAPTURE")==Some("1") {state["capturePolicy"]=json!("native-html-v1");}
         // Session identity is transport metadata, never guessed from a project
         // path or an earlier build. Old/unidentified states remain unscoped.
         if let Some(session_id) = arg(argv, "session-id")
-            .or_else(|| io.env("ANTI_DESIGN_SESSION_ID"))
+            .or_else(|| io.env("ANTI_AI_DESIGN_SESSION_ID"))
             .or_else(|| io.env("CODEX_THREAD_ID"))
             .filter(|s| !s.is_empty())
         {
@@ -3611,7 +3611,7 @@ pub fn run_with_renderer(argv: &[String],io: &mut Io,organic_scan: OrganicScan,r
             }
             let build_path = arg(argv, "build").unwrap_or(HERO_REPRO).to_string();
             let min = arg(argv, "min").map(|m| util::parse_f64(m, HERO_MIN)).unwrap_or(HERO_MIN);
-            let gate = gate_hero(io, &mut state, &build_path, min, ".anti-design/review/diff/hero", None, organic_scan, renderer);
+            let gate = gate_hero(io, &mut state, &build_path, min, ".anti-ai-design/review/diff/hero", None, organic_scan, renderer);
             let records = state.pointer("/phases/hero/records").and_then(Value::as_i64).unwrap_or(0) + 1;
             if let Some(h) = state.pointer_mut("/phases/hero").and_then(|v| v.as_object_mut()) {
                 h.insert("records".into(), json!(records));
@@ -3739,7 +3739,7 @@ pub fn run_with_renderer(argv: &[String],io: &mut Io,organic_scan: OrganicScan,r
             // a new hash alongside historical gates or model-supplied screenshots.
             if disposition == "ship" && native_capture(io, &state) {
                 let gate = gate_responsive(io, &mut state, RESPONSIVE_MIN,
-                    ".anti-design/review/diff/desktop", arg(argv, "artifact"), renderer);
+                    ".anti-ai-design/review/diff/desktop", arg(argv, "artifact"), renderer);
                 let at = now();
                 let responsive = &mut state["phases"]["responsive"];
                 responsive["attempts"] = json!(responsive["attempts"].as_u64().unwrap_or(0) + 1);
@@ -3782,7 +3782,7 @@ pub fn run_with_renderer(argv: &[String],io: &mut Io,organic_scan: OrganicScan,r
                         state["finish"] = json!({"disposition":"fix", "at":now(), "phaseAtFinish":phase,
                             "reason":"final native capture manifest unavailable"});
                         save_state(io, &state);
-                        io.err("build-phase: finish --disposition ship refused: the final native capture's input manifest (.anti-design/review/native/responsive/inputs.json) is missing or unreadable, so the finish cannot bind the files it checked. Run finish --disposition ship again; if it is refused again, report that the native capture left no manifest.\n");
+                        io.err("build-phase: finish --disposition ship refused: the final native capture's input manifest (.anti-ai-design/review/native/responsive/inputs.json) is missing or unreadable, so the finish cannot bind the files it checked. Run finish --disposition ship again; if it is refused again, report that the native capture left no manifest.\n");
                         return 2;
                     }
                 }

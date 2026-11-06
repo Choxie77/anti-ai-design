@@ -1,4 +1,4 @@
-use anti_design_html::{detect_html_source, DetectHtmlOptions};
+use anti_ai_design_html::{detect_html_source, DetectHtmlOptions};
 use std::path::Path;
 
 #[test]
@@ -45,8 +45,8 @@ fn hard_offset_shadow_fixture_is_advisory_and_respects_waivers() {
 #[test]
 fn scoped_and_comment_waivers_preserve_intentional_shadows() {
     for body in [
-        "<section data-anti-design-ignore=hard-offset-shadow><div style='box-shadow:4px 4px #333'>Intentional</div></section>",
-        "<!-- anti-design-disable hard-offset-shadow --><div style='box-shadow:4px 4px #333'>Intentional</div>",
+        "<section data-anti-ai-design-ignore=hard-offset-shadow><div style='box-shadow:4px 4px #333'>Intentional</div></section>",
+        "<!-- anti-ai-design-disable hard-offset-shadow --><div style='box-shadow:4px 4px #333'>Intentional</div>",
         "<div style='display:none'><div style='box-shadow:4px 4px #333'>Hidden</div></div>",
         "<div style='opacity:0'><div style='box-shadow:4px 4px #333'>Invisible</div></div>",
     ] {

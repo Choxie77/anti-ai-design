@@ -1,4 +1,4 @@
-//! JS: live-status.mjs -> `anti-design live-status`. Durable recovery status,
+//! JS: live-status.mjs -> `anti-ai-design live-status`. Durable recovery status,
 //! with or without a running helper server.
 
 use crate::live_resume::{
@@ -9,7 +9,7 @@ use crate::roots::enter_live_root;
 use crate::server::fetch_status;
 use crate::session::create_live_session_store;
 use crate::util::{json_pretty, println};
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 use serde_json::{json, Map, Value};
 
 pub fn run(args: &[String], io: &mut Io) -> i32 {

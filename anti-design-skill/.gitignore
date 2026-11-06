@@ -44,62 +44,62 @@ Thumbs.db
 # Cloudflare
 .wrangler/
 
-# Anti-Design-owned project files are split: generated sidecars/config may be
+# Anti-AI Design-owned project files are split: generated sidecars/config may be
 # tracked, but runtime recovery state and local assets should stay local.
-.anti-design/live/server.json
-.anti-design/live/codex-worker.json
-.anti-design/live/codex-worker.log
+.anti-ai-design/live/server.json
+.anti-ai-design/live/codex-worker.json
+.anti-ai-design/live/codex-worker.log
 # Ephemeral hook cache/state, at the project root and inside generated harness
-# skill dirs (**/skills/anti-design/scripts/.anti-design/). Anchored patterns
+# skill dirs (**/skills/anti-ai-design/scripts/.anti-ai-design/). Anchored patterns
 # would miss the nested copies the build/hook writes.
-**/.anti-design/hook.cache.json
-.anti-design/live/sessions/
-.anti-design/live/previews/
-.anti-design/live/annotations/
-.anti-design/live/artifacts/
-.anti-design/live/accept-receipts/
-.anti-design/live/locks/
-.anti-design/live/cache/
-.anti-design/live/benchmarks/
-.anti-design/live/manual-edit-apply-transaction.json
-.anti-design/live/manual-edit-events.jsonl
-.anti-design/live/manual-edit-evidence/
-.anti-design/live/pending-manual-edits.json
-.anti-design/live/deferred-svelte-component-accepts.json
-.anti-design/history/
-.anti-design/config.local.json
-**/.anti-design/hook.pending.json
-.anti-design/provider-smoke/
-src/__anti_design_provider_smoke_*.html
+**/.anti-ai-design/hook.cache.json
+.anti-ai-design/live/sessions/
+.anti-ai-design/live/previews/
+.anti-ai-design/live/annotations/
+.anti-ai-design/live/artifacts/
+.anti-ai-design/live/accept-receipts/
+.anti-ai-design/live/locks/
+.anti-ai-design/live/cache/
+.anti-ai-design/live/benchmarks/
+.anti-ai-design/live/manual-edit-apply-transaction.json
+.anti-ai-design/live/manual-edit-events.jsonl
+.anti-ai-design/live/manual-edit-evidence/
+.anti-ai-design/live/pending-manual-edits.json
+.anti-ai-design/live/deferred-svelte-component-accepts.json
+.anti-ai-design/history/
+.anti-ai-design/config.local.json
+**/.anti-ai-design/hook.pending.json
+.anti-ai-design/provider-smoke/
+src/__anti_ai_design_provider_smoke_*.html
 # Per-run critique snapshots are local artifacts. ignore.md (also under
 # this dir) carries deferrals the user may want to share, so it's
 # explicitly re-included below.
-.anti-design/critique/*
-!.anti-design/critique/ignore.md
+.anti-ai-design/critique/*
+!.anti-ai-design/critique/ignore.md
 
 # Legacy live mode session file + annotation screenshots
-.anti-design-live.json
-.anti-design-live/
-src/lib/anti-design/AntiDesignLiveRoot.svelte
-src/lib/anti-design/__runtime.js
+.anti-ai-design-live.json
+.anti-ai-design-live/
+src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte
+src/lib/anti-ai-design/__runtime.js
 
 # Legacy per-project live mode injection config. New installs use
-# .anti-design/live/config.json in the project root instead.
-**/skills/anti-design/scripts/config.json
+# .anti-ai-design/live/config.json in the project root instead.
+**/skills/anti-ai-design/scripts/config.json
 
 # Extension build artifacts
 extension/detector/
 
 # Engine binaries: fetched per platform (scripts/fetch-engine.mjs), never tracked.
-# The launcher next to them (skill/scripts/anti-design) is the tracked file.
+# The launcher next to them (skill/scripts/anti-ai-design) is the tracked file.
 skill/scripts/bin/
-**/skills/anti-design/scripts/bin/
+**/skills/anti-ai-design/scripts/bin/
 
 # Legacy design context (pre-v3.1, auto-migrated to PRODUCT.md by load-context.mjs)
-.anti-design.md
+.anti-ai-design.md
 # Note: PRODUCT.md and DESIGN.md are INTENTIONALLY tracked in this repo —
-# they serve as reference implementations for users installing anti-design.
-# Users of anti-design in their own projects can choose whether to track them.
+# they serve as reference implementations for users installing anti-ai-design.
+# Users of anti-ai-design in their own projects can choose whether to track them.
 
 # Evals (private, commercial)
 evals/
@@ -133,7 +133,7 @@ talks/
 # Local-only scratch for exploratory scripts, parked pages, and unused asset candidates.
 tmp/
 
-# Isolated ablation staging (anti-design-evals copies the built staged skill here
+# Isolated ablation staging (anti-ai-design-evals copies the built staged skill here
 # per rule, removes one rule, points a worker at it). Throwaway; never committed.
 .ablate-stage/
 

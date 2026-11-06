@@ -6,7 +6,7 @@ import vm from 'node:vm';
 function formatter() {
   const context = vm.createContext({});
   vm.runInContext(readFileSync(new URL('../extension/shared/findings-report.js', import.meta.url), 'utf8'), context);
-  return context.AntiDesignReport;
+  return context.AntiAiDesignReport;
 }
 
 test('shared report takes a page URL and counts individual findings', () => {
@@ -34,5 +34,5 @@ test('advisory-only reports keep metadata and have no generic polish suggestion'
     { advisory: true, type: 'hard-offset-shadow', name: 'Hard offset shadow', detail: '4px 4px 0' },
   ] }], 'https://example.test/');
   assert.match(report, /## Advisories \(1\)/);
-  assert.doesNotMatch(report, /\/polish|Suggested Anti-Design/);
+  assert.doesNotMatch(report, /\/polish|Suggested Anti-AI Design/);
 });

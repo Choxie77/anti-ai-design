@@ -1,14 +1,14 @@
 /**
- * Browser-side resolution of project detector waivers for Anti-Design live mode.
+ * Browser-side resolution of project detector waivers for Anti-AI Design live mode.
  *
- * The live server serializes `.anti-design/config.json` + `config.local.json`
+ * The live server serializes `.anti-ai-design/config.json` + `config.local.json`
  * detector ignores (plus the served-root prefixes from the inject config's
- * `files` globs) into `window.__ANTI_DESIGN_PROJECT_IGNORES__`. This part
+ * `files` globs) into `window.__ANTI_AI_DESIGN_PROJECT_IGNORES__`. This part
  * resolves that config against the current page's URL path when a detect scan
  * starts, so the overlay suppresses the same findings the CLI and the edit
  * hook do (issue #639).
  *
- * Mirrors filterDetectionFindings in cli/lib/anti-design-config.mjs:
+ * Mirrors filterDetectionFindings in cli/lib/anti-ai-design-config.mjs:
  *   1. `ignoreRules` suppress a rule project-wide.
  *   2. `ignoreValues` entries with `value: "*"` suppress their rule in the
  *      files their globs name. The CLI never applies an unscoped wildcard
@@ -40,7 +40,7 @@
   if (!root) return;
 
   // Keep in step with normalizeIgnoreRule / normalizeIgnoreValue in
-  // cli/lib/anti-design-config.mjs.
+  // cli/lib/anti-ai-design-config.mjs.
   function normalizeIgnoreRule(rule) {
     return String(rule || '').trim().toLowerCase();
   }
@@ -55,7 +55,7 @@
   }
 
   // Glob -> RegExp. Supports `**`, `*`, `?`, and `{a,b}` alternation.
-  // Keep in step with globToRegex in cli/lib/anti-design-config.mjs.
+  // Keep in step with globToRegex in cli/lib/anti-ai-design-config.mjs.
   function globToRegex(glob) {
     let re = '^';
     let i = 0;
@@ -105,7 +105,7 @@
   // prefix to every page, and that rule would suppress site-wide.
   //
   // Each prefixed path also contributes its slash suffixes, mirroring
-  // findingMatchesScopedIgnoreFile in cli/lib/anti-design-config.mjs (which
+  // findingMatchesScopedIgnoreFile in cli/lib/anti-ai-design-config.mjs (which
   // matches globs against every path suffix of the finding's file).
   //
   // One live session is served by one server, so a single document root must
@@ -190,7 +190,7 @@
    * Resolve the serialized project ignores for one page.
    *
    * @param {object} options
-   * @param {object} options.ignores  window.__ANTI_DESIGN_PROJECT_IGNORES__,
+   * @param {object} options.ignores  window.__ANTI_AI_DESIGN_PROJECT_IGNORES__,
    *   in whatever state it arrived: absent, null, or hand-edited into the
    *   wrong shape. Every read tolerates that and degrades to no filtering.
    * @param {string} options.pathname  location.pathname of the scanned page.
@@ -239,7 +239,7 @@
     return { disabledRules: [...disabledRules], disabledValues, skipScan: false };
   }
 
-  root.__ANTI_DESIGN_LIVE_IGNORES__ = {
+  root.__ANTI_AI_DESIGN_LIVE_IGNORES__ = {
     version: 1,
     resolveDetectIgnores,
   };

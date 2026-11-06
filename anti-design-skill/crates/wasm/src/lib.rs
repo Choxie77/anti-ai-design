@@ -1,6 +1,6 @@
-//! anti-design-wasm: the in-page rule core. wasm-bindgen exports over
-//! `anti_design_core::browser` (rules driven through the JS DOM probe) and
-//! over the pure `anti_design_core` functions (JSON in / JSON out).
+//! anti-ai-design-wasm: the in-page rule core. wasm-bindgen exports over
+//! `anti_ai_design_core::browser` (rules driven through the JS DOM probe) and
+//! over the pure `anti_ai_design_core` functions (JSON in / JSON out).
 
 pub mod dom_source;
 #[cfg(feature = "detect")]
@@ -12,9 +12,9 @@ pub mod exports_visual;
 pub mod js_dom;
 
 use dom_source::with_dom;
-use anti_design_core::browser::driver;
-use anti_design_core::browser::BrowserConfig;
-use anti_design_core::rule_pack::RulePack;
+use anti_ai_design_core::browser::driver;
+use anti_ai_design_core::browser::BrowserConfig;
+use anti_ai_design_core::rule_pack::RulePack;
 use std::sync::OnceLock;
 use wasm_bindgen::prelude::*;
 
@@ -29,7 +29,7 @@ static RULE_PACK: OnceLock<&'static dyn RulePack> = OnceLock::new();
 /// The static HTML engine's half of a pack goes through
 /// [`exports_detect::set_static_rule_pack`] (feature `detect`).
 pub fn set_rule_pack(pack: &'static dyn RulePack) {
-    anti_design_core::rule_pack::install(pack);
+    anti_ai_design_core::rule_pack::install(pack);
     let _ = RULE_PACK.set(pack);
 }
 
@@ -60,7 +60,7 @@ pub fn scoped_ignore_active(el: u32, rule_id: &str) -> bool {
 /// Built-ins in registry order, then any installed rule pack's rows.
 #[wasm_bindgen]
 pub fn antipatterns_json() -> String {
-    let rows: Vec<serde_json::Value> = anti_design_core::registry::all_antipatterns()
+    let rows: Vec<serde_json::Value> = anti_ai_design_core::registry::all_antipatterns()
         .map(|ap| {
             serde_json::json!({
                 "id": ap.id,

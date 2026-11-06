@@ -23,7 +23,7 @@
         "classes": "hero-title",
         "tag": "h1"
       },
-      "expectedFile": "node_modules/.anti-design-live/wraptest0/manifest.json",
+      "expectedFile": "node_modules/.anti-ai-design-live/wraptest0/manifest.json",
       "expectedSourceFile": "src/routes/+page.svelte",
       "expectedPreviewMode": "svelte-component"
     },
@@ -33,7 +33,7 @@
         "classes": "expense-list",
         "tag": "ul"
       },
-      "expectedFile": "node_modules/.anti-design-live/wraptest1/manifest.json",
+      "expectedFile": "node_modules/.anti-ai-design-live/wraptest1/manifest.json",
       "expectedSourceFile": "src/routes/+page.svelte",
       "expectedPreviewMode": "svelte-component"
     }
@@ -109,7 +109,7 @@
     "stateProbe": {
       "textSelector": "[data-testid='open-count']",
       "expectedText": "3 offen",
-      "windowProperty": "__antiDesignStatefulMounts",
+      "windowProperty": "__antiAiDesignStatefulMounts",
       "expectedWindowValue": 1,
       "expectWindowUnchanged": true
     },

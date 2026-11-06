@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// `anti-design` npm shim: finds the platform binary and execs it with argv.
-// Order: $ANTI_DESIGN_BIN, the @anti-design/cli-<os>-<arch> optional dependency,
-// the version-pinned user cache (~/.anti-design/bin/<version>/), then a
+// `anti-ai-design` npm shim: finds the platform binary and execs it with argv.
+// Order: $ANTI_AI_DESIGN_BIN, the @anti-ai-design/cli-<os>-<arch> optional dependency,
+// the version-pinned user cache (~/.anti-ai-design/bin/<version>/), then a
 // download into that cache from the public release channel. The cache and the
 // download are verified against skill/scripts/engine-checksums.txt (shipped in
 // the package); a <binary>.verified stamp holding the manifest digest and the
@@ -20,14 +20,14 @@ const pkg = require('../../package.json');
 const OS = { darwin: 'darwin', linux: 'linux', win32: 'windows' }[process.platform] || process.platform;
 const ARCH = { arm64: 'arm64', x64: 'x64' }[process.arch] || process.arch;
 const TARGET = `${OS}-${ARCH}`;
-const EXE = OS === 'windows' ? 'anti-design.exe' : 'anti-design';
-const PLATFORM_PKG = `@anti-design/cli-${TARGET}`;
+const EXE = OS === 'windows' ? 'anti-ai-design.exe' : 'anti-ai-design';
+const PLATFORM_PKG = `@anti-ai-design/cli-${TARGET}`;
 // The engine version travels as the pinned optionalDependency range.
 const VERSION = String(pkg.optionalDependencies?.[PLATFORM_PKG] || Object.values(pkg.optionalDependencies || {})[0] || '').replace(/^[^\d]*/, '');
-const CACHE_ROOT = process.env.ANTI_DESIGN_HOME || path.join(os.homedir(), '.anti-design');
+const CACHE_ROOT = process.env.ANTI_AI_DESIGN_HOME || path.join(os.homedir(), '.anti-ai-design');
 const CACHED = path.join(CACHE_ROOT, 'bin', VERSION, EXE);
-const BASE = (process.env.ANTI_DESIGN_DOWNLOAD_BASE || 'https://github.com/OWNER/anti-design/releases/download').replace(/\/$/, '');
-const ASSET = `anti-design-${TARGET}${OS === 'windows' ? '.exe' : ''}`;
+const BASE = (process.env.ANTI_AI_DESIGN_DOWNLOAD_BASE || 'https://github.com/Choxie77/anti-ai-design/releases/download').replace(/\/$/, '');
+const ASSET = `anti-ai-design-${TARGET}${OS === 'windows' ? '.exe' : ''}`;
 const URL = `${BASE}/engine-v${VERSION}/${ASSET}`;
 const MANIFEST = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'skill', 'scripts', 'engine-checksums.txt');
 const STAMP = `${CACHED}.verified`;
@@ -57,7 +57,7 @@ function fromPackage() {
 }
 async function download() {
   if (!VERSION) return null;
-  // Fail closed, like the skill launcher and `anti-design install`: no digest
+  // Fail closed, like the skill launcher and `anti-ai-design install`: no digest
   // on record refuses the download before any request, and nothing is written
   // until the hash matches, so a refusal leaves the cache dir untouched.
   const expected = expectedDigest();
@@ -83,13 +83,13 @@ async function download() {
   return CACHED;
 }
 async function locate() {
-  const envBin = process.env.ANTI_DESIGN_BIN;
+  const envBin = process.env.ANTI_AI_DESIGN_BIN;
   if (exists(envBin)) return envBin;
   const fromPkg = fromPackage();
   if (exists(fromPkg)) return fromPkg;
   if (exists(CACHED)) {
     // Windows on ARM runs x64 binaries, and the launchers fall back to that asset.
-    const accepted = [expectedDigest(), TARGET === 'windows-arm64' && expectedDigest('anti-design-windows-x64.exe')].filter(Boolean);
+    const accepted = [expectedDigest(), TARGET === 'windows-arm64' && expectedDigest('anti-ai-design-windows-x64.exe')].filter(Boolean);
     if (stampValid(accepted)) return CACHED;
     let digest = '';
     try { digest = createHash('sha256').update(fs.readFileSync(CACHED)).digest('hex'); } catch { /* unreadable: unverified */ }
@@ -97,9 +97,9 @@ async function locate() {
       try { fs.writeFileSync(STAMP, `${digest} ${fs.statSync(CACHED).size}\n`); } catch { /* read-only cache: verified this run */ }
       return CACHED;
     }
-    process.stderr.write(`anti-design: cannot verify the cached engine ${CACHED} against ${MANIFEST}; downloading engine ${VERSION} again\n`);
+    process.stderr.write(`anti-ai-design: cannot verify the cached engine ${CACHED} against ${MANIFEST}; downloading engine ${VERSION} again\n`);
   }
-  return download().catch((err) => { process.stderr.write(`anti-design: ${err.message}\n`); return null; });
+  return download().catch((err) => { process.stderr.write(`anti-ai-design: ${err.message}\n`); return null; });
 }
 
 // `--version` / `-v` is answered by the shim itself: the number users mean
@@ -113,17 +113,17 @@ if (argv[0] === '--version' || argv[0] === '-v') {
 const bin = await locate();
 if (!bin) {
   process.stderr.write(
-    `anti-design: no binary for ${TARGET}. Install ${PLATFORM_PKG}@${VERSION}, set ANTI_DESIGN_BIN, `
-    + `or download anti-design-${TARGET} v${VERSION} from ${BASE} into ${CACHED}.\n`,
+    `anti-ai-design: no binary for ${TARGET}. Install ${PLATFORM_PKG}@${VERSION}, set ANTI_AI_DESIGN_BIN, `
+    + `or download anti-ai-design-${TARGET} v${VERSION} from ${BASE} into ${CACHED}.\n`,
   );
   process.exit(127);
 }
 const result = spawnSync(bin, argv, {
   stdio: 'inherit',
-  env: { ANTI_DESIGN_SELF: 'npx anti-design', ...process.env },
+  env: { ANTI_AI_DESIGN_SELF: 'npx anti-ai-design', ...process.env },
 });
 if (result.error) {
-  process.stderr.write(`anti-design: failed to run ${bin}: ${result.error.message}\n`);
+  process.stderr.write(`anti-ai-design: failed to run ${bin}: ${result.error.message}\n`);
   process.exit(127);
 }
 process.exit(result.status === null ? 1 : result.status);

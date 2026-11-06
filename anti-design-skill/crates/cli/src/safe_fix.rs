@@ -1,9 +1,9 @@
-//! `anti-design detect --fix [--write]`: the safe-fix tier.
+//! `anti-ai-design detect --fix [--write]`: the safe-fix tier.
 //!
 //! Plain `detect` never reaches this module. With `--fix` the verb runs the normal
-//! detector (so project config, inline `anti-design-disable` comments and DESIGN.md
+//! detector (so project config, inline `anti-ai-design-disable` comments and DESIGN.md
 //! all apply), keeps the findings that have a registered safe fix
-//! (`anti_design_aad_rules::safe_fix`), and offers the rewrite only where a finding is.
+//! (`anti_ai_design_aad_rules::safe_fix`), and offers the rewrite only where a finding is.
 //!
 //! * No `--write`: dry run. A unified diff goes to stdout, a summary to stderr, and
 //!   nothing on disk changes (no source file, no run log, no folder).
@@ -19,13 +19,13 @@ use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use anti_design_aad_rules::safe_fix::{fix_text, unified_diff, Applied, Scope};
-use anti_design_common::Io;
-use anti_design_detect::Engines;
+use anti_ai_design_aad_rules::safe_fix::{fix_text, unified_diff, Applied, Scope};
+use anti_ai_design_common::Io;
+use anti_ai_design_detect::Engines;
 
-/// The project folder the run log lives in. One constant, so the later rename to
-/// `.anti-ai-design` is a one-line change. (Same value the live and context code use.)
-pub const CONTEXT_DIR: &str = anti_design_live::paths::ANTI_DESIGN_DIR;
+/// The project folder the run log lives in (`.anti-ai-design`), the same value the live and
+/// context code use.
+pub const CONTEXT_DIR: &str = anti_ai_design_live::paths::ANTI_AI_DESIGN_DIR;
 /// The run log's file name inside [`CONTEXT_DIR`].
 pub const CHANGELOG_FILE: &str = "changelog.md";
 
@@ -87,7 +87,7 @@ pub fn run(args: &[String], io: &mut Io, engines: &Engines) -> i32 {
 
     // The ordinary detector pass, captured.
     let (mut cap_io, cap) = Io::captured("", io.cwd.clone(), io.env.clone());
-    let detect_code = anti_design_detect::run_detect(&detect_args, &mut cap_io, engines);
+    let detect_code = anti_ai_design_detect::run_detect(&detect_args, &mut cap_io, engines);
     let detect_err = String::from_utf8_lossy(&cap.stderr.borrow()).into_owned();
     let detect_out = String::from_utf8_lossy(&cap.stdout.borrow()).into_owned();
     if !detect_err.is_empty() {
@@ -110,7 +110,7 @@ pub fn run(args: &[String], io: &mut Io, engines: &Engines) -> i32 {
     let mut by_file: BTreeMap<String, Scope> = BTreeMap::new();
     let mut total_findings = 0usize;
     for f in &findings {
-        if f.get("antipattern").and_then(|v| v.as_str()) != Some(anti_design_aad_rules::safe_fix::GRADIENT_TEXT) {
+        if f.get("antipattern").and_then(|v| v.as_str()) != Some(anti_ai_design_aad_rules::safe_fix::GRADIENT_TEXT) {
             continue;
         }
         let Some(file) = f.get("file").and_then(|v| v.as_str()) else { continue };

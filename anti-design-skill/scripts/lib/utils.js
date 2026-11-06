@@ -7,7 +7,7 @@ import { PROVIDERS } from './transformers/providers.js';
 // excludes them from dist, and the harness-sync step preserves them across
 // the rm+recopy so local state isn't destroyed on every rebuild.
 // - config.json: legacy live-mode inject target list for existing projects.
-//   New installs write project config at .anti-design/live/config.json instead.
+//   New installs write project config at .anti-ai-design/live/config.json instead.
 export const PER_PROJECT_SCRIPT_ARTIFACTS = new Set(['config.json']);
 
 // Platform binaries under `scripts/bin/<os>-<arch>/` are fetched per machine
@@ -236,7 +236,7 @@ export function readFilesRecursive(dir, fileList = []) {
 }
 
 /**
- * Read and parse the anti-design skill source.
+ * Read and parse the anti-ai-design skill source.
  * After v3.0 the repo holds exactly one user-invocable skill, flat at skill/.
  * Returns { skills: [oneEntry] } so downstream array-shaped consumers stay happy.
  *
@@ -245,7 +245,7 @@ export function readFilesRecursive(dir, fileList = []) {
  * and copies that directory verbatim. If `skill/SKILL.md` existed, `npx skills`
  * would install the UNCOMPILED source (unresolved `{{placeholders}}` and
  * `{{scripts_path}}`). Naming it `SKILL.src.md` hides it from discovery so the CLI falls
- * through to a compiled harness dir (`.agents/skills/anti-design`) instead.
+ * through to a compiled harness dir (`.agents/skills/anti-ai-design`) instead.
  */
 export function readSourceFiles(rootDir) {
   const skillDir = path.join(rootDir, 'skill');
@@ -328,7 +328,7 @@ export function readSourceFiles(rootDir) {
   }
 
   skills.push({
-    name: frontmatter.name || 'anti-design',
+    name: frontmatter.name || 'anti-ai-design',
     description: frontmatter.description || '',
     license: frontmatter.license || '',
     compatibility: frontmatter.compatibility || '',
@@ -668,14 +668,14 @@ function escapeRegex(str) {
 }
 
 const EXCLUDED_FROM_SUGGESTIONS = new Set([
-  'anti-design',               // foundational skill, not a steering command
-  'teach-anti-design',         // deprecated shim
+  'anti-ai-design',               // foundational skill, not a steering command
+  'teach-anti-ai-design',         // deprecated shim
   'frontend-design',          // deprecated shim
 ]);
 
-// Sub-commands of /anti-design that should appear in {{available_commands}}.
+// Sub-commands of /anti-ai-design that should appear in {{available_commands}}.
 // These are the commands that audit/critique/etc. reference when suggesting next steps.
-const ANTI_DESIGN_SUB_COMMANDS = [
+const ANTI_AI_DESIGN_SUB_COMMANDS = [
   'adapt', 'animate', 'audit', 'bolder', 'clarify', 'colorize',
   'critique', 'delight', 'distill', 'document', 'harden', 'layout',
   'onboard', 'optimize', 'overdrive', 'polish', 'quieter', 'shape', 'typeset',
@@ -686,15 +686,15 @@ export function replacePlaceholders(content, provider, commandNames = [], allSki
   const cmdPrefix = placeholders.command_prefix || '/';
 
   // Build the available_commands list.
-  // After the v3.0 consolidation, commands are sub-commands of /anti-design.
-  // If there's only one user-invocable skill (anti-design), generate sub-command references.
+  // After the v3.0 consolidation, commands are sub-commands of /anti-ai-design.
+  // If there's only one user-invocable skill (anti-ai-design), generate sub-command references.
   // Otherwise fall back to listing skill names (backwards compat for forks).
   const nonExcluded = commandNames.filter(n => !EXCLUDED_FROM_SUGGESTIONS.has(n));
   let commandList;
   if (nonExcluded.length === 0) {
-    // Single-skill architecture: list sub-commands as /anti-design <sub>
-    commandList = ANTI_DESIGN_SUB_COMMANDS
-      .map(n => `${cmdPrefix}anti-design ${n}`)
+    // Single-skill architecture: list sub-commands as /anti-ai-design <sub>
+    commandList = ANTI_AI_DESIGN_SUB_COMMANDS
+      .map(n => `${cmdPrefix}anti-ai-design ${n}`)
       .join(', ');
   } else {
     // Multi-skill architecture (backwards compat)
@@ -710,9 +710,9 @@ export function replacePlaceholders(content, provider, commandNames = [], allSki
 
   // Replace `/skillname` invocations with the correct command prefix for this provider
   // (e.g., `/normalize` → `$normalize` for Codex). Require the slash to be
-  // outside a path or URL so `.github/hooks/anti-design.json`,
-  // `.codex/skills/anti-design`, and the launcher invocation
-  // `{{scripts_path}}/anti-design <verb>` (a `}}`-preceded path segment,
+  // outside a path or URL so `.github/hooks/anti-ai-design.json`,
+  // `.codex/skills/anti-ai-design`, and the launcher invocation
+  // `{{scripts_path}}/anti-ai-design <verb>` (a `}}`-preceded path segment,
   // resolved after this pass) remain untouched.
   if (cmdPrefix !== '/' && allSkillNames.length > 0) {
     const sorted = [...allSkillNames].sort((a, b) => b.length - a.length);
@@ -734,16 +734,16 @@ export function replacePlaceholders(content, provider, commandNames = [], allSki
  * heuristics can collide with regex literals and runtime paths. Only exact
  * marker lines are replaced. The shipped scripts today (the launcher and the
  * page JS) carry no marker; the binary derives its provider from its install
- * path or ANTI_DESIGN_PROVIDER_ID at run time.
+ * path or ANTI_AI_DESIGN_PROVIDER_ID at run time.
  */
 export function replaceScriptProviderMarker(content, provider, buildProvider = provider) {
   const placeholders = PROVIDER_PLACEHOLDERS[provider] || PROVIDER_PLACEHOLDERS.cursor;
   const commandPrefix = placeholders.command_prefix || '/';
-  const prefixMarker = "export const ANTI_DESIGN_COMMAND_PREFIX = '/'; // @anti-design-provider-command-prefix";
-  const providerMarker = "export const ANTI_DESIGN_PROVIDER_ID = 'source'; // @anti-design-provider-id";
+  const prefixMarker = "export const ANTI_AI_DESIGN_COMMAND_PREFIX = '/'; // @anti-ai-design-provider-command-prefix";
+  const providerMarker = "export const ANTI_AI_DESIGN_PROVIDER_ID = 'source'; // @anti-ai-design-provider-id";
   return content
-    .replace(prefixMarker, `export const ANTI_DESIGN_COMMAND_PREFIX = ${JSON.stringify(commandPrefix)};`)
-    .replace(providerMarker, `export const ANTI_DESIGN_PROVIDER_ID = ${JSON.stringify(buildProvider)};`);
+    .replace(prefixMarker, `export const ANTI_AI_DESIGN_COMMAND_PREFIX = ${JSON.stringify(commandPrefix)};`)
+    .replace(providerMarker, `export const ANTI_AI_DESIGN_PROVIDER_ID = ${JSON.stringify(buildProvider)};`);
 }
 
 /**

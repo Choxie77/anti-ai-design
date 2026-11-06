@@ -1,4 +1,4 @@
-//! JS: live-wrap.mjs -> `anti-design live-wrap` / `wrap`. Find an element in
+//! JS: live-wrap.mjs -> `anti-ai-design live-wrap` / `wrap`. Find an element in
 //! source and wrap it in a variant container (or scaffold a Svelte component
 //! preview session), printing where the agent inserts variants.
 
@@ -12,11 +12,11 @@ use crate::svelte_component::{
 };
 use crate::util::{eprintln, json_compact, jsp, println};
 use crate::wrap_common::*;
-use anti_design_common::Io;
-use anti_design_core::js::trim;
+use anti_ai_design_common::Io;
+use anti_ai_design_core::js::trim;
 use serde_json::{json, Map, Value};
 
-const HELP: &str = "Usage: anti-design wrap [options]
+const HELP: &str = "Usage: anti-ai-design wrap [options]
 
 Find an element in source and wrap it in a variant container.
 
@@ -324,32 +324,32 @@ fn wrap_cli(args: &[String], io: &mut Io) -> i32 {
     let wrapper_lines: Vec<String> = if is_jsx {
         vec![
             format!(
-                "{}<div data-anti-design-variants=\"{}\" data-anti-design-variant-count=\"{}\" {}>",
+                "{}<div data-anti-ai-design-variants=\"{}\" data-anti-ai-design-variant-count=\"{}\" {}>",
                 indent, id, count_s, style_contents
             ),
-            format!("{}  {} anti-design-variants-start {} {}", indent, co, id, cc),
+            format!("{}  {} anti-ai-design-variants-start {} {}", indent, co, id, cc),
             format!("{}  {} Original {}", indent, co, cc),
-            format!("{}  <div data-anti-design-variant=\"original\">", indent),
+            format!("{}  <div data-anti-ai-design-variant=\"original\">", indent),
             reindent_original("    "),
             format!("{}  </div>", indent),
             format!("{}  {} Variants: insert below this line {}", indent, co, cc),
-            format!("{}  {} anti-design-variants-end {} {}", indent, co, id, cc),
+            format!("{}  {} anti-ai-design-variants-end {} {}", indent, co, id, cc),
             format!("{}</div>", indent),
         ]
     } else {
         vec![
-            format!("{}{} anti-design-variants-start {} {}", indent, co, id, cc),
+            format!("{}{} anti-ai-design-variants-start {} {}", indent, co, id, cc),
             format!(
-                "{}<div data-anti-design-variants=\"{}\" data-anti-design-variant-count=\"{}\" {}>",
+                "{}<div data-anti-ai-design-variants=\"{}\" data-anti-ai-design-variant-count=\"{}\" {}>",
                 indent, id, count_s, style_contents
             ),
             format!("{}  {} Original {}", indent, co, cc),
-            format!("{}  <div data-anti-design-variant=\"original\">", indent),
+            format!("{}  <div data-anti-ai-design-variant=\"original\">", indent),
             original_indented,
             format!("{}  </div>", indent),
             format!("{}  {} Variants: insert below this line {}", indent, co, cc),
             format!("{}</div>", indent),
-            format!("{}{} anti-design-variants-end {} {}", indent, co, id, cc),
+            format!("{}{} anti-ai-design-variants-end {} {}", indent, co, id, cc),
         ]
     };
 
@@ -638,8 +638,8 @@ fn line_matches_manual_edit_locator(line: &str, op: &Value) -> bool {
         let tag = crate::accept_css::js_string(tag);
         let re = regex::Regex::new(&format!(
             "(?i)<{ws}*{tag}(?:[{wsc}>/]|$)",
-            ws = anti_design_core::js::WS,
-            wsc = &anti_design_core::js::WS[1..anti_design_core::js::WS.len() - 1],
+            ws = anti_ai_design_core::js::WS,
+            wsc = &anti_ai_design_core::js::WS[1..anti_ai_design_core::js::WS.len() - 1],
             tag = regex::escape(&tag)
         ))
         .unwrap();
@@ -653,7 +653,7 @@ fn line_matches_manual_edit_locator(line: &str, op: &Value) -> bool {
         let eid = crate::accept_css::js_string(eid);
         let re = regex::Regex::new(&format!(
             "(?-u:\\b)id{ws}*={ws}*[\"']{id}[\"']",
-            ws = anti_design_core::js::WS,
+            ws = anti_ai_design_core::js::WS,
             id = regex::escape(&eid)
         ))
         .unwrap();

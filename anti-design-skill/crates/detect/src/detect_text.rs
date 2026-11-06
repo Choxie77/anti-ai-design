@@ -3,17 +3,17 @@
 //! stripping, `<style>` block and CSS-in-JS extraction, the inset-stripe scan,
 //! line matchers, page analyzers, dedupe, and inline ignores.
 
-use anti_design_core::checks::css_scan::{
+use anti_ai_design_core::checks::css_scan::{
     scan_css_text_for_grid_background, scan_css_text_for_pseudo_stripe, side_stripe_index,
     CssHostIndex, CustomProps,
 };
-use anti_design_core::checks::row_stripe::scan_css_text_for_row_stripe;
-use anti_design_core::checks::rules::DeclaredCorners;
-use anti_design_core::findings::{finding, Finding};
-use anti_design_core::inline_ignores::apply_inline_ignores;
-use anti_design_core::js::{self, ci, number_to_string, string_to_number};
-use anti_design_core::page::is_full_page;
-use anti_design_core::rule_pack::RulePack;
+use anti_ai_design_core::checks::row_stripe::scan_css_text_for_row_stripe;
+use anti_ai_design_core::checks::rules::DeclaredCorners;
+use anti_ai_design_core::findings::{finding, Finding};
+use anti_ai_design_core::inline_ignores::apply_inline_ignores;
+use anti_ai_design_core::js::{self, ci, number_to_string, string_to_number};
+use anti_ai_design_core::page::is_full_page;
+use anti_ai_design_core::rule_pack::RulePack;
 
 use crate::design_system::{check_source_design_system, DesignSystem};
 use crate::profiler::{profile_findings, profile_step, DetectorProfile, ProfileMeta};
@@ -2360,7 +2360,7 @@ pub fn detect_text(content: &str, file_path: &str, options: &TextOptions) -> Vec
 
     // A rule pack sees the file after every built-in matcher, analyzer, and
     // the dedupe, and before inline ignores: its rows are waivable with
-    // `anti-design-disable` exactly like built-in rules, and appending keeps
+    // `anti-ai-design-disable` exactly like built-in rules, and appending keeps
     // built-in output byte-identical when no pack is installed.
     if let Some(pack) = options.rule_pack {
         deduped.extend(pack.check_text(content, file_path, &ext));

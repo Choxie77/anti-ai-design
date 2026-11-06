@@ -1,16 +1,16 @@
-//! anti-design-browser: the URL engine of `anti-design detect`, ported from
+//! anti-ai-design-browser: the URL engine of `anti-ai-design detect`, ported from
 //! `cli/engine/engines/browser/detect-url.mjs` (+ `engines/visual/
 //! screenshot-contrast.mjs`). Instead of puppeteer it discovers an installed
 //! Chromium-based browser ([`discovery`]), drives it over CDP ([`cdp`]) with
 //! puppeteer's launch flags and page setup, and — since triage D2 — injects
 //! only the plain-JS snapshot producer, runs the rule core natively over
-//! [`anti_design_core::browser::snapshot::SnapshotDom`] ([`snapshot_engine`]),
+//! [`anti_ai_design_core::browser::snapshot::SnapshotDom`] ([`snapshot_engine`]),
 //! and maps the findings into [`Finding`]s exactly as `detectUrl` does. No
 //! WebAssembly runs next to the page, so the scan no longer needs
 //! `Page.setBypassCSP` and a strict-CSP site is scanned passively (see
 //! WASM-BUNDLE.md in the detector repo).
 //!
-//! Wired into `anti-design detect` through [`anti_design_detect::UrlEngine`]:
+//! Wired into `anti-ai-design detect` through [`anti_ai_design_detect::UrlEngine`]:
 //! a single URL uses `detect_url` (`waitUntil: 'networkidle0'`, `settleMs:
 //! 0`); several URLs share one browser through [`SharedBrowser`]
 //! (`createBrowserDetector()`: `waitUntil: 'load'`, `settleMs: 100`).
@@ -50,15 +50,15 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-use anti_design_core::browser::driver::{collect_browser_findings, serialize_findings};
-use anti_design_core::browser::dom::{Dom, ElId};
-use anti_design_core::browser::page_checks::measure_hidden_text_dom;
-use anti_design_core::browser::snapshot::{Facts, SnapshotDom};
-use anti_design_core::checks::measures::{check_content_hidden_at_rest, ContentHiddenInput};
-use anti_design_core::findings::{try_finding, Finding};
-use anti_design_detect::design_system::DesignSystem;
-use anti_design_detect::engines::{EngineError, ScanOptions, SharedBrowser, UrlEngine, UrlScan};
-use anti_design_detect::profiler::{DetectorProfile, ProfileMeta};
+use anti_ai_design_core::browser::driver::{collect_browser_findings, serialize_findings};
+use anti_ai_design_core::browser::dom::{Dom, ElId};
+use anti_ai_design_core::browser::page_checks::measure_hidden_text_dom;
+use anti_ai_design_core::browser::snapshot::{Facts, SnapshotDom};
+use anti_ai_design_core::checks::measures::{check_content_hidden_at_rest, ContentHiddenInput};
+use anti_ai_design_core::findings::{try_finding, Finding};
+use anti_ai_design_detect::design_system::DesignSystem;
+use anti_ai_design_detect::engines::{EngineError, ScanOptions, SharedBrowser, UrlEngine, UrlScan};
+use anti_ai_design_detect::profiler::{DetectorProfile, ProfileMeta};
 use serde_json::{json, Map, Value};
 
 use cdp::{Browser, CdpError, Page, Viewport};
@@ -71,7 +71,7 @@ use validity::{DocumentResponse, PageProbe, PageValidity};
 const NAVIGATION_TIMEOUT: Duration = Duration::from_millis(30000);
 
 /// The browser engine. Holds the process environment it reads for browser
-/// discovery (`ANTI_DESIGN_BROWSER`, `PUPPETEER_EXECUTABLE_PATH`,
+/// discovery (`ANTI_AI_DESIGN_BROWSER`, `PUPPETEER_EXECUTABLE_PATH`,
 /// `CHROME_PATH`, standard locations), sandbox flags (`CI`,
 /// `PUPPETEER_DANGEROUS_NO_SANDBOX`), and `HOME`/`PATH` for the search.
 pub struct BrowserEngine {
@@ -85,7 +85,7 @@ impl BrowserEngine {
 
     /// An engine reading the real process environment.
     pub fn from_process_env() -> Self {
-        BrowserEngine::new(anti_design_common::process_env())
+        BrowserEngine::new(anti_ai_design_common::process_env())
     }
 
     /// JS `launchArgs = process.env.CI ? ['--no-sandbox','--disable-setuid-sandbox'] : []`.
@@ -125,7 +125,7 @@ impl UrlEngine for BrowserEngine {
 
     fn detect_cdp_scan(
         &self,
-        endpoint: &anti_design_detect::cdp_endpoint::CdpEndpoint,
+        endpoint: &anti_ai_design_detect::cdp_endpoint::CdpEndpoint,
         target: Option<&str>,
         options: &ScanOptions,
     ) -> Result<UrlScan, EngineError> {
@@ -308,7 +308,7 @@ struct RawResult {
     /// [`scan_identities`]).
     scan_el: Option<ElId>,
     /// The third-party vendor the finding belongs to (see
-    /// [`anti_design_core::third_party`]); its message already names it.
+    /// [`anti_ai_design_core::third_party`]); its message already names it.
     third_party: Option<String>,
     /// For a page-level finding, where the evidence step found the element
     /// that carries its declaration ([`Evidence::page_anchors`]).
@@ -392,7 +392,7 @@ pub struct Evidence {
     /// `html`) whose declaration a painted element carries (a radial-gradient
     /// halo or a glow, its `var()` resolved), that element measured after the
     /// scan, `{ rect: [x, y, width, height], tag, id, class }`; `null`
-    /// otherwise. See [`anti_design_core::browser::driver::page_form_anchor`].
+    /// otherwise. See [`anti_ai_design_core::browser::driver::page_form_anchor`].
     pub page_anchors: Vec<Value>,
     pub screenshot: Option<Screenshot>,
     /// Why no screenshot was taken, when one was requested and failed.
@@ -499,7 +499,7 @@ fn step_findings<E>(
     let started = Instant::now();
     let out = f()?;
     let ms = started.elapsed().as_secs_f64() * 1000.0;
-    let ids = anti_design_detect::profiler::extract_finding_ids(out.iter().map(|r| r.id.as_str()));
+    let ids = anti_ai_design_detect::profiler::extract_finding_ids(out.iter().map(|r| r.id.as_str()));
     profile.record(
         ProfileMeta {
             engine: "browser",
@@ -520,7 +520,7 @@ fn js_str(v: Option<&Value>) -> String {
         Some(Value::Null) | None => String::new(),
         Some(Value::Bool(b)) => b.to_string(),
         Some(Value::Number(n)) => {
-            anti_design_core::js::number_to_string(n.as_f64().unwrap_or(f64::NAN))
+            anti_ai_design_core::js::number_to_string(n.as_f64().unwrap_or(f64::NAN))
         }
         Some(other) => other.to_string(),
     }
@@ -654,7 +654,7 @@ fn overlay_note(url: &str, report: &OverlayReport) -> String {
 
 /// Run the URL engine's scan on a browser the caller owns and also return
 /// the [`Evidence`] a reviewer needs to check each finding. The findings are
-/// the ones `anti-design detect --json <url>` prints for the same page and
+/// the ones `anti-ai-design detect --json <url>` prints for the same page and
 /// wait strategy. A blocked page returns no findings and an `Ok` with
 /// [`Evidence::validity`] set, instead of the CLI's error.
 pub fn detect_url_evidence(
@@ -771,7 +771,7 @@ pub fn replay_url_scan(
 /// Map raw results onto registry findings, returning each one's origin
 /// alongside. A design system that declares a purple switches the purple
 /// forms of ai-color-palette off (see
-/// [`anti_design_detect::design_system::drop_declared_purple_findings`]).
+/// [`anti_ai_design_detect::design_system::drop_declared_purple_findings`]).
 fn results_to_findings(
     url: &str,
     results: Vec<RawResult>,
@@ -795,7 +795,7 @@ fn results_to_findings_with(
     let mut origins = Vec::with_capacity(results.len());
     let mut anchors = Vec::with_capacity(results.len());
     for r in results {
-        if purple_off && anti_design_core::checks::rules::is_purple_palette_finding(&r.id, &r.snippet) {
+        if purple_off && anti_ai_design_core::checks::rules::is_purple_palette_finding(&r.id, &r.snippet) {
             continue;
         }
         let Some(mut item) = try_finding(&r.id, url, &r.snippet, 0.0) else {
@@ -817,7 +817,7 @@ fn results_to_findings_with(
         if !r.severity.is_empty() && r.severity != item.severity {
             item.severity = r.severity;
         }
-        anti_design_core::findings::derive_advisory_flag(&mut item);
+        anti_ai_design_core::findings::derive_advisory_flag(&mut item);
         findings.push(item);
         origins.push(r.origin);
         anchors.push(r.anchor.unwrap_or(Value::Null));
@@ -857,23 +857,23 @@ fn results_from_groups(groups: &[Value]) -> Vec<RawResult> {
 
 /// Per result of `results_from_groups(serialize_findings(dom, groups))`, in
 /// order: whether it is a `low-contrast` verdict on text the element pass
-/// hands to the pixels ([`anti_design_core::browser::visual::routed_reason`]).
+/// hands to the pixels ([`anti_ai_design_core::browser::visual::routed_reason`]).
 /// The live scan lets a pixel verdict replace such a verdict, so it is the
 /// visual-contrast pass's to report, and a replay leaves it out. A handed
 /// verdict whose ratio was taken against a ground a picture covers measured
-/// nothing ([`anti_design_core::browser::visual::handed_over_unmeasured`]).
-fn handed_over(dom: &SnapshotDom, groups: &[anti_design_core::browser::FindingGroup]) -> Vec<Handed> {
+/// nothing ([`anti_ai_design_core::browser::visual::handed_over_unmeasured`]).
+fn handed_over(dom: &SnapshotDom, groups: &[anti_ai_design_core::browser::FindingGroup]) -> Vec<Handed> {
     let mut out = Vec::new();
     for g in groups {
         let mut routed: Option<bool> = None;
         for f in &g.findings {
             let handed = f.type_ == "low-contrast"
                 && *routed.get_or_insert_with(|| {
-                    anti_design_core::browser::visual::routed_reason(dom, g.el).is_some()
+                    anti_ai_design_core::browser::visual::routed_reason(dom, g.el).is_some()
                 });
             out.push(if handed {
                 Handed::Yes {
-                    unmeasured: anti_design_core::browser::visual::handed_over_unmeasured(dom, g.el, &f.detail),
+                    unmeasured: anti_ai_design_core::browser::visual::handed_over_unmeasured(dom, g.el, &f.detail),
                 }
             } else {
                 Handed::No
@@ -942,7 +942,7 @@ fn settle_handed_over(
                 })))
     });
     for r in results.iter_mut().filter(|r| handed(r)) {
-        r.severity = anti_design_core::checks::rules::ADVISORY_SEVERITY.to_string();
+        r.severity = anti_ai_design_core::checks::rules::ADVISORY_SEVERITY.to_string();
     }
 }
 
@@ -962,7 +962,7 @@ fn unstarted_slider_note(url: &str, chars: f64, samples: &[String]) -> Option<St
     let sample = samples.first().map(|s| format!(", e.g. \"{s}\"")).unwrap_or_default();
     Some(format!(
         "Capture note: {} chars of text on {url} sit in sliders that never started (every slide hidden{sample}), so content-hidden-at-rest left them out. The page may not have finished loading; scan it again to check that text.",
-        anti_design_core::js::number_to_string(chars)
+        anti_ai_design_core::js::number_to_string(chars)
     ))
 }
 
@@ -1296,7 +1296,7 @@ fn scan_loaded(
     // Deterministic pass: run the rule core natively over the snapshot
     // (hit-test misses answered to a fixpoint). serialize_findings reproduces
     // the same per-finding fields (type/detail/ignoreValue/severity) and order
-    // the in-page bundle's `antiDesignDetect({ serialize: true })` produced; the
+    // the in-page bundle's `antiAiDesignDetect({ serialize: true })` produced; the
     // group selectors feed the visual pass below.
     let mut serialized_groups: Vec<Value> = Vec::new();
     // Copies whose verdict a counted finding speaks for (` (and N more)`):
@@ -1325,7 +1325,7 @@ fn scan_loaded(
         collapsed_selectors = collected
             .collapsed
             .iter()
-            .map(|el| anti_design_core::browser::driver::generate_selector(&base, *el))
+            .map(|el| anti_ai_design_core::browser::driver::generate_selector(&base, *el))
             .collect();
         let mut results = results_from_groups(&serialized_groups);
         hand_over(&mut results, &handed);
@@ -1496,7 +1496,7 @@ fn scan_loaded(
             .map(|r| {
                 let page_level = matches!(r.selector.as_deref(), Some("body") | Some("html") | None);
                 (page_level && r.origin == origin::SCAN)
-                    .then(|| anti_design_core::browser::driver::page_form_anchor(&base, &r.id, &r.snippet))
+                    .then(|| anti_ai_design_core::browser::driver::page_form_anchor(&base, &r.id, &r.snippet))
                     .flatten()
             })
             .collect();
@@ -1580,18 +1580,18 @@ fn script_error_result(message: &str, source: Option<&str>) -> RawResult {
         Some(source) => format!("{message} ({source})"),
         None => message.to_string(),
     };
-    match anti_design_core::third_party::ad_tech_vendor(message, source) {
+    match anti_ai_design_core::third_party::ad_tech_vendor(message, source) {
         Some(vendor) => RawResult {
             severity: "advisory".to_string(),
             third_party: Some(vendor.to_string()),
             ..RawResult::new(
                 origin::SCRIPT_ERROR,
                 "script-error".to_string(),
-                anti_design_core::third_party::tag_detail(&snippet, vendor),
+                anti_ai_design_core::third_party::tag_detail(&snippet, vendor),
             )
         },
-        None if anti_design_core::script_errors::react_recoverable_hydration_error(message).is_some()
-            || anti_design_core::script_errors::media_play_interrupted(message) =>
+        None if anti_ai_design_core::script_errors::react_recoverable_hydration_error(message).is_some()
+            || anti_ai_design_core::script_errors::media_play_interrupted(message) =>
         {
             RawResult {
                 severity: "advisory".to_string(),
@@ -1612,8 +1612,8 @@ fn tag_widget_vendor(dom: &SnapshotDom, r: &mut RawResult) {
     }
     let Some(selector) = r.selector.as_deref() else { return };
     let Ok(Some(el)) = dom.query_one(None, selector) else { return };
-    if let Some(vendor) = anti_design_core::third_party::widget_vendor(dom, el) {
-        r.snippet = anti_design_core::third_party::tag_detail(&r.snippet, vendor);
+    if let Some(vendor) = anti_ai_design_core::third_party::widget_vendor(dom, el) {
+        r.snippet = anti_ai_design_core::third_party::tag_detail(&r.snippet, vendor);
         r.third_party = Some(vendor.to_string());
     }
 }
@@ -2125,7 +2125,7 @@ impl CandidateKey {
     }
 }
 
-/// The match [`anti_design_core::browser::visual`] records for a candidate on
+/// The match [`anti_ai_design_core::browser::visual`] records for a candidate on
 /// `el` (`[n, count]` among the capture's matches of `selector`), for a
 /// selector anchored on an id that names several elements; `None` otherwise.
 fn repeated_match(dom: &dyn Dom, selector: &str, el: ElId) -> Option<Value> {
@@ -2274,7 +2274,7 @@ fn run_visual_contrast_fallback(
         // An attached app's page gets back the videos this paused, and only
         // those ([`attach::RESTORE_JS`]).
         let _ = page.evaluate(if page.is_attached() {
-            "(() => { const paused = globalThis.__antiDesignPausedMedia || (globalThis.__antiDesignPausedMedia = []); document.querySelectorAll('video').forEach(v => { try { if (!v.paused) { v.pause(); paused.push(v); } } catch (e) {} }); })()"
+            "(() => { const paused = globalThis.__antiAiDesignPausedMedia || (globalThis.__antiAiDesignPausedMedia = []); document.querySelectorAll('video').forEach(v => { try { if (!v.paused) { v.pause(); paused.push(v); } } catch (e) {} }); })()"
         } else {
             "document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} })"
         });
@@ -2675,7 +2675,7 @@ mod tests {
     #[test]
     fn a_declared_purple_drops_the_purple_forms() {
         let fm: Map<String, Value> = serde_json::from_value(json!({ "colors": { "primary": "#6d28d9" } })).unwrap();
-        let ds = anti_design_detect::design_system::normalize_design_system(Some(&fm), None, None, None, false);
+        let ds = anti_ai_design_detect::design_system::normalize_design_system(Some(&fm), None, None, None, false);
         let results = vec![
             RawResult::new(origin::SCAN, "ai-color-palette".into(), "Purple/violet gradient background".into()),
             RawResult::new(origin::SCAN, "ai-color-palette".into(), "Cyan gradient background".into()),

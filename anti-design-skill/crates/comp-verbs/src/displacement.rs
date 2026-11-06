@@ -9,8 +9,8 @@
 //! and confirms the best offset with the full comp-diff score on that part. A
 //! region found nowhere in the window stays missing.
 
-use anti_design_comp::metrics as m;
-use anti_design_comp::raster::{self as r, Image};
+use anti_ai_design_comp::metrics as m;
+use anti_ai_design_comp::raster::{self as r, Image};
 
 use crate::comp_diff::{score_pair, verdict_for, Score};
 

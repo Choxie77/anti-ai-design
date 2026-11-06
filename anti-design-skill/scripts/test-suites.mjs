@@ -100,7 +100,7 @@ export const SUITES = {
   // The verbs live in the engine binary; this repo pins its behavior with the
   // oracle goldens (tests/oracle) and drives its live-mode verbs over the
   // framework fixtures. Both skip when no binary is present (bun run
-  // fetch:engine, or ANTI_DESIGN_BIN).
+  // fetch:engine, or ANTI_AI_DESIGN_BIN).
   oracle: {
     description: 'Oracle corpus replay against the engine binary; skips without a binary.',
     triggers: [
@@ -115,7 +115,7 @@ export const SUITES = {
       {
         runner: 'node',
         timeoutMs: 900000,
-        files: ['tests/oracle.test.mjs', 'tests/aad-rules.test.mjs'],
+        files: ['tests/oracle.test.mjs', 'tests/aad-rules.test.mjs', 'tests/aad-safe-fix.test.mjs'],
       },
     ],
   },
@@ -190,7 +190,7 @@ export const SUITES = {
       },
     ],
   },
-  // `anti-design install/update/check` and their remote smoke moved into the
+  // `anti-ai-design install/update/check` and their remote smoke moved into the
   // engine binary and its repo; the deterministic coverage here is the oracle
   // corpus. The lane name stays so ci.yml and package.json keep resolving.
   'cli-remote-e2e': {

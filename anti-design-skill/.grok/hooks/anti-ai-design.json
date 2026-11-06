@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \".grok/skills/anti-ai-design/scripts/anti-ai-design\" ] || \".grok/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \".grok/skills/anti-ai-design/scripts/anti-ai-design\" ] || \".grok/skills/anti-ai-design/scripts/anti-ai-design\" hook",
+            "timeout": 30,
+            "statusMessage": "Design deep pass"
+          }
+        ]
+      }
+    ]
+  }
+}

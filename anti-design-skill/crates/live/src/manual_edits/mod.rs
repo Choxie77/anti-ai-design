@@ -45,7 +45,7 @@ fn is_git_ignored(abs: &str, cwd: &str) -> bool {
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
-    anti_design_common::proc::hide_window(&mut cmd);
+    anti_ai_design_common::proc::hide_window(&mut cmd);
     let status = cmd.status();
     matches!(status, Ok(s) if s.success())
 }

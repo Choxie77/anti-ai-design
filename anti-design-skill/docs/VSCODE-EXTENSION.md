@@ -2,13 +2,13 @@
 
 The VS Code extension is a declarative delivery channel for the GitHub Copilot skill. `bun run build` stages `dist/vscode/` from the GitHub provider output; `bun run package:vscode` builds and packages a VSIX with pinned `@vscode/vsce` tooling. Nothing is published by either command.
 
-Install [Anti-Design from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=renaissance-geek.anti-design), published by Renaissance Geek, or run `code --install-extension renaissance-geek.anti-design`. Requires VS Code 1.109.3+, Copilot Chat access, and a trusted local workspace. Use Chat in Agent mode, for example `/anti-design polish`. Avoid duplicate Anti-Design skill installations in the same workspace/profile.
+Install [Anti-AI Design from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=renaissance-geek.anti-ai-design), published by Renaissance Geek, or run `code --install-extension renaissance-geek.anti-ai-design`. Requires VS Code 1.109.3+, Copilot Chat access, and a trusted local workspace. Use Chat in Agent mode, for example `/anti-ai-design polish`. Avoid duplicate Anti-AI Design skill installations in the same workspace/profile.
 
 The package version follows `.claude-plugin/plugin.json`. Do not independently bump it for feature work. Publication and updates are separate maintainer steps; building or packaging does not publish.
 
 ## Scope
 
-- Register `skills/anti-design/SKILL.md` through `contributes.chatSkills`.
+- Register `skills/anti-ai-design/SKILL.md` through `contributes.chatSkills`.
 - Include its references, inline role fallbacks, launchers, and pinned engine version. Do not bundle engine binaries.
 - Resolve launcher paths from the loaded skill, not `.github/skills` in the workspace. Preserve the project's working directory.
 - No extension entrypoint, activation events, automatic hooks, custom-agent registrations, settings mutations, or workspace copying.
@@ -27,15 +27,15 @@ Before publishing, install the VSIX into a separate VS Code profile and extensio
 ```sh
 code --user-data-dir /absolute/path/to/test-profile \
   --extensions-dir /absolute/path/to/test-extensions \
-  --install-extension dist/vscode/anti-design-<version>.vsix
+  --install-extension dist/vscode/anti-ai-design-<version>.vsix
 code --user-data-dir /absolute/path/to/test-profile \
   --extensions-dir /absolute/path/to/test-extensions \
   /absolute/path/to/synthetic-project
 ```
 
-Use an otherwise skill-free fixture with PRODUCT.md, DESIGN.md, and a small HTML file. Disable discovery of user-level Anti-Design copies in that test profile to avoid testing the wrong installation. Sign into Copilot without enabling Settings Sync.
+Use an otherwise skill-free fixture with PRODUCT.md, DESIGN.md, and a small HTML file. Disable discovery of user-level Anti-AI Design copies in that test profile to avoid testing the wrong installation. Sign into Copilot without enabling Settings Sync.
 
-Check that `/anti-design` is discoverable, the loaded SKILL.md is inside the installed extension, a command-specific reference resolves there, and the launcher runs with cwd at the fixture. Record any requested command approvals. Also check that installation itself created no `.github/` directory or instructions file in the fixture. A launcher subprocess test alone is not a Copilot behavior test.
+Check that `/anti-ai-design` is discoverable, the loaded SKILL.md is inside the installed extension, a command-specific reference resolves there, and the launcher runs with cwd at the fixture. Record any requested command approvals. Also check that installation itself created no `.github/` directory or instructions file in the fixture. A launcher subprocess test alone is not a Copilot behavior test.
 
 Test the oldest supported editor as well as current stable before publication. Windows and remote workspaces need separate smoke checks; do not infer them from a macOS local run. Plain browser-only VS Code cannot run the native launcher.
 
@@ -43,15 +43,15 @@ Initial macOS packaging checks: the VSIX installs in VS Code 1.109.3 (which reso
 
 ### Recorded Copilot smoke (September 7, 2026)
 
-VS Code 1.136.1, Copilot Chat 0.64.1, Auto routed to GPT-5.6 Luna. A single read-only `/anti-design polish index.html` compatibility request passed:
+VS Code 1.136.1, Copilot Chat 0.64.1, Auto routed to GPT-5.6 Luna. A single read-only `/anti-ai-design polish index.html` compatibility request passed:
 
-- `/anti-design` appeared in the slash picker after reloading the window following initial folder trust. Before that reload, the extension was installed but absent from the skill list.
-- Copilot invoked the quoted absolute `skills/anti-design/scripts/anti-design` path inside the installed extension, with `context --target index.html`. One command approval was granted; default permission settings remained unchanged.
+- `/anti-ai-design` appeared in the slash picker after reloading the window following initial folder trust. Before that reload, the extension was installed but absent from the skill list.
+- Copilot invoked the quoted absolute `skills/anti-ai-design/scripts/anti-ai-design` path inside the installed extension, with `context --target index.html`. One command approval was granted; default permission settings remained unchanged.
 - The loader resolved the synthetic project root and its PRODUCT.md and DESIGN.md. Copilot then read `reference/polish.md` from the same extension, followed by the three fixture files.
 - The completed report correctly described the fixture. The project still contained only its original three files, with unchanged contents. No workspace skill copy, server, or image-generation call was created.
 
-The final `renaissance-geek.anti-design` 4.2.2 VSIX also passed the same read-only smoke in VS Code 1.109.3 / Copilot Chat 0.37.9 (Auto selected GPT-5.3-Codex): slash discovery, the installed launcher, project context, and the polish reference all resolved correctly. One scoped command approval was granted, and all three fixture files remained unchanged.
+The final `renaissance-geek.anti-ai-design` 4.2.2 VSIX also passed the same read-only smoke in VS Code 1.109.3 / Copilot Chat 0.37.9 (Auto selected GPT-5.3-Codex): slash discovery, the installed launcher, project context, and the polish reference all resolved correctly. One scoped command approval was granted, and all three fixture files remained unchanged.
 
-After publication, `code --install-extension renaissance-geek.anti-design` installed 4.2.2 into fresh isolated profile/extensions directories in VS Code 1.136.1. All 55 extension payload files matched the tested VSIX (ignoring VS Code's added `package.json` installation metadata). Its installed launcher loaded the same fixture context successfully; fixture hashes and file inventory stayed unchanged. This Marketplace check verified download/install and payload identity, not an additional Copilot conversation.
+After publication, `code --install-extension renaissance-geek.anti-ai-design` installed 4.2.2 into fresh isolated profile/extensions directories in VS Code 1.136.1. All 55 extension payload files matched the tested VSIX (ignoring VS Code's added `package.json` installation metadata). Its installed launcher loaded the same fixture context successfully; fixture hashes and file inventory stayed unchanged. This Marketplace check verified download/install and payload identity, not an additional Copilot conversation.
 
 These are packaging/path-resolution smokes, not activation-reliability or design-quality evaluations. They do not establish Windows or remote-host behavior.

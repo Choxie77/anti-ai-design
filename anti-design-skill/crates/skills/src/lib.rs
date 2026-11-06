@@ -1,23 +1,23 @@
-//! anti-design-skills: `anti-design help|install|link|update|check` and the
-//! legacy `anti-design skills <verb>` namespace, ported from
-//! `cli/bin/commands/skills.mjs` (plus the slice of `cli/lib/anti-design-config.mjs`
+//! anti-ai-design-skills: `anti-ai-design help|install|link|update|check` and the
+//! legacy `anti-ai-design skills <verb>` namespace, ported from
+//! `cli/bin/commands/skills.mjs` (plus the slice of `cli/lib/anti-ai-design-config.mjs`
 //! it imports).
 //!
 //! Deliberate departures from the original JS behavior:
 //!
 //! 1. After a skill directory is written (fresh install, refresh, update), if
-//!    its `scripts/VERSION` exists and `scripts/bin/<os>-<arch>/anti-design`
+//!    its `scripts/VERSION` exists and `scripts/bin/<os>-<arch>/anti-ai-design`
 //!    does not, the matching engine binary is downloaded from this repo's
-//!    `engine-v<version>` GitHub Release (`ANTI_DESIGN_DOWNLOAD_BASE` overrides
+//!    `engine-v<version>` GitHub Release (`ANTI_AI_DESIGN_DOWNLOAD_BASE` overrides
 //!    the base URL), verified against the skill dir's own
 //!    `scripts/engine-checksums.txt`, so the installed skill is
 //!    self-contained. See `engine_binary`.
 //! 2. Hook manifests are rewritten to invoke the launcher
-//!    (`"<skill>/scripts/anti-design" hook`, `anti-design.cmd` in the Codex
+//!    (`"<skill>/scripts/anti-ai-design" hook`, `anti-ai-design.cmd` in the Codex
 //!    `commandWindows` sibling) instead of `node "<skill>/scripts/hook.mjs"`.
-//!    The command forms match what `anti-design hooks on`
-//!    (`anti_design_hook::admin`) writes, and both paths recognize a manifest
-//!    entry as ours through `anti_design_context::hook_markers`, so the two
+//!    The command forms match what `anti-ai-design hooks on`
+//!    (`anti_ai_design_hook::admin`) writes, and both paths recognize a manifest
+//!    entry as ours through `anti_ai_design_context::hook_markers`, so the two
 //!    never drift on detection. See `hook_manifest`.
 //! 3. Remote skill ZIPs require an Ed25519 signature from a compiled-in key
 //!    before extraction. Failure is fatal even when an existing install is
@@ -36,7 +36,7 @@ pub mod prompt;
 pub mod providers;
 pub mod util;
 
-use anti_design_common::Io;
+use anti_ai_design_common::Io;
 
 /// How a JS code path leaves the verb: `process.exit(code)`, a thrown
 /// `PromptAbortError` (cli.js prints `\nAborted.` and exits 130), or any

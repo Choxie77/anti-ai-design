@@ -3,7 +3,7 @@
 
 use crate::util::{excerpt, is_markup, is_style, is_unknown, line_at};
 use crate::{ROW_FOCUS, ROW_ICON_BUTTON};
-use anti_design_core::findings::{finding_for, Finding};
+use anti_ai_design_core::findings::{finding_for, Finding};
 use once_cell::sync::Lazy;
 use regex::Regex;
 

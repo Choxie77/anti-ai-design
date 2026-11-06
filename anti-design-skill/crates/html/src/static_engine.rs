@@ -1,5 +1,5 @@
-//! The `anti-design detect` adapter for the static HTML engine: implements
-//! `anti_design_detect::engines::HtmlEngine` over [`crate::engine::detect_html`],
+//! The `anti-ai-design detect` adapter for the static HTML engine: implements
+//! `anti_ai_design_detect::engines::HtmlEngine` over [`crate::engine::detect_html`],
 //! wiring the three pieces `detectHtml` borrows from other JS modules:
 //!
 //! - the design-system trio (`checkSourceDesignSystem` and
@@ -15,17 +15,17 @@
 
 use std::path::Path;
 
-use anti_design_core::findings::Finding;
-use anti_design_core::js;
-use anti_design_core::js_ext_b::slice_utf16_prefix;
-use anti_design_detect::design_system::{
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_core::js;
+use anti_ai_design_core::js_ext_b::slice_utf16_prefix;
+use anti_ai_design_detect::design_system::{
     check_source_design_system, css_color_label, extract_radius_tokens, is_allowed_color_raw,
     is_allowed_font, is_allowed_radius_raw, is_transparent_css, make_design_finding,
     merge_design_system_findings, primary_font, DesignSystem, STATIC_DESIGN_SKIP_TAGS,
 };
-use anti_design_detect::detect_text::run_text_content_analyzers;
-use anti_design_detect::engines::{EngineError, HtmlEngine, ScanOptions};
-use anti_design_detect::profiler::{DetectorProfile, ProfileEvent as DetectProfileEvent};
+use anti_ai_design_detect::detect_text::run_text_content_analyzers;
+use anti_ai_design_detect::engines::{EngineError, HtmlEngine, ScanOptions};
+use anti_ai_design_detect::profiler::{DetectorProfile, ProfileEvent as DetectProfileEvent};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -35,10 +35,10 @@ use crate::engine::{detect_html, DesignSystemHook, DetectHtmlOptions};
 use crate::profile::{ProfileEvent, ProfileSink};
 use crate::quality::pf0;
 
-/// The static HTML engine as `anti-design detect` sees it.
+/// The static HTML engine as `anti-ai-design detect` sees it.
 ///
 /// `static_rule_pack` is the rule pack's static-document hook, set by
-/// whichever binary builds `Engines`; the `anti-design` binary leaves it
+/// whichever binary builds `Engines`; the `anti-ai-design` binary leaves it
 /// `None`. The pack's engine-wide hooks travel on `ScanOptions` instead,
 /// because `detect` owns those options and cannot name this crate's trait.
 #[derive(Debug, Default, Clone, Copy)]
@@ -152,7 +152,7 @@ impl DesignSystemHook for DetectDesignSystemHook<'_> {
     }
 
     fn drop_switched_off(&self, findings: &mut Vec<Finding>) {
-        anti_design_detect::design_system::drop_declared_purple_findings(findings, Some(self.design_system));
+        anti_ai_design_detect::design_system::drop_declared_purple_findings(findings, Some(self.design_system));
     }
 }
 

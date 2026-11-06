@@ -22,10 +22,10 @@ describe('engine release signing boundary', () => {
     expect(action(workflow.jobs.build, 'actions/upload-artifact').with.name).toContain(unsignedName);
     const sign = workflow.jobs['sign-windows'];
     expect(action(sign, 'actions/download-artifact').with.name).toBe(unsignedName);
-    expect(action(sign, 'actions/upload-artifact').with.name).toBe('anti-design-windows-x64');
+    expect(action(sign, 'actions/upload-artifact').with.name).toBe('anti-ai-design-windows-x64');
     expect(workflow.jobs.publish.needs).toEqual(['build', 'sign-windows']);
-    expect(action(workflow.jobs.publish, 'actions/download-artifact').with.pattern).toBe('anti-design-*');
-    expect(unsignedName.startsWith('anti-design-')).toBe(false);
+    expect(action(workflow.jobs.publish, 'actions/download-artifact').with.pattern).toBe('anti-ai-design-*');
+    expect(unsignedName.startsWith('anti-ai-design-')).toBe(false);
     expect(workflow.jobs.publish.steps.find(step => step.name === 'Lay out release assets with checksums').run).toContain('sha256sum');
   });
 
@@ -43,9 +43,9 @@ describe('engine release signing boundary', () => {
   test('signs exactly the engine with timestamping, then verifies before upload', () => {
     const sign = workflow.jobs['sign-windows'];
     const signing = action(sign, 'azure/artifact-signing-action');
-    expect(signing.with.files).toBe('${{ github.workspace }}\\unsigned\\anti-design.exe');
-    expect(signing.with['certificate-profile-name']).toBe('anti-design-windows');
-    expect(signing.with['signing-account-name']).toBe('anti-design-signing');
+    expect(signing.with.files).toBe('${{ github.workspace }}\\unsigned\\anti-ai-design.exe');
+    expect(signing.with['certificate-profile-name']).toBe('anti-ai-design-windows');
+    expect(signing.with['signing-account-name']).toBe('anti-ai-design-signing');
     expect(signing.with['timestamp-rfc3161']).toBe('http://timestamp.acs.microsoft.com');
     expect(signing.with['file-digest']).toBe('SHA256');
     expect(signing.with['timestamp-digest']).toBe('SHA256');

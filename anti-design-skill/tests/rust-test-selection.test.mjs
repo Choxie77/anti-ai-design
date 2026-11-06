@@ -63,7 +63,7 @@ describe('rust-test-selection', () => {
       'crates/html/src/a.rs': 'include_str!("../../../scripts/bundle-signing-keys.json")',
       'crates/comp/src/b.rs': '// rebuilt by scripts/lib/build.js; reads the project\'s "package.json"',
       'crates/tool/src/c.rs': '//! fixtures live in `tests/fixtures/antipatterns/`',
-      'crates/core/src/d.rs': 'let rel = "skill/scripts/anti-design is the launcher";',
+      'crates/core/src/d.rs': 'let rel = "skill/scripts/anti-ai-design is the launcher";',
     };
     assert.deepEqual(select(['scripts/test-rust-changed.mjs', 'scripts/lib/build.js', 'package.json'], sources).names, []);
     assert.deepEqual(select(['tests/fixtures/antipatterns/x.html', 'skill/scripts/live-browser.js'], sources).names, []);
@@ -72,16 +72,16 @@ describe('rust-test-selection', () => {
 
   it('selects the known readers of paths built with chained joins', () => {
     const packages = [
-      { name: 'anti-design-core', dir: 'crates/core', deps: [] },
-      { name: 'anti-design-html', dir: 'crates/html', deps: ['anti-design-core'] },
-      { name: 'anti-design-comp', dir: 'crates/comp', deps: [] },
+      { name: 'anti-ai-design-core', dir: 'crates/core', deps: [] },
+      { name: 'anti-ai-design-html', dir: 'crates/html', deps: ['anti-ai-design-core'] },
+      { name: 'anti-ai-design-comp', dir: 'crates/comp', deps: [] },
     ];
     const { selected } = selectCrates({
       changed: ['tests/oracle/vectors/calls/engines.static-html.css-cascade/cssPropToCamel.jsonl'],
       packages,
       searchCrates: () => [],
     });
-    assert.deepEqual([...selected.keys()].sort(), ['anti-design-core', 'anti-design-html']);
+    assert.deepEqual([...selected.keys()].sort(), ['anti-ai-design-core', 'anti-ai-design-html']);
     // Every row must name a workspace crate, or a rename silently drops it.
     const real = readdirSync('crates').flatMap((dir) => {
       try {

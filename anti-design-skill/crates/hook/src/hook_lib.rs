@@ -9,19 +9,19 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use anti_design_core::findings::Finding;
-use anti_design_core::js;
-use anti_design_detect::config::{
+use anti_ai_design_core::findings::Finding;
+use anti_ai_design_core::js;
+use anti_ai_design_detect::config::{
     extract_finding_ignore_value, filter_detection_findings, matches_any_glob,
     normalize_ignore_rule, normalize_ignore_value, normalize_ignore_value_entries, DetectionConfig,
     IgnoreValueEntry,
 };
-pub use anti_design_detect::config::{
+pub use anti_ai_design_detect::config::{
     match_configured_extension, merge_extensions, normalize_extension_entries, ExtensionEntry,
 };
-use anti_design_detect::design_system::{load_design_system_for_cwd, resolve_design_md_path, DesignSystem};
-use anti_design_detect::detect_text::{detect_text, TextOptions};
-use anti_design_detect::engines::{HtmlEngine, ScanOptions};
+use anti_ai_design_detect::design_system::{load_design_system_for_cwd, resolve_design_md_path, DesignSystem};
+use anti_ai_design_detect::detect_text::{detect_text, TextOptions};
+use anti_ai_design_detect::engines::{HtmlEngine, ScanOptions};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{Map, Value};
@@ -31,7 +31,7 @@ use crate::util::{
     safe_read_json, slice_prefix, slice_utf16, str_field, truthy_value, utf16_len,
 };
 
-pub const ENVELOPE_PREFIX: &str = "[anti-design@1]";
+pub const ENVELOPE_PREFIX: &str = "[anti-ai-design@1]";
 
 pub const ALLOWED_EXTS: &[&str] = &[
     ".tsx", ".jsx", ".html", ".htm", ".vue", ".svelte", ".astro", ".css", ".scss", ".sass",
@@ -42,7 +42,7 @@ pub const ACK_EXTS: &[&str] = &[
     ".tsx", ".jsx", ".html", ".htm", ".vue", ".svelte", ".astro", ".css", ".scss", ".sass", ".less",
 ];
 
-const WS: &str = anti_design_core::js::WS;
+const WS: &str = anti_ai_design_core::js::WS;
 
 macro_rules! re {
     ($name:ident, $pat:expr) => {
@@ -105,7 +105,7 @@ pub fn depth_is_set(value: Option<&str>) -> bool {
 
 /// The immediate tier, owned by the registry so wasm consumers can read the
 /// same list without linking this native-only crate.
-pub use anti_design_core::registry::IMMEDIATE_TIER_RULES;
+pub use anti_ai_design_core::registry::IMMEDIATE_TIER_RULES;
 
 /// A legacy id fallback that keeps older detector findings recognizable when
 /// they carry neither the runtime flag nor the canonical advisory severity.
@@ -122,29 +122,29 @@ pub fn is_advisory_finding(f: &Finding) -> bool {
 }
 
 pub const HOOK_LOCAL_IGNORE_PATTERNS: &[&str] = &[
-    ".anti-design/hook.cache.json",
-    ".anti-design/hook.pending.json",
-    ".anti-design/config.local.json",
+    ".anti-ai-design/hook.cache.json",
+    ".anti-ai-design/hook.pending.json",
+    ".anti-ai-design/config.local.json",
 ];
-const HOOK_IGNORE_MARKER_OPEN: &str = "# anti-design-hook-ignore-start";
-const HOOK_IGNORE_MARKER_CLOSE: &str = "# anti-design-hook-ignore-end";
+const HOOK_IGNORE_MARKER_OPEN: &str = "# anti-ai-design-hook-ignore-start";
+const HOOK_IGNORE_MARKER_CLOSE: &str = "# anti-ai-design-hook-ignore-end";
 const CACHE_MAX_SESSIONS: usize = 8;
 pub const EDIT_COUNT_THRESHOLD: u64 = 6;
 pub const MAX_SCAN_TARGETS: usize = 6;
 pub const STOP_MAX_FILES: usize = 20;
-const STEER_LINE: &str = "That does not mean the design is good: keep following the project design system and the anti-design skill guidance.";
+const STEER_LINE: &str = "That does not mean the design is good: keep following the project design system and the anti-ai-design skill guidance.";
 
 // ── paths ─────────────────────────────────────────────────────────────────
 
 pub fn get_config_path(cwd: &str) -> String {
-    jsp::join(&[cwd, ".anti-design", "config.json"])
+    jsp::join(&[cwd, ".anti-ai-design", "config.json"])
 }
 pub fn get_local_config_path(cwd: &str) -> String {
-    jsp::join(&[cwd, ".anti-design", "config.local.json"])
+    jsp::join(&[cwd, ".anti-ai-design", "config.local.json"])
 }
 /// JS: hook-lib.mjs#hookStateDir (issue #422) — where mutable hook state
-/// (cache + pending) lives. Defaults to the project-local `.anti-design/`
-/// dir. When ANTI_DESIGN_CACHE_ROOT is set, state relocates to a per-project
+/// (cache + pending) lives. Defaults to the project-local `.anti-ai-design/`
+/// dir. When ANTI_AI_DESIGN_CACHE_ROOT is set, state relocates to a per-project
 /// subdirectory of that root instead, so project roots stay free of tool
 /// artifacts. User-authored config (config.json, config.local.json,
 /// design.json) deliberately stays project-local — only disposable state
@@ -164,8 +164,8 @@ pub fn get_local_config_path(cwd: &str) -> String {
 /// state), so the digest disambiguates while keeping the dir name
 /// human-scannable.
 fn hook_state_dir(cwd: &str) -> String {
-    let raw = std::env::var("ANTI_DESIGN_CACHE_ROOT").unwrap_or_default();
-    let mut root = anti_design_core::js::trim(&raw).to_string();
+    let raw = std::env::var("ANTI_AI_DESIGN_CACHE_ROOT").unwrap_or_default();
+    let mut root = anti_ai_design_core::js::trim(&raw).to_string();
     if root.starts_with("~/") || root.starts_with("~\\") || root == "~" {
         // JS: os.homedir() || '' — HOME on unix, USERPROFILE on Windows.
         let home = if cfg!(windows) {
@@ -197,7 +197,7 @@ fn hook_state_dir(cwd: &str) -> String {
         };
         return jsp::join(&[&jsp::resolve(&proc_cwd, &[&root]), &format!("{}-{}", slug, digest)]);
     }
-    jsp::join(&[cwd, ".anti-design"])
+    jsp::join(&[cwd, ".anti-ai-design"])
 }
 
 pub fn get_cache_path(cwd: &str) -> String {
@@ -215,8 +215,8 @@ pub fn get_pending_path(cwd: &str) -> String {
 pub struct Runtime<'a> {
     pub proc_cwd: String,
     pub env: HashMap<String, String>,
-    /// `ANTI_DESIGN_COMMAND` (`/anti-design` or `$anti-design`).
-    pub anti_design_command: String,
+    /// `ANTI_AI_DESIGN_COMMAND` (`/anti-ai-design` or `$anti-ai-design`).
+    pub anti_ai_design_command: String,
     /// The `HOOK_ADMIN_COMMAND` printed in the full footer
     /// (JS: `node '<abs>/hook-admin.mjs'`; here `'<self>' hooks`).
     pub hook_admin_command: String,
@@ -232,7 +232,7 @@ impl<'a> Runtime<'a> {
     pub fn new(
         proc_cwd: String,
         env: HashMap<String, String>,
-        anti_design_command: String,
+        anti_ai_design_command: String,
         self_cmd: &str,
         html: &'a dyn HtmlEngine,
     ) -> Self {
@@ -241,7 +241,7 @@ impl<'a> Runtime<'a> {
         Runtime {
             proc_cwd,
             env,
-            anti_design_command,
+            anti_ai_design_command,
             hook_admin_command: format!("{self_command} hooks"),
             self_command,
             html,
@@ -266,7 +266,7 @@ impl<'a> Runtime<'a> {
 
     /// `os.homedir()`.
     pub fn homedir(&self) -> String {
-        anti_design_context::util::homedir(&self.env)
+        anti_ai_design_context::util::homedir(&self.env)
     }
 
     /// JS: envProjectDir(fallback) — `$CURSOR_PROJECT_DIR` when non-empty.
@@ -301,7 +301,7 @@ pub fn resolve_project_cwd(
 
 /// JS: looksLikeProjectRoot(dir)
 fn looks_like_project_root(dir: &str) -> bool {
-    [".git", "package.json", ".anti-design"]
+    [".git", "package.json", ".anti-ai-design"]
         .iter()
         .any(|m| exists(&jsp::join(&[dir, m])))
 }
@@ -364,10 +364,10 @@ pub fn resolve_stop_cwd(rt: &Runtime, session_cwd: &str, session_id: &str) -> St
 /// resolution and skips loadContext's surface-brief and visual-implementation
 /// work.
 pub fn resolve_project_platform(rt: &Runtime, cwd: &str) -> Option<String> {
-    let options = anti_design_context::target_args::TargetOptions::default();
-    let resolved = anti_design_context::context::resolve_context(cwd, &options, &rt.env);
+    let options = anti_ai_design_context::target_args::TargetOptions::default();
+    let resolved = anti_ai_design_context::context::resolve_context(cwd, &options, &rt.env);
     let product = resolved.product_path.as_deref().and_then(safe_read);
-    anti_design_context::context::extract_platform(product.as_deref())
+    anti_ai_design_context::context::extract_platform(product.as_deref())
 }
 
 /// JS: isNativePlatform(platform)
@@ -586,7 +586,7 @@ pub fn merge_ignore_values(
 
 // ── cache ─────────────────────────────────────────────────────────────────
 
-/// The `.anti-design/hook.cache.json` document, kept as ordered JSON so
+/// The `.anti-ai-design/hook.cache.json` document, kept as ordered JSON so
 /// insertion order (and any foreign keys) round-trip like the JS object.
 pub type Cache = Map<String, Value>;
 
@@ -790,7 +790,7 @@ fn resolve_hook_git_exclude_target(rt: &Runtime, cwd: &str) -> Option<GitExclude
             let git_dir = resolve_git_dir(rt, &dot_git, &dir)?;
             let rel_prefix = jsp::to_posix(&rt.relative(&dir, &start));
             return Some(GitExcludeTarget {
-                path: anti_design_common::git::info_exclude(&git_dir),
+                path: anti_ai_design_common::git::info_exclude(&git_dir),
                 pattern_prefix: if rel_prefix.is_empty() || rel_prefix == "." {
                     String::new()
                 } else {
@@ -915,7 +915,7 @@ pub fn touch_file(cache: &mut Cache, session_id: &str, file_path: &str) {
 pub fn suppression_notice(rt: &Runtime, file_path: &str) -> String {
     format!(
         "{ENVELOPE_PREFIX} Suppressing further design hints on {file_path}. More than {EDIT_COUNT_THRESHOLD} edits in this session reached. Run {} audit to revisit.",
-        rt.anti_design_command
+        rt.anti_ai_design_command
     )
 }
 
@@ -985,7 +985,7 @@ pub fn pending_label(f: &Finding) -> String {
     if !value.is_empty() {
         return format!("{}:0:{}", f.antipattern, value);
     }
-    let (uncounted, _) = anti_design_core::checks::rules::split_more_count(&f.snippet);
+    let (uncounted, _) = anti_ai_design_core::checks::rules::split_more_count(&f.snippet);
     let snippet = slice_prefix(js::trim(&uncounted), 80);
     if snippet.is_empty() {
         format!("{}:0", f.antipattern)
@@ -1004,7 +1004,7 @@ fn finding_identity(f: &Finding) -> String {
     // A finding that counts the copies it speaks for is the same finding
     // when the count moves: one more link wearing a reported colour pair is
     // not a new finding to repeat.
-    let (uncounted, _) = anti_design_core::checks::rules::split_more_count(&f.snippet);
+    let (uncounted, _) = anti_ai_design_core::checks::rules::split_more_count(&f.snippet);
     let snippet = slice_prefix(js::trim(&uncounted), 80);
     if snippet.is_empty() {
         f.antipattern.to_string()
@@ -1093,7 +1093,7 @@ pub fn remember_findings(
 /// How printed hook commands spell the engine: the quoted self path, or
 /// `& '<path>'` when it is the Windows `.cmd` launcher (#744).
 pub fn self_command_spelling(self_cmd: &str, win32: bool) -> String {
-    anti_design_common::launcher::with_call_operator(self_cmd, quote_command_arg(self_cmd, win32))
+    anti_ai_design_common::launcher::with_call_operator(self_cmd, quote_command_arg(self_cmd, win32))
 }
 
 pub fn quote_command_arg(value: &str, win32: bool) -> String {
@@ -1188,7 +1188,7 @@ fn extract_finding_ignore_value_raw(f: &Finding, rule: &str) -> String {
             return clean_ignore_value_display(&m[1]);
         }
         if let Some(m) = GOOGLE_PARAM_RE.captures(text) {
-            return clean_ignore_value_display(&anti_design_detect::config::decode_uri_component(
+            return clean_ignore_value_display(&anti_ai_design_detect::config::decode_uri_component(
                 &m[1],
             ));
         }
@@ -1218,7 +1218,7 @@ re!(
 re!(MOTION_TOKEN_RE, "(?i:bounce|elastic|wobble|jiggle|spring)");
 re!(
     COMMA_WS_SPLIT_RE,
-    format!("[,{}]+", anti_design_core::js::WS_CHARS)
+    format!("[,{}]+", anti_ai_design_core::js::WS_CHARS)
 );
 re!(EDGE_QUOTE_RE, r#"^["']|["']$"#);
 
@@ -1305,14 +1305,14 @@ fn format_deduped_finding_line(rt: &Runtime, f: &Finding, seen_rules: &mut Vec<S
 /// JS: directiveFooter({ mode })
 pub fn directive_footer(rt: &Runtime, short: bool) -> String {
     if short {
-        return "Triage per the session policy: fix real problems; persist confident false-positive or sanctioned-exception ignores via `anti-design hooks ignore-value` and disclose them in your reply; unsure, leave it with a reason.".to_string();
+        return "Triage per the session policy: fix real problems; persist confident false-positive or sanctioned-exception ignores via `anti-ai-design hooks ignore-value` and disclose them in your reply; unsure, leave it with a reason.".to_string();
     }
     [
         "Triage each finding, then state in your reply what you fixed, what you suppressed, and what you left standing:".to_string(),
         "- Real design problem: fix it. Keep intentional design as designed.".to_string(),
         format!("- Confident false positive or sanctioned exception (an intentional demo or fixture, documentation of bad design, literal or domain-appropriate motion, a choice the user confirmed): persist the narrowest ignore yourself and disclose it. Run `{} ignore-value <rule> \"<value>\" --reason \"<who decided: evidence>\"` with the pair shown on the finding line, or value \"*\" plus `--file <path>` when the line shows none. Write \"user confirmed\" in a reason only when the user did.", rt.hook_admin_command),
         "- Unsure: leave it as is and give the reason in one line. Ask the user only when you genuinely cannot decide.".to_string(),
-        format!("Self-serve ends at ignore-value: `ignore-file` and `ignore-rule` need the user's explicit approval, and never add an ignore to push a blocked write through. Full suppression ladder: {} hooks.", rt.anti_design_command),
+        format!("Self-serve ends at ignore-value: `ignore-file` and `ignore-rule` need the user's explicit approval, and never add an ignore to push a blocked write through. Full suppression ladder: {} hooks.", rt.anti_ai_design_command),
     ]
     .join("\n")
 }
@@ -1390,7 +1390,7 @@ pub fn render_template(
     let more = if remaining > 0 {
         Some(format!(
             "... and {remaining} more (see {} audit).",
-            rt.anti_design_command
+            rt.anti_ai_design_command
         ))
     } else {
         None
@@ -1431,7 +1431,7 @@ fn clamp_to_budget(
     footer: &str,
     max_chars: f64,
 ) -> String {
-    let more_generic = format!("... and more (see {} audit).", rt.anti_design_command);
+    let more_generic = format!("... and more (see {} audit).", rt.anti_ai_design_command);
     let mut last_more: Option<String> = more.map(str::to_string);
     for footer_text in footer_fallbacks(rt, footer) {
         let mut working: Vec<String> = lines.to_vec();
@@ -1531,7 +1531,7 @@ pub fn render_grouped_template(
         if hidden > 0 {
             lines.push(format!(
                 "- ... {hidden} more in {display} (see {} audit).",
-                rt.anti_design_command
+                rt.anti_ai_design_command
             ));
         }
     }
@@ -1555,7 +1555,7 @@ fn clamp_grouped_to_budget(
     footer: &str,
     max_chars: f64,
 ) -> String {
-    let more_generic = format!("... and more (see {} audit).", rt.anti_design_command);
+    let more_generic = format!("... and more (see {} audit).", rt.anti_ai_design_command);
     let assemble = |l: &[String], omitted: bool, f: &str| -> String {
         let mut blocks: Vec<&str> = vec![header];
         blocks.extend(l.iter().map(String::as_str));
@@ -1645,7 +1645,9 @@ impl HookScanOptions {
             design_system: self.design_system.clone(),
             viewport: None,
             profile: None,
-            rule_pack: None,
+            // Modified by Anti-AI Design contributors, 2026-11-05: the hook runs the
+            // same first-party pack as `detect` (None unless the binary installed one).
+            rule_pack: anti_ai_design_core::rule_pack::default_pack(),
             keep_consent_banners: false,
             keep_overlays: false,
             unreported_rules: Vec::new(),
@@ -1682,9 +1684,9 @@ pub fn design_system_options_for_file(
     if !config.design_system_enabled {
         return HookScanOptions { ignored_linked_stylesheet, ..HookScanOptions::default() };
     }
-    let project = anti_design_context::context::resolve_project(
+    let project = anti_ai_design_context::context::resolve_project(
         project_cwd,
-        &anti_design_context::target_args::TargetOptions {
+        &anti_ai_design_context::target_args::TargetOptions {
             target_path: Some(file_path.to_string()),
         },
         &rt.env,
@@ -1699,7 +1701,7 @@ pub fn design_system_options_for_file(
     HookScanOptions { ignored_linked_stylesheet, ..design_system_options(config, root) }
 }
 
-/// The detector the hook drives: the regex engine from `anti-design-detect`
+/// The detector the hook drives: the regex engine from `anti-ai-design-detect`
 /// and the static HTML engine through the `HtmlEngine` seam.
 pub fn detector_detect_text(
     content: &str,
@@ -1710,7 +1712,8 @@ pub fn detector_detect_text(
         profile: None,
         design_system: scan.design_system.as_deref(),
         inline_ignores: true,
-        rule_pack: None,
+        // Modified by Anti-AI Design contributors, 2026-11-05: see `to_scan_options`.
+        rule_pack: anti_ai_design_core::rule_pack::default_pack(),
         tokens: None,
     };
     detect_text(content, file_path, &opts)
@@ -1729,8 +1732,8 @@ pub fn detector_detect_html(
 
 pub fn design_stale_note(rt: &Runtime) -> String {
     format!(
-        "{ENVELOPE_PREFIX} DESIGN.md is newer than .anti-design/design.json. Run {} document to refresh the design-system sidecar.",
-        rt.anti_design_command
+        "{ENVELOPE_PREFIX} DESIGN.md is newer than .anti-ai-design/design.json. Run {} document to refresh the design-system sidecar.",
+        rt.anti_ai_design_command
     )
 }
 
@@ -1913,7 +1916,7 @@ fn str_field_any<'a>(map: &'a Map<String, Value>, key: &str) -> Option<&'a str> 
 
 /// JS: resolveHarness(env, event)
 pub fn resolve_harness(rt: &Runtime, event: Option<&Map<String, Value>>) -> &'static str {
-    match rt.env("ANTI_DESIGN_HOOK_HARNESS") {
+    match rt.env("ANTI_AI_DESIGN_HOOK_HARNESS") {
         Some("cursor") => return "cursor",
         Some("github") => return "github",
         Some("grok") => return "grok",
@@ -1950,14 +1953,14 @@ pub fn resolve_harness(rt: &Runtime, event: Option<&Map<String, Value>>) -> &'st
         // Codex turn-scoped events carry `turn_id`. Claude Code does not.
         // Detecting it here means an already-installed Codex hook emits the
         // Codex Stop contract without rewriting the hook command to set
-        // ANTI_DESIGN_HOOK_HARNESS (#603).
+        // ANTI_AI_DESIGN_HOOK_HARNESS (#603).
         if str_field(ev, "turn_id").is_some() {
             return "codex";
         }
     }
     // The plugin manifest sets this in the handler's `env`, which Grok honors too,
     // so it ranks below the event shapes above.
-    if rt.env("ANTI_DESIGN_HOOK_HARNESS") == Some("vscode") {
+    if rt.env("ANTI_AI_DESIGN_HOOK_HARNESS") == Some("vscode") {
         return "vscode";
     }
     "claude"
@@ -2268,7 +2271,7 @@ re!(
     STATIC_STYLE_IMPORT_RE,
     format!(
         r#"(?i)import{WS}+(?:[A-Za-z0-9_*{{}}{},$]+{WS}+from{WS}+)?['"]([^'"]+\.(?:css|scss|sass|less))['"]"#,
-        anti_design_core::js::WS_CHARS
+        anti_ai_design_core::js::WS_CHARS
     )
 );
 
@@ -2482,7 +2485,7 @@ pub fn expand_scan_targets(rt: &Runtime, primaries: &[String], project_cwd: &str
 /// JS: writeAuditLog(env, entry, cwd)
 pub fn write_audit_log(rt: &Runtime, entry: &Map<String, Value>, cwd: &str) -> bool {
     let base_cwd = str_field(entry, "cwd").unwrap_or(cwd).to_string();
-    let target = match rt.env("ANTI_DESIGN_HOOK_LOG").filter(|v| !v.is_empty()) {
+    let target = match rt.env("ANTI_AI_DESIGN_HOOK_LOG").filter(|v| !v.is_empty()) {
         Some(t) => Some(t.to_string()),
         None => read_config(&base_cwd).audit_log,
     };
@@ -2551,5 +2554,5 @@ pub fn js_slice(s: &str, start: usize, end: usize) -> String {
 /// so every hook entry stands down on the markers; `live-complete` verifies
 /// the file once the accepted variant is permanent.
 pub fn has_live_preview_markers(content: &str) -> bool {
-    content.contains("data-anti-design-variants=") || content.contains("anti-design-carbonize-start")
+    content.contains("data-anti-ai-design-variants=") || content.contains("anti-ai-design-carbonize-start")
 }

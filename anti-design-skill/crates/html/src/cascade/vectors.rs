@@ -1,5 +1,5 @@
 //! Vector-replay dispatch for `engines.static-html.css-cascade`, mirroring
-//! `anti_design_core::vectors::call` (`tests/vectors.rs` replays the recorded
+//! `anti_ai_design_core::vectors::call` (`tests/vectors.rs` replays the recorded
 //! JS calls through it).
 
 use super::checks_shim::CustomProps;
@@ -14,9 +14,9 @@ use super::values::{
     css_prop_to_camel, extract_static_color, normalize_static_css_value, parse_static_color,
     split_css_list, split_css_tokens, static_color_to_css, StyleValues,
 };
-use anti_design_core::color::Rgba;
-use anti_design_core::js;
-use anti_design_core::vectors::{decode, encode, Js};
+use anti_ai_design_core::color::Rgba;
+use anti_ai_design_core::js;
+use anti_ai_design_core::vectors::{decode, encode, Js};
 use serde_json::Value;
 
 pub const MODULE: &str = "engines.static-html.css-cascade";

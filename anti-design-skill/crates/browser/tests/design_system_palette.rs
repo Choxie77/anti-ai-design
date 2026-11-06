@@ -1,7 +1,7 @@
 //! `ai-color-palette` against a project's own documented palette, through a
 //! real browser.
 //!
-//! The FakeDom tests in `anti-design-core` pin the rule's decision; this one
+//! The FakeDom tests in `anti-ai-design-core` pin the rule's decision; this one
 //! pins the thing only a browser can answer: that the `oklch()` a DESIGN.md
 //! declares and the `oklch()` Chrome computes for an element are the same
 //! color by the time the rule sees them. A `file://` target loads the
@@ -13,7 +13,7 @@
 //! `differential.rs` does.
 //!
 //! Env:
-//! - `ANTI_DESIGN_BIN` — the binary (default `target/debug/anti-design`).
+//! - `ANTI_AI_DESIGN_BIN` — the binary (default `target/debug/anti-ai-design`).
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -77,22 +77,22 @@ fn rules(bin: &Path, dir: &Path, file: &str) -> Vec<String> {
 #[test]
 fn ai_palette_respects_a_documented_oklch_palette() {
     let env: HashMap<String, String> = std::env::vars().collect();
-    if anti_design_browser::discovery::find_browser(&env).is_err() {
+    if anti_ai_design_browser::discovery::find_browser(&env).is_err() {
         eprintln!("skip: no installed browser found");
         return;
     }
-    let bin = std::env::var("ANTI_DESIGN_BIN")
+    let bin = std::env::var("ANTI_AI_DESIGN_BIN")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| workspace_root().join("target/debug/anti-design"));
+        .unwrap_or_else(|_| workspace_root().join("target/debug/anti-ai-design"));
     if !bin.exists() {
         eprintln!(
-            "skip: {} missing (cargo build -p anti-design, or set ANTI_DESIGN_BIN)",
+            "skip: {} missing (cargo build -p anti-ai-design, or set ANTI_AI_DESIGN_BIN)",
             bin.display()
         );
         return;
     }
 
-    let dir = std::env::temp_dir().join(format!("anti-design-ds-palette-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("anti-ai-design-ds-palette-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("temp dir");
     // A project marker, so the DESIGN.md walk-up stops here rather than
     // climbing out of the temp directory.

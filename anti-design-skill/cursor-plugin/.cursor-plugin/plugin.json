@@ -1,12 +1,12 @@
 {
-  "name": "anti-design",
+  "name": "anti-ai-design",
   "version": "4.8.0",
-  "description": "Design and refine interfaces with Anti-Design skills, specialist agents, and design checks.",
+  "description": "Design and refine interfaces with Anti-AI Design skills, specialist agents, and design checks.",
   "author": {
     "name": "Renaissance Geek, Inc."
   },
-  "homepage": "https://anti-design.example",
-  "repository": "https://github.com/OWNER/anti-design",
+  "homepage": "https://github.com/Choxie77/anti-ai-design",
+  "repository": "https://github.com/Choxie77/anti-ai-design",
   "license": "Apache-2.0",
   "keywords": [
     "design",

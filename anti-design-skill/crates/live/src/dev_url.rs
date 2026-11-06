@@ -11,7 +11,7 @@ use std::time::Duration;
 /// SvelteKit, Nuxt, CRA, Angular, and the usual static servers.
 const DEFAULT_PORTS: &[u16] = &[5173, 3000, 4321, 8080, 4173, 3001, 5174, 8000, 4200, 5000, 1234];
 
-/// Candidate origins, in probe order. `ANTI_DESIGN_DEV_URL_CANDIDATES`
+/// Candidate origins, in probe order. `ANTI_AI_DESIGN_DEV_URL_CANDIDATES`
 /// (comma-separated) replaces the default list, for tests and unusual hosts.
 pub fn candidates(env_override: Option<&str>) -> Vec<String> {
     if let Some(list) = env_override {
@@ -159,7 +159,7 @@ mod tests {
         );
         assert!(!answers(&format!("ftp://127.0.0.1:{}/", port)));
         drop(listener);
-        // Modified by Anti-Design contributors, 2026-11-05: a freshly freed ephemeral port
+        // Modified by Anti-AI Design contributors, 2026-11-05: a freshly freed ephemeral port
         // can be re-bound by a parallel test (or another process) before this check runs,
         // which made the assertion flaky under load. Retry on new ports; a closed port must
         // be reported as not answering at least once, and any answer must be a re-bound port.

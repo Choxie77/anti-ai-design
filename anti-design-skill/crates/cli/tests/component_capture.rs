@@ -22,8 +22,8 @@ impl Fixture {
         let project = root.join("project");
         let store = root.join("store");
         fs::create_dir_all(&project).unwrap();
-        let png = anti_design_comp::png_io::encode_png(
-            &anti_design_comp::raster::create_image(100, 100, [25, 90, 65, 180]),
+        let png = anti_ai_design_comp::png_io::encode_png(
+            &anti_ai_design_comp::raster::create_image(100, 100, [25, 90, 65, 180]),
             &[],
         )
         .unwrap();
@@ -50,7 +50,7 @@ impl Fixture {
             serde_json::to_vec(input).unwrap(),
         )
         .unwrap();
-        Command::new(env!("CARGO_BIN_EXE_anti-design"))
+        Command::new(env!("CARGO_BIN_EXE_anti-ai-design"))
             .current_dir(&self.project)
             .args([
                 "component-review",

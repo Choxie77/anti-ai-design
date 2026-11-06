@@ -1,6 +1,6 @@
 //! How printed commands spell the Windows `.cmd` launcher (issue #744).
 //!
-//! `ANTI_DESIGN_SELF` is the launcher path the binary names in the commands it
+//! `ANTI_AI_DESIGN_SELF` is the launcher path the binary names in the commands it
 //! prints. When that path is the `.cmd` launcher and the printed spelling has
 //! to be quoted, PowerShell parses `"<path>" <verb>` as a string expression
 //! and fails with `Unexpected token '<verb>'`. The call operator runs it. The
@@ -9,9 +9,9 @@
 //! named `$work` would be rewritten before the launcher is found. Inside the
 //! literal only a single quote is special, and doubling it escapes it.
 //!
-//! The rule keys on the `.cmd` suffix, not on the OS: only `anti-design.cmd`
+//! The rule keys on the `.cmd` suffix, not on the OS: only `anti-ai-design.cmd`
 //! exports a `.cmd` self path, and it only runs on a Windows shell without
-//! sh. The sh launcher, the npm shim's `npx anti-design`, and unquoted paths
+//! sh. The sh launcher, the npm shim's `npx anti-ai-design`, and unquoted paths
 //! keep their spelling.
 
 /// True when `value` names the Windows `.cmd` launcher. Compares bytes, so a
@@ -65,10 +65,10 @@ mod tests {
 
     #[test]
     fn recognises_only_the_cmd_launcher() {
-        assert!(is_cmd_launcher(r"C:\Users\A B\skill\scripts\anti-design.cmd"));
-        assert!(is_cmd_launcher("C:/skill/scripts/ANTI_DESIGN.CMD"));
-        assert!(!is_cmd_launcher("/Users/a b/skill/scripts/anti-design"));
-        assert!(!is_cmd_launcher("npx anti-design"));
+        assert!(is_cmd_launcher(r"C:\Users\A B\skill\scripts\anti-ai-design.cmd"));
+        assert!(is_cmd_launcher("C:/skill/scripts/ANTI_AI_DESIGN.CMD"));
+        assert!(!is_cmd_launcher("/Users/a b/skill/scripts/anti-ai-design"));
+        assert!(!is_cmd_launcher("npx anti-ai-design"));
         assert!(!is_cmd_launcher(".cmd"));
     }
 
@@ -79,39 +79,39 @@ mod tests {
             assert!(!is_cmd_launcher(value), "{value}");
             assert_eq!(spell_self(value), value);
         }
-        assert!(is_cmd_launcher(r"C:\Users\工具\anti-design.cmd"));
-        assert_eq!(spell_self(r"C:\Users\工具 箱\anti-design.cmd"), r"& 'C:\Users\工具 箱\anti-design.cmd'");
+        assert!(is_cmd_launcher(r"C:\Users\工具\anti-ai-design.cmd"));
+        assert_eq!(spell_self(r"C:\Users\工具 箱\anti-ai-design.cmd"), r"& 'C:\Users\工具 箱\anti-ai-design.cmd'");
     }
 
     #[test]
     fn quoted_cmd_becomes_a_powershell_literal_call() {
-        let raw = r"C:\Users\A B\anti-design.cmd";
+        let raw = r"C:\Users\A B\anti-ai-design.cmd";
         assert_eq!(with_call_operator(raw, format!("\"{raw}\"")), format!("& '{raw}'"));
         // The caller's own escaping (doubled backslashes) is not carried over.
-        assert_eq!(with_call_operator(raw, r#""C:\\Users\\A B\\anti-design.cmd""#.into()), format!("& '{raw}'"));
+        assert_eq!(with_call_operator(raw, r#""C:\\Users\\A B\\anti-ai-design.cmd""#.into()), format!("& '{raw}'"));
         // Unquoted, or the sh launcher quoted for sh: unchanged.
-        assert_eq!(with_call_operator(r"C:\x\anti-design.cmd", r"C:\x\anti-design.cmd".into()), r"C:\x\anti-design.cmd");
-        assert_eq!(with_call_operator("/a b/anti-design", "'/a b/anti-design'".into()), "'/a b/anti-design'");
-        assert_eq!(with_call_operator("/a b/anti-design", "\"/a b/anti-design\"".into()), "\"/a b/anti-design\"");
+        assert_eq!(with_call_operator(r"C:\x\anti-ai-design.cmd", r"C:\x\anti-ai-design.cmd".into()), r"C:\x\anti-ai-design.cmd");
+        assert_eq!(with_call_operator("/a b/anti-ai-design", "'/a b/anti-ai-design'".into()), "'/a b/anti-ai-design'");
+        assert_eq!(with_call_operator("/a b/anti-ai-design", "\"/a b/anti-ai-design\"".into()), "\"/a b/anti-ai-design\"");
     }
 
     #[test]
     fn powershell_metacharacters_stay_literal() {
         // `$` and backticks are inert in a single-quoted literal; quotes double.
-        assert_eq!(powershell_call(r"C:\Users\A B\$work\anti-design.cmd"), r"& 'C:\Users\A B\$work\anti-design.cmd'");
-        assert_eq!(powershell_call(r"C:\a `b\anti-design.cmd"), r"& 'C:\a `b\anti-design.cmd'");
-        assert_eq!(powershell_call(r"C:\Users\O'Brien X\anti-design.cmd"), r"& 'C:\Users\O''Brien X\anti-design.cmd'");
-        assert_eq!(powershell_call("C:\\a \u{2019}b\\anti-design.cmd"), "& 'C:\\a \u{2019}\u{2019}b\\anti-design.cmd'");
+        assert_eq!(powershell_call(r"C:\Users\A B\$work\anti-ai-design.cmd"), r"& 'C:\Users\A B\$work\anti-ai-design.cmd'");
+        assert_eq!(powershell_call(r"C:\a `b\anti-ai-design.cmd"), r"& 'C:\a `b\anti-ai-design.cmd'");
+        assert_eq!(powershell_call(r"C:\Users\O'Brien X\anti-ai-design.cmd"), r"& 'C:\Users\O''Brien X\anti-ai-design.cmd'");
+        assert_eq!(powershell_call("C:\\a \u{2019}b\\anti-ai-design.cmd"), "& 'C:\\a \u{2019}\u{2019}b\\anti-ai-design.cmd'");
     }
 
     #[test]
     fn raw_spelling_quotes_only_a_spaced_cmd_path() {
-        assert_eq!(spell_self(r"C:\Users\A B\anti-design.cmd"), r"& 'C:\Users\A B\anti-design.cmd'");
-        assert_eq!(spell_self(r"C:\skill\anti-design.cmd"), r"C:\skill\anti-design.cmd");
-        assert_eq!(spell_self("/Users/a b/skill/scripts/anti-design"), "/Users/a b/skill/scripts/anti-design");
-        assert_eq!(spell_self("npx anti-design"), "npx anti-design");
+        assert_eq!(spell_self(r"C:\Users\A B\anti-ai-design.cmd"), r"& 'C:\Users\A B\anti-ai-design.cmd'");
+        assert_eq!(spell_self(r"C:\skill\anti-ai-design.cmd"), r"C:\skill\anti-ai-design.cmd");
+        assert_eq!(spell_self("/Users/a b/skill/scripts/anti-ai-design"), "/Users/a b/skill/scripts/anti-ai-design");
+        assert_eq!(spell_self("npx anti-ai-design"), "npx anti-ai-design");
         // Already spelled: never double-wrapped.
-        let spelled = spell_self(r"C:\A B\anti-design.cmd");
+        let spelled = spell_self(r"C:\A B\anti-ai-design.cmd");
         assert_eq!(spell_self(&spelled), spelled);
     }
 }

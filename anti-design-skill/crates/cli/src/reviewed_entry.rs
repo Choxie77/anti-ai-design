@@ -4,8 +4,8 @@
 //! for the first viewport's scores, never a
 //! replacement for native integrity, missing-region, or overall fidelity gates.
 use crate::entry_capture::{CaptureClock, CdpEntryRenderer};
-use anti_design_comp_verbs::asset_capture::capture_sha256;
-use anti_design_comp_verbs::entry_capture::{
+use anti_ai_design_comp_verbs::asset_capture::capture_sha256;
+use anti_ai_design_comp_verbs::entry_capture::{
     ApprovedReference, CapturedEntry, EntryEvidence, EntryRenderer, EntryRequest,
 };
 use serde_json::{json, Value};
@@ -160,13 +160,13 @@ impl EntryRenderer for ReviewedEntryRenderer {
             .evidence()
             .frames
             .iter()
-            .map(|f| anti_design_comp_verbs::entry_capture::FrameEvidence {
+            .map(|f| anti_ai_design_comp_verbs::entry_capture::FrameEvidence {
                 name: f.name.clone(),
                 png: f.png.clone(),
                 regions: f
                     .regions
                     .iter()
-                    .map(|r| anti_design_comp_verbs::asset_capture::AssetCapture {
+                    .map(|r| anti_ai_design_comp_verbs::asset_capture::AssetCapture {
                         receipt: r.receipt.clone(),
                         images: vec![],
                     })
@@ -209,12 +209,12 @@ impl CapturedEntry for ReviewedEntry {
 impl ReviewedEntryRenderer {
     pub fn local(root: &Path, home: Option<&Path>) -> Self {
         let session = (|| {
-            let manifest = read(&root.join(".anti-design/review/hero.json")).ok()?;
+            let manifest = read(&root.join(".anti-ai-design/review/hero.json")).ok()?;
             let project = root.canonicalize().ok()?;
             let id = manifest["id"].as_str()?;
             // Same project/id key as the shared component-review store.
             let key = capture_sha256(format!("{}\0{}", project.display(), id).as_bytes());
-            Some(home?.join(".anti-design/component-reviews").join(key))
+            Some(home?.join(".anti-ai-design/component-reviews").join(key))
         })();
         Self { session }
     }
@@ -248,7 +248,7 @@ mod tests {
             artifact: "index.html".into(),
             spec: "spec.json".into(),
             reference: "comp.png".into(),
-            stage: anti_design_comp_verbs::entry_capture::EntryStage::Responsive,
+            stage: anti_ai_design_comp_verbs::entry_capture::EntryStage::Responsive,
         };
         assert_eq!(
             reference(&session, &request).unwrap().png,

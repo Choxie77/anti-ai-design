@@ -354,7 +354,7 @@ pub fn rebuild_snapshot_from_journal(journal_path: &str, id: &str) -> (Map<Strin
         return (snapshot, next_seq);
     };
     for (i, line) in text.split('\n').enumerate() {
-        if anti_design_context::util::js_trim(line).is_empty() {
+        if anti_ai_design_context::util::js_trim(line).is_empty() {
             continue;
         }
         match serde_json::from_str::<Value>(line) {

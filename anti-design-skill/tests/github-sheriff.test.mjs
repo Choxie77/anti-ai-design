@@ -722,7 +722,7 @@ describe('github sheriff', () => {
 
   it('parses aggressive stale windows from CLI args', () => {
     const parsed = parseArgs([
-      '--repo', 'OWNER/anti-design',
+      '--repo', 'Choxie77/anti-ai-design',
       '--apply',
       '--warning-days', '7',
       '--close-days', '14',
@@ -730,7 +730,7 @@ describe('github sheriff', () => {
     ]);
 
     assert.equal(parsed.apply, true);
-    assert.equal(parsed.repo, 'OWNER/anti-design');
+    assert.equal(parsed.repo, 'Choxie77/anti-ai-design');
     assert.equal(parsed.warningDays, 7);
     assert.equal(parsed.closeDays, 14);
     assert.deepEqual(parsed.maintainers, ['pbakaus', 'other']);
@@ -789,7 +789,7 @@ function graphqlPrNode(overrides = {}) {
   return {
     number: 123,
     title: 'Test PR',
-    url: 'https://github.com/OWNER/anti-design/pull/123',
+    url: 'https://github.com/Choxie77/anti-ai-design/pull/123',
     isDraft: false,
     createdAt: '2026-07-01T00:00:00Z',
     updatedAt: '2026-07-01T00:00:00Z',

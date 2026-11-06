@@ -5,7 +5,7 @@
  * Each fixture under tests/framework-fixtures/ is a small project tree with a
  * fixture.json that declares the inject config + expected CSP and wrap
  * outcomes. The harness copies the fixture into a tmp git repo, applies the
- * fixture's gitignore, and runs `anti-design live-inject`, `live-wrap`, and
+ * fixture's gitignore, and runs `anti-ai-design live-inject`, `live-wrap`, and
  * `detect-csp` against it. Skips when no engine binary is available (see
  * tests/lib/engine-bin.mjs).
  *
@@ -43,11 +43,11 @@ function stageFixture(name) {
   const fixture = JSON.parse(readFileSync(join(fixtureRoot, 'fixture.json'), 'utf-8'));
   const gitignore = readFileSync(join(fixtureRoot, 'gitignore.txt'), 'utf-8');
 
-  const tmp = mkdtempSync(join(tmpdir(), 'anti-design-fixture-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'anti-ai-design-fixture-'));
   cpSync(join(fixtureRoot, 'files'), tmp, { recursive: true });
   writeFileSync(join(tmp, '.gitignore'), gitignore);
-  mkdirSync(join(tmp, '.anti-design', 'live'), { recursive: true });
-  writeFileSync(join(tmp, '.anti-design', 'live', 'config.json'), JSON.stringify(fixture.config));
+  mkdirSync(join(tmp, '.anti-ai-design', 'live'), { recursive: true });
+  writeFileSync(join(tmp, '.anti-ai-design', 'live', 'config.json'), JSON.stringify(fixture.config));
 
   // The AST scaffolder resolves the app's svelte compiler from the staged
   // root; the runtime suite gets it from a real npm install, the static sweep
@@ -113,34 +113,34 @@ for (const name of listFixtures()) {
         assert.equal(result.gitIgnore?.mode, 'git-info-exclude', 'live runtime ignores are installed locally');
         const ignored = execFileSync('git', [
           'check-ignore',
-          '.anti-design/live/server.json',
-          '.anti-design/live/sessions/example.jsonl',
-          '.anti-design/live/previews/example/v1.html',
-          '.anti-design/live/artifacts/example-r1.jsx',
-          '.anti-design/live/accept-receipts/example.json',
-          '.anti-design/live/locks/example.lock',
-          '.anti-design/live/deferred-svelte-component-accepts.json',
-          'src/lib/anti-design/AntiDesignLiveRoot.svelte',
-          'src/lib/anti-design/__runtime.js',
-          'src/lib/anti-design/a4ac4e74/v3.svelte',
+          '.anti-ai-design/live/server.json',
+          '.anti-ai-design/live/sessions/example.jsonl',
+          '.anti-ai-design/live/previews/example/v1.html',
+          '.anti-ai-design/live/artifacts/example-r1.jsx',
+          '.anti-ai-design/live/accept-receipts/example.json',
+          '.anti-ai-design/live/locks/example.lock',
+          '.anti-ai-design/live/deferred-svelte-component-accepts.json',
+          'src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte',
+          'src/lib/anti-ai-design/__runtime.js',
+          'src/lib/anti-ai-design/a4ac4e74/v3.svelte',
         ], { cwd: tmp, encoding: 'utf-8' });
-        assert.match(ignored, /\.anti-design\/live\/server\.json/);
-        assert.match(ignored, /\.anti-design\/live\/sessions\/example\.jsonl/);
-        assert.match(ignored, /\.anti-design\/live\/previews\/example\/v1\.html/);
-        assert.match(ignored, /\.anti-design\/live\/artifacts\/example-r1\.jsx/);
-        assert.match(ignored, /\.anti-design\/live\/accept-receipts\/example\.json/);
-        assert.match(ignored, /\.anti-design\/live\/locks\/example\.lock/);
-        assert.match(ignored, /\.anti-design\/live\/deferred-svelte-component-accepts\.json/);
-        assert.match(ignored, /src\/lib\/anti-design\/AntiDesignLiveRoot\.svelte/);
-        assert.match(ignored, /src\/lib\/anti-design\/__runtime\.js/);
-        assert.match(ignored, /src\/lib\/anti-design\/a4ac4e74\/v3\.svelte/);
+        assert.match(ignored, /\.anti-ai-design\/live\/server\.json/);
+        assert.match(ignored, /\.anti-ai-design\/live\/sessions\/example\.jsonl/);
+        assert.match(ignored, /\.anti-ai-design\/live\/previews\/example\/v1\.html/);
+        assert.match(ignored, /\.anti-ai-design\/live\/artifacts\/example-r1\.jsx/);
+        assert.match(ignored, /\.anti-ai-design\/live\/accept-receipts\/example\.json/);
+        assert.match(ignored, /\.anti-ai-design\/live\/locks\/example\.lock/);
+        assert.match(ignored, /\.anti-ai-design\/live\/deferred-svelte-component-accepts\.json/);
+        assert.match(ignored, /src\/lib\/anti-ai-design\/AntiAiDesignLiveRoot\.svelte/);
+        assert.match(ignored, /src\/lib\/anti-ai-design\/__runtime\.js/);
+        assert.match(ignored, /src\/lib\/anti-ai-design\/a4ac4e74\/v3\.svelte/);
         if (result.adapter === 'sveltekit') {
           const layout = readFileSync(join(tmp, 'src/routes/+layout.svelte'), 'utf-8');
           const appHtml = readFileSync(join(tmp, 'src/app.html'), 'utf-8');
-          const root = readFileSync(join(tmp, 'src/lib/anti-design/AntiDesignLiveRoot.svelte'), 'utf-8');
-          assert.match(layout, /anti-design-live-svelte-start/, 'SvelteKit layout got the adapter marker');
-          assert.match(layout, /AntiDesignLiveRoot/, 'SvelteKit layout renders the adapter host');
-          assert.doesNotMatch(appHtml, /anti-design-live-start/, 'SvelteKit app.html must remain untouched');
+          const root = readFileSync(join(tmp, 'src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte'), 'utf-8');
+          assert.match(layout, /anti-ai-design-live-svelte-start/, 'SvelteKit layout got the adapter marker');
+          assert.match(layout, /AntiAiDesignLiveRoot/, 'SvelteKit layout renders the adapter host');
+          assert.doesNotMatch(appHtml, /anti-ai-design-live-start/, 'SvelteKit app.html must remain untouched');
           assert.doesNotMatch(appHtml, /localhost:9999\/live\.js/, 'SvelteKit app.html must not own live.js');
           assert.match(root, /localhost:9999\/live\.js/, 'SvelteKit root component loads live.js');
           return;
@@ -149,7 +149,7 @@ for (const name of listFixtures()) {
           const plugin = result.results[0];
           const body = readFileSync(join(tmp, plugin.file), 'utf-8');
           assert.equal(plugin.inserted, true, 'Nuxt client plugin was created');
-          assert.match(body, /anti-design-live-nuxt-plugin/);
+          assert.match(body, /anti-ai-design-live-nuxt-plugin/);
           assert.match(body, /if \(!import\.meta\.dev/);
           assert.match(body, /localhost:9999\/live\.js/);
           return;
@@ -159,9 +159,9 @@ for (const name of listFixtures()) {
           const rootDoc = readFileSync(join(tmp, adapterResult.file), 'utf-8');
           const component = readFileSync(join(tmp, adapterResult.componentFile), 'utf-8');
           assert.equal(adapterResult.inserted, true, 'TanStack Start root document was patched');
-          assert.match(rootDoc, /anti-design-live-tanstack-start/, 'root document got the adapter marker');
-          assert.match(rootDoc, /<AntiDesignLiveRoot \/>/, 'root document renders the mount component');
-          assert.doesNotMatch(rootDoc, /anti-design-live-start/, 'root document must not get the raw script block');
+          assert.match(rootDoc, /anti-ai-design-live-tanstack-start/, 'root document got the adapter marker');
+          assert.match(rootDoc, /<AntiAiDesignLiveRoot \/>/, 'root document renders the mount component');
+          assert.doesNotMatch(rootDoc, /anti-ai-design-live-start/, 'root document must not get the raw script block');
           assert.doesNotMatch(rootDoc, /localhost:9999\/live\.js/, 'root document must not own live.js directly');
           assert.match(component, /localhost:9999\/live\.js/, 'mount component loads live.js');
           assert.match(component, /useEffect/, 'mount component appends the script on mount');
@@ -170,7 +170,7 @@ for (const name of listFixtures()) {
         for (const r of result.results) {
           assert.ok(r.inserted, `${r.file} got the tag (result: ${JSON.stringify(r)})`);
           const body = readFileSync(join(tmp, r.file), 'utf-8');
-          assert.match(body, /anti-design-live-start/);
+          assert.match(body, /anti-ai-design-live-start/);
           assert.match(body, /localhost:9999\/live\.js/);
         }
       } finally {
@@ -188,10 +188,10 @@ for (const name of listFixtures()) {
         if (result.adapter === 'sveltekit') {
           const layout = readFileSync(join(tmp, 'src/routes/+layout.svelte'), 'utf-8');
           const appHtml = readFileSync(join(tmp, 'src/app.html'), 'utf-8');
-          assert.doesNotMatch(layout, /AntiDesignLiveRoot/);
-          assert.doesNotMatch(layout, /anti-design-live-svelte-start/);
-          assert.doesNotMatch(appHtml, /anti-design-live-start/);
-          assert.equal(existsSync(join(tmp, 'src/lib/anti-design/AntiDesignLiveRoot.svelte')), false);
+          assert.doesNotMatch(layout, /AntiAiDesignLiveRoot/);
+          assert.doesNotMatch(layout, /anti-ai-design-live-svelte-start/);
+          assert.doesNotMatch(appHtml, /anti-ai-design-live-start/);
+          assert.equal(existsSync(join(tmp, 'src/lib/anti-ai-design/AntiAiDesignLiveRoot.svelte')), false);
           return;
         }
         if (result.adapter === 'nuxt') {
@@ -202,14 +202,14 @@ for (const name of listFixtures()) {
         if (result.adapter === 'tanstack-start') {
           const adapterResult = result.results[0];
           const rootDoc = readFileSync(join(tmp, adapterResult.file), 'utf-8');
-          assert.doesNotMatch(rootDoc, /AntiDesignLiveRoot/);
-          assert.doesNotMatch(rootDoc, /anti-design-live-tanstack-start/);
+          assert.doesNotMatch(rootDoc, /AntiAiDesignLiveRoot/);
+          assert.doesNotMatch(rootDoc, /anti-ai-design-live-tanstack-start/);
           assert.equal(existsSync(join(tmp, adapterResult.componentFile)), false, 'TanStack mount component was removed');
           return;
         }
         for (const r of result.results) {
           const body = readFileSync(join(tmp, r.file), 'utf-8');
-          assert.doesNotMatch(body, /anti-design-live-start/);
+          assert.doesNotMatch(body, /anti-ai-design-live-start/);
           assert.doesNotMatch(body, /live\.js/);
         }
       } finally {
@@ -281,7 +281,7 @@ describe('detect-csp — Next.js proxy placement', { skip: ENGINE_BIN ? false : 
       ['lib/network/proxy.ts', null],
       ['apps/web/lib/proxy.ts', null, ['apps/web/app']],
     ]) {
-      const tmp = mkdtempSync(join(tmpdir(), 'anti-design-proxy-placement-'));
+      const tmp = mkdtempSync(join(tmpdir(), 'anti-ai-design-proxy-placement-'));
       try {
         mkdirSync(dirname(join(tmp, relPath)), { recursive: true });
         for (const marker of markers) {

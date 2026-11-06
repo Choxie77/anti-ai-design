@@ -4,8 +4,8 @@
   "exit": 3,
   "signal": null,
   "files": {
-    ".anti-design/questions/k1.hand.json": "{\"id\":\"h1\",\"digest\":\"0000000000000000\",\"comps\":[\".anti-design/mocks/decision/a.png\"],\"pre\":{}}",
-    ".anti-design/questions/k1.render-check": "h1",
-    ".anti-design/questions/k1.state.json": "{\"pid\":<PID>,\"port\":1,\"url\":\"http://127.0.0.1:1/\",\"comps\":[\".anti-design/mocks/decision/a.png\"]}"
+    ".anti-ai-design/questions/k1.hand.json": "{\"id\":\"h1\",\"digest\":\"0000000000000000\",\"comps\":[\".anti-ai-design/mocks/decision/a.png\"],\"pre\":{}}",
+    ".anti-ai-design/questions/k1.render-check": "h1",
+    ".anti-ai-design/questions/k1.state.json": "{\"pid\":<PID>,\"port\":1,\"url\":\"http://127.0.0.1:1/\",\"comps\":[\".anti-ai-design/mocks/decision/a.png\"]}"
   }
 }

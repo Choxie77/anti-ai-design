@@ -8,13 +8,13 @@
 
 use std::path::{Path, PathBuf};
 
-use anti_design_common::Io;
-use anti_design_comp::font_fingerprint::{distance, fingerprint, FpOpts, Fingerprint};
-use anti_design_comp::font_index::{
+use anti_ai_design_common::Io;
+use anti_ai_design_comp::font_fingerprint::{distance, fingerprint, FpOpts, Fingerprint};
+use anti_ai_design_comp::font_index::{
     candidates_from_index, load_font_index, CandOpts, FontIndex, SizeKey, MIN_RANK_CAP_PX,
 };
-use anti_design_comp::png_io;
-use anti_design_comp::raster::{self as r};
+use anti_ai_design_comp::png_io;
+use anti_ai_design_comp::raster::{self as r};
 use serde_json::{json, Map, Value};
 use sha1::{Digest, Sha1};
 
@@ -226,7 +226,7 @@ fn with_weight_variants(list: &[&str]) -> Vec<String> {
 
 struct Selected {
     candidates: Vec<RankCandidate>,
-    catalog: Vec<anti_design_comp::font_index::Candidate>,
+    catalog: Vec<anti_ai_design_comp::font_index::Candidate>,
     #[allow(dead_code)]
     source: &'static str,
 }
@@ -378,20 +378,20 @@ fn resolve(io: &Io, p: &str) -> PathBuf {
 }
 
 /// Resolve the font-index catalog the way concept-seed resolves its catalog:
-/// `ANTI_DESIGN_CATALOG_DIR/font-index.json` first (the private moat mount, evals
+/// `ANTI_AI_DESIGN_CATALOG_DIR/font-index.json` first (the private moat mount, evals
 /// and tests), then the skill's shipped copy at
-/// `ANTI_DESIGN_SKILL_DIR/scripts/data/font-index.json`. None when neither
+/// `ANTI_AI_DESIGN_SKILL_DIR/scripts/data/font-index.json`. None when neither
 /// exists: the built-in per-width shortlist stands in, exactly as the JS did
 /// when `data/font-index.json` was absent. The catalog file is never committed
 /// to the engine repo.
 fn font_index_path(io: &Io) -> Option<PathBuf> {
-    if let Some(dir) = io.env.get("ANTI_DESIGN_CATALOG_DIR").filter(|v| !v.is_empty()) {
+    if let Some(dir) = io.env.get("ANTI_AI_DESIGN_CATALOG_DIR").filter(|v| !v.is_empty()) {
         let p = Path::new(dir).join("font-index.json");
         if p.exists() {
             return Some(p);
         }
     }
-    if let Some(dir) = io.env.get("ANTI_DESIGN_SKILL_DIR").filter(|v| !v.is_empty()) {
+    if let Some(dir) = io.env.get("ANTI_AI_DESIGN_SKILL_DIR").filter(|v| !v.is_empty()) {
         let p = Path::new(dir).join("scripts").join("data").join("font-index.json");
         if p.exists() {
             return Some(p);
@@ -419,7 +419,7 @@ fn write_spec(io: &Io, spec_path: &str, spec: &Value) {
 
 // ---- CLI -------------------------------------------------------------------
 
-/// `anti-design font-match --measure <id> | --rank <id> ...`
+/// `anti-ai-design font-match --measure <id> | --rank <id> ...`
 pub fn run(argv: &[String], io: &mut Io, renderer: &mut dyn FontRenderer) -> i32 {
     let spec_path = arg_or(argv, "spec", SPEC_PATH).to_string();
     let mut spec = load_spec(&resolve(io, &spec_path));
@@ -518,7 +518,7 @@ pub fn run(argv: &[String], io: &mut Io, renderer: &mut dyn FontRenderer) -> i32
     let category = arg(argv, "category");
     let sel = select_candidates(&fp, own, index.as_ref(), 25, category);
     if let Some(index) = index.as_ref() {
-        let mut top5: Vec<&anti_design_comp::font_index::Candidate> = Vec::new();
+        let mut top5: Vec<&anti_ai_design_comp::font_index::Candidate> = Vec::new();
         for h in &sel.catalog {
             if !top5.iter().any(|t| t.family == h.family) {
                 top5.push(h);
@@ -556,7 +556,7 @@ pub fn run(argv: &[String], io: &mut Io, renderer: &mut dyn FontRenderer) -> i32
         // No browser: the catalog fingerprint order is the ranking.
         if let (Some(_), Some(best)) = (index.as_ref(), sel.catalog.first()) {
             let font_size_px = round(fp.cap_height_px / 0.70) as i64;
-            io.out("RANK unavailable: no browser (playwright or puppeteer) resolvable from this project or the anti-design CLI; the CATALOG order stands as the ranking.\n");
+            io.out("RANK unavailable: no browser (playwright or puppeteer) resolvable from this project or the anti-ai-design CLI; the CATALOG order stands as the ranking.\n");
             io.out(&format!(
                 "USE font-family: '{}'; font-weight: {}; font-size: {font_size_px}px;{} NOTE font-size is estimated (cap {}px / 0.70); render one headline word at that size, compare its cap height to the comp crop, and correct the size before building on it.\n",
                 best.family,
@@ -580,7 +580,7 @@ pub fn run(argv: &[String], io: &mut Io, renderer: &mut dyn FontRenderer) -> i32
             write_spec(io, &spec_path, spec_val);
             return 0;
         }
-        io.out("RANK unavailable: no browser (playwright or puppeteer) resolvable from this project or the anti-design CLI, and no catalog index. Choose by the MEASURE line: match the width class first, then the weight class; render one headline word against the comp before building on it.\n");
+        io.out("RANK unavailable: no browser (playwright or puppeteer) resolvable from this project or the anti-ai-design CLI, and no catalog index. Choose by the MEASURE line: match the width class first, then the weight class; render one headline word against the comp before building on it.\n");
         return 0;
     };
     // Rank rendered rows.

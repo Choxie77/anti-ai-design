@@ -1,9 +1,9 @@
 /**
- * Browser-side durable session helpers for Anti-Design live mode.
+ * Browser-side durable session helpers for Anti-AI Design live mode.
  *
  * Kept separate from live-browser.js so recovery state can be tested without
  * booting the full overlay UI. Served before live-browser.js and attached to
- * window.__ANTI_DESIGN_LIVE_SESSION__.
+ * window.__ANTI_AI_DESIGN_LIVE_SESSION__.
  */
 (function (root) {
   'use strict';
@@ -179,5 +179,5 @@
     };
   }
 
-  root.__ANTI_DESIGN_LIVE_SESSION__ = { createLiveBrowserSessionState, randomUUID, randomId8 };
+  root.__ANTI_AI_DESIGN_LIVE_SESSION__ = { createLiveBrowserSessionState, randomUUID, randomId8 };
 })(typeof window !== 'undefined' ? window : globalThis);

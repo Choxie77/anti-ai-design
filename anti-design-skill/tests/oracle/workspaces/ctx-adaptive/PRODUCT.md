@@ -1,6 +1,6 @@
 # Oracle Fixture Product
 
-<!-- anti-design:product-schema 1 -->
+<!-- anti-ai-design:product-schema 1 -->
 
 ## Platform
 

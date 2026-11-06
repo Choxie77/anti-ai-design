@@ -6,14 +6,14 @@ field; paste them as they are. Keep this file in step with the manifest
 `extension/detector/antipatterns.json` after `bun run build:extension`).
 
 ## Name
-Anti-Design
+Anti-AI Design
 
 ## Short description (132 chars max)
 Detect AI slop and design anti-patterns in any web page. Open DevTools and see what needs fixing.
 
 ## Detailed description
 
-Anti-Design detects 61 common UI anti-patterns directly in your browser. Open the Anti-Design panel in DevTools on any page and overlays highlight issues, from AI-generated design tells to accessibility and quality problems.
+Anti-AI Design detects 61 common UI anti-patterns directly in your browser. Open the Anti-AI Design panel in DevTools on any page and overlays highlight issues, from AI-generated design tells to accessibility and quality problems.
 
 WHAT IT DETECTS
 
@@ -45,7 +45,7 @@ Quality issues (general design and accessibility):
 HOW IT WORKS
 
 1. Install the extension
-2. Open DevTools on any page (Cmd+Opt+I / F12) and click the "Anti-Design" panel tab
+2. Open DevTools on any page (Cmd+Opt+I / F12) and click the "Anti-AI Design" panel tab
 3. The page is scanned and overlays highlight every finding
 4. The panel lists the findings, grouped as AI tells and quality issues
 5. Click any finding to jump to the element in the Elements panel
@@ -61,13 +61,13 @@ FEATURES
 - Works on any website, including pages with a strict Content Security Policy
 - Runs 100% locally, no data sent anywhere
 
-The same 61 rules power the Anti-Design CLI and the live design mode, built from one open-source rule engine.
+The same 61 rules power the Anti-AI Design CLI and the live design mode, built from one open-source rule engine.
 
-Open source at https://github.com/OWNER/anti-design
+Open source at https://github.com/Choxie77/anti-ai-design
 
 ## What's new (version notes for 1.4.0)
 
-The detector now runs as WebAssembly in an extension offscreen document. The page is snapshotted and the rules evaluate that snapshot, so a site's Content Security Policy no longer decides whether the detector runs. Same rules as the Anti-Design CLI and live mode, built from the same source, now 61 of them. New "offscreen" permission for exactly that; nothing about what the extension can see has changed.
+The detector now runs as WebAssembly in an extension offscreen document. The page is snapshotted and the rules evaluate that snapshot, so a site's Content Security Policy no longer decides whether the detector runs. Same rules as the Anti-AI Design CLI and live mode, built from the same source, now 61 of them. New "offscreen" permission for exactly that; nothing about what the extension can see has changed.
 
 ## Category
 Developer Tools
@@ -76,7 +76,7 @@ Developer Tools
 English
 
 ## Privacy policy URL
-https://anti-design.example/privacy
+https://github.com/Choxie77/anti-ai-design/privacy
 
 ## Single purpose description
 Detects and highlights UI anti-patterns (AI-generated design tells and general quality issues) on any web page.

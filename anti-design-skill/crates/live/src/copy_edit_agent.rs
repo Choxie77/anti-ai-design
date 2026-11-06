@@ -5,7 +5,7 @@
 use crate::event_validation::truthy;
 use crate::manual_edits::evidence::{arr, ins, is_path_inside_or_equal, utf16_len, utf16_slice};
 use crate::util::{exists, json_pretty, jsp, Env};
-use anti_design_common::proc;
+use anti_ai_design_common::proc;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{json, Map, Value};
@@ -41,7 +41,7 @@ pub fn build_copy_edit_batch_prompt(batch: &Value, cwd: &str) -> String {
         None => vec![],
     };
     let mut lines: Vec<String> = vec![
-        "You are the Anti-Design staged copy-edit batch applier.".into(),
+        "You are the Anti-AI Design staged copy-edit batch applier.".into(),
         String::new(),
         "Apply the staged browser copy edits to the real source files in this repository.".into(),
         String::new(),
@@ -71,11 +71,11 @@ pub fn build_copy_edit_batch_prompt(batch: &Value, cwd: &str) -> String {
         "- When user copy contains framework-sensitive characters such as >, keep the visible text exact but encode it as valid source. In JSX/TSX text nodes, use a quoted expression like {\"alpha -> beta\"} instead of raw text that contains >.".into(),
         "- Replacement text must still be valid source syntax. If newText is display text inside JS, TS, JSX, Svelte, Astro, or data files and is not the existing typed value, quote or escape it as source text instead of pasting raw user text into code.".into(),
         "- When the user changes a visible value back to a plain number and evidence shows the source model was numeric, replace the enclosing source value so the result is numeric, not a quoted string.".into(),
-        "- Never copy browser edit-mode scaffolding into source: no contenteditable, data-anti-design-* markers, wrapper variants, generated style/script tags, or runtime-only attributes.".into(),
+        "- Never copy browser edit-mode scaffolding into source: no contenteditable, data-anti-ai-design-* markers, wrapper variants, generated style/script tags, or runtime-only attributes.".into(),
         "- Preserve unrelated site/demo edits and unrelated staged changes.".into(),
         "- After editing, check touched JS files with node --check where applicable and inspect touched Astro/HTML for obvious syntax damage.".into(),
-        "- If package.json defines scripts.anti-design:manual-edit-validate, it must pass after edits.".into(),
-        "- Check for leftover anti-design-carbonize markers or variant wrapper markers in touched files.".into(),
+        "- If package.json defines scripts.anti-ai-design:manual-edit-validate, it must pass after edits.".into(),
+        "- Check for leftover anti-ai-design-carbonize markers or variant wrapper markers in touched files.".into(),
         String::new(),
         "Final response contract:".into(),
         "Return ONLY JSON, with no markdown fence and no prose.".into(),
@@ -126,7 +126,7 @@ pub fn run_copy_edit_batch_agent(
     };
     let provider = provider.unwrap_or_default();
     if provider == "mock" {
-        let delay_ms = env_number(env, "ANTI_DESIGN_LIVE_COPY_AGENT_MOCK_DELAY_MS");
+        let delay_ms = env_number(env, "ANTI_AI_DESIGN_LIVE_COPY_AGENT_MOCK_DELAY_MS");
         if delay_ms > 0.0 {
             std::thread::sleep(std::time::Duration::from_millis(delay_ms as u64));
         }
@@ -152,7 +152,7 @@ pub fn run_copy_edit_batch_agent(
     }
 
     let prompt = build_copy_edit_batch_prompt(batch, cwd);
-    let out_dir = mkdtemp("anti-design-copy-batch-")?;
+    let out_dir = mkdtemp("anti-ai-design-copy-batch-")?;
     let _ = std::fs::create_dir_all(&out_dir);
     let result_path = jsp::join(&[&out_dir, "result.json"]);
     let log_path = jsp::join(&[&out_dir, "agent.log"]);
@@ -188,7 +188,7 @@ pub fn run_copy_edit_batch_agent(
     };
     Err(format!(
         "AI copy-edit batch did not return a valid completion payload. {}",
-        anti_design_context::util::js_trim(&tail)
+        anti_ai_design_context::util::js_trim(&tail)
     ))
 }
 
@@ -215,7 +215,7 @@ fn slice_tail(s: &str, n: usize) -> String {
 fn env_number(env: &Env, key: &str) -> f64 {
     match env.get(key) {
         Some(v) if !v.is_empty() => {
-            let n = anti_design_core::js::string_to_number(v);
+            let n = anti_ai_design_core::js::string_to_number(v);
             if n.is_nan() {
                 f64::NAN
             } else {
@@ -247,12 +247,12 @@ fn mkdtemp(prefix: &str) -> Result<String, String> {
 
 static MARKER_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
-        r"(?m)^\s*(?:<!--|\{/\*)\s*anti-design-carbonize-(?:start|end)\b|^\s*(?:<!--|\{/\*)\s*anti-design-variants-(?:start|end)\b",
+        r"(?m)^\s*(?:<!--|\{/\*)\s*anti-ai-design-carbonize-(?:start|end)\b|^\s*(?:<!--|\{/\*)\s*anti-ai-design-variants-(?:start|end)\b",
     )
     .unwrap()
 });
 static ATTR_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"\bdata-anti-design-(?:variants?|original-text|editable|text-wrap)\s*=").unwrap()
+    Regex::new(r"\bdata-anti-ai-design-(?:variants?|original-text|editable|text-wrap)\s*=").unwrap()
 });
 
 /// JS: runCopyEditPostApplyChecks({ cwd, files })
@@ -262,7 +262,7 @@ pub fn run_copy_edit_post_apply_checks(cwd: &str, files: &[String]) -> Value {
     let mut seen: HashSet<&String> = HashSet::new();
     let unique_files: Vec<&String> = files
         .iter()
-        .filter(|f| !anti_design_context::util::js_trim(f).is_empty())
+        .filter(|f| !anti_ai_design_context::util::js_trim(f).is_empty())
         .filter(|f| seen.insert(f))
         .collect();
 
@@ -279,15 +279,15 @@ pub fn run_copy_edit_post_apply_checks(cwd: &str, files: &[String]) -> Value {
                 failures.push(json!({
                     "file": relative_file,
                     "reason": "read_failed",
-                    "message": anti_design_context::util::node_read_error(&file, &e),
+                    "message": anti_ai_design_context::util::node_read_error(&file, &e),
                 }));
                 continue;
             }
         };
-        if let Some(marker) = find_leftover_anti_design_marker(&content) {
+        if let Some(marker) = find_leftover_anti_ai_design_marker(&content) {
             failures.push(json!({
                 "file": relative_file,
-                "reason": "leftover_anti_design_marker",
+                "reason": "leftover_anti_ai_design_marker",
                 "marker": marker,
             }));
         }
@@ -327,7 +327,7 @@ pub fn run_copy_edit_post_apply_checks(cwd: &str, files: &[String]) -> Value {
                     failures.push(json!({
                         "file": relative_file,
                         "reason": "invalid_js",
-                        "message": anti_design_context::util::js_trim(&message),
+                        "message": anti_ai_design_context::util::js_trim(&message),
                     }));
                 }
             }
@@ -369,12 +369,12 @@ const { createRequire } = require('node:module');
 const fs = require('node:fs');
 let parser;
 try {
-  parser = createRequire(process.env.ANTI_DESIGN_SYNTAX_CWD + '/noop.js')('@babel/parser');
+  parser = createRequire(process.env.ANTI_AI_DESIGN_SYNTAX_CWD + '/noop.js')('@babel/parser');
 } catch {
   process.exit(3);
 }
-const content = fs.readFileSync(process.env.ANTI_DESIGN_SYNTAX_FILE, 'utf-8');
-const plugins = JSON.parse(process.env.ANTI_DESIGN_SYNTAX_PLUGINS);
+const content = fs.readFileSync(process.env.ANTI_AI_DESIGN_SYNTAX_FILE, 'utf-8');
+const plugins = JSON.parse(process.env.ANTI_AI_DESIGN_SYNTAX_PLUGINS);
 try {
   parser.parse(content, { sourceType: 'module', plugins, errorRecovery: false });
   process.exit(0);
@@ -387,10 +387,10 @@ try {
         .arg("-e")
         .arg(script)
         .current_dir(cwd)
-        .env("ANTI_DESIGN_SYNTAX_CWD", cwd)
-        .env("ANTI_DESIGN_SYNTAX_FILE", absolute)
+        .env("ANTI_AI_DESIGN_SYNTAX_CWD", cwd)
+        .env("ANTI_AI_DESIGN_SYNTAX_FILE", absolute)
         .env(
-            "ANTI_DESIGN_SYNTAX_PLUGINS",
+            "ANTI_AI_DESIGN_SYNTAX_PLUGINS",
             serde_json::to_string(&plugins).unwrap_or_else(|_| "[]".into()),
         )
         .output();
@@ -417,8 +417,8 @@ try {
     }
 }
 
-/// JS: findLeftoverAntiDesignMarker(content)
-fn find_leftover_anti_design_marker(content: &str) -> Option<String> {
+/// JS: findLeftoverAntiAiDesignMarker(content)
+fn find_leftover_anti_ai_design_marker(content: &str) -> Option<String> {
     if let Some(m) = MARKER_RE.find(content) {
         return Some(m.as_str().to_string());
     }
@@ -539,7 +539,7 @@ fn run_manual_edit_validation_script(cwd: &str) -> Option<Value> {
         "failure": {
             "file": "package.json",
             "reason": "manual_edit_validation_failed",
-            "message": anti_design_context::util::js_trim(&joined.join("\n")),
+            "message": anti_ai_design_context::util::js_trim(&joined.join("\n")),
         }
     }))
 }
@@ -553,9 +553,9 @@ fn read_manual_edit_validation_script(cwd: &str) -> Option<String> {
     let pkg: Value = serde_json::from_str(&String::from_utf8_lossy(&raw)).ok()?;
     let script = pkg
         .get("scripts")
-        .and_then(|s| s.get("anti-design:manual-edit-validate"))?;
+        .and_then(|s| s.get("anti-ai-design:manual-edit-validate"))?;
     match script {
-        Value::String(s) if !anti_design_context::util::js_trim(s).is_empty() => Some(s.clone()),
+        Value::String(s) if !anti_ai_design_context::util::js_trim(s).is_empty() => Some(s.clone()),
         _ => None,
     }
 }
@@ -1002,7 +1002,7 @@ fn compact_context_for_batch(value: Option<&Value>) -> Value {
 }
 
 static STRIP_ATTR_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"\sdata-anti-design-(?:original-text|editable|text-wrap)(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?"#).unwrap()
+    Regex::new(r#"\sdata-anti-ai-design-(?:original-text|editable|text-wrap)(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?"#).unwrap()
 });
 static STRIP_CE_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r#"\scontenteditable(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?"#).unwrap());
@@ -1178,12 +1178,12 @@ fn normalize_batch_result(result: &Value) -> Value {
 /// JS: mockBatchResult(batch, env, cwd)
 fn mock_batch_result(batch: &Value, env: &Env, cwd: &str) -> Result<Value, String> {
     apply_mock_writes(env, cwd)?;
-    if let Some(raw) = env.get("ANTI_DESIGN_LIVE_COPY_AGENT_MOCK_RESULT") {
+    if let Some(raw) = env.get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_MOCK_RESULT") {
         if !raw.is_empty() {
             if let Some(parsed) = parse_copy_edit_batch_result(raw) {
                 return Ok(parsed);
             }
-            return Err("Invalid ANTI_DESIGN_LIVE_COPY_AGENT_MOCK_RESULT JSON".to_string());
+            return Err("Invalid ANTI_AI_DESIGN_LIVE_COPY_AGENT_MOCK_RESULT JSON".to_string());
         }
     }
     let applied: Vec<Value> = arr(batch.get("entries"))
@@ -1202,7 +1202,7 @@ fn mock_batch_result(batch: &Value, env: &Env, cwd: &str) -> Result<Value, Strin
 
 /// JS: applyMockWrites(env, cwd)
 fn apply_mock_writes(env: &Env, cwd: &str) -> Result<(), String> {
-    let Some(raw) = env.get("ANTI_DESIGN_LIVE_COPY_AGENT_MOCK_WRITES") else {
+    let Some(raw) = env.get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_MOCK_WRITES") else {
         return Ok(());
     };
     if raw.is_empty() {
@@ -1210,7 +1210,7 @@ fn apply_mock_writes(env: &Env, cwd: &str) -> Result<(), String> {
     }
     let writes: Option<Value> = serde_json::from_str(raw).ok();
     let Some(Value::Object(writes)) = writes else {
-        return Err("Invalid ANTI_DESIGN_LIVE_COPY_AGENT_MOCK_WRITES JSON".to_string());
+        return Err("Invalid ANTI_AI_DESIGN_LIVE_COPY_AGENT_MOCK_WRITES JSON".to_string());
     };
     for (relative_file, content) in writes {
         let Value::String(content) = content else {
@@ -1230,7 +1230,7 @@ fn apply_mock_writes(env: &Env, cwd: &str) -> Result<(), String> {
 
 /// JS: parseCopyEditAgentResult(text)
 pub fn parse_copy_edit_agent_result(text: &str) -> Option<Value> {
-    let trimmed = anti_design_context::util::js_trim(text);
+    let trimmed = anti_ai_design_context::util::js_trim(text);
     if trimmed.is_empty() {
         return None;
     }
@@ -1275,13 +1275,13 @@ pub fn choose_copy_edit_agent(
     chat_available: Option<&dyn Fn() -> bool>,
 ) -> Option<String> {
     let raw = env
-        .get("ANTI_DESIGN_LIVE_COPY_AGENT")
+        .get("ANTI_AI_DESIGN_LIVE_COPY_AGENT")
         .cloned()
         .unwrap_or_default();
     let mode = if raw.is_empty() {
         "auto".to_string()
     } else {
-        anti_design_context::util::js_trim(&raw).to_lowercase()
+        anti_ai_design_context::util::js_trim(&raw).to_lowercase()
     };
     let chat = || chat_available.map(|f| f()).unwrap_or(false);
     match mode.as_str() {
@@ -1388,7 +1388,7 @@ fn compute_command_authed(command: &str) -> bool {
         return false;
     };
     let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
-    let stdout = anti_design_context::util::js_trim(&stdout).to_string();
+    let stdout = anti_ai_design_context::util::js_trim(&stdout).to_string();
     if !output.status.success() {
         return false;
     }
@@ -1418,7 +1418,7 @@ pub fn describe_no_provider_error(env: &Env, chat_available: bool) -> String {
             lines.push("  • Claude CLI: installed; CLAUDE_CODE_OAUTH_TOKEN is set but the CLI still rejected it. The token may be expired or invalid.".into());
         } else {
             lines.push("  • Claude CLI: installed but not selected. If Apply still fails, the subprocess may be unable to read your `claude /login` credentials (on macOS, the Keychain can be unreachable from a no-TTY child).".into());
-            lines.push("      Headless fix: run `claude setup-token` once, then `export CLAUDE_CODE_OAUTH_TOKEN=<the printed sk-ant-oat01-… token>` before starting `anti-design live-server`.".into());
+            lines.push("      Headless fix: run `claude setup-token` once, then `export CLAUDE_CODE_OAUTH_TOKEN=<the printed sk-ant-oat01-… token>` before starting `anti-ai-design live-server`.".into());
             lines.push("      Alternative: `export ANTHROPIC_API_KEY=<key>` if you have console.anthropic.com credits.".into());
         }
     } else {
@@ -1433,17 +1433,17 @@ pub fn describe_no_provider_error(env: &Env, chat_available: bool) -> String {
         lines.push("  • Codex CLI: not installed.".into());
     }
     if chat_available {
-        lines.push("  • Chat: an Anti-Design live session is polling but selection chose another provider — unexpected; please report.".into());
+        lines.push("  • Chat: an Anti-AI Design live session is polling but selection chose another provider — unexpected; please report.".into());
     } else {
-        lines.push("  • Chat: no Anti-Design live session is currently polling on this server. Start Anti-Design live in your chat to route Apply through the chat agent.".into());
+        lines.push("  • Chat: no Anti-AI Design live session is currently polling on this server. Start Anti-AI Design live in your chat to route Apply through the chat agent.".into());
     }
-    lines.push("Fix one of the above, or set ANTI_DESIGN_LIVE_COPY_AGENT=mock for tests.".into());
+    lines.push("Fix one of the above, or set ANTI_AI_DESIGN_LIVE_COPY_AGENT=mock for tests.".into());
     lines.join("\n")
 }
 
 /// JS: extractRunnerErrorMessage(output, command)
 pub fn extract_runner_error_message(output: &str, command: &str) -> Option<String> {
-    let text = anti_design_context::util::js_trim(output);
+    let text = anti_ai_design_context::util::js_trim(output);
     if text.is_empty() {
         return None;
     }
@@ -1469,20 +1469,20 @@ pub fn extract_runner_error_message(output: &str, command: &str) -> Option<Strin
         }
         if parsed.get("is_error") == Some(&Value::Bool(true)) {
             if let Some(Value::String(result)) = parsed.get("result") {
-                let t = anti_design_context::util::js_trim(result);
+                let t = anti_ai_design_context::util::js_trim(result);
                 if !t.is_empty() {
                     return Some(format!("{} CLI: {}", command, t));
                 }
             }
         }
         if let Some(Value::String(message)) = parsed.get("message") {
-            let t = anti_design_context::util::js_trim(message);
+            let t = anti_ai_design_context::util::js_trim(message);
             if !t.is_empty() {
                 return Some(format!("{} CLI: {}", command, t));
             }
         }
         if let Some(Value::String(error)) = parsed.get("error") {
-            let t = anti_design_context::util::js_trim(error);
+            let t = anti_ai_design_context::util::js_trim(error);
             if !t.is_empty() {
                 return Some(format!("{} CLI: {}", command, t));
             }
@@ -1490,7 +1490,7 @@ pub fn extract_runner_error_message(output: &str, command: &str) -> Option<Strin
     }
     let lines: Vec<&str> = text
         .split('\n')
-        .map(|l| anti_design_context::util::js_trim(l.strip_suffix('\r').unwrap_or(l)))
+        .map(|l| anti_ai_design_context::util::js_trim(l.strip_suffix('\r').unwrap_or(l)))
         .filter(|l| !l.is_empty())
         .collect();
     if let Some(last) = lines.last() {
@@ -1513,7 +1513,7 @@ fn run_codex(
     log_path: &str,
     timeout_ms: Option<f64>,
 ) -> Result<(), String> {
-    let effort = match env.get("ANTI_DESIGN_LIVE_COPY_AGENT_EFFORT") {
+    let effort = match env.get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_EFFORT") {
         Some(v) if !v.is_empty() => v.clone(),
         _ => "low".to_string(),
     };
@@ -1528,7 +1528,7 @@ fn run_codex(
         "-c".into(),
         format!("model_reasoning_effort=\"{}\"", effort),
     ];
-    if let Some(model) = env.get("ANTI_DESIGN_LIVE_COPY_AGENT_MODEL") {
+    if let Some(model) = env.get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_MODEL") {
         if !model.is_empty() {
             args.push("--model".into());
             args.push(model.clone());
@@ -1553,7 +1553,7 @@ fn run_claude(
         "--output-format".into(),
         "json".into(),
     ];
-    if let Some(model) = env.get("ANTI_DESIGN_LIVE_COPY_AGENT_MODEL") {
+    if let Some(model) = env.get("ANTI_AI_DESIGN_LIVE_COPY_AGENT_MODEL") {
         if !model.is_empty() {
             args.push("--model".into());
             args.push(model.clone());
@@ -1665,7 +1665,7 @@ fn run_agent_process(
                     let _ = child.kill();
                     break Err(format!(
                         "AI copy-edit worker timed out after {}ms",
-                        anti_design_context::util::js_number_to_string(timeout_ms)
+                        anti_ai_design_context::util::js_number_to_string(timeout_ms)
                     ));
                 }
                 std::thread::sleep(std::time::Duration::from_millis(20));

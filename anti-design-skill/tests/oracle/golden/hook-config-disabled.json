@@ -4,6 +4,6 @@
   "exit": 0,
   "signal": null,
   "files": {
-    ".anti-design/config.json": "{\n  \"hook\": {\n    \"enabled\": false\n  }\n}\n"
+    ".anti-ai-design/config.json": "{\n  \"hook\": {\n    \"enabled\": false\n  }\n}\n"
   }
 }

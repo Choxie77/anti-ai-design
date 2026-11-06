@@ -1,17 +1,17 @@
 //! fs / os helpers with the Node semantics the JS relied on. Paths are plain
-//! strings joined with `/` (`anti_design_detect::jsp`), like the rest of the
+//! strings joined with `/` (`anti_ai_design_detect::jsp`), like the rest of the
 //! engine.
 
 use std::collections::HashMap;
 use std::path::Path;
 
-pub use anti_design_detect::jsp;
+pub use anti_ai_design_detect::jsp;
 
 pub type Env = HashMap<String, String>;
 
 /// `os.homedir()` (posix: `$HOME` first).
 pub fn homedir(env: &Env) -> String {
-    anti_design_context::util::homedir(env)
+    anti_ai_design_context::util::homedir(env)
 }
 
 /// `os.tmpdir()`: `$TMPDIR || $TMP || $TEMP || '/tmp'`, one trailing slash

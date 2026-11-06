@@ -7,19 +7,19 @@ this page is how to use what was built and where it lives.
 
 ```bash
 # Dry run (the default): prints a unified diff on stdout, a summary on stderr, changes nothing.
-anti-design detect --fix src/
+anti-ai-design detect --fix src/
 
 # Apply. --write implies --fix.
-anti-design detect --write src/
+anti-ai-design detect --write src/
 ```
 
 * Targets are files or folders. URLs, `--cdp`, `--github`, `--list-rules` and `--json`
   are refused in fix mode (they have no file to rewrite, or a different output).
-* Plain `anti-design detect ...` is unchanged byte for byte and never writes.
+* Plain `anti-ai-design detect ...` is unchanged byte for byte and never writes.
 * Exit code: `0` when the run completed (preview or write), `1` when a file could not be
   scanned, read or written or the arguments are not valid in fix mode.
-* The fixes follow findings. Fix mode runs the normal detector first, so `.anti-design`
-  config ignores, `anti-design-disable` comments and DESIGN.md decide what is eligible. A
+* The fixes follow findings. Fix mode runs the normal detector first, so `.anti-ai-design`
+  config ignores, `anti-ai-design-disable` comments and DESIGN.md decide what is eligible. A
   waived finding is never rewritten.
 
 ## What gets fixed
@@ -40,7 +40,7 @@ several `from-` classes. Commented-out code is never touched.
 
 ## Run log
 
-`--write` appends one line per applied fix to `.anti-design/changelog.md` in the folder
+`--write` appends one line per applied fix to `.anti-ai-design/changelog.md` in the folder
 you ran the command from. The file is created with a short header; after that it is
 append-only (never rewritten or trimmed).
 
@@ -61,11 +61,11 @@ never create the folder.
 | Rust tests (`cargo test --workspace safe_fix`) | `crates/aad-rules/src/safe_fix.rs` (unit), `crates/cli/tests/safe_fix.rs` (binary) |
 | Node tests | `anti-design-skill/tests/aad-safe-fix.test.mjs` |
 
-## For the rename pass
+## Names used
 
 * `anti-design-skill/crates/cli/src/safe_fix.rs`: `CONTEXT_DIR` (alias of
-  `anti_design_live::paths::ANTI_DESIGN_DIR`, currently `.anti-design`) and `CHANGELOG_FILE`.
-* The tests hard-code `.anti-design/changelog.md` in `crates/cli/tests/safe_fix.rs` and
-  `tests/aad-safe-fix.test.mjs`, plus the `anti-design-disable` waiver comment in one test.
-* The `--fix`/`--write` help text is not in `detect --help` yet (the usage text lives in
-  `crates/detect/src/cli.rs` and the oracle pins it); adding it needs a golden update.
+  `anti_ai_design_live::paths::ANTI_AI_DESIGN_DIR`, `.anti-ai-design`) and `CHANGELOG_FILE`.
+* The tests hard-code `.anti-ai-design/changelog.md` in `crates/cli/tests/safe_fix.rs` and
+  `tests/aad-safe-fix.test.mjs`, plus the `anti-ai-design-disable` waiver comment in one test.
+* `--fix` and `--write` are listed in `detect --help` (the usage text lives in
+  `crates/detect/src/cli.rs`; the oracle golden `detect-help` pins it).

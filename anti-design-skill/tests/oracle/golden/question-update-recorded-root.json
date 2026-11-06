@@ -4,6 +4,6 @@
   "exit": 0,
   "signal": null,
   "files": {
-    "proj/.anti-design/questions/k1.next.json": "{\"title\":\"Pick\",\"options\":[{\"id\":\"a\",\"label\":\"A\",\"thesis\":\"One.\"},{\"id\":\"b\",\"label\":\"B\",\"thesis\":\"Two.\"}]}"
+    "proj/.anti-ai-design/questions/k1.next.json": "{\"title\":\"Pick\",\"options\":[{\"id\":\"a\",\"label\":\"A\",\"thesis\":\"One.\"},{\"id\":\"b\",\"label\":\"B\",\"thesis\":\"Two.\"}]}"
   }
 }

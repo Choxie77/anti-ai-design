@@ -1,4 +1,4 @@
-use anti_design_browser::{cdp::Browser, discovery};
+use anti_ai_design_browser::{cdp::Browser, discovery};
 use std::time::Duration;
 
 #[test]

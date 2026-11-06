@@ -1,4 +1,4 @@
-//! `anti-design detect --fix [--write]`, the safe-fix tier, through the real binary:
+//! `anti-ai-design detect --fix [--write]`, the safe-fix tier, through the real binary:
 //! dry run prints a diff and writes nothing, `--write` applies, a second run is a no-op,
 //! and the run log gets exactly one entry per applied fix.
 
@@ -18,18 +18,18 @@ fn project(name: &str) -> PathBuf {
 }
 
 fn aad(dir: &Path, args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_anti-design"))
+    Command::new(env!("CARGO_BIN_EXE_anti-ai-design"))
         .args(args)
         .current_dir(dir)
         .env("HOME", dir)
         .env("NO_COLOR", "1")
-        .env("ANTI_DESIGN_NO_UPDATE_CHECK", "1")
+        .env("ANTI_AI_DESIGN_NO_UPDATE_CHECK", "1")
         .output()
-        .expect("run anti-design")
+        .expect("run anti-ai-design")
 }
 
 fn log_entries(dir: &Path) -> Vec<String> {
-    let p = dir.join(".anti-design").join("changelog.md");
+    let p = dir.join(".anti-ai-design").join("changelog.md");
     fs::read_to_string(p).map(|s| s.lines().filter(|l| l.starts_with("- ")).map(str::to_string).collect()).unwrap_or_default()
 }
 
@@ -45,7 +45,7 @@ fn safe_fix_dry_run_prints_a_diff_and_changes_nothing() {
     assert!(stdout.contains("+  color: #6366f1;"), "{stdout}");
     assert!(String::from_utf8_lossy(&out.stderr).contains("dry run, nothing was changed"));
     assert_eq!(fs::read_to_string(dir.join("a.css")).unwrap(), GRADIENT_CSS, "dry run must not touch the file");
-    assert!(!dir.join(".anti-design").exists(), "dry run must not create the log folder");
+    assert!(!dir.join(".anti-ai-design").exists(), "dry run must not create the log folder");
 }
 
 #[test]
@@ -69,14 +69,14 @@ fn safe_fix_second_run_is_a_no_op_and_adds_no_log_line() {
     fs::write(dir.join("a.css"), GRADIENT_CSS).unwrap();
     assert_eq!(aad(&dir, &["detect", "--fix", "--write", "a.css"]).status.code(), Some(0));
     let after_first = fs::read_to_string(dir.join("a.css")).unwrap();
-    let log_first = fs::read_to_string(dir.join(".anti-design/changelog.md")).unwrap();
+    let log_first = fs::read_to_string(dir.join(".anti-ai-design/changelog.md")).unwrap();
 
     let second = aad(&dir, &["detect", "--fix", "--write", "a.css"]);
     assert_eq!(second.status.code(), Some(0));
     assert!(second.stdout.is_empty(), "no diff on the second run: {}", String::from_utf8_lossy(&second.stdout));
     assert!(String::from_utf8_lossy(&second.stderr).contains("No safe fixes to apply"));
     assert_eq!(fs::read_to_string(dir.join("a.css")).unwrap(), after_first);
-    assert_eq!(fs::read_to_string(dir.join(".anti-design/changelog.md")).unwrap(), log_first, "the log is untouched");
+    assert_eq!(fs::read_to_string(dir.join(".anti-ai-design/changelog.md")).unwrap(), log_first, "the log is untouched");
     assert_eq!(log_entries(&dir).len(), 1);
 }
 
@@ -85,10 +85,10 @@ fn safe_fix_log_appends_across_different_files_without_rewriting() {
     let dir = project("append");
     fs::write(dir.join("a.css"), GRADIENT_CSS).unwrap();
     aad(&dir, &["detect", "--write", "a.css"]);
-    let first = fs::read_to_string(dir.join(".anti-design/changelog.md")).unwrap();
+    let first = fs::read_to_string(dir.join(".anti-ai-design/changelog.md")).unwrap();
     fs::write(dir.join("b.css"), GRADIENT_CSS).unwrap();
     aad(&dir, &["detect", "--write", "b.css"]);
-    let second = fs::read_to_string(dir.join(".anti-design/changelog.md")).unwrap();
+    let second = fs::read_to_string(dir.join(".anti-ai-design/changelog.md")).unwrap();
     assert!(second.starts_with(&first), "earlier lines must stay exactly as they were");
     assert_eq!(log_entries(&dir).len(), 2);
 }
@@ -110,13 +110,13 @@ fn safe_fix_html_file_with_style_block_and_tailwind() {
 #[test]
 fn safe_fix_waived_finding_is_left_alone() {
     let dir = project("waived");
-    let css = format!("/* anti-design-disable gradient-text -- brand mark */\n{GRADIENT_CSS}");
+    let css = format!("/* anti-ai-design-disable gradient-text -- brand mark */\n{GRADIENT_CSS}");
     fs::write(dir.join("a.css"), &css).unwrap();
     let out = aad(&dir, &["detect", "--write", "a.css"]);
     assert_eq!(out.status.code(), Some(0));
     assert!(out.stdout.is_empty());
     assert_eq!(fs::read_to_string(dir.join("a.css")).unwrap(), css);
-    assert!(!dir.join(".anti-design").exists());
+    assert!(!dir.join(".anti-ai-design").exists());
 }
 
 #[test]
@@ -147,5 +147,5 @@ fn safe_fix_plain_detect_is_unchanged_and_never_writes() {
     let out = aad(&dir, &["detect", "a.css"]);
     assert_eq!(out.status.code(), Some(2));
     assert_eq!(fs::read_to_string(dir.join("a.css")).unwrap(), GRADIENT_CSS);
-    assert!(!dir.join(".anti-design").exists());
+    assert!(!dir.join(".anti-ai-design").exists());
 }

@@ -17,7 +17,7 @@ import {
 } from '../scripts/lib/validate-plugin-versions.js';
 
 function skillMd(version) {
-  return `---\nname: anti-design\nversion: ${version}\nuser-invocable: true\n---\n\nBody.\n`;
+  return `---\nname: anti-ai-design\nversion: ${version}\nuser-invocable: true\n---\n\nBody.\n`;
 }
 
 function writeFixture(root, { plugin, marketplace, subtreePlugin, codexPlugin, skill } = {}) {
@@ -27,26 +27,26 @@ function writeFixture(root, { plugin, marketplace, subtreePlugin, codexPlugin, s
     fs.writeFileSync(abs, contents);
   };
   if (plugin !== undefined) {
-    write('.claude-plugin/plugin.json', JSON.stringify({ name: 'anti-design', version: plugin }, null, 2));
+    write('.claude-plugin/plugin.json', JSON.stringify({ name: 'anti-ai-design', version: plugin }, null, 2));
   }
   if (marketplace !== undefined) {
-    write('.claude-plugin/marketplace.json', JSON.stringify({ plugins: [{ name: 'anti-design', version: marketplace }] }, null, 2));
+    write('.claude-plugin/marketplace.json', JSON.stringify({ plugins: [{ name: 'anti-ai-design', version: marketplace }] }, null, 2));
   }
   if (subtreePlugin !== undefined) {
-    write('plugin/.claude-plugin/plugin.json', JSON.stringify({ name: 'anti-design', version: subtreePlugin, skills: './skills/' }, null, 2));
+    write('plugin/.claude-plugin/plugin.json', JSON.stringify({ name: 'anti-ai-design', version: subtreePlugin, skills: './skills/' }, null, 2));
   }
   if (codexPlugin !== undefined) {
-    write('dist/openai/anti-design/.codex-plugin/plugin.json', JSON.stringify({ name: 'anti-design', version: codexPlugin, skills: './skills/' }, null, 2));
+    write('dist/openai/anti-ai-design/.codex-plugin/plugin.json', JSON.stringify({ name: 'anti-ai-design', version: codexPlugin, skills: './skills/' }, null, 2));
   }
   if (skill !== undefined) {
-    write('plugin/skills/anti-design/SKILL.md', skillMd(skill));
+    write('plugin/skills/anti-ai-design/SKILL.md', skillMd(skill));
   }
 }
 
 describe('collectPluginVersions', () => {
   let root;
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-ver-'));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-ver-'));
   });
   afterEach(() => {
     fs.rmSync(root, { recursive: true, force: true });
@@ -61,19 +61,19 @@ describe('collectPluginVersions', () => {
 
   test('flags an npm package.json whose version drifted from the skill', () => {
     writeFixture(root, { plugin: '3.7.1', marketplace: '3.7.1' });
-    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'anti-design', version: '3.6.0', optionalDependencies: { '@anti-design/cli-darwin-arm64': '0.1.14' } }));
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'anti-ai-design', version: '3.6.0', optionalDependencies: { '@anti-ai-design/cli-darwin-arm64': '0.1.14' } }));
     const { mismatches } = collectPluginVersions(root);
     expect(mismatches).toEqual([{ relPath: 'package.json', found: '3.6.0', expected: '3.7.1' }]);
 
-    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'anti-design', version: '3.7.1', optionalDependencies: { '@anti-design/cli-darwin-arm64': '0.1.14' } }));
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'anti-ai-design', version: '3.7.1', optionalDependencies: { '@anti-ai-design/cli-darwin-arm64': '0.1.14' } }));
     expect(collectPluginVersions(root).mismatches).toEqual([]);
   });
 
-  test('leaves a package.json that is not the anti-design CLI alone', () => {
-    // anti-design-site builds the skill from a tree whose root package.json is
-    // the site's own, also named anti-design, at its own version.
+  test('leaves a package.json that is not the anti-ai-design CLI alone', () => {
+    // anti-ai-design-site builds the skill from a tree whose root package.json is
+    // the site's own, also named anti-ai-design, at its own version.
     writeFixture(root, { plugin: '3.7.1', marketplace: '3.7.1' });
-    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'anti-design', version: '3.2.1' }));
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'anti-ai-design', version: '3.2.1' }));
     const { checked, mismatches } = collectPluginVersions(root);
     expect(mismatches).toEqual([]);
     expect(checked.some((c) => c.relPath === 'package.json')).toBe(false);
@@ -99,7 +99,7 @@ describe('collectPluginVersions', () => {
     writeFixture(root, { plugin: '3.7.1', marketplace: '3.7.1', subtreePlugin: '3.7.1', codexPlugin: '3.6.0', skill: '3.7.1' });
     const { mismatches } = collectPluginVersions(root);
     expect(mismatches).toEqual([
-      { relPath: 'dist/openai/anti-design/.codex-plugin/plugin.json', found: '3.6.0', expected: '3.7.1' },
+      { relPath: 'dist/openai/anti-ai-design/.codex-plugin/plugin.json', found: '3.6.0', expected: '3.7.1' },
     ]);
   });
 
@@ -107,7 +107,7 @@ describe('collectPluginVersions', () => {
     writeFixture(root, { plugin: '3.7.1', marketplace: '3.7.1', subtreePlugin: '3.7.1', skill: '3.1.1' });
     const { mismatches } = collectPluginVersions(root);
     expect(mismatches).toEqual([
-      { relPath: 'plugin/skills/anti-design/SKILL.md', found: '3.1.1', expected: '3.7.1' },
+      { relPath: 'plugin/skills/anti-ai-design/SKILL.md', found: '3.1.1', expected: '3.7.1' },
     ]);
   });
 
@@ -117,7 +117,7 @@ describe('collectPluginVersions', () => {
     expect(mismatches.map((m) => m.relPath)).toEqual([
       '.claude-plugin/marketplace.json',
       'plugin/.claude-plugin/plugin.json',
-      'plugin/skills/anti-design/SKILL.md',
+      'plugin/skills/anti-ai-design/SKILL.md',
     ]);
   });
 
@@ -160,7 +160,7 @@ describe('collectPluginVersions', () => {
 
   test('flags a root plugin.json that exists but has no version field', () => {
     fs.mkdirSync(path.join(root, '.claude-plugin'), { recursive: true });
-    fs.writeFileSync(path.join(root, '.claude-plugin/plugin.json'), JSON.stringify({ name: 'anti-design' }));
+    fs.writeFileSync(path.join(root, '.claude-plugin/plugin.json'), JSON.stringify({ name: 'anti-ai-design' }));
     const { source, errors } = collectPluginVersions(root);
     // source stays null, but it is reported as an error rather than silently passing.
     expect(source).toBeNull();
@@ -178,12 +178,12 @@ describe('readSkillFrontmatterVersion', () => {
   });
 
   test('prefers metadata.version while accepting the legacy top-level key', () => {
-    const content = '---\nname: anti-design\nversion: 3.0.0\nmetadata:\n  version: 3.7.1\n---\n';
+    const content = '---\nname: anti-ai-design\nversion: 3.0.0\nmetadata:\n  version: 3.7.1\n---\n';
     expect(readSkillFrontmatterVersion(content)).toBe('3.7.1');
   });
 
   test('reads metadata.version after nested metadata fields', () => {
-    const content = '---\nname: anti-design\nmetadata:\n  interface:\n    display_name: Anti-Design\n  version: "3.7.1"\n---\n';
+    const content = '---\nname: anti-ai-design\nmetadata:\n  interface:\n    display_name: Anti-AI Design\n  version: "3.7.1"\n---\n';
     expect(readSkillFrontmatterVersion(content)).toBe('3.7.1');
   });
 
@@ -192,7 +192,7 @@ describe('readSkillFrontmatterVersion', () => {
   });
 
   test('reads a version from CRLF-encoded frontmatter', () => {
-    const crlf = '---\r\nname: anti-design\r\nversion: 3.7.1\r\nuser-invocable: true\r\n---\r\n\r\nBody.\r\n';
+    const crlf = '---\r\nname: anti-ai-design\r\nversion: 3.7.1\r\nuser-invocable: true\r\n---\r\n\r\nBody.\r\n';
     expect(readSkillFrontmatterVersion(crlf)).toBe('3.7.1');
   });
 });
@@ -200,7 +200,7 @@ describe('readSkillFrontmatterVersion', () => {
 describe('collectPluginVersions with CRLF line endings', () => {
   let root;
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-design-ver-crlf-'));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anti-ai-design-ver-crlf-'));
   });
   afterEach(() => {
     fs.rmSync(root, { recursive: true, force: true });
@@ -209,7 +209,7 @@ describe('collectPluginVersions with CRLF line endings', () => {
   test('a CRLF-saved SKILL.md at the right version is not a false mismatch', () => {
     writeFixture(root, { plugin: '3.7.1', marketplace: '3.7.1', subtreePlugin: '3.7.1', skill: '3.7.1' });
     // Re-save the bundled SKILL.md with CRLF line endings.
-    const skillPath = path.join(root, 'plugin/skills/anti-design/SKILL.md');
+    const skillPath = path.join(root, 'plugin/skills/anti-ai-design/SKILL.md');
     fs.writeFileSync(skillPath, fs.readFileSync(skillPath, 'utf-8').replace(/\n/g, '\r\n'));
     const { mismatches, errors } = collectPluginVersions(root);
     expect(mismatches).toEqual([]);

@@ -14,7 +14,7 @@ use regex::Regex;
 
 /// The selector lists, thresholds and text parsers these checks share are
 /// open; re-exported so `checks::text_rules` stays one path.
-pub use anti_design_foundation::rules::text::*;
+pub use anti_ai_design_foundation::rules::text::*;
 
 macro_rules! re {
     ($name:ident, $pat:expr) => {

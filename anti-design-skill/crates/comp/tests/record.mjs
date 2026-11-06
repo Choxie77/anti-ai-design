@@ -1,10 +1,10 @@
 /**
- * Differential-parity recorder for the anti-design-comp Rust port.
+ * Differential-parity recorder for the anti-ai-design-comp Rust port.
  *
  * FROZEN. The JS libs it reads (`skill/scripts/lib/*.mjs`) were removed when
  * the runtime went node-free, so this cannot run again; it is kept as the
  * record of how `tests/golden/parity.json` was produced. Point
- * ANTI_DESIGN_PUBLIC_REPO at a checkout old enough to still have them.
+ * ANTI_AI_DESIGN_PUBLIC_REPO at a checkout old enough to still have them.
  *
  * Runs the pure JS comp-fidelity libs over a set of representative inputs and
  * writes:
@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PUB =
-  process.env.ANTI_DESIGN_PUBLIC_REPO ||
+  process.env.ANTI_AI_DESIGN_PUBLIC_REPO ||
   path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const L = (p) => `${PUB}/skill/scripts/lib/${p}`;
 const png = await import(L('png.mjs'));

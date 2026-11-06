@@ -11,7 +11,7 @@ use crate::js_ext_a::JsMap;
 use serde::Serialize;
 
 /// The collect result type is shared.
-pub use anti_design_foundation::browser::CollectResult;
+pub use anti_ai_design_foundation::browser::CollectResult;
 
 /// JS: checks.mjs#scopedIgnoreActive(el, ruleId)
 pub fn scoped_ignore_active(dom: &dyn Dom, el: ElId, rule_id: &str) -> bool {
@@ -19,7 +19,7 @@ pub fn scoped_ignore_active(dom: &dyn Dom, el: ElId, rule_id: &str) -> bool {
     // Handle 0 is JS null (a missing document.body): the walk never runs.
     let mut cur = if el == 0 { None } else { Some(el) };
     while let Some(c) = cur {
-        if let Some(attr) = dom.attr(c, "data-anti-design-ignore") {
+        if let Some(attr) = dom.attr(c, "data-anti-ai-design-ignore") {
             let lowered = crate::js::to_lower_case(crate::js::trim(&attr));
             let rules: Vec<&str> = SPLIT_RE
                 .split(&lowered)
@@ -1164,7 +1164,7 @@ impl CategoryHues {
 /// The regex-on-HTML pass of collectBrowserFindings: `checkHtmlPatterns` on
 /// the live document's HTML, selector-scoped filtering against the live DOM
 /// (a selector matching nothing drops the finding; a match under a
-/// data-anti-design-ignore ancestor is waived), and the mapping with the
+/// data-anti-ai-design-ignore ancestor is waived), and the mapping with the
 /// pulsing-dot hero promotion. Returns `{ type, detail, severity? }`; the
 /// caller applies `_ruleOk`.
 pub fn scoped_html_pattern_findings(dom: &dyn Dom) -> Vec<BrowserFinding> {
@@ -2456,7 +2456,7 @@ pub fn build_selector_segment(dom: &dyn Dom, el: ElId) -> String {
     let mut sel = tag.clone();
     let classes: Vec<String> = class_list(dom, el)
         .into_iter()
-        .filter(|c| !c.starts_with("anti-design-") && !is_likely_hashed_class(c))
+        .filter(|c| !c.starts_with("anti-ai-design-") && !is_likely_hashed_class(c))
         .take(2)
         .collect();
     if !classes.is_empty() {
@@ -2860,7 +2860,7 @@ pub fn element_is_scanned(dom: &dyn Dom, el: ElId) -> bool {
     if super::dom::closest_or_none(
         dom,
         el,
-        ".anti-design-overlay, .anti-design-label, .anti-design-banner, .anti-design-tooltip",
+        ".anti-ai-design-overlay, .anti-ai-design-label, .anti-ai-design-banner, .anti-ai-design-tooltip",
     )
     .is_some()
     {
@@ -2870,7 +2870,7 @@ pub fn element_is_scanned(dom: &dyn Dom, el: ElId) -> bool {
     if el_id.starts_with("claude-") || el_id.starts_with("cic-") {
         return false;
     }
-    super::dom::closest_or_none(dom, el, "[id^=\"anti-design-live-\"]").is_none()
+    super::dom::closest_or_none(dom, el, "[id^=\"anti-ai-design-live-\"]").is_none()
 }
 
 /// Drops the [`super::hidden_mockup::DROP_RULES`] findings of an element
@@ -2909,7 +2909,7 @@ pub fn collect_browser_findings(dom: &dyn Dom, config: &BrowserConfig) -> Collec
 
     // A page matched by detector.ignoreFiles is waived wholesale: every scan
     // stage answers empty so the badge and toast read zero. Mirrors
-    // shouldIgnoreDetectionFile in cli/lib/anti-design-config.mjs; the live
+    // shouldIgnoreDetectionFile in cli/lib/anti-ai-design-config.mjs; the live
     // overlay resolves the globs per page (live-browser-ignores.js) and
     // forwards the verdict as config.skipScan. JS: index.mjs#skipScanActive().
     if config.extension_mode && config.skip_scan {
@@ -2992,7 +2992,7 @@ pub fn collect_browser_findings(dom: &dyn Dom, config: &BrowserConfig) -> Collec
         let palette_painted = (!palette.tells.is_empty() || palette.ink.is_some())
             && super::painted::unpainted_for(dom, el, super::painted::PaintGate::Box).is_none();
         // An ignored subtree gets no vote in the page-wide reading. A cyan
-        // tell inside `data-anti-design-ignore="ai-color-palette"` would
+        // tell inside `data-anti-ai-design-ignore="ai-color-palette"` would
         // otherwise open the two-hue gate and charge neon ink somewhere else
         // on the page that nobody waived: ignored content changing the
         // result for content that was not ignored.
@@ -3480,7 +3480,7 @@ mod tests {
         let badge = d.add(Some(body), "div");
         d.set_rect(badge, 0.0, 0.0, 120.0, 32.0);
         d.set_styles(badge, &[("backgroundColor", "rgb(124, 58, 237)")]);
-        d.add_selector(badge, ".anti-design-overlay");
+        d.add_selector(badge, ".anti-ai-design-overlay");
         assert!(!page_paints_stock_violet(&d), "overlay chrome");
         d.el_mut(badge).selectors.clear();
         d.set_attr(badge, "id", "claude-agent-glow");
@@ -4351,7 +4351,7 @@ mod tests {
         let main = d.add(Some(body), "main");
         d.set_attr(main, "id", "app");
         let sec = d.add(Some(main), "section");
-        d.set_attr(sec, "class", "hero css-1a2b3c anti-design-x   hero-inner");
+        d.set_attr(sec, "class", "hero css-1a2b3c anti-ai-design-x   hero-inner");
         let a = d.add(Some(sec), "p");
         let b = d.add(Some(sec), "p");
         d.set_attr(b, "class", "lead");
@@ -4740,7 +4740,7 @@ mod tests {
     #[test]
     fn disabled_values_parse_and_normalize_like_the_js() {
         // JS `.filter(e => e && typeof e === 'object' && e.rule && e.value)`:
-        // a hand-edited __ANTI_DESIGN_CONFIG__ drops bad entries, it does not
+        // a hand-edited __ANTI_AI_DESIGN_CONFIG__ drops bad entries, it does not
         // fail the whole config.
         let cfg: BrowserConfig = serde_json::from_str(
             r##"{"extensionMode":true,"disabledValues":[
@@ -4796,7 +4796,7 @@ mod tests {
     /// An ignored subtree does not get to open the page-wide palette gate.
     /// `ai-color-palette` holds neon ink until a second tell hue turns up
     /// somewhere on the page; a cyan tell inside a
-    /// `data-anti-design-ignore="ai-color-palette"` subtree used to count
+    /// `data-anti-ai-design-ignore="ai-color-palette"` subtree used to count
     /// toward that, so waiving one component charged an unrelated one.
     #[test]
     fn ignored_colors_do_not_contribute_tell_hues() {
@@ -4809,7 +4809,7 @@ mod tests {
             let demo = d.add(Some(body), "div");
             d.set_style(demo, "backgroundColor", "rgb(5, 6, 10)");
             if ignore {
-                d.set_attr(demo, "data-anti-design-ignore", "ai-color-palette");
+                d.set_attr(demo, "data-anti-ai-design-ignore", "ai-color-palette");
             }
             let cyan = d.add(Some(demo), "span");
             d.add_text(cyan, "Terminal output");
@@ -4851,7 +4851,7 @@ mod tests {
         let mut d = FakeDom::new();
         let (_h, body) = d.with_page();
         let wrap = d.add(Some(body), "div");
-        d.set_attr(wrap, "data-anti-design-ignore", "low-contrast, glow-effect");
+        d.set_attr(wrap, "data-anti-ai-design-ignore", "low-contrast, glow-effect");
         let p = d.add(Some(wrap), "p");
         d.add_selector(p, "#t");
         assert!(scoped_ignore_active(&d, p, "LOW-CONTRAST"));
@@ -4862,7 +4862,7 @@ mod tests {
         });
         assert_eq!(visual_contrast_result_el(&d, &result), Some(p));
         assert!(visual_contrast_result_finding(&d, p, &[], &result).is_none());
-        d.set_attr(wrap, "data-anti-design-ignore", "glow-effect");
+        d.set_attr(wrap, "data-anti-ai-design-ignore", "glow-effect");
         let f = visual_contrast_result_finding(&d, p, &[], &result).unwrap();
         assert_eq!((f.type_.as_str(), f.detail.as_str()), ("low-contrast", "browser contrast 2.0:1"));
         let existing = vec![BrowserFinding::new("low-contrast", "x")];

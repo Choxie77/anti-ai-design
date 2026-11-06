@@ -1,7 +1,7 @@
 //! JS: live/project-ignores.mjs — project detector waivers for the live
 //! overlay (issue #639, hardened in the PR #645 follow-up). One place
 //! decides what the /live.js prelude serializes as
-//! `window.__ANTI_DESIGN_PROJECT_IGNORES__`:
+//! `window.__ANTI_AI_DESIGN_PROJECT_IGNORES__`:
 //!
 //!   ignoreRules   detector.ignoreRules, unioned across every live root.
 //!   ignoreValues  detector.ignoreValues entries ({rule, value, files?}),
@@ -23,7 +23,7 @@
 //!
 //! Config is read from every root the live session spans: the appRoot the
 //! server chdir'd onto, plus contextRoot and repoRoot when they differ. The
-//! edit hook keys the same config at the session cwd, and `anti-design
+//! edit hook keys the same config at the session cwd, and `anti-ai-design
 //! detect` reads it from its invocation cwd, so reading only the appRoot
 //! silently dropped every waiver in exactly the monorepo layouts the roots
 //! manifest exists for. Reading is additive across roots, matching
@@ -75,14 +75,14 @@ pub fn collect_project_detector_ignores(
         // readConfig merges config.json with the gitignored
         // config.local.json and type-checks both, exactly as the edit hook
         // reads the same pair.
-        let config = anti_design_hook::hook_lib::read_config(dir);
+        let config = anti_ai_design_hook::hook_lib::read_config(dir);
         for rule in &config.ignore_rules {
-            if !anti_design_core::js::trim(rule).is_empty() && !ignore_rules.contains(rule) {
+            if !anti_ai_design_core::js::trim(rule).is_empty() && !ignore_rules.contains(rule) {
                 ignore_rules.push(rule.clone());
             }
         }
         for glob in &config.ignore_files {
-            if !anti_design_core::js::trim(glob).is_empty() && !ignore_files.contains(glob) {
+            if !anti_ai_design_core::js::trim(glob).is_empty() && !ignore_files.contains(glob) {
                 ignore_files.push(glob.clone());
             }
         }
@@ -220,7 +220,7 @@ mod tests {
     impl Tmp {
         fn new() -> Tmp {
             let base = std::env::temp_dir().join(format!(
-                "anti-design-project-ignores-{}-{:?}",
+                "anti-ai-design-project-ignores-{}-{:?}",
                 std::process::id(),
                 std::thread::current().id()
             ));
@@ -274,7 +274,7 @@ mod tests {
         let app = Tmp::new();
         app.write("package.json", "{\"name\":\"single\",\"private\":true}\n");
         app.write(
-            ".anti-design/config.json",
+            ".anti-ai-design/config.json",
             &detector_config(json!({
                 "ignoreRules": ["ai-color-palette"],
                 "ignoreFiles": ["prototype/legacy/**"],
@@ -283,7 +283,7 @@ mod tests {
                 ]
             })),
         );
-        app.write(".anti-design/live/config.json", &live_config(json!(["prototype/index.html", "prototype/library/buttons.html"])));
+        app.write(".anti-ai-design/live/config.json", &live_config(json!(["prototype/index.html", "prototype/library/buttons.html"])));
         app.write("prototype/index.html", "<html></html>");
         app.write("prototype/library/buttons.html", "<html></html>");
 
@@ -306,13 +306,13 @@ mod tests {
         std::fs::create_dir_all(repo.0.join(".git")).unwrap();
         repo.write("site/package.json", "{\"name\":\"site\",\"private\":true}\n");
         repo.write(
-            ".anti-design/config.json",
+            ".anti-ai-design/config.json",
             &detector_config(json!({
                 "ignoreRules": ["ai-color-palette"],
                 "ignoreValues": [{ "rule": "overused-font", "value": "space grotesk" }]
             })),
         );
-        repo.write("site/.anti-design/live/config.json", &live_config(json!(["prototype/index.html"])));
+        repo.write("site/.anti-ai-design/live/config.json", &live_config(json!(["prototype/index.html"])));
         repo.write("site/prototype/index.html", "<html></html>");
 
         let out = collect(&app, Some(&repo.path()));
@@ -331,20 +331,20 @@ mod tests {
         std::fs::create_dir_all(repo.0.join(".git")).unwrap();
         repo.write("site/package.json", "{\"name\":\"site\",\"private\":true}\n");
         repo.write(
-            ".anti-design/config.json",
+            ".anti-ai-design/config.json",
             &detector_config(json!({
                 "ignoreRules": ["ai-color-palette"],
                 "ignoreValues": [{ "rule": "overused-font", "value": "space grotesk" }]
             })),
         );
         repo.write(
-            "site/.anti-design/config.json",
+            "site/.anti-ai-design/config.json",
             &detector_config(json!({
                 "ignoreRules": ["gradient-text", "ai-color-palette"],
                 "ignoreValues": [{ "rule": "overused-font", "value": "space grotesk" }]
             })),
         );
-        repo.write("site/.anti-design/live/config.json", &live_config(json!(["prototype/index.html"])));
+        repo.write("site/.anti-ai-design/live/config.json", &live_config(json!(["prototype/index.html"])));
         repo.write("site/prototype/index.html", "<html></html>");
 
         let out = collect(&app, Some(&repo.path()));
@@ -357,7 +357,7 @@ mod tests {
         let app = Tmp::new();
         app.write("package.json", "{\"name\":\"globs\",\"private\":true}\n");
         app.write(
-            ".anti-design/live/config.json",
+            ".anti-ai-design/live/config.json",
             &live_config(json!(["prototype/**/*.html", "prototype/not-created-yet.html"])),
         );
         app.write("prototype/index.html", "<html></html>");
@@ -384,10 +384,10 @@ mod tests {
         let app = Tmp::new();
         app.write("package.json", "{\"name\":\"broken\",\"private\":true}\n");
         app.write(
-            ".anti-design/config.json",
+            ".anti-ai-design/config.json",
             "{\"detector\":{\"ignoreRules\":\"foo\",\"ignoreValues\":[null,7],\"ignoreFiles\":{}}}",
         );
-        app.write(".anti-design/live/config.json", &live_config(json!(["prototype/index.html"])));
+        app.write(".anti-ai-design/live/config.json", &live_config(json!(["prototype/index.html"])));
         app.write("prototype/index.html", "<html></html>");
 
         let out = collect(&app.path(), None);

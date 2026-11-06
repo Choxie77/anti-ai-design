@@ -12,10 +12,10 @@ export function assertAdviceOnly(trace, text) {
   assert.ok(text.trim(), 'advice must reach the user, not stop at reference loading');
   assert.deepEqual(trace.writePaths, [], 'advice must not use the write tool');
   const mutations = trace.toolCalls.flatMap((call) => call.mutatedPaths ?? [])
-    .filter((file) => !file.startsWith('.anti-design/') || file.startsWith('.anti-design/critique/'));
+    .filter((file) => !file.startsWith('.anti-ai-design/') || file.startsWith('.anti-ai-design/critique/'));
   assert.deepEqual(mutations, [], 'advice must not edit project files or archive an unsolicited critique');
   assert.deepEqual(trace.questionCalls, [], 'advice must not start an init or design interview');
-  assert.ok(!trace.bashCommands.some((command) => command.includes('anti-design detect')), 'workflow advice does not run menu scans');
+  assert.ok(!trace.bashCommands.some((command) => command.includes('anti-ai-design detect')), 'workflow advice does not run menu scans');
 }
 
 function normalizedAdvice(text) {
@@ -33,7 +33,7 @@ export function assertWorkflowAdvice(trace, text, { missingContext = false } = {
   assert.match(advice, /index\.html|landing page|\b(?:this|the|existing|current)\s+(?:page|site|surface|ui)\b|\bexisting\s+(?:visual\s+)?(?:implementation|design|code)\b/, 'advice should address the existing surface');
   assert.match(advice, missingContext ? /\binit\b/ : /\b(?:critique|audit|polish)\b/, 'advice must recommend a relevant starting point');
   if (missingContext) assert.match(advice, /\bdocument\b/, 'advice should explain how to record the existing identity');
-  assert.doesNotMatch(advice, within(String.raw`(?:must|need to|have to|required to)\s+(?:run\s+)?(?:\/anti-design\s+)?(?:init|document)\b[^.!?\n]{0,100}\bbefore\s+(?:you\s+can\s+)?(?:run(?:ning)?\s+)?(?:polish(?:ing)?|refin(?:e|ing|ement))\b|(?:polish|refinement)\s+(?:requires|is blocked by|cannot run without)\s+(?:init|document|product\.md|design\.md)`),
+  assert.doesNotMatch(advice, within(String.raw`(?:must|need to|have to|required to)\s+(?:run\s+)?(?:\/anti-ai-design\s+)?(?:init|document)\b[^.!?\n]{0,100}\bbefore\s+(?:you\s+can\s+)?(?:run(?:ning)?\s+)?(?:polish(?:ing)?|refin(?:e|ing|ement))\b|(?:polish|refinement)\s+(?:requires|is blocked by|cannot run without)\s+(?:init|document|product\.md|design\.md)`),
     'setup is not a mandatory prerequisite for narrow refinement');
 }
 
@@ -53,7 +53,7 @@ export function assertNewWorkLifecycle(trace, { target, redesign = false }) {
   const writes = (call, file) => (call.mutatedPaths || []).includes(file);
   const implementation = calls.findIndex((call) => writes(call, target));
   const question = calls.findIndex((call) => call.name === 'ask_user_question');
-  const brief = calls.findIndex((call) => (call.mutatedPaths || []).some((file) => file.startsWith('.anti-design/surfaces/')));
+  const brief = calls.findIndex((call) => (call.mutatedPaths || []).some((file) => file.startsWith('.anti-ai-design/surfaces/')));
   assert.ok(implementation >= 0, `new-work did not produce the requested artifact: ${target}`);
   assert.ok(question >= 0 && question < implementation, 'implementation must follow a user answer');
   assert.ok(brief >= 0 && brief < implementation, 'the direction contract must be recorded in a surface brief before implementation');
@@ -76,7 +76,7 @@ function responseBlocks(responseMessages) {
 function contextLauncherDenialIndex(blocks) {
   const contextCalls = new Set(blocks.filter((block) => block.role === 'assistant'
     && block.type === 'tool-call' && block.toolName === 'bash'
-    && /anti-design\s+context\b/.test(block.input?.command ?? '')).map((block) => block.toolCallId));
+    && /anti-ai-design\s+context\b/.test(block.input?.command ?? '')).map((block) => block.toolCallId));
   return blocks.findIndex((block) => block.role === 'tool'
     && block.type === 'tool-result' && contextCalls.has(block.toolCallId)
     && block.output?.type === 'text' && /Bash permission denied by the host/.test(block.output.value));
