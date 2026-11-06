@@ -39,7 +39,7 @@ function badge(x, y, n, delay, id) {
   return s(
     'g',
     { transform: `translate(${x} ${y})`, id },
-    s('g', an('pop', delay, { class: 'badge' }), s('circle', { r: 13, class: 'f-red' }), s('text', { class: 'f-onred t-serif badge-n', 'text-anchor': 'middle', y: 5, text: String(n) })),
+    s('g', an('pop', delay, { class: 'badge' }), s('circle', { r: 13, class: 'f-red' }), s('text', { class: 'f-onred t-sans badge-n', 'text-anchor': 'middle', y: 5, text: String(n) })),
   );
 }
 
@@ -158,7 +158,7 @@ export function sceneProofreader(ruleCount) {
       s('rect', { x: 378, y: y - 18, width: 236, height: 36, rx: 3, class: hit ? 'row-hit' : 'row' }),
       s('circle', { cx: 400, cy: y, r: 6, class: hit ? 'f-red' : 'row-dot' }),
       hit ? s('circle', an('ping', when, { cx: 400, cy: y, r: 6, class: 'ping-ring' }, 0.9)) : null,
-      txt(418, y + 5, name, hit ? 't-serif t-row t-bold' : 't-serif t-row t-soft'),
+      txt(418, y + 5, name, hit ? 't-sans t-row t-bold' : 't-sans t-row t-soft'),
       hit ? s('path', an('draw', when - 0.05, { d: `M 330 ${lineY(lineIdx)} C 352 ${lineY(lineIdx)} 352 ${y} 378 ${y}`, pathLength: 1, class: 'leader' }, 0.5)) : null,
     );
   });
@@ -169,8 +169,8 @@ export function sceneProofreader(ruleCount) {
     s('g', an('sweep', t0, { class: 'sweep' }, dur), s('rect', { x: 31, y: 50, width: 298, height: 24, class: 'sweep-band' }), s('rect', { x: 31, y: 50, width: 298, height: 2, class: 'f-red' })),
     txt(378, 50, 'KNOWN MARKS', 't-label'),
     ...rows,
-    txt(378, 328, ruleCount ? `…and ${Math.max(ruleCount - 5, 0)} more` : '…and many more', 't-serif t-soft t-row t-italic'),
-    txt(378, 352, 'checked on every line', 't-serif t-soft t-small t-italic'),
+    txt(378, 328, ruleCount ? `…and ${Math.max(ruleCount - 5, 0)} more` : '…and many more', 't-sans t-soft t-row t-italic'),
+    txt(378, 352, 'checked on every line', 't-sans t-soft t-small t-italic'),
   );
 }
 
@@ -181,7 +181,7 @@ function fileIcon(x, y, delay, label, hits) {
     s('path', { d: `M ${x} ${y} h 17 l 7 7 v 22 h -24 z`, class: 'f-paper s-ink' }),
     s('path', { d: `M ${x + 17} ${y} v 7 h 7`, class: 's-ink f-none' }),
     txt(x + 38, y + 21, label, 't-mono t-file'),
-    hits === null ? null : s('g', { transform: `translate(${x + 214} ${y + 14})` }, s('g', an('pop', delay + 0.55, { class: 'count' }), s('circle', { r: 12, class: hits ? 'f-red' : 'f-deep s-rule' }), s('text', { class: hits ? 'f-onred t-serif badge-n' : 't-serif badge-n f-ink', 'text-anchor': 'middle', y: 5, text: hits ? String(hits) : '0' }))),
+    hits === null ? null : s('g', { transform: `translate(${x + 214} ${y + 14})` }, s('g', an('pop', delay + 0.55, { class: 'count' }), s('circle', { r: 12, class: hits ? 'f-red' : 'f-deep s-rule' }), s('text', { class: hits ? 'f-onred t-sans badge-n' : 't-sans badge-n f-ink', 'text-anchor': 'middle', y: 5, text: hits ? String(hits) : '0' }))),
   );
 }
 
@@ -198,12 +198,12 @@ export function sceneScan() {
   const lens = files.map((f, i) => s('rect', an('flash', 0.8 + i * 0.7, { x: 42, y: y0 + i * step - 8, width: 246, height: 44, rx: 3, class: 'lens' }, 0.8)));
   const pills = ['Gradient text', 'Glowing shadow', 'Low contrast', 'Tiny text'].map((t, i) => {
     const y = 84 + i * 42;
-    return s('g', an('pop', 3.1 + i * 0.35, { class: 'pill-row' }), s('rect', { x: 372, y, width: 236, height: 32, rx: 3, class: 'row-hit' }), s('circle', { cx: 392, cy: y + 16, r: 6, class: 'f-red' }), txt(408, y + 21, t, 't-serif t-row'));
+    return s('g', an('pop', 3.1 + i * 0.35, { class: 'pill-row' }), s('rect', { x: 372, y, width: 236, height: 32, rx: 3, class: 'row-hit' }), s('circle', { cx: 392, cy: y + 16, r: 6, class: 'f-red' }), txt(408, y + 21, t, 't-sans t-row'));
   });
   return scene(
     'A project folder. The detector looks at each file in turn and puts the number of findings next to it. A crossed-out pencil shows it never writes.',
     s('rect', { x: 28, y: 28, width: 272, height: 262, rx: 4, class: 'f-paper s-ink' }),
-    s('g', an('fade', 0.1), s('path', { d: 'M 46 52 h 14 l 4 5 h 18 v 22 h -36 z', class: 'f-deep s-ink' }), txt(94, 72, 'my-project/', 't-serif t-bold t-row')),
+    s('g', an('fade', 0.1), s('path', { d: 'M 46 52 h 14 l 4 5 h 18 v 22 h -36 z', class: 'f-deep s-ink' }), txt(94, 72, 'my-project/', 't-sans t-bold t-row')),
     ...lens,
     ...files.map((f, i) => fileIcon(56, y0 + i * step, 0.4 + i * 0.12, f.label, f.hits)),
     s('path', an('draw', 3, { d: 'M 306 160 H 352', pathLength: 1, class: 'leader' }, 0.5)),
@@ -218,11 +218,11 @@ export function sceneScan() {
       // eye
       s('path', { d: 'M 58 358 Q 80 338 102 358 Q 80 378 58 358 Z', class: 's-ink f-none sw2' }),
       s('circle', { cx: 80, cy: 358, r: 6.5, class: 'f-ink' }),
-      txt(116, 364, 'Reads every file', 't-serif t-lg'),
+      txt(116, 364, 'Reads every file', 't-sans t-lg'),
       // pencil, struck
       s('g', { transform: 'translate(386 358) rotate(-40)' }, s('rect', { x: -26, y: -6, width: 44, height: 12, class: 'f-deep s-ink' }), s('path', { d: 'M 18 -6 L 30 0 L 18 6 Z', class: 'f-ink' })),
       s('path', an('draw', 4.6, { d: 'M 360 380 L 414 336', pathLength: 1, class: 'pen sw3' }, 0.35)),
-      txt(432, 364, 'Never writes', 't-serif t-lg'),
+      txt(432, 364, 'Never writes', 't-sans t-lg'),
     ),
   );
 }
@@ -248,20 +248,20 @@ export function sceneFindings() {
       'g',
       an('fade', 0),
       s('rect', { x: 28, y: 28, width: 440, height: 346, rx: 3, class: 'f-paper s-ink sw15' }),
-      txt(50, 72, 'Gradient text', 't-serif t-title'),
+      txt(50, 72, 'Gradient text', 't-sans t-title'),
       s('rect', { x: 340, y: 50, width: 104, height: 26, rx: 2, class: 'f-none s-red' }),
-      txt(392, 68, 'WARNING', 't-serif t-sev', { 'text-anchor': 'middle' }),
+      txt(392, 68, 'WARNING', 't-sans t-sev', { 'text-anchor': 'middle' }),
       txt(50, 104, 'styles.css:4 · gradient-text · Looks AI-made', 't-mono t-soft t-small'),
-      txt(50, 134, 'Decorative rather than meaningful, and a common', 't-serif t-body'),
-      txt(50, 154, 'mark of AI-made design. Use a solid color.', 't-serif t-body'),
-      s('text', { x: 50, y: 184, class: 't-serif t-soft t-small' }, 'What matched: ', s('tspan', { class: 't-mono' }, 'background-clip: text + gradient')),
+      txt(50, 134, 'Decorative rather than meaningful, and a common', 't-sans t-body'),
+      txt(50, 154, 'mark of AI-made design. Use a solid color.', 't-sans t-body'),
+      s('text', { x: 50, y: 184, class: 't-sans t-soft t-small' }, 'What matched: ', s('tspan', { class: 't-mono' }, 'background-clip: text + gradient')),
       s('rect', { x: 50, y: 198, width: 396, height: 104, rx: 2, class: 'f-deep s-rule' }),
       ...code.flatMap(([n, t, hit], i) => {
         const y = 224 + i * 30;
         return [hit ? s('rect', { x: 51, y: y - 17, width: 394, height: 26, class: 'hit-wash' }) : null, hit ? s('rect', { x: 51, y: y - 17, width: 3, height: 26, class: 'f-red' }) : null, txt(68, y, String(n), 't-mono t-soft t-small'), txt(92, y, t, 't-mono t-code2')];
       }),
       s('rect', { x: 50, y: 316, width: 222, height: 26, rx: 2, class: 'f-none s-soft tag-dash' }),
-      txt(62, 334, 'Can be fixed automatically', 't-serif t-small t-bold'),
+      txt(62, 334, 'Can be fixed automatically', 't-sans t-small t-bold'),
     ),
     ...markers.flatMap((m, i) => [leader(468, m.y, 506, m.y, 0.8 + i * 0.55), badge(522, m.y, m.n, 0.9 + i * 0.55, `an-${m.n}`), s('text', an('fade', 1 + i * 0.55, { x: 544, y: m.y + 5, class: 't-note t-note-sm' }), m.label)]),
     s('path', an('draw', 1.1, { d: 'M 340 82 L 444 82', pathLength: 1, class: 'pen pen-thin' }, 0.4)),
@@ -297,7 +297,7 @@ export function sceneFixes() {
       'g',
       an('lit', 3.4 + i * 0.7, { class: 'flow' }),
       s('rect', { x, y: 214, width: 136, height: 36, rx: 18, class: 'flow-pill' }),
-      txt(x + 68, 237, t, 't-serif t-small t-bold', { 'text-anchor': 'middle' }),
+      txt(x + 68, 237, t, 't-sans t-small t-bold', { 'text-anchor': 'middle' }),
       i < steps.length - 1 ? s('path', { d: `M ${x + 140} 232 h 6`, class: 's-ink f-none' }) : null,
     );
   });
@@ -333,7 +333,7 @@ export function sceneSafe() {
       'g',
       an('fade', 0.3),
       s('path', { d: 'M 64 150 h 34 l 8 10 h 52 v 80 h -94 z', class: 'f-deep s-ink' }),
-      txt(111, 266, 'your project', 't-serif t-row', { 'text-anchor': 'middle' }),
+      txt(111, 266, 'your project', 't-sans t-row', { 'text-anchor': 'middle' }),
     ),
     // studio window
     s(
@@ -344,7 +344,7 @@ export function sceneSafe() {
       s('rect', { x: 264, y: 172, width: 70, height: 7, rx: 3.5, class: 'f-rule' }),
       s('rect', { x: 264, y: 188, width: 100, height: 7, rx: 3.5, class: 'f-rule' }),
       s('rect', { x: 264, y: 204, width: 50, height: 7, rx: 3.5, class: 'f-red' }),
-      txt(320, 276, 'the Studio', 't-serif t-row', { 'text-anchor': 'middle' }),
+      txt(320, 276, 'the Studio', 't-sans t-row', { 'text-anchor': 'middle' }),
     ),
     // packets travelling folder <-> studio
     s('path', { d: 'M 168 190 H 246', class: 's-ink f-none dash' }),
@@ -359,15 +359,15 @@ export function sceneSafe() {
       'g',
       an('fade', 0.9),
       s('path', { d: 'M 500 190 q -22 0 -22 -20 q 0 -20 24 -18 q 6 -24 36 -20 q 24 4 26 26 q 22 2 22 18 q 0 14 -20 14 z', class: 'f-deep s-soft' }),
-      txt(540, 225, 'the internet', 't-serif t-row t-soft', { 'text-anchor': 'middle' }),
-      txt(540, 247, 'nothing goes here', 't-serif t-small t-red t-italic', { 'text-anchor': 'middle' }),
+      txt(540, 225, 'the internet', 't-sans t-row t-soft', { 'text-anchor': 'middle' }),
+      txt(540, 247, 'nothing goes here', 't-sans t-small t-red t-italic', { 'text-anchor': 'middle' }),
     ),
     // guarantees
     ...[
       ['Only your chosen folder', 76],
       ['Reads before it writes', 296],
       ['You confirm every write', 480],
-    ].map(([t, x], i) => s('g', an('fade', 2 + i * 0.4), s('circle', { cx: x - 22 + (i === 0 ? 0 : 0), cy: 366, r: 9, class: 'f-ink' }), s('path', { d: `M ${x - 26} 366 l 3 4 l 7 -8`, class: 's-paper f-none sw2' }), txt(x - 6, 372, t, 't-serif t-small'))),
+    ].map(([t, x], i) => s('g', an('fade', 2 + i * 0.4), s('circle', { cx: x - 22 + (i === 0 ? 0 : 0), cy: 366, r: 9, class: 'f-ink' }), s('path', { d: `M ${x - 26} 366 l 3 4 l 7 -8`, class: 's-paper f-none sw2' }), txt(x - 6, 372, t, 't-sans t-small'))),
   );
 }
 

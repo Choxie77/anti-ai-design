@@ -1,39 +1,57 @@
-/* Anti-AI Design Studio. A marked-up manuscript: paper, ink, one proofreader's red.
-   Red is used only to mark findings and for the single primary action. */
+/* Anti-AI Design Studio: a workbench.
+   A tool you stand at, not a page you read. Hard-edged panels on a cool grey bench, a dark rail on the
+   left, Helvetica for words, mono for anything that is data. One highlighter yellow marks what the
+   detector flagged and what to do next. Red is a pen: it only annotates, flags errors and shows deletions. */
 
 :root {
-  --paper: #f5efe2;
-  --paper-deep: #ebe3d0;
-  --paper-lit: #fbf7ee;
-  --ink: #1c1915;
-  --ink-soft: #554d41;
-  --rule: #cdc2aa;
-  --control: #7d725f;
-  --red: #a91d15;
-  --on-red: #fbf7ee;
-  --red-wash: rgba(169, 29, 21, 0.1);
+  --bg: #e4e5e7;
+  --panel: #ffffff;
+  --panel-2: #f1f2f3;
+  --ink: #0e0f11;
+  --ink-soft: #4a4d53;
+  --rule: #c2c5ca;
+  --control: #6a6e75;
 
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --mark: #ffe600;
+  --on-mark: #0e0f11;
+  --mark-wash: rgba(255, 230, 0, 0.42);
+
+  --alert: #c4241a;
+  --on-alert: #ffffff;
+  --alert-wash: rgba(196, 36, 26, 0.1);
+
+  --side: #0e0f11;
+  --side-ink: #f1f2f3;
+  --side-soft: #9a9ea6;
+  --side-rule: #2b2d31;
+
+  --sans: "Helvetica Neue", Helvetica, "Nimbus Sans", "Liberation Sans", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  --radius: 2px;
-  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --gutter: clamp(1rem, 3.5vw, 2.5rem);
   --measure: 40rem;
+  --side-w: 15.5rem;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #17140f;
-    --paper-deep: #221e17;
-    --paper-lit: #1d1913;
-    --ink: #ece4d2;
-    --ink-soft: #b3a995;
-    --rule: #463e32;
-    --control: #8d8470;
-    --red: #ff9283;
-    --on-red: #17140f;
-    --red-wash: rgba(255, 146, 131, 0.13);
+    --bg: #101113;
+    --panel: #18191c;
+    --panel-2: #202226;
+    --ink: #ececed;
+    --ink-soft: #a5a9b0;
+    --rule: #34373c;
+    --control: #868b93;
+
+    --mark-wash: rgba(255, 230, 0, 0.2);
+
+    --alert: #ff7b6e;
+    --on-alert: #101113;
+    --alert-wash: rgba(255, 123, 110, 0.14);
+
+    --side: #08090a;
+    --side-rule: #26282c;
   }
 }
 
@@ -50,19 +68,20 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
-  font-family: var(--serif);
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
 }
 
 .page {
   width: 100%;
-  max-width: 78rem;
+  max-width: 76rem;
   margin-inline: auto;
   padding-left: var(--gutter);
   padding-right: var(--gutter);
@@ -70,7 +89,7 @@ body {
 
 main {
   flex: 1;
-  padding-top: 2.5rem;
+  padding-top: 2rem;
   padding-bottom: 4rem;
 }
 
@@ -94,198 +113,345 @@ main:focus:not(:focus-visible) {
   position: absolute;
   left: 1rem;
   top: -4rem;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--mark);
+  color: var(--on-mark);
   padding: 0.5rem 1rem;
-  z-index: 10;
+  font-weight: 700;
+  z-index: 100;
 }
 
 .skip:focus {
   top: 0.5rem;
 }
 
-/* Focus is never removed: a plain ink ring, offset so it clears the control. */
+/* Focus is never removed: a hard ink ring with a gap, plus a yellow halo so it also shows on the dark rail. */
 :focus-visible {
   outline: 3px solid var(--ink);
-  outline-offset: 3px;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--mark);
 }
 
 a {
   color: inherit;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.18em;
 }
 
-/* Masthead */
+/* ---------- The rail (header) ---------- */
 .masthead {
-  border-bottom: 3px double var(--ink);
+  background: var(--side);
+  color: var(--side-ink);
+}
+
+.masthead :focus-visible {
+  outline-color: var(--side-ink);
 }
 
 .masthead-inner {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem 2rem;
-  padding-top: 1.25rem;
-  padding-bottom: 0.75rem;
-}
-
-.brand {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-
-.brand-sub {
-  font-weight: 400;
-  font-style: italic;
-  color: var(--ink-soft);
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem var(--gutter) 0;
 }
 
 .brand-block {
   min-width: 0;
 }
 
-.tagline {
-  margin: 0.15rem 0 0;
-  font-size: 0.9375rem;
-  color: var(--ink-soft);
-  max-width: 34rem;
-}
-
-#nav {
+.brand {
+  margin: 0;
+  font-size: 1.3125rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 2rem;
+  gap: 0.15rem 0.5rem;
+}
+
+/* The wordmark is the product: the "AI" gets the highlighter. */
+.brand .hl {
+  background: var(--mark);
+  color: var(--on-mark);
+  padding: 0 0.12em;
+  margin: 0 0.04em;
+}
+
+.brand-sub {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--side-soft);
+}
+
+.tagline {
+  display: none;
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--side-soft);
+}
+
+/* Phone: the three steps on one row, the reference links on a quieter row under them. */
+#nav {
+  display: flex;
+  flex-direction: column;
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+}
+
+#nav .nav-list {
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .nav-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 2.25rem;
+  gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* The three steps read as a sequence; Rules is reference and sits apart. */
-.nav-steps .nav-step + .nav-step .nav-link::before {
-  content: "→";
-  position: absolute;
-  left: -1.6rem;
-  color: var(--ink-soft);
-  font-weight: 400;
-}
-
-.nav-step {
-  position: relative;
-}
-
-.nav-ref {
-  padding-left: 2rem;
-  border-left: 1px solid var(--rule);
-}
-
 .nav-link {
-  position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  padding: 0.7rem 0.75rem;
+  min-height: 2.75rem;
+  color: var(--side-ink);
   text-decoration: none;
-  font-size: 1.0625rem;
-  border-bottom: 2px solid transparent;
+  font-size: 0.9375rem;
+  border-bottom: 3px solid transparent;
 }
 
 .nav-link:hover {
-  border-bottom-color: var(--control);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-link[aria-current="page"] {
   font-weight: 700;
-  border-bottom-color: var(--ink);
+  border-bottom-color: var(--mark);
 }
 
 .nav-n {
-  font-style: italic;
-  color: var(--ink-soft);
-  font-weight: 400;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--side-soft);
 }
 
 .is-waiting .nav-link {
-  color: var(--ink-soft);
+  color: var(--side-soft);
 }
 
 .nav-count {
+  margin-left: auto;
   font-family: var(--mono);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0 0.4rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius);
+  min-width: 1.4rem;
+  padding: 0.05rem 0.4rem;
+  text-align: center;
+  background: var(--mark);
+  color: var(--on-mark);
   line-height: 1.4;
-  color: var(--ink);
 }
 
-/* Footer */
+.nav-ref {
+  border-top: 1px solid var(--side-rule);
+}
+
+.nav-link-ref {
+  color: var(--side-soft);
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+  padding-block: 0.5rem;
+}
+
+.nav-ref .nav-link {
+  border-bottom: 0;
+}
+
+.nav-link-ref:hover,
+.nav-link-ref[aria-current="page"] {
+  color: var(--side-ink);
+}
+
+/* ---------- The footer ---------- */
 .colophon {
   border-top: 1px solid var(--rule);
   padding-top: 1rem;
   padding-bottom: 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
 }
 
 .colophon .meta {
   margin: 0.15rem 0;
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
 
-/* Type */
+/* ---------- Desktop: rail on the left, bench on the right ---------- */
+@media (min-width: 64rem) {
+  body {
+    display: grid;
+    grid-template-columns: var(--side-w) minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+  }
+
+  .masthead {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--side-rule);
+  }
+
+  main {
+    grid-column: 2;
+    grid-row: 1;
+    padding-top: 2.5rem;
+  }
+
+  .colophon {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .masthead-inner {
+    padding: 1.5rem 0 1.5rem;
+    gap: 0;
+    min-height: 100%;
+  }
+
+  .brand-block {
+    padding: 0 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--side-rule);
+  }
+
+  .brand {
+    font-size: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tagline {
+    display: block;
+  }
+
+  #nav {
+    gap: 0;
+    margin: 0;
+    padding: 1rem 0 0;
+  }
+
+  #nav .nav-list {
+    overflow: visible;
+  }
+
+  .nav-list {
+    flex-direction: column;
+  }
+
+  .nav-list::before {
+    display: block;
+    padding: 0 1.25rem 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--side-soft);
+  }
+
+  .nav-steps::before {
+    content: "workflow";
+  }
+
+  .nav-ref {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    border-top: 0;
+  }
+
+  .nav-link-ref {
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    padding-block: 0.55rem;
+  }
+
+  .nav-ref::before {
+    content: "reference";
+  }
+
+  .nav-link {
+    padding: 0.55rem 1.25rem;
+    border-bottom: 0;
+    border-left: 4px solid transparent;
+    padding-left: calc(1.25rem - 4px);
+  }
+
+  .nav-link[aria-current="page"] {
+    border-left-color: var(--mark);
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .nav-n {
+    width: 1.25rem;
+  }
+}
+
+/* ---------- Type ---------- */
 h1,
 h2,
 h3 {
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.1;
   margin: 0;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
 h1 {
-  font-size: clamp(2.25rem, 5.5vw, 3.5rem);
-  margin-bottom: 0.75rem;
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin-bottom: 0.9rem;
 }
 
-h1:focus:not(:focus-visible) {
+/* The heading takes focus after navigation so screen readers start there; it is not a control, so no ring. */
+h1:focus,
+h1:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 
 h2 {
-  font-size: 1.625rem;
+  font-size: 1.5rem;
 }
 
 h3 {
-  font-size: 1.375rem;
+  font-size: 1.1875rem;
 }
 
 p {
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.85rem;
   text-wrap: pretty;
 }
 
 .lede {
-  font-size: 1.25rem;
-  max-width: var(--measure);
-  color: var(--ink);
-  margin-bottom: 2rem;
+  font-size: 1.1875rem;
+  line-height: 1.45;
+  max-width: 38rem;
+  margin-bottom: 1.75rem;
 }
 
 .meta,
 .help {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--ink-soft);
   max-width: var(--measure);
 }
@@ -297,43 +463,52 @@ p {
 code,
 .mono {
   font-family: var(--mono);
-  font-size: 0.9em;
+  font-size: 0.875em;
 }
 
 code {
   overflow-wrap: anywhere;
 }
 
+/* Inline code in prose sits on a faint chip so it reads as "a thing from the code". */
+p code,
+li code,
+dd code {
+  background: var(--panel-2);
+  padding: 0.05em 0.3em;
+}
+
 .label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   margin-bottom: 0.4rem;
   padding: 0;
 }
 
 .screen > h1 + .meta {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
-/* Controls */
+/* ---------- Controls ---------- */
 .field {
   display: block;
   width: 100%;
   max-width: 36rem;
-  padding: 0.6rem 0.75rem;
-  background: var(--paper-lit);
+  padding: 0.55rem 0.7rem;
+  background: var(--panel);
   color: var(--ink);
   border: 1px solid var(--control);
-  border-radius: var(--radius);
+  border-radius: 0;
   font: inherit;
   font-size: 1rem;
   min-height: 2.75rem;
 }
 
-/* Browsers dim placeholders below AA; keep them at the soft ink colour. */
+.field:focus {
+  border-color: var(--ink);
+}
+
 .field::placeholder {
   color: var(--ink-soft);
   opacity: 1;
@@ -347,11 +522,11 @@ textarea.field {
 
 .btn {
   display: inline-block;
-  padding: 0.7rem 1.4rem;
+  padding: 0.65rem 1.25rem;
   min-height: 2.75rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--ink);
-  background: transparent;
+  border-radius: 0;
+  border: 2px solid var(--ink);
+  background: var(--panel);
   color: var(--ink);
   font: inherit;
   font-weight: 700;
@@ -361,23 +536,35 @@ textarea.field {
 }
 
 .btn:hover {
-  background: var(--paper-deep);
+  background: var(--ink);
+  color: var(--panel);
 }
 
+/* The one thing to do next is always the marker colour. */
 .btn-primary {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--on-red);
+  background: var(--mark);
+  border-color: var(--ink);
+  color: var(--on-mark);
 }
 
 .btn-primary:hover {
-  background: var(--red);
-  filter: brightness(0.92);
+  background: var(--ink);
+  color: var(--mark);
 }
 
 .btn[disabled] {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.5;
+}
+
+.btn[disabled]:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.btn-primary[disabled]:hover {
+  background: var(--mark);
+  color: var(--on-mark);
 }
 
 .linkish {
@@ -388,7 +575,7 @@ textarea.field {
   font: inherit;
   color: inherit;
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.18em;
   cursor: pointer;
   text-align: left;
 }
@@ -405,7 +592,7 @@ textarea.field {
 }
 
 .stack > * + * {
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 fieldset {
@@ -419,7 +606,7 @@ legend {
   padding: 0;
 }
 
-/* Segmented radios and toggles share one look. */
+/* Segmented radios and toggles share one look: a row of square keys, pressed = filled. */
 .segs {
   display: inline-flex;
   flex-wrap: wrap;
@@ -442,26 +629,30 @@ legend {
 .seg label,
 .toggle {
   display: inline-block;
-  padding: 0.55rem 1rem;
+  padding: 0.5rem 1rem;
   min-height: 2.75rem;
-  border: 1px solid var(--ink);
-  background: transparent;
+  border: 2px solid var(--ink);
+  background: var(--panel);
   color: var(--ink);
   font: inherit;
+  font-size: 0.9375rem;
   cursor: pointer;
-  margin: 0 -1px -1px 0;
+  margin: 0 -2px -2px 0;
 }
 
 .seg input:checked + label,
 .toggle[aria-pressed="true"] {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--panel);
   font-weight: 700;
 }
 
 .seg input:focus-visible + label {
   outline: 3px solid var(--ink);
-  outline-offset: 3px;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--mark);
+  position: relative;
+  z-index: 1;
 }
 
 .toggle {
@@ -482,48 +673,16 @@ legend {
   accent-color: var(--ink);
 }
 
-/* Scan: a folio with a margin column */
-.folio {
-  margin-top: 1rem;
-  border-top: 1px solid var(--ink);
-}
-
-.folio-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.5rem 2.5rem;
-  padding-top: 1.75rem;
-  padding-bottom: 1.75rem;
-  border-bottom: 1px solid var(--rule);
-}
-
+/* ---------- Scan ---------- */
 .margin {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
 }
 
-.step {
-  margin: 0;
-  font-size: 2.25rem;
-  line-height: 1;
-  font-style: italic;
-}
-
-.margin-note {
-  margin: 0;
-  font-size: 0.9375rem;
-  color: var(--ink-soft);
-  font-style: italic;
-}
-
-.folio-main {
-  min-width: 0;
-}
-
 .segs + .stack,
 .segs + div {
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 .browse {
@@ -538,13 +697,19 @@ legend {
 }
 
 .browse .rule-list {
-  border-top: 1px solid var(--rule);
+  border: 1px solid var(--rule);
+  background: var(--panel);
   max-height: 16rem;
   overflow: auto;
+  padding: 0 0.75rem;
 }
 
 .browse .rule-list li {
   border-bottom: 1px solid var(--rule);
+}
+
+.browse .rule-list li:last-child {
+  border-bottom: 0;
 }
 
 .slot:empty {
@@ -555,22 +720,57 @@ legend {
   min-height: 14rem;
 }
 
-/* Notices: ruled boxes, no tinted cards */
+/* The form is a panel with a header strip and a footer strip, like a dialog on a real tool. */
+.panel {
+  max-width: 46rem;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+}
+
+.panel-body {
+  border: 0;
+  margin: 0;
+  padding: 1.25rem 1.25rem 1.5rem;
+  min-width: 0;
+}
+
+.panel-body > legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.panel-body > legend + * {
+  clear: both;
+}
+
+.panel-foot {
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 2px solid var(--ink);
+  background: var(--panel-2);
+}
+
+.panel .checks {
+  margin: 0;
+  padding: 0.75rem 1.25rem 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* Notices: a panel with a hard bar on its left edge */
 .notice {
-  border-top: 3px double var(--ink);
-  border-bottom: 1px solid var(--ink);
-  padding: 1.25rem 0;
-  margin: 1.5rem 0;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  padding: 1.1rem 1.25rem;
+  margin: 1.25rem 0;
   max-width: 46rem;
 }
 
 .notice-error {
-  border-top-color: var(--red);
-  border-bottom-color: var(--red);
+  border-color: var(--alert);
 }
 
 .notice-title {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   margin-bottom: 0.5rem;
 }
 
@@ -581,31 +781,37 @@ legend {
 pre.plain {
   margin: 0.75rem 0;
   padding: 0.75rem 1rem;
-  background: var(--paper-deep);
+  background: var(--panel-2);
   border: 1px solid var(--rule);
-  border-radius: var(--radius);
   overflow: auto;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
 .loading {
-  font-style: italic;
+  font-family: var(--mono);
+  font-size: 0.875rem;
   color: var(--ink-soft);
 }
 
-/* Results: ledger */
+/* ---------- Findings: the readout ---------- */
 .ledger {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem 3rem;
-  border-top: 3px double var(--ink);
-  border-bottom: 1px solid var(--ink);
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 0;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+.ledger > * {
+  padding: 1.25rem;
+}
+
+.ledger > * + * {
+  border-top: 1px solid var(--ink);
 }
 
 .big {
@@ -613,36 +819,47 @@ pre.plain {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 0 0.5rem;
+  gap: 0 0.6rem;
 }
 
+/* The big number sits on a highlighter strip. */
 .big-n {
-  font-size: clamp(3.5rem, 12vw, 5.5rem);
+  font-size: clamp(3.5rem, 11vw, 5.5rem);
   line-height: 1;
   font-weight: 700;
-  color: var(--red);
+  letter-spacing: -0.05em;
+  background: var(--mark);
+  color: var(--on-mark);
+  padding: 0 0.12em;
 }
 
 .big-l {
-  font-size: 1.25rem;
-  font-style: italic;
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .tally-title {
-  font-weight: 700;
-  font-size: 0.875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.4rem;
 }
 
 .tally-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.15rem 1rem;
-  padding-top: 0.6rem;
-  padding-bottom: 0.6rem;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--rule);
+}
+
+.tally-row:last-child {
+  border-bottom: 0;
+}
+
+.tally-k {
+  font-weight: 700;
 }
 
 .tally-n {
@@ -653,7 +870,7 @@ pre.plain {
 .bar {
   grid-column: 1 / -1;
   display: block;
-  height: 4px;
+  height: 6px;
   width: var(--w, 0);
   background: var(--ink);
 }
@@ -664,22 +881,22 @@ pre.plain {
   border-bottom: 1px solid var(--rule);
 }
 
-/* Filters */
+/* Filters: a toolbar */
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 1.75rem;
+  gap: 1rem 1.5rem;
   align-items: flex-end;
-  padding-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
   margin-bottom: 0.75rem;
-  border-bottom: 1px solid var(--rule);
+  background: var(--panel);
+  border: 1px solid var(--ink);
 }
 
 .fs.grow {
   flex: 1 1 14rem;
 }
 
-/* Let every filter shrink and wrap instead of pushing the row wider than the page. */
 .filters > .fs {
   min-width: 0;
 }
@@ -696,15 +913,31 @@ pre.plain {
   gap: 0;
 }
 
-/* Findings */
+/* Groups: each file or rule is a ruled sheet with a dark title bar */
 .groups > * + * {
-  margin-top: 2.5rem;
+  margin-top: 1.75rem;
+}
+
+.group {
+  background: var(--panel);
+  border: 2px solid var(--ink);
 }
 
 .group-head {
-  border-bottom: 2px solid var(--ink);
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.25rem;
+  background: var(--ink);
+  color: var(--panel);
+  padding: 0.75rem 1.25rem;
+}
+
+.group-head .meta,
+.group-head .why {
+  color: var(--panel);
+  opacity: 0.8;
+}
+
+.group-head code {
+  background: none;
+  padding: 0;
 }
 
 .group-head .meta {
@@ -716,12 +949,14 @@ pre.plain {
 }
 
 .group-title {
-  font-size: 1.625rem;
+  font-size: 1.25rem;
   overflow-wrap: anywhere;
 }
 
 .group-title.mono {
-  font-size: 1.3125rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .entries {
@@ -731,17 +966,19 @@ pre.plain {
 }
 
 .finding {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding: 1.25rem;
   border-bottom: 1px solid var(--rule);
-  max-width: 56rem;
+}
+
+.entries > .finding:last-child {
+  border-bottom: 0;
 }
 
 .finding-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.9rem;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
   margin-bottom: 0.3rem;
 }
 
@@ -755,8 +992,15 @@ pre.plain {
 
 .where {
   margin: 0 0 0.6rem;
-  font-size: 0.9375rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
   color: var(--ink-soft);
+}
+
+.where code {
+  background: none;
+  padding: 0;
+  font-size: 1em;
 }
 
 .why {
@@ -764,42 +1008,47 @@ pre.plain {
 }
 
 .note {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--ink-soft);
-  font-style: italic;
   max-width: var(--measure);
 }
 
-/* Severity: words first, red marks only what needs attention. */
+/* Severity: words plus a shape, never colour alone.
+   error = solid ink, warning = marker yellow, advisory = outline. */
 .sev,
 .tag {
   display: inline-block;
-  font-family: var(--serif);
-  font-size: 0.8125rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   padding: 0.1rem 0.5rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius);
+  border: 1.5px solid var(--ink);
   line-height: 1.5;
   text-decoration: none;
+  color: var(--ink);
+  background: transparent;
 }
 
 .sev-error {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--on-red);
+  background: var(--alert);
+  border-color: var(--alert);
+  color: var(--on-alert);
 }
 
 .sev-warning {
-  border-color: var(--red);
-  color: var(--red);
+  background: var(--mark);
+  border-color: var(--ink);
+  color: var(--on-mark);
 }
 
 .sev-advisory {
   border-color: var(--control);
   color: var(--ink-soft);
+}
+
+.group-head .sev-advisory {
+  color: var(--panel);
+  border-color: var(--panel);
 }
 
 .tag {
@@ -810,34 +1059,34 @@ pre.plain {
 
 a.tag:hover {
   border-style: solid;
+  background: var(--ink);
+  color: var(--panel);
+  border-color: var(--ink);
 }
 
 .tag-first {
   border-style: solid;
   background: var(--ink);
   border-color: var(--ink);
-  color: var(--paper);
+  color: var(--panel);
   font-weight: 700;
 }
 
-/* Code around a finding */
+/* Code around a finding: a numbered gutter, and the flagged line is highlighted like a marker pen. */
 .code {
   position: relative; /* contains the visually hidden text inside the scroll box */
   margin-top: 0.75rem;
-  padding: 0.5rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  background: var(--panel-2);
   overflow-x: auto;
   font-family: var(--mono);
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-size: 0.8125rem;
+  line-height: 1.6;
 }
 
 .cl {
   display: flex;
   min-width: max-content;
-  padding: 0.1875rem 0;
 }
 
 .ln {
@@ -855,23 +1104,22 @@ a.tag:hover {
 }
 
 .cl-hit {
-  background: var(--red-wash);
+  background: var(--mark-wash);
   font-weight: 700;
 }
 
 .cl-hit .ln {
-  background: var(--red);
-  color: var(--on-red);
-  border-right-color: var(--red);
+  background: var(--mark);
+  color: var(--on-mark);
+  border-right-color: var(--ink);
 }
 
-/* Diffs */
+/* ---------- Fixes: diffs ---------- */
 .guarantee {
-  border-top: 3px double var(--ink);
-  border-bottom: 1px solid var(--ink);
-  padding-top: 0.9rem;
-  padding-bottom: 0.9rem;
-  font-size: 1.1875rem;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  padding: 0.9rem 1.25rem;
+  font-size: 1.0625rem;
   max-width: 46rem;
 }
 
@@ -882,9 +1130,8 @@ a.tag:hover {
 .diff-wrap {
   position: relative;
   overflow-x: auto;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  background: var(--panel);
   margin-top: 0.5rem;
 }
 
@@ -892,8 +1139,8 @@ a.tag:hover {
   border-collapse: collapse;
   width: 100%;
   font-family: var(--mono);
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-size: 0.8125rem;
+  line-height: 1.6;
 }
 
 .diff td,
@@ -903,14 +1150,12 @@ a.tag:hover {
 }
 
 .diff th {
-  font-family: var(--serif);
+  font-family: var(--sans);
   font-size: 0.8125rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   text-align: left;
   padding-top: 0.35rem;
   padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--ink);
 }
 
 .dn {
@@ -923,6 +1168,7 @@ a.tag:hover {
 .ds {
   width: 1.5rem;
   user-select: none;
+  font-weight: 700;
 }
 
 .dt {
@@ -930,32 +1176,33 @@ a.tag:hover {
 }
 
 .hunk td {
-  background: var(--paper-deep);
+  background: var(--panel-2);
   color: var(--ink-soft);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   padding-top: 0.15rem;
   padding-bottom: 0.15rem;
+  border-block: 1px solid var(--rule);
 }
 
+/* Removed lines are red on a wash; added lines are marker yellow. The sign column says it too. */
 .d-del,
 tr.d-del .dt {
-  background: var(--red-wash);
+  background: var(--alert-wash);
 }
 
 .d-add,
 tr.d-add .dt {
-  background: var(--paper-deep);
+  background: var(--mark-wash);
   font-weight: 700;
 }
 
 .d-del .ds,
 tr.d-del .ds {
-  color: var(--red);
-  font-weight: 700;
+  color: var(--alert);
 }
 
 .d-empty {
-  background: var(--paper-deep);
+  background: var(--panel-2);
 }
 
 .diff-split .dt {
@@ -963,26 +1210,60 @@ tr.d-del .ds {
   min-width: 16rem;
 }
 
-.confirm {
-  border-top: 3px double var(--red);
-  border-bottom: 1px solid var(--red);
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
+/* "Do this next" and "are you sure" are the only places a whole block is highlighted. */
+.confirm,
+.next {
+  background: var(--mark);
+  color: var(--on-mark);
+  border: 2px solid var(--ink);
   max-width: 46rem;
+}
+
+.confirm {
+  padding: 1.25rem;
+}
+
+.confirm .btn-primary,
+.next .btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--mark);
+}
+
+.confirm .btn-primary:hover,
+.next .btn-primary:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.confirm .btn-quiet {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.confirm .btn-quiet:hover {
+  color: var(--panel);
+}
+
+.confirm .meta,
+.confirm .help,
+.next .meta,
+.next-d {
+  color: inherit;
 }
 
 .section-title {
   margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.375rem;
 }
 
 .verdict {
-  font-size: 1.25rem;
-  font-style: italic;
+  font-size: 1.1875rem;
+  font-weight: 700;
 }
 
 .verdict-open {
-  color: var(--red);
+  color: var(--alert);
 }
 
 .log {
@@ -994,9 +1275,10 @@ tr.d-del .ds {
 
 .log th {
   text-align: left;
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-soft);
   padding: 0.4rem 0.75rem 0.4rem 0;
   border-bottom: 2px solid var(--ink);
 }
@@ -1013,18 +1295,14 @@ tr.d-del .ds {
 }
 
 @media (min-width: 56rem) {
-  .folio-row {
-    grid-template-columns: 11rem minmax(0, 1fr);
-  }
-
-  .margin {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
   .ledger {
     grid-template-columns: 1.1fr 1fr 1fr;
     align-items: start;
+  }
+
+  .ledger > * + * {
+    border-top: 0;
+    border-left: 1px solid var(--ink);
   }
 }
 
@@ -1037,7 +1315,7 @@ tr.d-del .ds {
   .log tr {
     display: block;
     padding-top: 0.6rem;
-  padding-bottom: 0.6rem;
+    padding-bottom: 0.6rem;
     border-bottom: 1px solid var(--rule);
   }
 
@@ -1049,19 +1327,13 @@ tr.d-del .ds {
 
   .log td::before {
     content: attr(data-label) ": ";
-    font-family: var(--serif);
-    font-size: 0.8125rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 0.75rem;
     color: var(--ink-soft);
   }
 }
 
 @media (max-width: 30rem) {
-  body {
-    font-size: 1rem;
-  }
-
   .btn {
     width: 100%;
   }
@@ -1078,29 +1350,31 @@ tr.d-del .ds {
   }
 }
 
-
-/* Scan: how it works, then one panel */
+/* ---------- Scan: how it works, then one panel ---------- */
 .how {
   list-style: none;
-  margin: 0 0 2rem;
-  padding: 1rem 0;
+  margin: 0 0 1.75rem;
+  padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem 2rem;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--rule);
+  background: var(--panel);
+  border: 1px solid var(--ink);
 }
 
 .how-step {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
+  padding: 1rem 1.1rem;
+}
+
+.how-step + .how-step {
+  border-top: 1px solid var(--rule);
 }
 
 .how-n {
-  font-size: 2rem;
-  line-height: 1;
-  font-style: italic;
+  font-family: var(--mono);
+  font-size: 0.75rem;
   color: var(--ink-soft);
 }
 
@@ -1111,62 +1385,36 @@ tr.d-del .ds {
 
 .how-d {
   margin: 0.1rem 0 0;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--ink-soft);
 }
 
-.panel {
-  max-width: 46rem;
-  border-top: 3px double var(--ink);
-  border-bottom: 1px solid var(--ink);
-}
-
-.panel-body {
-  border: 0;
-  margin: 0;
-  padding: 1.5rem 0 1rem;
-  min-width: 0;
-}
-
-.panel-foot {
-  padding: 1rem 0 1.25rem;
-  border-top: 1px solid var(--rule);
-}
-
-.panel .checks {
-  margin: 0;
-  padding: 0.75rem 0 1rem;
-  border-top: 1px solid var(--rule);
-}
-
-/* Findings: explain the numbers, then say what to do */
+/* ---------- Findings: explain the numbers, then say what to do ---------- */
 .big-wrap .help {
   margin-top: 0.5rem;
 }
 
 .tally-d {
   grid-column: 1 / -1;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--ink-soft);
   line-height: 1.4;
 }
 
 .next {
-  max-width: 46rem;
-  margin: 0 0 2rem;
-  padding: 1rem 0 1.25rem;
-  border-bottom: 1px solid var(--rule);
+  margin: 0 0 1.75rem;
+  padding: 1.1rem 1.25rem 1.25rem;
 }
 
 .next-t {
   margin: 0 0 0.2rem;
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .next-d {
   margin: 0 0 0.9rem;
-  color: var(--ink-soft);
   max-width: var(--measure);
 }
 
@@ -1178,50 +1426,63 @@ tr.d-del .ds {
   font-size: 1em;
 }
 
-/* Rules: key to the words used */
+/* ---------- Rules: key to the words used ---------- */
 .glossary {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.25rem 2rem;
   max-width: 46rem;
-  margin: 0 0 2rem;
-  padding: 1rem 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--rule);
+  margin: 0 0 1.75rem;
+  padding: 0.5rem 1.1rem;
+  background: var(--panel);
+  border: 1px solid var(--ink);
 }
 
 .glossary dt {
   font-weight: 700;
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
 }
 
 .glossary dd {
-  margin: 0;
-  font-size: 0.9375rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.875rem;
   color: var(--ink-soft);
+}
+
+.rules .finding {
+  border: 0;
+}
+
+.rules {
+  background: var(--panel);
+  border: 1px solid var(--ink);
+}
+
+.rules > li + li {
+  border-top: 1px solid var(--rule);
 }
 
 @media (min-width: 48rem) {
   .how {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .how-step + .how-step {
+    border-top: 0;
+    border-left: 1px solid var(--rule);
+  }
+
   .glossary {
     grid-template-columns: 11rem 1fr;
+    gap: 0 1.5rem;
   }
+
   .glossary dt {
     margin-top: 0;
+    padding-block: 0.4rem;
   }
-}
 
-@media (max-width: 47.99rem) {
-  .nav-ref {
-    padding-left: 0;
-    border-left: 0;
-  }
-  .nav-steps .nav-step + .nav-step .nav-link::before {
-    display: none;
-  }
-  .nav-list {
-    gap: 0.25rem 1.5rem;
+  .glossary dd {
+    margin: 0;
+    padding-block: 0.4rem;
   }
 }

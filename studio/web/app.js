@@ -141,7 +141,7 @@ function drawNav() {
       h(
         'a',
         { href: '#/' + r.id, 'aria-current': r.id === cur.id ? 'page' : false, class: 'nav-link' },
-        h('span', { class: 'nav-n', 'aria-hidden': 'true', text: String(i + 1) }),
+        h('span', { class: 'nav-n', 'aria-hidden': 'true', text: String(i + 1).padStart(2, '0') }),
         h('span', { text: r.label }),
         extra,
         waiting ? h('span', { class: 'sr-only', text: ' (available after a scan)' }) : null,
