@@ -125,18 +125,18 @@ export function projectChooser(ctx, { onOpened, onCancel }) {
   const message = h('div', { class: 'slot', 'aria-live': 'polite' });
   const choices = h('div', { class: 'slot' });
   const browserSlot = h('div', { class: 'slot' });
-  const pickBtn = h('button', { type: 'button', class: 'btn btn-primary', onclick: () => pick() }, 'Choose folder…');
-  const browseBtn = h('button', { type: 'button', class: 'btn', 'aria-expanded': 'false', onclick: () => toggleBrowser() }, 'Browse folders');
-  const input = h('input', { id: ids.path, class: 'field mono', type: 'text', autocomplete: 'off', spellcheck: 'false', placeholder: '/Users/you/Desktop/my-website' });
+  const home = state.info?.home || '/Users/you';
+  const pickBtn = h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => pick() }, 'Choose folder…');
+  const browseBtn = h('button', { type: 'button', class: 'linkish', 'aria-expanded': 'false', onclick: () => toggleBrowser() }, 'browse your folders here');
+  const input = h('input', { id: ids.path, class: 'field mono', type: 'text', autocomplete: 'off', spellcheck: 'false', placeholder: `${home}/Desktop/my-website` });
   const openBtn = h('button', { type: 'submit', class: 'btn' }, 'Open');
-  const drop = h('div', { class: 'dropzone', 'aria-hidden': 'true' }, h('span', { class: 'drop-t', text: 'Drop your project folder anywhere on this page' }));
+  const drop = h('div', { class: 'dropzone', 'aria-hidden': 'true' }, h('span', { class: 'drop-t', text: 'Drop the folder here to open it' }));
   const el = h(
     'section',
     { class: 'choose', 'aria-labelledby': ids.head },
     h('h2', { class: 'choose-t', id: ids.head, text: 'Which project do you want to check?' }),
-    h('p', { class: 'help', text: 'Pick the folder that holds your website or app. Choosing it only looks inside; nothing is changed or uploaded.' }),
-    h('div', { class: 'choose-actions' }, pickBtn, browseBtn, onCancel ? h('button', { type: 'button', class: 'btn btn-quiet', onclick: onCancel }, 'Keep the current project') : null),
-    drop,
+    h('p', { class: 'help', text: 'Pick the folder that holds your website or app. This only looks inside; nothing is changed or uploaded.' }),
+    h('div', { class: 'choose-main' }, pickBtn),
     h(
       'form',
       {
@@ -147,13 +147,16 @@ export function projectChooser(ctx, { onOpened, onCancel }) {
           open(input.value);
         },
       },
-      h('label', { for: ids.path, class: 'label', text: 'Or paste the folder’s path' }),
+      h('label', { for: ids.path, class: 'label', text: 'Or paste its path' }),
       h('div', { class: 'row' }, input, openBtn),
-      h('p', { class: 'help', text: 'On a Mac, select the folder in Finder, press Option + Command + C, and paste here.' }),
+      h('p', { class: 'help', text: 'On a Mac: select the folder in Finder, press Option + Command + C, then paste here.' }),
     ),
+    h('p', { class: 'help choose-more' }, 'You can also drop the folder anywhere on this page, or ', browseBtn, '.'),
+    drop,
     choices,
     message,
     browserSlot,
+    onCancel ? h('div', { class: 'choose-foot' }, h('button', { type: 'button', class: 'btn btn-quiet', onclick: onCancel }, 'Keep the current project')) : null,
   );
 
   const browser = folderBrowser(ctx, { onUse: (p) => open(p) });
@@ -187,7 +190,7 @@ export function projectChooser(ctx, { onOpened, onCancel }) {
     const show = force ?? browserSlot.hidden;
     browserSlot.hidden = !show;
     browseBtn.setAttribute('aria-expanded', String(show));
-    browseBtn.textContent = show ? 'Hide folder list' : 'Browse folders';
+    browseBtn.textContent = show ? 'hide the folder list' : 'browse your folders here';
     if (show) browser.start();
   }
 
@@ -232,7 +235,6 @@ export function projectChooser(ctx, { onOpened, onCancel }) {
       if (err.code === 'no_dialog') {
         canPick = false;
         pickBtn.hidden = true;
-        browseBtn.classList.add('btn-primary');
         message.append(notice(err, 'notice'));
         toggleBrowser(true);
       } else message.append(notice(err));

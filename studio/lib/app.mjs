@@ -119,7 +119,7 @@ export function createApp(opts) {
       buildCommand: engine.BUILD_COMMAND,
       limits: { maxFileBytes: MAX_FILE_BYTES, maxSnippetBytes: MAX_SNIPPET_BYTES },
       snippetExts: [...SNIPPET_EXTS],
-      capabilities: { folders: true, snippets: true, apply: true, changelog: true, switchProject: !lockRoot },
+      capabilities: { folders: true, snippets: true, apply: true, changelog: true, chooseProject: true, switchProject: !lockRoot },
     };
   }
 

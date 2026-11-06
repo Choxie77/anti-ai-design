@@ -38,13 +38,35 @@ export function pathCandidates(input, { home = os.homedir(), bases = [] } = {}) 
     t = t.replace(/\\(.)/g, '$1');
   }
   if (!t) return [];
-  if (t === '~' || t.startsWith('~/') || t.startsWith('~\\')) t = path.join(home, t.slice(1));
-  if (path.isAbsolute(t)) return [path.normalize(t)];
+  // Paths copied out of a web address or a link keep their %20 and friends. Try the decoded spelling first
+  // (a folder really called "a%20b" still works, because the raw spelling stays as the fallback).
+  const spellings = [t];
+  if (/%[0-9a-f]{2}/i.test(t)) {
+    try {
+      const decoded = decodeURIComponent(t);
+      if (decoded !== t && !decoded.includes('\0')) spellings.unshift(decoded);
+    } catch {
+      /* not valid percent-encoding: keep the raw spelling only */
+    }
+  }
   const out = [];
-  for (const base of [...bases, home, path.join(home, 'Desktop'), path.join(home, 'Documents')]) {
-    if (!base) continue;
-    const p = path.resolve(base, t);
+  const add = (p) => {
     if (!out.includes(p)) out.push(p);
+  };
+  for (let s of spellings) {
+    if (s === '~' || s.startsWith('~/') || s.startsWith('~\\')) s = path.join(home, s.slice(1));
+    if (path.isAbsolute(s)) {
+      add(path.normalize(s));
+      continue;
+    }
+    // "Users/Adam/Desktop/site": an absolute path that lost its first slash when it was copied.
+    if (path.sep === '/') {
+      const first = s.split('/')[0];
+      if (first && first !== '.' && first !== '..' && fs.existsSync(path.join('/', first))) add(path.normalize('/' + s));
+    }
+    for (const base of [...bases, home, path.join(home, 'Desktop'), path.join(home, 'Documents')]) {
+      if (base) add(path.resolve(base, s));
+    }
   }
   return out;
 }
@@ -64,7 +86,8 @@ export function resolveTyped(input, opts) {
       /* try the next one */
     }
   }
-  throw new HttpError(404, 'not_found', `There is no folder at "${String(input).trim().slice(0, 200)}". Check the spelling, or use "Choose folder" to pick it.`);
+  // Not "not_found": that code means "no such API route", which the page reads as an out-of-date server.
+  throw new HttpError(404, 'no_such_folder', `There is no folder at "${String(input).trim().slice(0, 200)}". Check the spelling, or use "Choose folder" to pick it.`);
 }
 
 /** The whole disk and the whole home folder are not projects; scanning them would read everything. */

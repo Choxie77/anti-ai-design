@@ -1,5 +1,5 @@
 import { h, clear, plural, copyText, nextId, s, reducedMotion } from '../ui.js';
-import { EngineError } from '../engine.js';
+import { EngineError, canSwitchProject, serverIsOutdated, STALE_SERVER } from '../engine.js';
 import { CATEGORY } from '../glossary.js';
 import { SAMPLE, SAMPLE_EXT } from '../sample.js';
 import { MINI } from '../art.js';
@@ -65,7 +65,7 @@ export function renderScan(main, ctx) {
   let browseReq = 0;
   let scannable = null; // what the detector would read in the chosen folder, from the last browse
   let chooser = null; // the "which project?" card while it is on screen
-  const canSwitch = info?.capabilities?.switchProject !== false;
+  const canSwitch = canSwitchProject(info);
 
   const errorSlot = h('div', { class: 'slot', id: ids.err });
   const readingSlot = h('div', { class: 'slot reading-slot' });
@@ -136,7 +136,8 @@ export function renderScan(main, ctx) {
     const noProject = !info?.root;
     scopeBox.hidden = noProject || choosing || form.mode !== 'folder';
     summarySlot.hidden = noProject || choosing;
-    submit.textContent = form.mode === 'folder' ? (noProject ? 'Choose a project first' : form.path.trim() ? 'Scan this folder' : 'Scan whole project') : 'Scan this code';
+    submit.textContent = form.mode === 'folder' ? (noProject ? 'Choose a project first' : form.path.trim() ? (/\.[a-z0-9]+$/i.test(form.path.trim()) ? 'Scan this file' : 'Scan this folder') : 'Scan whole project') : 'Scan this code';
+    submit.hidden = form.mode === 'folder' && choosing; // one thing to do at a time: pick the project first
     submit.disabled = busy || !engineOk || (form.mode === 'folder' && (noProject || (scannable !== null && scannable.files === 0)));
   }
 
@@ -251,6 +252,7 @@ export function renderScan(main, ctx) {
     chooser = null;
     clear(projectSlot);
     if (info?.root && !choosing) {
+      if (serverIsOutdated(info)) projectSlot.append(h('div', { class: 'notice notice-error', role: 'alert' }, h('p', { class: 'notice-title', text: 'Restart the Studio to switch projects' }), h('p', { text: STALE_SERVER })));
       projectSlot.append(
         h(
           'div',

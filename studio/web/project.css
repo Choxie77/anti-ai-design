@@ -21,15 +21,30 @@
   margin-top: 0.4rem;
 }
 
-.choose-actions {
+.choose-main {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
 }
 
-/* A drop target in words. Dropping works anywhere on the page; this just says so. */
+.btn-lg {
+  padding: 0.8rem 1.6rem;
+  font-size: 1.0625rem;
+}
+
+.choose-more {
+  margin-top: 0.6rem;
+}
+
+.choose-foot {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* The drop target only appears while a folder is being dragged over the page; dropping works anywhere on it. */
 .dropzone {
-  padding: 1rem;
+  display: none;
+  padding: 1.25rem 1rem;
   border: 2px dashed var(--control);
   color: var(--ink-soft);
   font-size: 0.9375rem;
@@ -41,6 +56,7 @@
 }
 
 .choose.is-dragging .dropzone {
+  display: block;
   border-style: solid;
   border-color: var(--ink);
   background: var(--mark-wash);
@@ -239,4 +255,9 @@
 
 .scope-body {
   margin-top: 1rem;
+}
+
+/* A button's own display rule would otherwise win over the hidden attribute. */
+.btn[hidden] {
+  display: none;
 }

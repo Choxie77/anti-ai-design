@@ -1,4 +1,4 @@
-import { createEngine } from './engine.js';
+import { createEngine, canSwitchProject, serverIsOutdated, STALE_SERVER } from './engine.js';
 import { h, clear, plural } from './ui.js';
 import { fixableIds } from './model.js';
 import { renderScan } from './views/scan.js';
@@ -182,7 +182,7 @@ function drawColophon() {
     return;
   }
   const e = state.info.engine;
-  const canSwitch = state.info.capabilities?.switchProject !== false;
+  const canSwitch = canSwitchProject(state.info);
   const change = canSwitch
     ? h('a', { href: '#/scan', class: 'linkish', onclick: () => ((state.choosing = true), location.hash === '#/scan' && route_()) }, 'Change project')
     : null;
@@ -190,6 +190,7 @@ function drawColophon() {
     state.info.root
       ? h('p', { class: 'meta' }, 'Project folder ', h('code', { text: state.info.root }), ' · the Studio only reads and changes files inside it. ', change)
       : h('p', { class: 'meta' }, 'No project chosen yet. ', change),
+    ...(serverIsOutdated(state.info) ? [h('p', { class: 'meta stale', role: 'alert' }, STALE_SERVER)] : []),
     h('p', { class: 'meta' }, 'Detector ', h('code', { text: e.found ? e.path : 'not found' }), e.version ? ` · version ${e.version}` : '', ' · Everything runs on this computer; nothing is uploaded.'),
   );
 }

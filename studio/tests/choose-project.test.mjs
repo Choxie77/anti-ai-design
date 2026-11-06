@@ -7,7 +7,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { pathCandidates, pickFolderNative, readRecent, rememberRecent, isTooBroad } from '../lib/folders.mjs';
 import { startApp, makeDir, write, GRADIENT } from './helpers.mjs';
-import { LocalEngine, WasmEngine, EngineError } from '../web/engine.js';
+import { LocalEngine, WasmEngine, EngineError, serverIsOutdated, canSwitchProject } from '../web/engine.js';
 
 // ---- understanding what a person typed ------------------------------------------------------------------
 
@@ -367,4 +367,52 @@ test('every script the page loads is valid JavaScript', () => {
   for (const f of files) {
     assert.doesNotThrow(() => execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' }), path.relative(webDir, f));
   }
+});
+
+// ---- what people really paste ---------------------------------------------------------------------------
+
+test('typed paths: a lost first slash and %20 from a web address are put right', () => {
+  const home = '/Users/sam';
+  // "Users" exists at the top of the disk on a Mac; "/Users/..." is tried before anything under the home folder.
+  const c = pathCandidates('Users/Adam/Desktop/Anti%20ai%20design/mock-ai-site/index.html', { home });
+  assert.equal(c[0], '/Users/Adam/Desktop/Anti ai design/mock-ai-site/index.html');
+  assert.ok(c.includes('/Users/Adam/Desktop/Anti%20ai%20design/mock-ai-site/index.html'), 'the raw spelling stays as a fallback');
+  assert.deepEqual(pathCandidates('/a/my%20site', { home }), ['/a/my site', '/a/my%20site']);
+  assert.deepEqual(pathCandidates('/a/100%', { home }), ['/a/100%'], 'a stray % is not an escape');
+  assert.deepEqual(pathCandidates('/a/%zz', { home }), ['/a/%zz']);
+});
+
+test('pasting a decoded, slash-less path opens the folder; a missing folder is not mistaken for an old server', async () => {
+  const s = await startApp({ noRoot: true });
+  try {
+    const site = path.join(s.home, 'My Site');
+    write(site, 'index.html', '<p>hi</p>');
+    const odd = site.replace(/^\//, '').replace(/ /g, '%20');
+    const ok = await s.post('/api/project', { path: odd });
+    assert.equal(ok.status, 200, JSON.stringify(ok.json));
+    assert.equal(ok.json.root, fs.realpathSync(site));
+    const eng = new LocalEngine({ baseUrl: s.base, token: s.token });
+    await assert.rejects(eng.openProject(path.join(s.home, 'nope')), (e) => e.code === 'no_such_folder');
+  } finally {
+    await s.close();
+  }
+});
+
+test('the page can tell a server that predates the project chooser, and a locked one', async () => {
+  assert.equal(serverIsOutdated({ capabilities: { folders: true, switchProject: undefined } }), true);
+  assert.equal(canSwitchProject({ capabilities: { folders: true } }), false);
+  assert.equal(serverIsOutdated(null), false);
+  const s = await startApp();
+  try {
+    const info = (await s.get('/api/info')).json;
+    assert.equal(serverIsOutdated(info), false);
+    assert.equal(canSwitchProject(info), true);
+  } finally {
+    await s.close();
+  }
+  const old = new LocalEngine({
+    baseUrl: '',
+    fetchImpl: async () => ({ ok: false, status: 404, json: async () => ({ error: { code: 'not_found', message: 'No such API route.' } }) }),
+  });
+  await assert.rejects(old.openProject('/x'), (e) => e.code === 'stale_server' && /restart|start it again/i.test(e.message));
 });

@@ -30,6 +30,19 @@ export class EngineError extends Error {
   }
 }
 
+/** What to tell a person whose Studio server was started before this page was updated. */
+export const STALE_SERVER = 'The Studio server that is running is older than this page, so it does not know how to do this yet. Stop it (press Ctrl+C in the terminal where you started it), start it again with "node studio/server.mjs", then reload this page.';
+
+/** True when the server reports its abilities but lacks the project chooser: it was started before an update. */
+export function serverIsOutdated(info) {
+  return Boolean(info && info.capabilities && info.capabilities.chooseProject !== true);
+}
+
+/** Whether the page may offer "choose another project": the server must be current and not locked to one folder. */
+export function canSwitchProject(info) {
+  return !serverIsOutdated(info) && info?.capabilities?.switchProject !== false;
+}
+
 export class LocalEngine {
   constructor({ baseUrl = '', token = '', fetchImpl } = {}) {
     this.baseUrl = baseUrl;
@@ -59,6 +72,8 @@ export class LocalEngine {
     }
     if (!res.ok) {
       const e = data && data.error;
+      // A page newer than the server behind it asks for routes the server has never heard of.
+      if (res.status === 404 && e?.message === 'No such API route.') throw new EngineError('stale_server', STALE_SERVER);
       throw new EngineError(e?.code || 'http_' + res.status, e?.message || `The server answered ${res.status}.`, {
         status: res.status,
         details: e?.details,
