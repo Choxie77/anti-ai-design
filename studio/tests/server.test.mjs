@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { startApp, write, GRADIENT, withEnv } from './helpers.mjs';
 
 const json = { 'content-type': 'application/json' };
@@ -342,7 +343,7 @@ test('static files: served with a strict CSP, nothing outside web/', async () =>
 });
 
 test('the web files make no external requests', () => {
-  const dir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'web');
+  const dir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'web');
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
   for (const f of walk(dir)) {
     const text = fs.readFileSync(f, 'utf8');
