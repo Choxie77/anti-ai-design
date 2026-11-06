@@ -1,15 +1,25 @@
-import { h, clear, plural, copyText, nextId } from '../ui.js';
+import { h, clear, plural, copyText, nextId, s, reducedMotion } from '../ui.js';
 import { EngineError } from '../engine.js';
 import { CATEGORY } from '../glossary.js';
+import { SAMPLE, SAMPLE_EXT } from '../sample.js';
+import { MINI } from '../art.js';
 
-const EXAMPLE = `.hero h1 {
-  font-size: 3rem;
-  background: linear-gradient(90deg, #6366f1, #ec4899);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+/** A page of code being read by a red band. Used while a scan runs. */
+export function readingAnimation(lines) {
+  const widths = [70, 120, 90, 150, 60, 110, 130, 80];
+  return h(
+    'div',
+    { class: 'reading', 'aria-hidden': 'true' },
+    s(
+      'svg',
+      { viewBox: '0 0 200 96', class: 'reading-svg', focusable: 'false' },
+      s('rect', { x: 1, y: 1, width: 198, height: 94, rx: 3, class: 'f-paper s-ink' }),
+      ...widths.map((w, i) => s('rect', { x: 14, y: 10 + i * 10.5, width: w, height: 5, rx: 2.5, class: 'f-rule' })),
+      s('g', { class: 'a-sweep sweep reading-sweep', vars: {} }, s('rect', { x: 2, y: 6, width: 196, height: 14, class: 'sweep-band' }), s('rect', { x: 2, y: 6, width: 196, height: 1.5, class: 'f-red' })),
+    ),
+    h('p', { class: 'reading-t', text: lines ? `Reading ${plural(lines, 'line')} of code…` : 'Reading your code…' }),
+  );
 }
-`;
 
 export function renderScan(main, ctx) {
   const { engine, state, go, announce } = ctx;
@@ -22,6 +32,7 @@ export function renderScan(main, ctx) {
   let browseReq = 0;
 
   const errorSlot = h('div', { class: 'slot', id: ids.err });
+  const readingSlot = h('div', { class: 'slot reading-slot' });
   const folderBody = h('div', { class: 'stack' });
   const snippetBody = h('div', { class: 'stack' });
   const browseList = h('div', { class: 'browse', 'aria-live': 'polite' });
@@ -140,8 +151,8 @@ export function renderScan(main, ctx) {
     );
   }
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  async function onSubmit(e, { minMs = 0 } = {}) {
+    if (e) e.preventDefault();
     if (busy) return;
     let input;
     if (form.mode === 'snippet') {
@@ -161,8 +172,13 @@ export function renderScan(main, ctx) {
     submit.disabled = true;
     submit.setAttribute('aria-busy', 'true');
     announce('Scanning');
+    clear(readingSlot).append(readingAnimation(input.snippet ? input.snippet.split('\n').length : 0));
     try {
+      const started = Date.now();
       const scan = await engine.scan(input);
+      // Guided runs wait a moment so the reading animation can play once; normal scans never wait.
+      const wait = reducedMotion() ? 0 : minMs - (Date.now() - started);
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       if (!alive) return;
       ctx.setScan(scan, input);
       announce(`Scan finished: ${plural(scan.summary.total, 'finding')}`);
@@ -170,6 +186,7 @@ export function renderScan(main, ctx) {
     } catch (err) {
       if (!alive) return;
       busy = false;
+      clear(readingSlot);
       submit.removeAttribute('aria-busy');
       sync();
       showError(err);
@@ -193,12 +210,12 @@ export function renderScan(main, ctx) {
       h('button', {
         type: 'button',
         class: 'linkish',
-        text: 'Fill in a small example',
+        text: 'Fill in a sample with real problems in it',
         onclick: () => {
-          form.snippet = EXAMPLE;
-          form.ext = 'css';
-          code.value = EXAMPLE;
-          extSelect.value = 'css';
+          form.snippet = SAMPLE;
+          form.ext = SAMPLE_EXT;
+          code.value = SAMPLE;
+          extSelect.value = SAMPLE_EXT;
         },
       }),
       ' Pasted code is held in a private temporary folder and deleted right after the scan.',
@@ -221,10 +238,10 @@ export function renderScan(main, ctx) {
     'ol',
     { class: 'how', 'aria-label': 'How the Studio works' },
     [
-      ['Scan', 'The detector reads your code. A scan never changes a file.'],
-      ['Findings', 'Each mark is listed with the reason it matters and the exact line of code.'],
-      ['Fixes', 'Only mechanical fixes are offered. You see the change first and confirm it.'],
-    ].map(([t, d], i) => h('li', { class: 'how-step' }, h('span', { class: 'how-n', 'aria-hidden': 'true', text: String(i + 1) }), h('div', {}, h('p', { class: 'how-t', text: t }), h('p', { class: 'how-d', text: d })))),
+      ['Scan', 'The detector reads your code. A scan never changes a file.', 'scan'],
+      ['Findings', 'Each mark is listed with the reason it matters and the exact line of code.', 'results'],
+      ['Fixes', 'Only mechanical fixes are offered. You see the change first and confirm it.', 'fixes'],
+    ].map(([t, d, key], i) => h('li', { class: 'how-step' }, h('span', { class: 'how-art' }, MINI[key]()), h('div', {}, h('p', { class: 'how-t' }, h('span', { class: 'how-n', 'aria-hidden': 'true', text: `${i + 1}` }), t), h('p', { class: 'how-d', text: d })))),
   );
 
   const checks = h('p', { class: 'meta checks' });
@@ -241,12 +258,20 @@ export function renderScan(main, ctx) {
     })
     .catch(() => {});
 
+  const startHere = h(
+    'section',
+    { class: 'start-here', 'aria-labelledby': 'sh-h' },
+    h('div', { class: 'start-copy' }, h('h2', { class: 'start-t', id: 'sh-h', text: 'New here?' }), h('p', { class: 'start-d', text: 'Take a short illustrated tour, or try the Studio on a small sample. Nothing in your project is touched either way.' })),
+    h('div', { class: 'start-actions' }, h('button', { type: 'button', class: 'btn btn-primary', disabled: !engineOk, onclick: () => ctx.runSample() }, 'Try it on a sample'), h('a', { class: 'btn', href: '#/welcome', text: 'Take the tour' }), h('a', { class: 'btn btn-quiet', href: '#/guide', text: 'Browse the field guide' })),
+  );
+
   main.append(
     h(
       'div',
       { class: 'screen' },
       h('h1', { text: 'Scan your project' }),
       h('p', { class: 'lede', text: 'The detector reads your HTML, CSS and component code and flags what makes an interface look machine-generated, plus basic craft and accessibility slips.' }),
+      startHere,
       how,
       engineNotice,
       h(
@@ -260,7 +285,7 @@ export function renderScan(main, ctx) {
           folderBody,
           snippetBody,
         ),
-        h('div', { class: 'panel-foot' }, errorSlot, submit, h('p', { class: 'help', text: 'Reading only. You will review the results before anything can be fixed.' })),
+        h('div', { class: 'panel-foot' }, errorSlot, readingSlot, submit, h('p', { class: 'help', text: 'Reading only. You will review the results before anything can be fixed.' })),
         checks,
       ),
     ),
@@ -268,6 +293,11 @@ export function renderScan(main, ctx) {
 
   sync();
   if (engineOk) loadBrowse();
+  // "Try it on a sample" lands here with the sample filled in and asks for the scan to run itself.
+  if (state.autoRun && engineOk) {
+    state.autoRun = false;
+    setTimeout(() => alive && onSubmit(null, { minMs: 1600 }), 350);
+  }
   return () => {
     alive = false;
   };

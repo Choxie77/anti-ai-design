@@ -679,6 +679,15 @@ pre.plain {
   flex: 1 1 14rem;
 }
 
+/* Let every filter shrink and wrap instead of pushing the row wider than the page. */
+.filters > .fs {
+  min-width: 0;
+}
+
+.fs.check {
+  flex: 0 1 14rem;
+}
+
 .fs .field {
   max-width: none;
 }

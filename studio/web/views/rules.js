@@ -1,5 +1,6 @@
 import { h, clear, plural } from '../ui.js';
 import { SEVERITY, CATEGORY, categoryLabel, severityLabel } from '../glossary.js';
+import { specimenForRule } from '../guide-content.js';
 
 export function renderRules(main, ctx) {
   const { engine, state } = ctx;
@@ -29,6 +30,7 @@ export function renderRules(main, ctx) {
           h('div', { class: 'finding-head' }, h('h2', { class: 'finding-title', text: r.name }), h('span', { class: `sev sev-${r.severity}`, text: severityLabel(r.severity) }), r.firstParty ? h('span', { class: 'tag tag-first', title: 'Written for Anti-AI Design', text: 'Anti-AI Design' }) : h('span', { class: 'tag', title: 'Comes with the underlying detection engine', text: 'Core engine' })),
           h('p', { class: 'where' }, h('code', { text: r.id }), ` · ${categoryLabel(r.category)}`, r.scopes.length ? ` · checks ${r.scopes.join(', ')}` : ''),
           h('p', { class: 'why', text: r.description }),
+          specimenForRule(r.id) ? h('p', { class: 'meta' }, h('a', { href: `#/guide/${specimenForRule(r.id).id}`, text: 'See this one side by side with a better version' })) : null,
         ),
       );
     }

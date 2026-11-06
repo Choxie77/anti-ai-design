@@ -1,6 +1,19 @@
 import { h, clear, plural, copyText } from '../ui.js';
 import { compareRescan } from '../model.js';
 import { unifiedDiff, splitDiff } from './diffview.js';
+import { startCoach } from '../coach.js';
+import { setFlag } from '../onboarding.js';
+import { checkMark } from '../art.js';
+
+/** Two bars that show how far the finding count dropped. */
+function scoreVisual(before, after) {
+  const bar = (label, n, cls) => {
+    const fill = h('span', { class: `score-bar ${cls}` });
+    fill.style.setProperty('--w', `${before ? Math.max(n ? 4 : 0, Math.round((n / before) * 100)) : 0}%`);
+    return h('div', { class: 'score-row' }, h('span', { class: 'score-k', text: label }), h('span', { class: 'score-track' }, fill), h('span', { class: 'score-n', text: String(n) }));
+  };
+  return h('figure', { class: 'score', 'aria-label': `Findings before the fix: ${before}. After: ${after}.` }, after < before ? checkMark() : null, h('div', { class: 'score-rows' }, bar('Before', before, 'is-before'), bar('After', after, 'is-after')));
+}
 
 export function renderFixes(main, ctx) {
   const { engine, state, announce } = ctx;
@@ -154,12 +167,35 @@ export function renderFixes(main, ctx) {
     body.append(
       guarantee(),
       h('p', { class: 'lede' }, `${plural(p.fixCount, 'fix', 'fixes')} in ${plural(p.fileCount, 'file')}. Read what would change, then decide.`),
+      h('button', { type: 'button', class: 'btn btn-quiet walk', onclick: () => startWalk() }, 'Walk me through this page'),
       h('p', { class: 'help legend' }, 'How to read it: lines starting with ', h('code', { text: '−' }), ' are removed, lines starting with ', h('code', { text: '+' }), ' are added, and unmarked lines are unchanged context.'),
       layoutToggle(),
       diffs(p.files),
       fx.confirm
         ? confirmPanel(p)
         : h('div', { class: 'row' }, h('button', { id: 'apply-btn', type: 'button', class: 'btn btn-primary', text: `Apply ${plural(p.fixCount, 'fix', 'fixes')}`, onclick: () => { fx.confirm = true; draw(); } }), h('p', { class: 'help', text: 'You will be asked to confirm before anything is written.' })),
+    );
+    // Arriving from the sample walkthrough: explain this screen once, then leave the choice to the person.
+    if (state.guide === 'fixes' && !fx.coached) {
+      fx.coached = true;
+      setTimeout(() => alive && startWalk(), 450);
+    }
+  }
+
+  function startWalk() {
+    const step = (sel, title, text) => ({ target: () => body.querySelector(sel), title, body: text });
+    const done = () => {
+      setFlag('coach-fixes');
+      state.guide = null;
+    };
+    startCoach(
+      [
+        step('.guarantee', 'Nothing has changed yet', isSnippet ? 'This is only a preview. Because this is pasted code, applying it never touches a file: you just get fixed text back.' : 'This is only a preview. If you apply it, only the files shown here are edited.'),
+        step('.legend', 'How to read the change', 'Lines starting with − are removed. Lines starting with + are added. Unmarked lines are unchanged context so you can see where you are.'),
+        step('.diffs', 'The before and after', 'Here the gradient is swapped for one solid color. It is a mechanical change that cannot alter what the code means, which is why it is safe to automate.'),
+        step('#apply-btn', 'You decide', 'Pressing this asks you to confirm first. Go ahead and try it: the Studio will then scan again and show that the mark is gone.'),
+      ],
+      { doneLabel: 'Got it', onDone: done, onClose: done },
     );
   }
 
@@ -183,6 +219,7 @@ export function renderFixes(main, ctx) {
         'section',
         {},
         h('h2', { class: 'section-title', text: 'Checked again after the fix' }),
+        scoreVisual(fx.rescan.before, fx.rescan.after),
         h('p', { class: gone ? 'verdict' : 'verdict verdict-open', text: gone ? `The fixed findings are gone. ${plural(fx.rescan.after, 'finding')} left, down from ${fx.rescan.before}.` : `Some fixed findings still show up. ${plural(fx.rescan.after, 'finding')} now, ${fx.rescan.before} before.` }),
         h('ul', { class: 'rule-list' }, fx.compare.map((c) => h('li', { class: 'tally-row2' }, h('code', { text: `${c.rule} · ${c.file}` }), ` ${c.gone ? 'not reported any more' : `still ${c.after} reported`} (was ${c.before})`))),
         h('div', { class: 'row' }, fx.rescan.after > 0 ? h('a', { class: 'btn btn-quiet', href: '#/results', text: 'See what is left' }) : null, h('a', { class: 'btn btn-quiet', href: '#/scan', text: 'Scan something else' })),

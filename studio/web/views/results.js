@@ -1,4 +1,8 @@
-import { h, clear, plural, cap, formatMs } from '../ui.js';
+import { h, clear, plural, cap, formatMs, countUp } from '../ui.js';
+import { sevGlyph } from '../art.js';
+import { startCoach } from '../coach.js';
+import { setFlag } from '../onboarding.js';
+import { specimenForRule } from '../guide-content.js';
 import { SEVERITY_ORDER, filterFindings, groupFindings } from '../model.js';
 import { SEVERITY, CATEGORY, categoryLabel, severityLabel } from '../glossary.js';
 
@@ -21,7 +25,7 @@ export function codeBlock(ctxData, label, wholeFile = false) {
 }
 
 export function sevChip(sev) {
-  return h('span', { class: `sev sev-${sev}`, text: severityLabel(sev) });
+  return h('span', { class: `sev sev-${sev}` }, sevGlyph(sev), severityLabel(sev));
 }
 
 function countRows(title, counts, total, order, glossary) {
@@ -66,6 +70,7 @@ export function renderResults(main, ctx) {
   }
 
   const { summary } = scan;
+  const bigN = h('span', { class: 'big-n', text: String(summary.total) });
   const where = scan.kind === 'snippet' ? 'your snippet' : scan.target === '.' || scan.target === '' ? 'your whole project' : scan.target;
   const head = h(
     'div',
@@ -73,6 +78,7 @@ export function renderResults(main, ctx) {
     h('h1', { text: 'Findings' }),
     h('p', { class: 'meta' }, `Scanned `, h('code', { text: where }), ` in ${formatMs(scan.durationMs)}`, scan.skipped ? ` · ${plural(scan.skipped, 'finding')} outside the root hidden` : ''),
   );
+  const walkBtn = h('button', { type: 'button', class: 'btn btn-quiet walk', onclick: () => startWalk() }, 'Walk me through this page');
 
   if (summary.total === 0) {
     head.append(
@@ -98,7 +104,7 @@ export function renderResults(main, ctx) {
       h(
         'div',
         { class: 'big-wrap' },
-        h('p', { class: 'big' }, h('span', { class: 'big-n', text: String(summary.total) }), h('span', { class: 'big-l', text: ` ${summary.total === 1 ? 'finding' : 'findings'} in ${plural(summary.files, 'file')}` })),
+        h('p', { class: 'big' }, bigN, h('span', { class: 'big-l', text: ` ${summary.total === 1 ? 'finding' : 'findings'} in ${plural(summary.files, 'file')}` })),
         h('p', { class: 'help', text: 'A finding is one place where your code matches a known mark of generic or careless design.' }),
       ),
       countRows('How serious', summary.bySeverity, summary.total, SEVERITY_ORDER, SEVERITY),
@@ -148,6 +154,7 @@ export function renderResults(main, ctx) {
         h('h3', { class: 'finding-title' }, byRule ? h('code', { text: place(f) }) : f.name),
         sevChip(f.severity),
         fixable ? h('a', { class: 'tag', href: '#/fixes', text: 'Can be fixed automatically' }) : null,
+        specimenForRule(f.rule) ? h('a', { class: 'tag tag-guide', href: `#/guide/${specimenForRule(f.rule).id}`, title: 'See this mark next to a better version', text: 'See an example' }) : null,
       ),
       h('p', { class: 'where' }, byRule ? null : [h('code', { text: place(f) }), ' · '], h('code', { text: f.rule }), ` · ${categoryLabel(f.category)}`),
       byRule ? null : h('p', { class: 'why', text: f.description }),
@@ -243,8 +250,42 @@ export function renderResults(main, ctx) {
   );
   // The next step goes right under the summary, before the long list.
   head.querySelector('.ledger').after(nextStep);
+  head.querySelector('.meta').after(walkBtn);
   main.append(head);
   drawList();
+  countUp(bigN, summary.total);
+
+  function startWalk() {
+    const step = (sel, title, body) => ({ target: () => main.querySelector(sel), title, body });
+    const toFixes = state.guide === 'results' && state.preview?.fixCount > 0;
+    startCoach(
+      [
+        step('.big-wrap', 'The headline number', `${plural(summary.total, 'finding')} in ${plural(summary.files, 'file')}. A finding is one place where your code matches a known mark of generic or careless design.`),
+        step('.ledger', 'How serious, and what kind', 'The left bars count findings by severity: Error breaks something for real people, Warning is a clear mark, Advisory is a judgment call. The right shows whether it is about the AI-made look or about craft and accessibility.'),
+        {
+          // Prefer a finding that shows code, so "the shaded line" is something the person can actually see.
+          target: () => [...main.querySelectorAll('.finding')].find((f) => f.querySelector('.code')) || main.querySelector('.finding'),
+          title: 'One finding, up close',
+          body: 'You get the name and severity, the file and line, a plain-words reason, what exactly matched, and the code around it. The shaded line is the one that matched. Some findings cover a whole file, and those have no single line to show.',
+        },
+        step('.next', 'What to do next', state.preview?.fixCount ? 'Some findings have a safe automatic fix. You will see exactly what changes before anything is written.' : 'None of these can be fixed automatically, so work through the list by hand. Each entry says what to change.'),
+      ],
+      {
+        doneLabel: toFixes ? 'Continue to Fixes' : 'Got it',
+        onDone: () => {
+          setFlag('coach-results');
+          if (toFixes) {
+            state.guide = 'fixes';
+            ctx.go('fixes');
+          } else state.guide = null;
+        },
+        onClose: () => {
+          setFlag('coach-results');
+          state.guide = null;
+        },
+      },
+    );
+  }
 
   // Which findings have a safe fix is only known after a dry run. Ask for it quietly.
   ctx.ensurePreview().then((p) => {
@@ -252,8 +293,10 @@ export function renderResults(main, ctx) {
     clear(nextStep);
     if (p && p.fixCount) {
       nextStep.append(
-        h('p', { class: 'next-t', text: `${plural(state.fixable.size, 'finding')} can be fixed automatically.` }),
-        h('p', { class: 'next-d', text: `You will see exactly what changes and confirm before anything is written.${p.fixCount !== state.fixable.size ? ' One change can clear more than one finding.' : ''} The other findings need a person to decide.` }),
+        // Some findings (whole-file ones, and pasted snippets) cannot be matched to a changed line, so the
+        // honest count to show is the number of fixes, not the number of tagged findings.
+        h('p', { class: 'next-t', text: state.fixable.size ? `${plural(state.fixable.size, 'finding')} can be fixed automatically.` : `${plural(p.fixCount, 'safe automatic fix', 'safe automatic fixes')} ${p.fixCount === 1 ? 'is' : 'are'} available.` }),
+        h('p', { class: 'next-d', text: `You will see exactly what changes and confirm before anything is written.${state.fixable.size && p.fixCount !== state.fixable.size ? ' One change can clear more than one finding.' : ''} The other findings need a person to decide.` }),
         h('a', { class: 'btn btn-primary', href: '#/fixes', text: `Review ${plural(p.fixCount, 'fix', 'fixes')}` }),
       );
     } else if (p) {
@@ -265,5 +308,7 @@ export function renderResults(main, ctx) {
       nextStep.append(h('p', { class: 'meta', text: 'Could not check for automatic fixes. The findings below are still accurate.' }));
     }
     drawList();
+    // Arriving from "Try it on a sample": start the walkthrough once the next-step box is filled in.
+    if (state.guide === 'results') setTimeout(() => main.isConnected && startWalk(), 500);
   });
 }

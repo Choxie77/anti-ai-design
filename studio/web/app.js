@@ -5,13 +5,24 @@ import { renderScan } from './views/scan.js';
 import { renderResults } from './views/results.js';
 import { renderFixes } from './views/fixes.js';
 import { renderRules } from './views/rules.js';
+import { renderTour } from './views/tour.js';
+import { renderGuide } from './views/guide.js';
+import { hasSeenTour } from './onboarding.js';
+import { stopCoach } from './coach.js';
+import { SAMPLE, SAMPLE_EXT } from './sample.js';
 
 const ROUTES = [
   { id: 'scan', label: 'Scan', render: renderScan },
   { id: 'results', label: 'Findings', render: renderResults },
   { id: 'fixes', label: 'Fixes', render: renderFixes },
   { id: 'rules', label: 'Rules', render: renderRules },
+  { id: 'welcome', label: 'Tour', render: renderTour },
+  { id: 'guide', label: 'Field guide', render: renderGuide },
 ];
+// Reference pages sit beside the three steps, not inside them.
+const REFERENCE = ['welcome', 'guide', 'rules'];
+const REFERENCE_LABEL = { welcome: 'Tour', guide: 'Field guide', rules: 'All rules' };
+const REFERENCE_HINT = { welcome: 'A short illustrated introduction', guide: 'See each AI-made mark next to a better version', rules: 'Everything the detector checks' };
 
 function readToken() {
   const m = /(?:^|[#&])token=([a-f0-9]+)/.exec(location.hash);
@@ -45,6 +56,9 @@ export const state = {
   fixable: new Set(),
   resultsView: null,
   fix: null,
+  guide: null, // which screen the guided sample run wants to walk through next
+  autoRun: false,
+  ruleCount: null,
 };
 
 function announce(msg) {
@@ -92,7 +106,19 @@ function go(route) {
   else location.hash = '#/' + route;
 }
 
-const ctx = { engine, state, go, announce, ensurePreview, setScan };
+/**
+ * "Try it on a sample": fills in a small piece of real code and scans it, then walks the person through
+ * the Findings and Fixes screens. The snippet is scanned from a private temporary folder, so no project
+ * file is read or changed.
+ */
+function runSample() {
+  state.scanForm = { mode: 'snippet', path: '', ext: SAMPLE_EXT, snippet: SAMPLE };
+  state.autoRun = true;
+  state.guide = 'results';
+  go('scan');
+}
+
+const ctx = { engine, state, go, announce, ensurePreview, setScan, runSample };
 
 function current() {
   const id = /^#\/(\w+)/.exec(location.hash)?.[1];
@@ -122,13 +148,12 @@ function drawNav() {
       ),
     );
   };
-  const rules = ROUTES.find((r) => r.id === 'rules');
   clear(nav).append(
-    h('ol', { class: 'nav-list nav-steps' }, ROUTES.filter((r) => r.id !== 'rules').map(stepItem)),
+    h('ol', { class: 'nav-list nav-steps' }, ROUTES.filter((r) => !REFERENCE.includes(r.id)).map(stepItem)),
     h(
       'ul',
-      { class: 'nav-list nav-ref' },
-      h('li', {}, h('a', { href: '#/rules', 'aria-current': rules.id === cur.id ? 'page' : false, class: 'nav-link', title: 'Reference: everything the detector checks' }, 'All rules')),
+      { class: 'nav-list nav-ref', 'aria-label': 'Help and reference' },
+      REFERENCE.map((id) => h('li', {}, h('a', { href: '#/' + id, 'aria-current': id === cur.id ? 'page' : false, class: 'nav-link nav-link-ref', title: REFERENCE_HINT[id] }, REFERENCE_LABEL[id]))),
     ),
   );
 }
@@ -149,6 +174,7 @@ function drawColophon() {
 let cleanup = null;
 function route_() {
   const route = current();
+  stopCoach();
   if (typeof cleanup === 'function') cleanup();
   cleanup = null;
   drawNav();
@@ -183,7 +209,9 @@ function renderBlocked(el, err) {
 
 async function boot() {
   // Drop the token from the address bar so it does not end up in a copied link.
-  if (/token=/.test(location.hash)) history.replaceState(null, '', location.pathname + '#/scan');
+  // First visit lands on the tour; after that the Studio opens on Scan. A link to a specific screen is kept.
+  const bare = !location.hash || location.hash === '#/' || /^#token=/.test(location.hash) || (/token=/.test(location.hash) && !/^#\/\w+/.test(location.hash));
+  if (/token=/.test(location.hash) || bare) history.replaceState(null, '', location.pathname + (hasSeenTour() ? '#/scan' : '#/welcome'));
   window.addEventListener('hashchange', route_);
   drawNav();
   drawColophon();
